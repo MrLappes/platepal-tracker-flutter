@@ -1,9 +1,3 @@
-# platepal_tracker
-
-A new Flutter project.
-
-## Getting Started
-
 # PlatePal Tracker
 
 A comprehensive Flutter nutrition tracking application that helps users log meals, track nutrition intake, and achieve their fitness goals through AI-powered insights and personalized recommendations.
