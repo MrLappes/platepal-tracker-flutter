@@ -72,7 +72,6 @@ class ChatAgentService {
     );
     _responseGenerationStep = ResponseGenerationStep(
       openaiService: _openaiService,
-      dishProcessor: _dishProcessingStep,
     );
     _deepSearchVerificationStep = DeepSearchVerificationStep(
       openaiService: _openaiService,
@@ -143,13 +142,11 @@ class ChatAgentService {
       _onThinkingStep?.call(
         contextStepText,
         'Collecting your profile, preferences, and relevant meal history',
-      );
-
-      // Patch: Always pass a valid ThinkingStepResponse object
+      ); // Patch: Always pass a valid ThinkingStepResponse object
       final thinkingResultObj = ThinkingStepResponse.safeFromDynamic(
         thinkingResult.data?['thinkingResult'],
       );
-      final contextInput = initialInput.copyWith(
+      var contextInput = initialInput.copyWith(
         thinkingResult: () => thinkingResultObj,
         metadata: {...initialInput.metadata!, ...thinkingResult.data!},
       );
@@ -158,7 +155,6 @@ class ChatAgentService {
       debugPrint(
         '📚 Context gathering completed with success: ${contextResult.success} and data ${contextResult.data}',
       );
-
       if (!contextResult.success) {
         return _handleStepFailure(
           'context_gathering',
@@ -166,9 +162,77 @@ class ChatAgentService {
           stepResults,
           thinkingSteps,
         );
+      } // Step 3.5: Deep Search Verification (if enabled and has contextual features) - Pre-response validation
+      ChatStepResult? verificationResult;
+      if (_deepSearchEnabled) {
+        if (_shouldRunDeepSearchVerification(thinkingResultObj)) {
+          debugPrint('🔍 Step 3.5: Context validation...');
+          final verificationStepText =
+              '🔍 Validating context sufficiency for optimal response...';
+          thinkingSteps.add(verificationStepText);
+          _onThinkingStep?.call(
+            verificationStepText,
+            'Analyzing gathered context to ensure we can provide the best possible answer',
+          );
+
+          final verificationInput = contextInput.copyWith(
+            metadata: {
+              ...contextInput.metadata!,
+              'contextGatheringResult': contextResult.data,
+            },
+          );
+
+          verificationResult = await _deepSearchVerificationStep.execute(
+            verificationInput,
+          );
+          stepResults.add(verificationResult);
+
+          // Handle pipeline control decisions
+          if (verificationResult.success) {
+            final controlResult = await _handlePipelineControl(
+              verificationResult,
+              contextInput,
+              stepResults,
+              thinkingSteps,
+            );
+
+            if (controlResult != null) {
+              // Pipeline control recommended changes, apply them
+              contextInput = controlResult;
+            }
+          } else {
+            debugPrint(
+              '⚠️ Context validation failed, continuing with available context...',
+            );
+          }
+        } else {
+          // Deep search verification was skipped - track it
+          debugPrint(
+            '⏭️ Deep search verification skipped (no contextual features beyond conversation history)',
+          );
+          final skippedStepText = '⏭️ Deep search verification skipped';
+          thinkingSteps.add(skippedStepText);
+          _onThinkingStep?.call(
+            skippedStepText,
+            'No external data sources needed - only conversation history required for response',
+          );
+
+          // Add a skipped step result for the UI
+          final skippedStepResult = ChatStepResult.success(
+            stepName: 'deep_search_verification',
+            data: {
+              'skipped': true,
+              'reason':
+                  'No contextual features beyond conversation history needed',
+              'contextRequirements':
+                  thinkingResultObj?.contextRequirements.toJson(),
+            },
+          );
+          stepResults.add(skippedStepResult);
+        }
       }
 
-      // Step 3: Image Processing (if image provided)
+      // Step 4: Image Processing (if image provided)
       ChatStepResult? imageResult;
       if (imageUri != null && imageUri.isNotEmpty) {
         debugPrint('📸 Step 3: Processing image...');
@@ -193,41 +257,10 @@ class ChatAgentService {
             thinkingSteps,
           );
         }
-      } // Step 4: Dish Processing (if dishes detected or mentioned)
-      ChatStepResult? dishResult;
-      final hasDishContent = _hasDishRelatedContent(
-        thinkingResult,
-        imageResult,
-      );
-      if (hasDishContent) {
-        debugPrint('🍽️ Step 4: Processing dishes...');
-        final dishStepText = '🍽️ Processing and analyzing dishes...';
-        thinkingSteps.add(dishStepText);
-        _onThinkingStep?.call(
-          dishStepText,
-          'Calculating nutrition values, ingredients, and meal details',
-        );
+      }
 
-        final dishInput = contextInput.copyWith(
-          metadata: {
-            ...contextInput.metadata!,
-            ...contextResult.data!,
-            if (imageResult != null) ...imageResult.data!,
-          },
-        );
-        dishResult = await _dishProcessingStep.execute(dishInput);
-        stepResults.add(dishResult);
-
-        if (!dishResult.success && dishResult.error?.retryable == false) {
-          return _handleStepFailure(
-            'dish_processing',
-            dishResult,
-            stepResults,
-            thinkingSteps,
-          );
-        }
-      } // Step 5: Response Generation - Create final response
-      debugPrint('✍️ Step 5: Generating response...');
+      // Step 4: Response Generation - Create final response
+      debugPrint('✍️ Step 4: Generating response...');
       final responseStepText = '✍️ Crafting your personalized response...';
       thinkingSteps.add(responseStepText);
       _onThinkingStep?.call(
@@ -259,7 +292,6 @@ class ChatAgentService {
           ...contextInput.metadata!,
           ...contextResult.data!,
           if (imageResult != null) ...imageResult.data!,
-          if (dishResult != null) ...dishResult.data!,
         },
       );
       final responseResult = await _responseGenerationStep.execute(
@@ -274,40 +306,50 @@ class ChatAgentService {
           stepResults,
           thinkingSteps,
         );
-      }
+      } // Step 5: Dish Processing (if AI response contains dishes)
+      ChatStepResult? dishResult;
+      try {
+        // Get the raw AI response that contains potential dishes array
+        final aiResponse =
+            responseResult.data?['parsedResponse'] as Map<String, dynamic>?;
 
-      // Step 6: Deep Search Verification (if enabled)
-      ChatStepResult? verificationResult;
-      if (_deepSearchEnabled) {
-        debugPrint('🔍 Step 6: Deep search verification...');
-        final verificationStepText =
-            '🔍 Verifying information with deep search...';
-        thinkingSteps.add(verificationStepText);
-        _onThinkingStep?.call(
-          verificationStepText,
-          'Cross-referencing information with additional sources for accuracy',
-        );
-        final verificationInput = responseInput.copyWith(
-          metadata: {
-            ...responseInput.metadata!,
-            'stepToVerify': 'response_generation',
-            'stepResult': responseResult,
-            'originalUserMessage': userMessage,
-          },
-        );
-        verificationResult = await _deepSearchVerificationStep.execute(
-          verificationInput,
-        );
-        stepResults.add(verificationResult);
+        if (aiResponse != null && _responseHasDishes(aiResponse)) {
+          debugPrint('🍽️ Step 5: Processing dishes from AI response...');
+          final dishStepText = '🍽️ Processing and analyzing dishes...';
+          thinkingSteps.add(dishStepText);
+          _onThinkingStep?.call(
+            dishStepText,
+            'Calculating nutrition values, ingredients, and meal details',
+          );
 
-        // Deep search verification failure is not critical
-        if (!verificationResult.success) {
-          debugPrint('⚠️ Deep search verification failed, continuing...');
+          final dishInput = contextInput.copyWith(
+            metadata: {
+              'dishes': aiResponse['dishes'],
+              'uploadedImageUri': imageUri,
+            },
+          );
+          dishResult = await _dishProcessingStep.execute(dishInput);
+          stepResults.add(dishResult);
+
+          if (!dishResult.success && dishResult.error?.retryable == false) {
+            return _handleStepFailure(
+              'dish_processing',
+              dishResult,
+              stepResults,
+              thinkingSteps,
+            );
+          }
         }
+      } catch (e) {
+        debugPrint('⚠️ Error checking for dishes in response: $e');
       }
 
-      // Extract final response
-      final finalResponse = responseResult.data!['response'] as String;
+      // Step 6: Response Generation completed - Extract final response
+      final chatResponseData =
+          responseResult.data!['chatResponse'] as Map<String, dynamic>?;
+      final finalResponse =
+          chatResponseData?['replyText'] as String? ??
+          'I apologize, but I encountered an issue generating a response. Please try again.';
       final extractedDishes =
           dishResult?.data?['validatedDishes'] as List? ?? [];
 
@@ -343,25 +385,42 @@ class ChatAgentService {
         errorStepText,
         'Attempting to recover from error and provide a helpful response',
       );
-
       final errorResult = await _errorHandlingStep.execute(
         initialInput.copyWith(
           metadata: {
-            ...initialInput.metadata!,
-            'error': e.toString(),
-            'stackTrace': stackTrace.toString(),
+            ...initialInput.metadata ?? {},
+            'failedStep': 'chat_processing',
+            'originalError': ChatAgentError(
+              type: ChatErrorType.criticalError,
+              message: e.toString(),
+              details: stackTrace.toString(),
+              retryable: false,
+            ),
+            'retryCount': 0,
+            'contextSize': initialInput.userMessage.length,
             'partialResults': stepResults.map((r) => r.toJson()).toList(),
           },
         ),
       );
       stepResults.add(errorResult);
-
       final duration = DateTime.now().difference(startTime);
+
+      // Extract response text from error handling result
+      String responseText =
+          'I apologize, but I encountered an error processing your request. Please try again.';
+      if (errorResult.success && errorResult.data != null) {
+        final recoveryResult =
+            errorResult.data!['recoveryResult'] as ErrorRecoveryResult?;
+        if (recoveryResult?.fallbackResponse != null) {
+          responseText = recoveryResult!.fallbackResponse!.replyText;
+        } else {
+          responseText =
+              'I encountered an issue but was able to recover. Please try your request again.';
+        }
+      }
+
       return ChatResponse(
-        replyText:
-            errorResult.success
-                ? errorResult.data!['response'] as String
-                : 'I apologize, but I encountered an error processing your request. Please try again.',
+        replyText: responseText,
         dishes: [],
         metadata: {
           'error': e.toString(),
@@ -404,27 +463,33 @@ class ChatAgentService {
     );
   }
 
-  /// Check if the request has dish-related content
-  bool _hasDishRelatedContent(
-    ChatStepResult thinkingResult,
-    ChatStepResult? imageResult,
-  ) {
-    final thinkingData = thinkingResult.data ?? {};
-    final imageData = imageResult?.data ?? {};
+  /// Check if the AI response contains dishes to process
+  bool _responseHasDishes(Map<String, dynamic> aiResponse) {
+    final dishes = aiResponse['dishes'] as List<dynamic>?;
+    final hasDishes = dishes != null && dishes.isNotEmpty;
+    debugPrint(
+      '🔍 AI response has dishes: $hasDishes (${dishes?.length ?? 0} dishes)',
+    );
+    return hasDishes;
+  }
 
-    // Check if thinking step identified dish-related intent
-    final hasThinkingDishIntent =
-        thinkingData['hasDishContent'] == true ||
-        thinkingData['dishRelated'] == true ||
-        (thinkingData['categories'] as List?)?.contains('dish_analysis') ==
-            true;
+  /// Determines if deep search verification should run based on contextual features
+  /// Only runs when there are actual data sources to validate (not just conversation history)
+  bool _shouldRunDeepSearchVerification(ThinkingStepResponse? thinkingResult) {
+    if (thinkingResult == null) return false;
 
-    // Check if image processing detected dishes
-    final hasImageDishes =
-        imageData['detectedDishes'] != null &&
-        (imageData['detectedDishes'] as List).isNotEmpty;
+    final requirements = thinkingResult.contextRequirements;
 
-    return hasThinkingDishIntent || hasImageDishes;
+    // Check if any non-history contextual features are needed
+    return requirements.needsUserProfile ||
+        requirements.needsTodaysNutrition ||
+        requirements.needsWeeklyNutritionSummary ||
+        requirements.needsListOfCreatedDishes ||
+        requirements.needsExistingDishes ||
+        requirements.needsInfoOnDishCreation ||
+        requirements.needsNutritionAdvice ||
+        requirements.needsHistoricalMealLookup;
+    // Note: needsConversationHistory is excluded as it doesn't require context validation
   }
 
   // Configuration methods
@@ -446,4 +511,123 @@ class ChatAgentService {
   bool get isDeepSearchEnabled => _deepSearchEnabled;
   int get maxRetries => _maxRetries;
   int get maxContextLength => _maxContextLength;
+
+  /// Handles pipeline control decisions from deep search verification
+  Future<ChatStepInput?> _handlePipelineControl(
+    ChatStepResult verificationResult,
+    ChatStepInput currentInput,
+    List<ChatStepResult> stepResults,
+    List<String> thinkingSteps,
+  ) async {
+    try {
+      final pipelineControlData =
+          verificationResult.data?['pipelineControl'] as Map<String, dynamic>?;
+      if (pipelineControlData == null) {
+        debugPrint('⚠️ No pipeline control data found in verification result');
+        return null;
+      }
+
+      final pipelineControl = PipelineControlResult.fromJson(
+        pipelineControlData,
+      );
+      debugPrint('🔄 Pipeline control analysis:');
+      debugPrint('   Has enough context: ${pipelineControl.hasEnoughContext}');
+      debugPrint('   Confidence: ${pipelineControl.confidence}');
+      debugPrint('   Actions: ${pipelineControl.recommendedActions}');
+
+      // If context is sufficient and confidence is high, continue normally
+      if (pipelineControl.hasEnoughContext &&
+          pipelineControl.confidence >= 0.8) {
+        debugPrint(
+          '✅ Context validation passed - proceeding with high confidence',
+        );
+        return null; // No changes needed
+      }
+
+      // Handle different pipeline control actions
+      for (final action in pipelineControl.recommendedActions) {
+        switch (action) {
+          case PipelineControlAction.continueNormally:
+            debugPrint('✅ Continuing normally despite lower confidence');
+            return null;
+
+          case PipelineControlAction.retryWithModifications:
+            debugPrint('🔄 Retrying context gathering with modifications');
+            if (pipelineControl.contextModifications != null) {
+              // Apply context modifications to input
+              return currentInput.copyWith(
+                metadata: {
+                  ...currentInput.metadata!,
+                  ...pipelineControl.contextModifications!,
+                  'retryAttempt':
+                      (currentInput.metadata?['retryAttempt'] as int? ?? 0) + 1,
+                },
+              );
+            }
+            break;
+
+          case PipelineControlAction.skipOptionalSteps:
+            debugPrint('⏭️ Skipping optional steps for token optimization');
+            return currentInput.copyWith(
+              metadata: {
+                ...currentInput.metadata!,
+                'skipOptionalSteps': true,
+                'stepsToSkip': pipelineControl.stepsToSkip ?? [],
+              },
+            );
+
+          case PipelineControlAction.gatherAdditionalContext:
+            debugPrint('📚 Additional context gathering recommended');
+            if (pipelineControl.contextModifications != null) {
+              return currentInput.copyWith(
+                metadata: {
+                  ...currentInput.metadata!,
+                  'additionalContextNeeded': true,
+                  ...pipelineControl.contextModifications!,
+                },
+              );
+            }
+            break;
+
+          case PipelineControlAction.modifySearchParameters:
+            debugPrint('🔧 Modifying search parameters');
+            if (pipelineControl.searchParameters != null) {
+              return currentInput.copyWith(
+                metadata: {
+                  ...currentInput.metadata!,
+                  'searchParameters': pipelineControl.searchParameters,
+                },
+              );
+            }
+            break;
+
+          case PipelineControlAction.discardAndRetry:
+            debugPrint('🗑️ Discarding current context and retrying');
+            // Reset to initial state but with retry metadata
+            return currentInput.copyWith(
+              metadata: {
+                ...currentInput.metadata!,
+                'discardPreviousContext': true,
+                'retryAttempt':
+                    (currentInput.metadata?['retryAttempt'] as int? ?? 0) + 1,
+              },
+            );
+        }
+      }
+
+      // If no specific actions handled, log the recommendation and continue
+      debugPrint('ℹ️ Pipeline control reasoning: ${pipelineControl.reasoning}');
+      if (pipelineControl.identifiedGaps.isNotEmpty) {
+        debugPrint('⚠️ Identified gaps: ${pipelineControl.identifiedGaps}');
+      }
+      if (pipelineControl.suggestions.isNotEmpty) {
+        debugPrint('💡 Suggestions: ${pipelineControl.suggestions}');
+      }
+
+      return null; // Continue with current input if no modifications applied
+    } catch (error) {
+      debugPrint('❌ Error handling pipeline control: $error');
+      return null; // Continue normally on error
+    }
+  }
 }

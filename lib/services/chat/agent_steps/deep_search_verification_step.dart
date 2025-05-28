@@ -3,7 +3,10 @@ import 'package:flutter/foundation.dart';
 import '../../../models/chat_types.dart';
 import '../openai_service.dart';
 
-/// Performs deep verification of agent step results using secondary AI calls
+/// Performs pre-response context validation and pipeline control decisions
+/// This step acts as a "second thinking step" that analyzes whether the gathered
+/// context is sufficient to properly answer the user's question and provides
+/// pipeline control instructions for dynamic execution flow.
 class DeepSearchVerificationStep extends AgentStep {
   final OpenAIService _openaiService;
 
@@ -16,54 +19,64 @@ class DeepSearchVerificationStep extends AgentStep {
   @override
   Future<ChatStepResult> execute(ChatStepInput input) async {
     try {
-      debugPrint('🔍 DeepSearchVerificationStep: Starting verification');
+      debugPrint('🔍 DeepSearchVerificationStep: Starting context validation');
 
-      final stepToVerify = input.metadata!['stepToVerify'] as String;
-      final stepResult = input.metadata!['stepResult'] as ChatStepResult;
-      final originalUserMessage =
-          input.metadata!['originalUserMessage'] as String;
+      // Extract gathered context and thinking results
+      final thinkingResult = input.thinkingResult;
+      final contextData =
+          input.metadata?['contextGatheringResult'] as Map<String, dynamic>?;
+      final imageData = input.metadata?['imageResult'] as Map<String, dynamic>?;
+      final dishData = input.metadata?['dishResult'] as Map<String, dynamic>?;
 
-      debugPrint('🔍 Verifying step: $stepToVerify');
-
-      // Create verification prompt
-      final verificationPrompt = _buildVerificationPrompt(
-        stepToVerify,
-        stepResult,
-        originalUserMessage,
+      // Build context validation prompt
+      final validationPrompt = _buildContextValidationPrompt(
+        input.userMessage,
+        input.enhancedSystemPrompt ?? input.initialSystemPrompt ?? '',
+        thinkingResult,
+        contextData,
+        imageData,
+        dishData,
       );
 
-      // Send verification request to AI
+      debugPrint(
+        '🔍 Analyzing context sufficiency for proper response generation',
+      );
+
+      // Send validation request to AI
       final messages = [
-        {'role': 'system', 'content': verificationPrompt},
+        {'role': 'system', 'content': validationPrompt},
         {
           'role': 'user',
-          'content': 'Please verify the step result and provide your analysis.',
+          'content':
+              'Analyze the context and determine if there is enough information to properly answer the user\'s question. Provide pipeline control recommendations.',
         },
       ];
 
       final response = await _openaiService.sendChatRequest(
         messages: messages,
-        temperature: 0.1, // Low temperature for consistent verification
+        temperature: 0.1, // Low temperature for consistent validation
         responseFormat: {'type': 'json_object'},
       );
 
       final content = response.choices.first.message.content ?? '{}';
-      final verificationResult = json.decode(content) as Map<String, dynamic>;
+      final validationResult = json.decode(content) as Map<String, dynamic>;
 
-      // Parse verification result
-      final verification = ChatStepVerificationResult(
-        valid: verificationResult['isValid'] as bool? ?? false,
-        message: verificationResult['details'] as String? ?? '',
-        error: null,
+      // Parse pipeline control result
+      final pipelineControl = PipelineControlResult.fromJson(validationResult);
+
+      debugPrint('🔍 Context validation completed');
+      debugPrint('   Has enough context: ${pipelineControl.hasEnoughContext}');
+      debugPrint('   Confidence: ${pipelineControl.confidence}');
+      debugPrint(
+        '   Recommended actions: ${pipelineControl.recommendedActions}',
       );
-
-      debugPrint('🔍 DeepSearchVerificationStep: Verification completed');
-      debugPrint('   Valid: ${verification.valid}');
-      // Optionally log more details if needed
 
       return ChatStepResult.success(
         stepName: stepName,
-        data: {'verification': verification, 'stepVerified': stepToVerify},
+        data: {
+          'pipelineControl': pipelineControl.toJson(),
+          'validationDetails': validationResult,
+        },
       );
     } catch (error) {
       debugPrint(
@@ -73,7 +86,7 @@ class DeepSearchVerificationStep extends AgentStep {
         stepName: stepName,
         error: ChatAgentError(
           type: ChatErrorType.verificationError,
-          message: 'Failed to perform deep verification',
+          message: 'Failed to perform context validation',
           details: error.toString(),
           retryable: true,
         ),
@@ -88,177 +101,166 @@ class DeepSearchVerificationStep extends AgentStep {
   ) async {
     if (!result.success) {
       return ChatStepVerificationResult.invalid(
-        message: 'Verification step failed to execute',
+        message: 'Context validation step failed to execute',
         error: result.error,
       );
     }
-    // Optionally, add more meta-verification logic here if needed
+
+    // Validate the pipeline control result structure
+    final pipelineControlData =
+        result.data?['pipelineControl'] as Map<String, dynamic>?;
+    if (pipelineControlData == null) {
+      return ChatStepVerificationResult.invalid(
+        message: 'No pipeline control result in validation step output',
+      );
+    }
+
+    // Validate required fields
+    final valid = AgentStepSchemaValidator.validateJson(pipelineControlData, [
+      'hasEnoughContext',
+      'confidence',
+      'recommendedActions',
+      'reasoning',
+    ]);
+
+    if (!valid) {
+      return ChatStepVerificationResult.invalid(
+        message: 'Pipeline control result failed schema validation',
+      );
+    }
+
     return ChatStepVerificationResult.valid();
   }
 
-  /// Builds the verification prompt for a specific step
-  String _buildVerificationPrompt(
-    String stepName,
-    ChatStepResult stepResult,
-    String originalUserMessage,
+  /// Builds the context validation prompt for analyzing whether gathered context is sufficient
+  String _buildContextValidationPrompt(
+    String userMessage,
+    String systemPrompt,
+    ThinkingStepResponse? thinkingResult,
+    Map<String, dynamic>? contextData,
+    Map<String, dynamic>? imageData,
+    Map<String, dynamic>? dishData,
   ) {
     final prompt = StringBuffer();
 
     prompt.writeln(
-      'You are an expert verification agent tasked with validating the results of a chat agent step.',
+      'You are an expert context validation agent that determines whether there is enough context to properly answer a user\'s question.',
     );
     prompt.writeln();
-    prompt.writeln('STEP BEING VERIFIED: $stepName');
-    prompt.writeln('ORIGINAL USER MESSAGE: "$originalUserMessage"');
+    prompt.writeln('Your job is to:');
+    prompt.writeln(
+      '1. Analyze the user\'s question against the gathered context',
+    );
+    prompt.writeln(
+      '2. Determine if there\'s sufficient information for a proper response',
+    );
+    prompt.writeln(
+      '3. Provide pipeline control recommendations for optimization',
+    );
     prompt.writeln();
-    prompt.writeln('STEP EXECUTION RESULT:');
-    prompt.writeln('- Success: ${stepResult.success}');
 
-    if (stepResult.success) {
+    prompt.writeln(
+      'IMPORTANT: Conversation history will be appended during the final response generation step and is not visible here for validation. Focus only on validating the contextual data sources shown below.',
+    );
+    prompt.writeln();
+
+    prompt.writeln('USER QUESTION: "$userMessage"');
+    prompt.writeln();
+
+    prompt.writeln('SYSTEM CONTEXT:');
+    prompt.writeln(systemPrompt);
+    prompt.writeln();
+
+    if (thinkingResult != null) {
+      prompt.writeln('THINKING STEP ANALYSIS:');
+      prompt.writeln('- User Intent: ${thinkingResult.userIntent}');
       prompt.writeln(
-        '- Data keys: ${stepResult.data?.keys.join(', ') ?? 'none'}',
+        '- Context Requirements: ${thinkingResult.contextRequirements.toJson()}',
       );
-
-      // Add specific verification logic based on step type
-      switch (stepName) {
-        case 'thinking':
-          _addThinkingVerificationGuidelines(prompt, stepResult);
-          break;
-        case 'context_gathering':
-          _addContextVerificationGuidelines(prompt, stepResult);
-          break;
-        case 'response_generation':
-          _addResponseVerificationGuidelines(prompt, stepResult);
-          break;
-        case 'dish_processing':
-          _addDishProcessingVerificationGuidelines(prompt, stepResult);
-          break;
-        default:
-          _addGenericVerificationGuidelines(prompt, stepResult);
-      }
-    } else {
-      prompt.writeln('- Error: ${stepResult.error?.message}');
-      prompt.writeln('- Error Type: ${stepResult.error?.type}');
+      prompt.writeln(
+        '- Response Requirements: ${thinkingResult.responseRequirements}',
+      );
+      prompt.writeln();
     }
 
-    prompt.writeln();
+    if (contextData != null) {
+      prompt.writeln('GATHERED CONTEXT DATA:');
+      contextData.forEach((key, value) {
+        prompt.writeln(
+          '- $key: ${value.toString().length > 100 ? "${value.toString().substring(0, 100)}..." : value}',
+        );
+      });
+      prompt.writeln();
+    }
+
+    if (imageData != null) {
+      prompt.writeln('IMAGE PROCESSING RESULTS:');
+      imageData.forEach((key, value) {
+        prompt.writeln('- $key: Available');
+      });
+      prompt.writeln();
+    }
+
+    if (dishData != null) {
+      prompt.writeln('DISH PROCESSING RESULTS:');
+      dishData.forEach((key, value) {
+        prompt.writeln('- $key: Available');
+      });
+      prompt.writeln();
+    }
+
+    prompt.writeln('VALIDATION GUIDELINES:');
     prompt.writeln(
-      'Please analyze the step result and provide verification in this JSON format:',
+      '- Assess if the gathered context addresses the user\'s specific question',
     );
+    prompt.writeln('- Consider if there are any critical information gaps');
+    prompt.writeln('- Evaluate the quality and relevance of available context');
+    prompt.writeln(
+      '- Determine if additional context gathering would significantly improve the response',
+    );
+    prompt.writeln(
+      '- Consider token efficiency - don\'t recommend gathering unnecessary context',
+    );
+    prompt.writeln();
+
+    prompt.writeln('PIPELINE CONTROL OPTIONS:');
+    prompt.writeln(
+      '- continueNormally: Context is sufficient, proceed to response generation',
+    );
+    prompt.writeln(
+      '- retryWithModifications: Retry context gathering with modified parameters',
+    );
+    prompt.writeln(
+      '- skipOptionalSteps: Skip non-essential steps to optimize token usage',
+    );
+    prompt.writeln(
+      '- gatherAdditionalContext: Specific additional context is needed',
+    );
+    prompt.writeln(
+      '- modifySearchParameters: Adjust search/filtering parameters for better results',
+    );
+    prompt.writeln(
+      '- discardAndRetry: Current context is poor quality, start over with different approach',
+    );
+    prompt.writeln();
+
+    prompt.writeln('Respond with this JSON format:');
     prompt.writeln('{');
-    prompt.writeln('  "isValid": boolean,');
-    prompt.writeln('  "issues": ["list", "of", "specific", "issues"],');
-    prompt.writeln(
-      '  "suggestions": ["list", "of", "improvement", "suggestions"],',
-    );
+    prompt.writeln('  "hasEnoughContext": boolean,');
     prompt.writeln('  "confidence": number_between_0_and_1,');
-    prompt.writeln('  "details": "detailed_explanation_of_verification"');
+    prompt.writeln(
+      '  "recommendedActions": ["list", "of", "pipeline", "actions"],',
+    );
+    prompt.writeln('  "reasoning": "detailed_explanation_of_assessment",');
+    prompt.writeln('  "contextModifications": {"key": "value"}, // optional');
+    prompt.writeln('  "stepsToRetry": ["step1", "step2"], // optional');
+    prompt.writeln('  "stepsToSkip": ["step1", "step2"], // optional');
+    prompt.writeln('  "searchParameters": {"param": "value"}, // optional');
+    prompt.writeln('  "identifiedGaps": ["gap1", "gap2"], // optional');
+    prompt.writeln(
+      '  "suggestions": ["suggestion1", "suggestion2"] // optional',
+    );
     prompt.writeln('}');
-
     return prompt.toString();
-  }
-
-  void _addThinkingVerificationGuidelines(
-    StringBuffer prompt,
-    ChatStepResult result,
-  ) {
-    prompt.writeln();
-    prompt.writeln('THINKING STEP VERIFICATION GUIDELINES:');
-    prompt.writeln('- Check if analysis correctly identifies user intent');
-    prompt.writeln(
-      '- Verify context requirements are appropriate for the request',
-    );
-    prompt.writeln('- Ensure response requirements align with user needs');
-    prompt.writeln(
-      '- Validate that the thinking step provides clear guidance for subsequent steps',
-    );
-
-    if (result.data != null && result.data!.containsKey('thinkingResponse')) {
-      final thinking = result.data!['thinkingResponse'];
-      prompt.writeln('- Thinking result: $thinking');
-    }
-  }
-
-  void _addContextVerificationGuidelines(
-    StringBuffer prompt,
-    ChatStepResult result,
-  ) {
-    prompt.writeln();
-    prompt.writeln('CONTEXT GATHERING VERIFICATION GUIDELINES:');
-    prompt.writeln(
-      '- Check if all required context was successfully retrieved',
-    );
-    prompt.writeln('- Verify context is relevant to the user request');
-    prompt.writeln('- Ensure context data is properly formatted');
-    prompt.writeln(
-      '- Validate that context gathering aligns with thinking step requirements',
-    );
-
-    if (result.data != null) {
-      prompt.writeln(
-        '- Available context keys: ${result.data!.keys.join(', ')}',
-      );
-    }
-  }
-
-  void _addResponseVerificationGuidelines(
-    StringBuffer prompt,
-    ChatStepResult result,
-  ) {
-    prompt.writeln();
-    prompt.writeln('RESPONSE GENERATION VERIFICATION GUIDELINES:');
-    prompt.writeln(
-      '- Check if response text is helpful and addresses user query',
-    );
-    prompt.writeln(
-      '- Verify dishes (if any) are properly structured and nutritionally reasonable',
-    );
-    prompt.writeln('- Ensure recommendations are actionable and relevant');
-    prompt.writeln(
-      '- Validate that response tone matches expected bot personality',
-    );
-
-    if (result.data != null && result.data!.containsKey('chatResponse')) {
-      final response = result.data!['chatResponse'];
-      prompt.writeln('- Response generated: $response');
-    }
-  }
-
-  void _addDishProcessingVerificationGuidelines(
-    StringBuffer prompt,
-    ChatStepResult result,
-  ) {
-    prompt.writeln();
-    prompt.writeln('DISH PROCESSING VERIFICATION GUIDELINES:');
-    prompt.writeln('- Check if dishes were correctly parsed and validated');
-    prompt.writeln(
-      '- Verify nutritional information is reasonable and consistent',
-    );
-    prompt.writeln(
-      '- Ensure ingredient lists are complete and properly formatted',
-    );
-    prompt.writeln(
-      '- Validate that new dishes have unique IDs and proper metadata',
-    );
-
-    if (result.data != null) {
-      final dishCount = (result.data!['validatedDishes'] as List?)?.length ?? 0;
-      final errorCount =
-          (result.data!['processingErrors'] as List?)?.length ?? 0;
-      prompt.writeln('- Dishes processed: $dishCount');
-      prompt.writeln('- Processing errors: $errorCount');
-    }
-  }
-
-  void _addGenericVerificationGuidelines(
-    StringBuffer prompt,
-    ChatStepResult result,
-  ) {
-    prompt.writeln();
-    prompt.writeln('GENERIC VERIFICATION GUIDELINES:');
-    prompt.writeln('- Check if the step completed successfully');
-    prompt.writeln('- Verify output data is properly structured');
-    prompt.writeln('- Ensure step result aligns with expected outcomes');
-    prompt.writeln('- Validate that any errors are properly handled');
   }
 }

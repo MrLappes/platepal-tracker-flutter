@@ -59,12 +59,8 @@ class AgentStepFactory {
           mealRepository: _mealRepository,
           userProfileRepository: _userProfileRepository,
         );
-
       case 'response_generation':
-        return ResponseGenerationStep(
-          openaiService: _openaiService,
-          dishProcessor: getStep('dish_processing') as DishProcessingStep,
-        );
+        return ResponseGenerationStep(openaiService: _openaiService);
 
       case 'dish_processing':
         return DishProcessingStep(
@@ -261,17 +257,17 @@ class AgentStepRegistry {
         dependencies: [],
       ),
     );
-
     registerStep(
       'deep_search_verification',
       AgentStepMetadata(
         name: 'deep_search_verification',
-        description: 'Performs AI-powered verification of step results',
-        category: 'verification',
+        description:
+            'Validates context sufficiency and provides pipeline control decisions',
+        category: 'validation',
         supportsVerification: false, // Meta-verification not supported
         supportsDeepSearch: false,
         estimatedExecutionTime: Duration(seconds: 3),
-        dependencies: [],
+        dependencies: ['thinking', 'context_gathering'],
       ),
     );
   }

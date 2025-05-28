@@ -42,10 +42,10 @@ Respond with a SINGLE JSON object containing the following fields:
     - "needsWeeklyNutritionSummary": true/false (if a summary of the past week's nutrition is relevant)
     - "needsListOfCreatedDishes": true/false (if a list of dishes the user has previously created/saved is relevant, e.g., when user says "my dishes")
     - "needsExistingDishes": true/false (if general knowledge about existing dishes/recipes is relevant, e.g., for suggestions, or if user mentions ingredients)
-    - "needsInfoOnDishCreation": true/false (if the user is asking how to create/log a new dish, or about the process of making something)
+    - "needsInfoOnDishCreation": true/false (if the user is asking the bot to create a new dish or recipe, e.g., "create a recipe for chicken curry" or "make a dish with these ingredients")
     - "needsNutritionAdvice": true/false (if the user is seeking general nutrition advice, or asking about healthiness of foods)
     - "needsHistoricalMealLookup": true/false (if the user is asking about meals from a specific past day/period like "yesterday" or "last Tuesday")
-    - "needsConversationHistory": true/false (if the full conversation history is needed for context, or false if just the current message and system prompt are sufficient for an appropriate response)
+    - "needsConversationHistory": true/false (if the full conversation history is needed for context, or false if just the current message and system prompt are sufficient for an appropriate response, set to false only if the question is completely off topic or unrelated to previous messages)
     - "historicalMealPeriod": string (e.g., "yesterday", "last week", "tuesday", if needsHistoricalMealLookup is true and a period is identifiable, otherwise null)
 3.  "responseRequirements": A list of strings indicating key elements the AI's final response should include (e.g., ["recipe_suggestions", "nutrition_information", "meal_planning", "image_analysis", "dish_identification", "nutrition_estimation", "general_nutrition_advice"]). Choose from these examples or create specific ones if needed.
 

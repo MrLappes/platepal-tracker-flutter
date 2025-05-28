@@ -124,10 +124,45 @@ class AgentStepsModal extends StatelessWidget {
     bool deepSearchEnabled,
     int stepsCount,
   ) {
+    // Calculate step statistics
+    final steps = metadata['stepResults'] as List? ?? [];
+
+    // Separate error handling steps from regular steps
+    final errorHandlingSteps =
+        steps.where((step) => step['stepName'] == 'error_handling').length;
+    final errorHandlingSuccessful =
+        steps
+            .where(
+              (step) =>
+                  step['stepName'] == 'error_handling' &&
+                  step['success'] == true,
+            )
+            .length;
+
+    // Calculate regular step statistics (excluding error handling steps)
+    final regularSteps = steps.where(
+      (step) => step['stepName'] != 'error_handling',
+    );
+    final completedSteps =
+        regularSteps
+            .where(
+              (step) =>
+                  step['success'] == true && (step['data']?['skipped'] != true),
+            )
+            .length;
+    final skippedSteps =
+        regularSteps.where((step) => step['data']?['skipped'] == true).length;
+    final failedSteps =
+        regularSteps.where((step) => step['success'] == false).length;
     final summaryData = {
       'processingTime': '${processingTime}ms',
       'botType': botType,
-      'stepsCount': stepsCount,
+      'totalSteps': stepsCount,
+      'completedSteps': completedSteps,
+      'skippedSteps': skippedSteps,
+      'failedSteps': failedSteps,
+      'errorHandlingSteps': errorHandlingSteps,
+      'errorHandlingSuccessful': errorHandlingSuccessful,
       'deepSearchEnabled': deepSearchEnabled,
       'metadata': metadata,
     };
@@ -164,7 +199,34 @@ class AgentStepsModal extends StatelessWidget {
             const SizedBox(height: 16),
             _buildInfoRow(theme, 'Processing Time', '${processingTime}ms'),
             _buildInfoRow(theme, 'Bot Type', botType),
-            _buildInfoRow(theme, 'Steps Completed', '$stepsCount'),
+            _buildInfoRow(theme, 'Total Steps', '$stepsCount'),
+            if (skippedSteps > 0)
+              _buildInfoRow(
+                theme,
+                'Skipped Steps',
+                '$skippedSteps',
+                color: Colors.orange,
+              ),
+            if (failedSteps > 0)
+              _buildInfoRow(
+                theme,
+                'Failed Steps',
+                '$failedSteps',
+                color: Colors.red,
+              ),
+            if (errorHandlingSteps > 0)
+              _buildInfoRow(
+                theme,
+                'Error Recovery',
+                '$errorHandlingSuccessful/$errorHandlingSteps',
+                color: Colors.amber,
+              ),
+            _buildInfoRow(
+              theme,
+              'Completed Steps',
+              '$completedSteps',
+              color: Colors.green,
+            ),
             _buildInfoRow(
               theme,
               'Deep Search',
@@ -209,7 +271,12 @@ class AgentStepsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(ThemeData theme, String label, String value) {
+  Widget _buildInfoRow(
+    ThemeData theme,
+    String label,
+    String value, {
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -227,7 +294,7 @@ class AgentStepsModal extends StatelessWidget {
             child: Text(
               value,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.8),
+                color: color ?? theme.colorScheme.onSurface.withOpacity(0.8),
               ),
             ),
           ),
@@ -295,21 +362,52 @@ class AgentStepsModal extends StatelessWidget {
     final error = step['error'] as Map<String, dynamic>?;
     final timestamp = step['timestamp'] as String?;
     final executionTime = step['executionTime'] as int?;
+    final isSkipped = data['skipped'] as bool? ?? false;
+    final skipReason =
+        data['reason'] as String?; // Determine the display status and colors
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+
+    // Special handling for error_handling steps
+    final isErrorHandlingStep = stepName == 'error_handling';
+
+    if (isSkipped) {
+      statusColor = Colors.orange;
+      statusIcon = Icons.skip_next;
+      statusText = 'Skipped';
+    } else if (isErrorHandlingStep) {
+      // Error handling steps should be shown as warning/error even if they succeeded
+      statusColor = Colors.red;
+      statusIcon = Icons.error_outline;
+      statusText = success ? 'Error recovered' : 'Error handling failed';
+    } else if (success) {
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+      statusText = 'Completed successfully';
+    } else {
+      statusColor = Colors.red;
+      statusIcon = Icons.error;
+      statusText = 'Failed';
+    }
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ExpansionTile(
         leading: CircleAvatar(
           radius: 18,
-          backgroundColor: success ? Colors.green : Colors.red,
-          child: Text(
-            '$stepNumber',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
+          backgroundColor: statusColor,
+          child:
+              isSkipped
+                  ? Icon(Icons.skip_next, color: Colors.white, size: 16)
+                  : Text(
+                    '$stepNumber',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
         ),
         title: Text(
           stepName,
@@ -319,16 +417,15 @@ class AgentStepsModal extends StatelessWidget {
         ),
         subtitle: Row(
           children: [
-            Icon(
-              success ? Icons.check_circle : Icons.error,
-              size: 16,
-              color: success ? Colors.green : Colors.red,
-            ),
+            Icon(statusIcon, size: 16, color: statusColor),
             const SizedBox(width: 4),
-            Text(
-              success ? 'Completed successfully' : 'Failed',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: success ? Colors.green : Colors.red,
+            Expanded(
+              child: Text(
+                isSkipped && skipReason != null
+                    ? '$statusText: $skipReason'
+                    : statusText,
+                style: theme.textTheme.bodySmall?.copyWith(color: statusColor),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (executionTime != null) ...[
@@ -348,6 +445,17 @@ class AgentStepsModal extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Skipped step explanation section
+                if (isSkipped) ...[
+                  _buildCopyableSection(context, theme, '⏭️ Skip Details', {
+                    'reason': skipReason ?? 'No reason provided',
+                    'stepName': stepName,
+                    if (data.containsKey('contextRequirements'))
+                      'contextRequirements': data['contextRequirements'],
+                  }, isMetadata: true),
+                  const SizedBox(height: 16),
+                ],
+
                 // Metadata section
                 if (timestamp != null || executionTime != null) ...[
                   _buildCopyableSection(context, theme, '📊 Metadata', {
@@ -355,6 +463,7 @@ class AgentStepsModal extends StatelessWidget {
                     if (executionTime != null)
                       'executionTime': '${executionTime}ms',
                     'success': success,
+                    'skipped': isSkipped,
                     'stepName': stepName,
                   }, isMetadata: true),
                   const SizedBox(height: 16),
@@ -366,8 +475,8 @@ class AgentStepsModal extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // Data Output section
-                if (data.isNotEmpty) ...[
+                // Data Output section (only show if not skipped and has meaningful data)
+                if (!isSkipped && data.isNotEmpty) ...[
                   _buildCopyableSection(context, theme, '📤 Data Output', data),
                   const SizedBox(height: 16),
                 ],
