@@ -568,10 +568,11 @@ class ContextRequirements {
   final bool needsInfoOnDishCreation; // For how-to questions
   final bool needsNutritionAdvice;
   final bool needsHistoricalMealLookup; // For historical meal data
+  final bool
+  needsConversationHistory; // Whether full conversation history is needed for context
   final String?
   historicalMealPeriod; // e.g., "yesterday", "last_3_days", "last_week"
   final Map<String, dynamic>? metadata;
-
   const ContextRequirements({
     this.needsUserProfile = false,
     this.needsTodaysNutrition = false,
@@ -581,10 +582,10 @@ class ContextRequirements {
     this.needsInfoOnDishCreation = false,
     this.needsNutritionAdvice = false,
     this.needsHistoricalMealLookup = false,
+    this.needsConversationHistory = true,
     this.historicalMealPeriod,
     this.metadata,
   });
-
   factory ContextRequirements.fromJson(Map<String, dynamic> json) {
     return ContextRequirements(
       needsUserProfile: json['needsUserProfile'] as bool? ?? false,
@@ -597,11 +598,14 @@ class ContextRequirements {
       needsInfoOnDishCreation:
           json['needsInfoOnDishCreation'] as bool? ?? false,
       needsNutritionAdvice: json['needsNutritionAdvice'] as bool? ?? false,
+      needsHistoricalMealLookup:
+          json['needsHistoricalMealLookup'] as bool? ?? false,
+      needsConversationHistory:
+          json['needsConversationHistory'] as bool? ?? true,
       historicalMealPeriod: json['historicalMealPeriod'] as String?,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'needsUserProfile': needsUserProfile,
@@ -611,6 +615,8 @@ class ContextRequirements {
       'needsExistingDishes': needsExistingDishes,
       'needsInfoOnDishCreation': needsInfoOnDishCreation,
       'needsNutritionAdvice': needsNutritionAdvice,
+      'needsHistoricalMealLookup': needsHistoricalMealLookup,
+      'needsConversationHistory': needsConversationHistory,
       'historicalMealPeriod': historicalMealPeriod,
       'metadata': metadata,
     };
@@ -624,6 +630,8 @@ class ContextRequirements {
     bool? needsExistingDishes,
     bool? needsInfoOnDishCreation,
     bool? needsNutritionAdvice,
+    bool? needsHistoricalMealLookup,
+    bool? needsConversationHistory,
     String? historicalMealPeriod,
     Map<String, dynamic>? metadata,
   }) {
@@ -638,6 +646,10 @@ class ContextRequirements {
       needsInfoOnDishCreation:
           needsInfoOnDishCreation ?? this.needsInfoOnDishCreation,
       needsNutritionAdvice: needsNutritionAdvice ?? this.needsNutritionAdvice,
+      needsHistoricalMealLookup:
+          needsHistoricalMealLookup ?? this.needsHistoricalMealLookup,
+      needsConversationHistory:
+          needsConversationHistory ?? this.needsConversationHistory,
       historicalMealPeriod: historicalMealPeriod ?? this.historicalMealPeriod,
       metadata: metadata ?? this.metadata,
     );
@@ -754,6 +766,12 @@ class ChatStepVerificationResult {
     ChatAgentError? error,
   }) =>
       ChatStepVerificationResult(valid: false, message: message, error: error);
+
+  Map<String, dynamic> toJson() => {
+    'valid': valid,
+    'message': message,
+    'error': error?.toJson(),
+  };
 }
 
 /// Utility for runtime schema validation of agent step JSON outputs

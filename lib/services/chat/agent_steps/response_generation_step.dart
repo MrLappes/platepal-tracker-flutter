@@ -20,11 +20,26 @@ class ResponseGenerationStep extends AgentStep {
 
   @override
   String get stepName => 'response_generation';
-
   @override
   Future<ChatStepResult> execute(ChatStepInput input) async {
     try {
       debugPrint('🤖 ResponseGenerationStep: Starting response generation');
+
+      // Check if we should include conversation history based on thinking step analysis
+      bool includeConversationHistory = true; // Default to true for safety
+      if (input.thinkingResult?.contextRequirements.needsConversationHistory !=
+          null) {
+        includeConversationHistory =
+            input.thinkingResult!.contextRequirements.needsConversationHistory;
+        debugPrint(
+          '🤖 ResponseGenerationStep: Using thinking step decision for conversation history: $includeConversationHistory',
+        );
+      } else {
+        debugPrint(
+          '🤖 ResponseGenerationStep: No thinking result found, defaulting to include conversation history',
+        );
+      }
+
       final messages = _buildConversationMessages(
         input.enhancedSystemPrompt ?? '',
         input.conversationHistory,
@@ -39,6 +54,7 @@ class ResponseGenerationStep extends AgentStep {
                         input.metadata!['enhancedSystemPrompt'] is String
                     ? input.metadata!['enhancedSystemPrompt'] as String
                     : null),
+        includeConversationHistory: includeConversationHistory,
       );
       debugPrint('🤖 ResponseGenerationStep: Sending request to OpenAI');
       debugPrint('🤖 ResponseGenerationStep: Prompt/messages:');
@@ -130,9 +146,7 @@ class ResponseGenerationStep extends AgentStep {
             '⚠️ ResponseGenerationStep: Dish processing failed, continuing without dishes',
           );
         }
-      }
-
-      // --- Build ChatResponse ---
+      } // --- Build ChatResponse ---
       final chatResponse = ChatResponse(
         replyText:
             parsedResponse['replyText'] as String? ??
@@ -148,7 +162,10 @@ class ResponseGenerationStep extends AgentStep {
       debugPrint('✅ ResponseGenerationStep: Successfully generated response');
       return ChatStepResult.success(
         stepName: stepName,
-        data: {'chatResponse': chatResponse.toJson()},
+        data: {
+          'chatResponse': chatResponse.toJson(),
+          'conversationHistoryIncluded': includeConversationHistory,
+        },
       );
     } catch (error) {
       debugPrint('❌ ResponseGenerationStep: Error during execution: $error');
@@ -210,6 +227,7 @@ class ResponseGenerationStep extends AgentStep {
     String? imageUri,
     List<UserIngredient>? userIngredients, {
     String? contextSummary,
+    bool includeConversationHistory = true,
   }) {
     final messages = <Map<String, dynamic>>[];
 
@@ -227,32 +245,44 @@ class ResponseGenerationStep extends AgentStep {
     debugPrint(
       '🤖 ResponseGenerationStep: System prompt added: ' + fullSystemPrompt,
     );
-    // Add conversation history (simplified)
-    for (final historyMessage in conversationHistory) {
-      if (historyMessage.role == 'system' || historyMessage.isLoading) continue;
 
-      String enhancedContent = historyMessage.content;
+    // Conditionally add conversation history based on needsConversationHistory flag
+    if (includeConversationHistory) {
+      debugPrint(
+        '🤖 ResponseGenerationStep: Including full conversation history',
+      );
+      // Add conversation history (simplified)
+      for (final historyMessage in conversationHistory) {
+        if (historyMessage.role == 'system' || historyMessage.isLoading)
+          continue;
 
-      // Add ingredients info if present
-      if (historyMessage.role == 'user' &&
-          historyMessage.ingredients != null &&
-          historyMessage.ingredients!.isNotEmpty) {
-        final ingredientsList = historyMessage.ingredients!
-            .map(
-              (ing) =>
-                  '${ing.name} (${ing.quantity}${ing.unit}, ID: ${ing.id})',
-            )
-            .join(', ');
-        enhancedContent +=
-            '\n\n[User has the following ingredients ready: $ingredientsList]';
+        String enhancedContent = historyMessage.content;
+
+        // Add ingredients info if present
+        if (historyMessage.role == 'user' &&
+            historyMessage.ingredients != null &&
+            historyMessage.ingredients!.isNotEmpty) {
+          final ingredientsList = historyMessage.ingredients!
+              .map(
+                (ing) =>
+                    '${ing.name} (${ing.quantity}${ing.unit}, ID: ${ing.id})',
+              )
+              .join(', ');
+          enhancedContent +=
+              '\n\n[User has the following ingredients ready: $ingredientsList]';
+        }
+
+        // Note if message has image
+        if (historyMessage.imageUri != null) {
+          enhancedContent += '\n\n[This message includes an image]';
+        }
+
+        messages.add({'role': historyMessage.role, 'content': enhancedContent});
       }
-
-      // Note if message has image
-      if (historyMessage.imageUri != null) {
-        enhancedContent += '\n\n[This message includes an image]';
-      }
-
-      messages.add({'role': historyMessage.role, 'content': enhancedContent});
+    } else {
+      debugPrint(
+        '🤖 ResponseGenerationStep: Skipping conversation history per thinking step analysis',
+      );
     }
 
     // Add current user message with enhancements

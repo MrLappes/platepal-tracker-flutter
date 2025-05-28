@@ -420,7 +420,20 @@ class AgentStepsModal extends StatelessWidget {
     bool isMetadata = false,
     bool isRaw = false,
   }) {
-    final jsonString = const JsonEncoder.withIndent('  ').convert(data);
+    String jsonString;
+    try {
+      jsonString = const JsonEncoder.withIndent('  ').convert(data);
+    } catch (e) {
+      // Handle objects that can't be JSON serialized
+      final sanitizedData = _sanitizeDataForJson(data);
+      try {
+        jsonString = const JsonEncoder.withIndent('  ').convert(sanitizedData);
+      } catch (e2) {
+        // Last resort: convert everything to strings
+        jsonString =
+            'Error serializing data: ${e2.toString()}\n\nRaw data:\n${data.toString()}';
+      }
+    }
     final displayString = isRaw ? jsonString : _formatDataForDisplay(data);
 
     return Column(
@@ -610,6 +623,76 @@ class AgentStepsModal extends StatelessWidget {
       buffer.writeln('... and ${data.length - 3} more items');
     }
     return buffer.toString().trim();
+  }
+
+  /// Sanitizes data for JSON encoding by converting complex objects to serializable forms
+  Map<String, dynamic> _sanitizeDataForJson(Map<String, dynamic> data) {
+    final sanitized = <String, dynamic>{};
+
+    data.forEach((key, value) {
+      if (value == null) {
+        sanitized[key] = null;
+      } else if (value is String || value is num || value is bool) {
+        sanitized[key] = value;
+      } else if (value is List) {
+        sanitized[key] = value.map((item) => _sanitizeValue(item)).toList();
+      } else if (value is Map) {
+        if (value is Map<String, dynamic>) {
+          sanitized[key] = _sanitizeDataForJson(value);
+        } else {
+          sanitized[key] = value.toString();
+        }
+      } else {
+        // Try to call toJson() if available, otherwise convert to string
+        try {
+          // Use reflection-like approach to check for toJson method
+          final hasToJson =
+              value.toString().contains('toJson') ||
+              value.runtimeType.toString().contains(
+                'ChatStepVerificationResult',
+              ) ||
+              value.runtimeType.toString().contains('ChatAgentError');
+          if (hasToJson) {
+            sanitized[key] = (value as dynamic).toJson();
+          } else {
+            sanitized[key] = value.toString();
+          }
+        } catch (e) {
+          sanitized[key] = value.toString();
+        }
+      }
+    });
+
+    return sanitized;
+  }
+
+  /// Sanitizes individual values for JSON encoding
+  dynamic _sanitizeValue(dynamic value) {
+    if (value == null) {
+      return null;
+    } else if (value is String || value is num || value is bool) {
+      return value;
+    } else if (value is List) {
+      return value.map((item) => _sanitizeValue(item)).toList();
+    } else if (value is Map<String, dynamic>) {
+      return _sanitizeDataForJson(value);
+    } else {
+      // Try to call toJson() if available, otherwise convert to string
+      try {
+        final hasToJson =
+            value.runtimeType.toString().contains(
+              'ChatStepVerificationResult',
+            ) ||
+            value.runtimeType.toString().contains('ChatAgentError');
+        if (hasToJson) {
+          return (value as dynamic).toJson();
+        } else {
+          return value.toString();
+        }
+      } catch (e) {
+        return value.toString();
+      }
+    }
   }
 
   void _copyToClipboard(BuildContext context, String text) {
