@@ -287,9 +287,13 @@ class ChatAgentService {
           verificationStepText,
           'Cross-referencing information with additional sources for accuracy',
         );
-
         final verificationInput = responseInput.copyWith(
-          metadata: {...responseInput.metadata!, ...responseResult.data!},
+          metadata: {
+            ...responseInput.metadata!,
+            'stepToVerify': 'response_generation',
+            'stepResult': responseResult,
+            'originalUserMessage': userMessage,
+          },
         );
         verificationResult = await _deepSearchVerificationStep.execute(
           verificationInput,

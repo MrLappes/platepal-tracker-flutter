@@ -45,6 +45,7 @@ Respond with a SINGLE JSON object containing the following fields:
     - "needsInfoOnDishCreation": true/false (if the user is asking how to create/log a new dish, or about the process of making something)
     - "needsNutritionAdvice": true/false (if the user is seeking general nutrition advice, or asking about healthiness of foods)
     - "needsHistoricalMealLookup": true/false (if the user is asking about meals from a specific past day/period like "yesterday" or "last Tuesday")
+    - "needsConversationHistory": true/false (if the full conversation history is needed for context, or false if just the current message and system prompt are sufficient for an appropriate response)
     - "historicalMealPeriod": string (e.g., "yesterday", "last week", "tuesday", if needsHistoricalMealLookup is true and a period is identifiable, otherwise null)
 3.  "responseRequirements": A list of strings indicating key elements the AI's final response should include (e.g., ["recipe_suggestions", "nutrition_information", "meal_planning", "image_analysis", "dish_identification", "nutrition_estimation", "general_nutrition_advice"]). Choose from these examples or create specific ones if needed.
 
@@ -66,6 +67,7 @@ Example for "User wants a recipe for chicken and rice":
     "needsInfoOnDishCreation": false,
     "needsNutritionAdvice": false,
     "needsHistoricalMealLookup": false,
+    "needsConversationHistory": false,
     "historicalMealPeriod": null
   },
   "responseRequirements": ["recipe_suggestions"]
@@ -88,9 +90,16 @@ Example for "User wants a recipe for chicken and rice":
       'needsInfoOnDishCreation',
       'needsNutritionAdvice',
       'needsHistoricalMealLookup',
+      'needsConversationHistory',
     ];
     for (final key in boolKeys) {
       ctx[key] = ctx[key] is bool ? ctx[key] : false;
+    }
+
+    // Set needsConversationHistory to true by default if not specified
+    if (!ctx.containsKey('needsConversationHistory') ||
+        ctx['needsConversationHistory'] == null) {
+      ctx['needsConversationHistory'] = true;
     }
     // Patch historicalMealPeriod to always be a string (never null)
     if (!ctx.containsKey('historicalMealPeriod') ||
@@ -325,8 +334,14 @@ Example for "User wants a recipe for chicken and rice":
     bool hasIngredients,
   ) {
     return hasIngredients
-        ? ContextRequirements(needsExistingDishes: true)
-        : ContextRequirements(needsNutritionAdvice: true);
+        ? ContextRequirements(
+          needsExistingDishes: true,
+          needsConversationHistory: false,
+        )
+        : ContextRequirements(
+          needsNutritionAdvice: true,
+          needsConversationHistory: true,
+        );
   }
 
   List<String> _fallbackDetermineResponseRequirements(bool hasIngredients) {
