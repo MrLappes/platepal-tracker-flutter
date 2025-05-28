@@ -122,6 +122,84 @@ class ErrorRecoveryResult {
   });
 }
 
+/// Pipeline control actions that deep search verification can recommend
+enum PipelineControlAction {
+  continueNormally,
+  retryWithModifications,
+  skipOptionalSteps,
+  gatherAdditionalContext,
+  modifySearchParameters,
+  discardAndRetry,
+}
+
+/// Pipeline control result for deep search verification step
+class PipelineControlResult {
+  final bool hasEnoughContext;
+  final double confidence;
+  final List<PipelineControlAction> recommendedActions;
+  final Map<String, dynamic>? contextModifications;
+  final List<String>? stepsToRetry;
+  final List<String>? stepsToSkip;
+  final Map<String, dynamic>? searchParameters;
+  final String reasoning;
+  final List<String> identifiedGaps;
+  final List<String> suggestions;
+
+  const PipelineControlResult({
+    required this.hasEnoughContext,
+    required this.confidence,
+    required this.recommendedActions,
+    required this.reasoning,
+    this.contextModifications,
+    this.stepsToRetry,
+    this.stepsToSkip,
+    this.searchParameters,
+    this.identifiedGaps = const [],
+    this.suggestions = const [],
+  });
+
+  factory PipelineControlResult.fromJson(Map<String, dynamic> json) {
+    return PipelineControlResult(
+      hasEnoughContext: json['hasEnoughContext'] as bool,
+      confidence: (json['confidence'] as num).toDouble(),
+      recommendedActions:
+          (json['recommendedActions'] as List)
+              .map(
+                (action) => PipelineControlAction.values.firstWhere(
+                  (e) => e.toString().split('.').last == action,
+                ),
+              )
+              .toList(),
+      reasoning: json['reasoning'] as String,
+      contextModifications:
+          json['contextModifications'] as Map<String, dynamic>?,
+      stepsToRetry: (json['stepsToRetry'] as List?)?.cast<String>(),
+      stepsToSkip: (json['stepsToSkip'] as List?)?.cast<String>(),
+      searchParameters: json['searchParameters'] as Map<String, dynamic>?,
+      identifiedGaps: (json['identifiedGaps'] as List?)?.cast<String>() ?? [],
+      suggestions: (json['suggestions'] as List?)?.cast<String>() ?? [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'hasEnoughContext': hasEnoughContext,
+      'confidence': confidence,
+      'recommendedActions':
+          recommendedActions
+              .map((action) => action.toString().split('.').last)
+              .toList(),
+      'reasoning': reasoning,
+      'contextModifications': contextModifications,
+      'stepsToRetry': stepsToRetry,
+      'stepsToSkip': stepsToSkip,
+      'searchParameters': searchParameters,
+      'identifiedGaps': identifiedGaps,
+      'suggestions': suggestions,
+    };
+  }
+}
+
 /// Chat execution context
 class ChatExecutionContext {
   final String userMessage;

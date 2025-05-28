@@ -2,21 +2,15 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:platepal_tracker/models/user_ingredient.dart';
 import '../../../models/chat_types.dart';
-import '../../../models/dish.dart';
 import '../openai_service.dart';
-import 'dish_processing_step.dart';
 import '../../chat/system_prompts.dart';
 
 /// Generates the main AI response based on gathered context and user message
 class ResponseGenerationStep extends AgentStep {
   final OpenAIService _openaiService;
-  final DishProcessingStep _dishProcessor;
 
-  ResponseGenerationStep({
-    required OpenAIService openaiService,
-    required DishProcessingStep dishProcessor,
-  }) : _openaiService = openaiService,
-       _dishProcessor = dishProcessor;
+  ResponseGenerationStep({required OpenAIService openaiService})
+    : _openaiService = openaiService;
 
   @override
   String get stepName => 'response_generation';
@@ -119,44 +113,17 @@ class ResponseGenerationStep extends AgentStep {
         );
       }
 
-      // --- Dish processing (if present) ---
-      List<Dish> validatedDishes = [];
-      if (parsedResponse['dishes'] != null &&
-          parsedResponse['dishes'] is List) {
-        final dishProcessingResult = await _dishProcessor.execute(
-          ChatStepInput(
-            userMessage: input.userMessage,
-            imageUri: input.imageUri,
-            userIngredients: input.userIngredients,
-            metadata: {
-              'dishes': parsedResponse['dishes'],
-              'uploadedImageUri': input.imageUri,
-            },
-          ),
-        );
-        if (dishProcessingResult.success) {
-          // Map ProcessedDish to Dish if necessary
-          final processed = dishProcessingResult.data?['validatedDishes'];
-          if (processed != null && processed is List) {
-            validatedDishes =
-                processed.where((e) => e is Dish).cast<Dish>().toList();
-          }
-        } else {
-          debugPrint(
-            '⚠️ ResponseGenerationStep: Dish processing failed, continuing without dishes',
-          );
-        }
-      } // --- Build ChatResponse ---
+      // --- Build ChatResponse ---
       final chatResponse = ChatResponse(
         replyText:
             parsedResponse['replyText'] as String? ??
             "I'm not sure how to respond to that.",
-        dishes: validatedDishes.isNotEmpty ? validatedDishes : null,
+        dishes: null, // Dishes will be processed in separate pipeline step
         recommendation: parsedResponse['recommendation'] as String?,
         metadata: {
           'modelUsed': _openaiService.selectedModel,
           'tokensUsed': response.usage?.totalTokens,
-          'dishesProcessed': validatedDishes.length,
+          'rawResponse': parsedResponse,
         },
       );
       debugPrint('✅ ResponseGenerationStep: Successfully generated response');
@@ -164,6 +131,7 @@ class ResponseGenerationStep extends AgentStep {
         stepName: stepName,
         data: {
           'chatResponse': chatResponse.toJson(),
+          'parsedResponse': parsedResponse,
           'conversationHistoryIncluded': includeConversationHistory,
         },
       );
