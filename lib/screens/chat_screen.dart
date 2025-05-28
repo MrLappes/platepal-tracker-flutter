@@ -120,7 +120,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           if (chatProvider.isLoading &&
               chatProvider.currentTypingMessage != null)
-            _buildTypingIndicator(context, chatProvider.currentTypingMessage!),
+            _buildThinkingIndicator(context, chatProvider),
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
@@ -273,8 +273,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildTypingIndicator(BuildContext context, String message) {
+  Widget _buildThinkingIndicator(
+    BuildContext context,
+    ChatProvider chatProvider,
+  ) {
     final theme = Theme.of(context);
+    final currentStep = chatProvider.currentAgentStep;
+    final message = chatProvider.currentTypingMessage ?? 'AI is thinking...';
+    final thinkingSteps = chatProvider.currentThinkingSteps;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -315,29 +321,89 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.colorScheme.primary,
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          currentStep ?? message,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (thinkingSteps.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 120),
+                      child: SingleChildScrollView(
+                        reverse: true,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:
+                              thinkingSteps.length > 5
+                                  ? thinkingSteps
+                                      .sublist(thinkingSteps.length - 5)
+                                      .map(
+                                        (step) => Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 1,
+                                          ),
+                                          child: Text(
+                                            step,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(0.6),
+                                                  fontSize: 11,
+                                                ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList()
+                                  : thinkingSteps
+                                      .map(
+                                        (step) => Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 1,
+                                          ),
+                                          child: Text(
+                                            step,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(0.6),
+                                                  fontSize: 11,
+                                                ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      message,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),

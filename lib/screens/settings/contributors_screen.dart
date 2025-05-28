@@ -139,7 +139,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
             leading: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: IconButton(
@@ -195,7 +195,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -296,7 +296,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -495,7 +495,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
             opacity: value,
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFe384c7).withOpacity(0.1),
+                color: const Color(0xFFe384c7).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(

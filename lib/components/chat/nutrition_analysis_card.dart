@@ -67,7 +67,9 @@ class NutritionAnalysisCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -133,7 +135,7 @@ class NutritionAnalysisCard extends StatelessWidget {
                           style: theme.textTheme.bodySmall,
                         ),
                         backgroundColor: theme.colorScheme.secondaryContainer
-                            .withOpacity(0.5),
+                            .withValues(alpha: 0.5),
                       );
                     }).toList(),
               ),
@@ -212,7 +214,7 @@ class NutritionAnalysisCard extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],

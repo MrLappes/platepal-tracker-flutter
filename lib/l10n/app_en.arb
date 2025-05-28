@@ -1198,5 +1198,21 @@
   "dangerZone": "Danger Zone",
   "@dangerZone": {
     "description": "Section title for dangerous operations"
-  }
+  },
+  "chatAgentSettingsTitle": "Chat Agent Settings",
+  "@chatAgentSettingsTitle": { "description": "Title for chat agent settings screen" },
+  "chatAgentEnableTitle": "Enable Agent Mode",
+  "@chatAgentEnableTitle": { "description": "Switch title for enabling agent mode" },
+  "chatAgentEnableSubtitle": "Use the multi-step agent pipeline for chat",
+  "@chatAgentEnableSubtitle": { "description": "Switch subtitle for enabling agent mode" },
+  "chatAgentDeepSearchTitle": "Enable Deep Search",
+  "@chatAgentDeepSearchTitle": { "description": "Switch title for enabling deep search" },
+  "chatAgentDeepSearchSubtitle": "Allow the agent to use deep search for more accurate answers",
+  "@chatAgentDeepSearchSubtitle": { "description": "Switch subtitle for enabling deep search" },
+  "chatAgentInfoTitle": "What is Agent Mode?",
+  "@chatAgentInfoTitle": { "description": "Card title for agent mode explanation" },
+  "chatAgentInfoDescription": "Agent mode enables PlatePal's advanced multi-step reasoning pipeline for chat. This allows the assistant to analyze your query, gather context, and provide more accurate, explainable answers. Deep Search lets the agent use more data for even better results.",
+  "@chatAgentInfoDescription": { "description": "Card description for agent mode explanation" },
+  "chatSettingsSaved": "Chat settings saved successfully",
+  "@chatSettingsSaved": { "description": "Snackbar message when chat settings are saved" }
 }

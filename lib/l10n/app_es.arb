@@ -320,5 +320,13 @@
   "resetAppCancel": "Cancelar",
   "resetAppSuccess": "Los datos de la aplicación se han restablecido exitosamente",
   "resetAppError": "Error al restablecer los datos de la aplicación",
-  "dangerZone": "Zona de Peligro"
+  "dangerZone": "Zona de Peligro",
+  "chatAgentSettingsTitle": "Configuración del Agente de Chat",
+  "chatAgentEnableTitle": "Activar Modo Agente",
+  "chatAgentEnableSubtitle": "Usa la canalización de agente de varios pasos para el chat",
+  "chatAgentDeepSearchTitle": "Activar Búsqueda Profunda",
+  "chatAgentDeepSearchSubtitle": "Permite que el agente use búsqueda profunda para respuestas más precisas",
+  "chatAgentInfoTitle": "¿Qué es el Modo Agente?",
+  "chatAgentInfoDescription": "El modo agente activa la avanzada canalización de razonamiento de varios pasos de PlatePal para el chat. Esto permite que el asistente analice tu consulta, recopile contexto y proporcione respuestas más precisas y explicables. La Búsqueda Profunda permite al agente usar más datos para obtener mejores resultados.",
+  "chatSettingsSaved": "Configuración de chat guardada correctamente"
 }

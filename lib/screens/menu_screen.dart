@@ -120,6 +120,22 @@ class MenuScreen extends StatelessWidget {
               ),
             ],
           ),
+
+          // Chat & AI Settings Section
+          _buildSettingsSection(
+            context,
+            title: 'Chat & AI Settings',
+            icon: Icons.chat,
+            children: [
+              _buildSettingsTile(
+                context,
+                title: 'Chat Agent Options',
+                subtitle: 'Enable agent mode, deep search, and more',
+                icon: Icons.psychology,
+                onTap: () => context.push('/settings/chat-agent'),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -159,7 +175,7 @@ class MenuScreen extends StatelessWidget {
                       border: Border.all(
                         color: Theme.of(
                           context,
-                        ).colorScheme.outline.withOpacity(0.2),
+                        ).colorScheme.outline.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),

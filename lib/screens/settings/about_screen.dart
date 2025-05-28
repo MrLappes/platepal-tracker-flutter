@@ -118,7 +118,7 @@ class _AboutScreenState extends State<AboutScreen>
             leading: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: IconButton(
@@ -185,7 +185,7 @@ class _AboutScreenState extends State<AboutScreen>
                                           color: Theme.of(context)
                                               .colorScheme
                                               .outline
-                                              .withOpacity(0.2),
+                                              .withValues(alpha: 0.2),
                                           width: 2,
                                         ),
                                       ),
@@ -395,7 +395,7 @@ class _AboutScreenState extends State<AboutScreen>
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(12),
         ),

@@ -608,7 +608,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Icon(
                 Icons.timeline_outlined,
                 size: 80,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.6),
               ),
               const SizedBox(height: 24),
               Text(
@@ -1046,17 +1048,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         referenceLines: [
           ReferenceLine(
             value: 18.5,
-            color: Colors.orange.withOpacity(0.5),
+            color: Colors.orange.withValues(alpha: 0.5),
             label: 'Underweight',
           ),
           ReferenceLine(
             value: 25.0,
-            color: Colors.orange.withOpacity(0.5),
+            color: Colors.orange.withValues(alpha: 0.5),
             label: 'Overweight',
           ),
           ReferenceLine(
             value: 30.0,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
             label: 'Obese',
           ),
         ],
@@ -1195,9 +1197,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -1293,7 +1295,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       decoration: BoxDecoration(
         color: colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.error.withOpacity(0.3)),
+        border: Border.all(color: colorScheme.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1836,7 +1838,7 @@ class CalorieChartPainter extends CustomPainter {
 
     final paint =
         Paint()
-          ..color = Colors.green.withOpacity(0.7)
+          ..color = Colors.green.withValues(alpha: 0.7)
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
 
@@ -1908,7 +1910,7 @@ class CalorieChartPainter extends CustomPainter {
 
       // Add intensity based on how far from maintenance
       final intensity = (diff.abs() / 500).clamp(0.3, 1.0);
-      barColor = barColor.withOpacity(intensity);
+      barColor = barColor.withValues(alpha: intensity);
 
       final paint =
           Paint()

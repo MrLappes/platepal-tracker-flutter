@@ -99,7 +99,7 @@ class _ChatInputState extends State<ChatInput>
                   color: theme.colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.shadow.withOpacity(0.05),
+                      color: theme.colorScheme.shadow.withValues(alpha: 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, -1),
                     ),
@@ -185,7 +185,7 @@ class _ChatInputState extends State<ChatInput>
                 color: theme.colorScheme.surface,
                 border: Border(
                   top: BorderSide(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -209,8 +209,8 @@ class _ChatInputState extends State<ChatInput>
                               decoration: BoxDecoration(
                                 color:
                                     _showMenu
-                                        ? theme.colorScheme.primary.withOpacity(
-                                          0.1,
+                                        ? theme.colorScheme.primary.withValues(
+                                          alpha: 0.1,
                                         )
                                         : theme
                                             .colorScheme
@@ -227,7 +227,7 @@ class _ChatInputState extends State<ChatInput>
                                         _showMenu
                                             ? theme.colorScheme.primary
                                             : theme.colorScheme.onSurface
-                                                .withOpacity(0.7),
+                                                .withValues(alpha: 0.7),
                                   ),
                                 ),
                               ),
@@ -294,7 +294,7 @@ class _ChatInputState extends State<ChatInput>
                                         (_hasText || _selectedImage != null)
                                             ? theme.colorScheme.onPrimary
                                             : theme.colorScheme.onSurface
-                                                .withOpacity(0.4),
+                                                .withValues(alpha: 0.4),
                                   ),
                           tooltip: localizations.sendMessage,
                         ),
@@ -325,12 +325,12 @@ class _ChatInputState extends State<ChatInput>
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.1),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: theme.colorScheme.shadow.withOpacity(0.05),
+              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -344,11 +344,11 @@ class _ChatInputState extends State<ChatInput>
               width: 64, // Larger container for icon
               height: 64, // Larger container for icon
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.12),
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 4,
                     offset: const Offset(0, 2),
@@ -403,7 +403,7 @@ class _ChatInputState extends State<ChatInput>
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.shadow.withOpacity(0.1),
+                      color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 2),
@@ -432,11 +432,13 @@ class _ChatInputState extends State<ChatInput>
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withOpacity(0.9),
+                      color: theme.colorScheme.surface.withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.shadow.withOpacity(0.2),
+                          color: theme.colorScheme.shadow.withValues(
+                            alpha: 0.2,
+                          ),
                           spreadRadius: 1,
                           blurRadius: 2,
                           offset: const Offset(0, 1),

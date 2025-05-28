@@ -320,5 +320,13 @@
   "resetAppCancel": "Abbrechen",
   "resetAppSuccess": "Anwendungsdaten wurden erfolgreich zurückgesetzt",
   "resetAppError": "Fehler beim Zurücksetzen der Anwendungsdaten",
-  "dangerZone": "Gefahrenzone"
+  "dangerZone": "Gefahrenzone",
+  "chatAgentSettingsTitle": "Chat-Agent Einstellungen",
+  "chatAgentEnableTitle": "Agent-Modus aktivieren",
+  "chatAgentEnableSubtitle": "Verwende die mehrstufige Agenten-Pipeline für den Chat",
+  "chatAgentDeepSearchTitle": "Deep Search aktivieren",
+  "chatAgentDeepSearchSubtitle": "Erlaube dem Agenten, Deep Search für genauere Antworten zu verwenden",
+  "chatAgentInfoTitle": "Was ist der Agent-Modus?",
+  "chatAgentInfoDescription": "Der Agent-Modus aktiviert PlatePals fortschrittliche mehrstufige Denk-Pipeline für den Chat. So kann der Assistent deine Anfrage analysieren, Kontext sammeln und genauere, erklärbare Antworten liefern. Deep Search ermöglicht dem Agenten, noch mehr Daten für bessere Ergebnisse zu nutzen.",
+  "chatSettingsSaved": "Chat-Einstellungen erfolgreich gespeichert"
 }

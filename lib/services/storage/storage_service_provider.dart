@@ -65,6 +65,11 @@ class StorageServiceProvider extends ChangeNotifier {
     }
   }
 
+  /// Expose SharedPreferences instance for settings screens
+  Future<SharedPreferences> getPrefs() async {
+    return await SharedPreferences.getInstance();
+  }
+
   @override
   void dispose() {
     // Close database connections asynchronously
