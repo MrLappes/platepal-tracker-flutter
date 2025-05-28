@@ -221,6 +221,10 @@
   "imageSourceSelection": "Seleccionar Fuente de Imagen",
   "nutritionAnalysis": "Análisis Nutricional",
   "addToMeals": "Agregar a Comidas",
+  "details": "Detalles",
+  "tapToViewAgentSteps": "Toca para ver los pasos del agente",
+  "addedToMealsSuccess": "Se agregó {dishName} a las comidas",
+  "close": "Cerrar",
   "servingSize": "Tamaño de Porción",
   "perServing": "por porción",
   "dishName": "Nombre del Plato",
@@ -326,7 +330,7 @@
   "chatAgentEnableSubtitle": "Usa la canalización de agente de varios pasos para el chat",
   "chatAgentDeepSearchTitle": "Activar Búsqueda Profunda",
   "chatAgentDeepSearchSubtitle": "Permite que el agente use búsqueda profunda para respuestas más precisas",
-  "chatAgentInfoTitle": "¿Qué es el Modo Agente?",
-  "chatAgentInfoDescription": "El modo agente activa la avanzada canalización de razonamiento de varios pasos de PlatePal para el chat. Esto permite que el asistente analice tu consulta, recopile contexto y proporcione respuestas más precisas y explicables. La Búsqueda Profunda permite al agente usar más datos para obtener mejores resultados.",
-  "chatSettingsSaved": "Configuración de chat guardada correctamente"
+  "chatAgentInfoTitle": "¿Qué es el Modo Agente?",  "chatAgentInfoDescription": "El modo agente activa la avanzada canalización de razonamiento de varios pasos de PlatePal para el chat. Esto permite que el asistente analice tu consulta, recopile contexto y proporcione respuestas más precisas y explicables. La Búsqueda Profunda permite al agente usar más datos para obtener mejores resultados.",
+  "chatSettingsSaved": "Configuración de chat guardada correctamente",
+  "yesterday": "Ayer"
 }
