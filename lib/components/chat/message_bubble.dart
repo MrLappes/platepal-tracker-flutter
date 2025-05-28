@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/chat_message.dart';
+import 'agent_steps_modal.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -58,43 +59,86 @@ class MessageBubble extends StatelessWidget {
                         bottomLeft: !isUser ? const Radius.circular(4) : null,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (message.hasImage) ...[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              message.imageUrl!,
-                              width: 200,
-                              height: 150,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: 200,
-                                  height: 150,
-                                  color: theme.colorScheme.surfaceContainerHigh,
-                                  child: const Icon(Icons.error),
-                                );
-                              },
+                    child: GestureDetector(
+                      onTap: () => _handleMessageTap(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (message.hasImage) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                message.imageUrl!,
+                                width: 200,
+                                height: 150,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 200,
+                                    height: 150,
+                                    color:
+                                        theme.colorScheme.surfaceContainerHigh,
+                                    child: const Icon(Icons.error),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          GestureDetector(
+                            onLongPress:
+                                () =>
+                                    _copyToClipboard(context, message.content),
+                            child: Text(
+                              message.content,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color:
+                                    isUser
+                                        ? theme.colorScheme.onPrimary
+                                        : theme.colorScheme.onSurface,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          if (!isUser && _hasAgentMetadata()) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withOpacity(
+                                  0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withOpacity(
+                                    0.3,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.psychology,
+                                    size: 14,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Tap to view agent steps',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
-                        GestureDetector(
-                          onLongPress:
-                              () => _copyToClipboard(context, message.content),
-                          child: Text(
-                            message.content,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  isUser
-                                      ? theme.colorScheme.onPrimary
-                                      : theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -182,6 +226,22 @@ class MessageBubble extends StatelessWidget {
       return 'Yesterday';
     } else {
       return '${dateTime.day}/${dateTime.month}';
+    }
+  }
+
+  /// Check if this message has agent processing metadata
+  bool _hasAgentMetadata() {
+    return message.metadata != null &&
+        message.metadata!['mode'] == 'full_agent_pipeline';
+  }
+
+  /// Handle tap on assistant message to show agent steps
+  void _handleMessageTap(BuildContext context) {
+    if (!message.isFromUser && _hasAgentMetadata()) {
+      showDialog(
+        context: context,
+        builder: (context) => AgentStepsModal(metadata: message.metadata!),
+      );
     }
   }
 }

@@ -167,6 +167,17 @@ class MealLog {
     required this.mealType,
     required this.loggedAt,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'dish': dish.toJson(), // Assuming Dish has a toJson method
+      'servingSize': servingSize,
+      'mealType': mealType,
+      'loggedAt': loggedAt.toIso8601String(),
+    };
+  }
 }
 
 class NutritionSummary {

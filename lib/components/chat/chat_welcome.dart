@@ -19,7 +19,7 @@ class ChatWelcome extends StatelessWidget {
           colors: [
             isDark
                 ? theme.colorScheme.surface
-                : theme.colorScheme.primaryContainer.withOpacity(0.1),
+                : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
             theme.colorScheme.surface,
           ],
         ),
@@ -61,23 +61,23 @@ class ChatWelcome extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             isDark
-                ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                : theme.colorScheme.primary.withOpacity(0.05),
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+                : theme.colorScheme.primary.withValues(alpha: 0.05),
             isDark
-                ? theme.colorScheme.primary.withOpacity(0.05)
-                : theme.colorScheme.primaryContainer.withOpacity(0.2),
+                ? theme.colorScheme.primary.withValues(alpha: 0.05)
+                : theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.1),
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -99,7 +99,7 @@ class ChatWelcome extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -129,7 +129,7 @@ class ChatWelcome extends StatelessWidget {
           Text(
             localizations.chatWelcomeSubtitle,
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -158,7 +158,7 @@ class ChatWelcome extends StatelessWidget {
         Text(
           localizations.whatCanIHelpWith,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -296,13 +296,13 @@ class ChatWelcome extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.08),
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
               ],
               border: Border.all(
-                color: theme.colorScheme.outlineVariant.withOpacity(0.15),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
               ),
             ),
             child: Padding(
@@ -318,7 +318,9 @@ class ChatWelcome extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: action.gradient.colors.first.withOpacity(0.3),
+                          color: action.gradient.colors.first.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -345,7 +347,9 @@ class ChatWelcome extends StatelessWidget {
                         Text(
                           action.subtitle,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
                       ],
@@ -357,7 +361,7 @@ class ChatWelcome extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

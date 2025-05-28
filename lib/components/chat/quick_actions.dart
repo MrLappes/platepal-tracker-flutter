@@ -76,8 +76,10 @@ class QuickActions extends StatelessWidget {
       avatar: Icon(action.icon, size: 16, color: theme.colorScheme.primary),
       label: Text(action.label, style: theme.textTheme.bodySmall),
       onPressed: () => onActionTap(action.message),
-      backgroundColor: theme.colorScheme.primaryContainer.withOpacity(0.3),
-      side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+      backgroundColor: theme.colorScheme.primaryContainer.withValues(
+        alpha: 0.3,
+      ),
+      side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
     );
   }
 }

@@ -4,7 +4,17 @@ import 'dart:convert';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import '../models/nutrition_analysis.dart';
+import '../models/chat_types.dart' as agent_types;
+import '../models/chat_types.dart' show ChatMessageRole;
+import '../models/user_ingredient.dart';
 import '../services/chat/openai_service.dart';
+import '../services/chat/chat_agent_service.dart';
+import '../repositories/dish_repository.dart';
+import '../repositories/meal_repository.dart';
+import '../repositories/user_profile_repository.dart';
+import '../services/storage/dish_service.dart';
+import '../services/storage/storage_service_provider.dart';
+import '../services/user_session_service.dart';
 
 class ChatProvider extends ChangeNotifier {
   final OpenAIService _openAIService = OpenAIService();
@@ -13,11 +23,53 @@ class ChatProvider extends ChangeNotifier {
   String? _currentTypingMessage;
   bool _isApiKeyConfigured = false;
 
+  // Agent system components (lazy-initialized)
+  ChatAgentService? _chatAgentService;
+  bool _agentModeEnabled = false;
+  bool _deepSearchEnabled = false;
+
+  // Agent thinking steps for real-time display
+  List<String> _currentThinkingSteps = [];
+  String? _currentAgentStep;
+
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isLoading => _isLoading;
   String? get currentTypingMessage => _currentTypingMessage;
   bool get hasMessages => _messages.isNotEmpty;
   bool get isApiKeyConfigured => _isApiKeyConfigured;
+
+  // Agent system getters and setters
+  bool get isAgentModeEnabled => _agentModeEnabled;
+  bool get isDeepSearchEnabled => _deepSearchEnabled;
+  List<String> get currentThinkingSteps =>
+      List.unmodifiable(_currentThinkingSteps);
+  String? get currentAgentStep => _currentAgentStep;
+  set agentModeEnabled(bool enabled) {
+    _agentModeEnabled = enabled;
+    if (enabled) {
+      _initializeAgentService();
+    }
+    _saveAgentSettings(); // Save settings when changed
+    notifyListeners();
+  }
+
+  /// Use this instead of the setter to ensure agent service is ready
+  Future<void> setAgentModeEnabled(bool enabled) async {
+    _agentModeEnabled = enabled;
+    if (enabled) {
+      await _initializeAgentService();
+    }
+    await _saveAgentSettings();
+    notifyListeners();
+  }
+
+  set deepSearchEnabled(bool enabled) {
+    _deepSearchEnabled = enabled;
+    _chatAgentService?.enableDeepSearch(enabled);
+    _saveAgentSettings(); // Save settings when changed
+    notifyListeners();
+  }
+
   ChatProvider() {
     _initializeProvider();
   }
@@ -25,6 +77,76 @@ class ChatProvider extends ChangeNotifier {
   Future<void> _initializeProvider() async {
     await _checkApiKeyConfiguration();
     await _loadMessages();
+    await _loadAgentSettings();
+  }
+
+  /// Initialize agent service when needed
+  Future<void> _initializeAgentService() async {
+    if (_chatAgentService != null) return;
+    try {
+      // Get SharedPreferences for UserSessionService
+      final prefs = await StorageServiceProvider().getPrefs();
+      final userSessionService = UserSessionService(prefs);
+
+      // Initialize default user if needed
+      await userSessionService.initializeDefaultUser();
+
+      // Create repositories - these are lazy wrappers around existing services
+      final dishRepository = DishRepository();
+      final mealRepository = MealRepository(
+        userSessionService: userSessionService,
+      );
+      final userProfileRepository = UserProfileRepository(
+        userSessionService: userSessionService,
+      );
+      final dishService = DishService();
+
+      // Initialize default user profile if needed
+      await userProfileRepository.initializeDefaultUserProfile();
+
+      _chatAgentService = ChatAgentService(
+        openaiService: _openAIService,
+        dishRepository: dishRepository,
+        mealRepository: mealRepository,
+        userProfileRepository: userProfileRepository,
+        dishService: dishService,
+      );
+
+      // Apply current settings
+      _chatAgentService!.enableDeepSearch(_deepSearchEnabled);
+
+      debugPrint('🤖 ChatProvider: Agent service initialized');
+    } catch (e) {
+      debugPrint('❌ Failed to initialize agent service: $e');
+      _agentModeEnabled = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load agent settings from SharedPreferences via StorageServiceProvider
+  Future<void> _loadAgentSettings() async {
+    try {
+      final prefs = await StorageServiceProvider().getPrefs();
+      _agentModeEnabled = prefs.getBool('agent_mode_enabled') ?? false;
+      _deepSearchEnabled = prefs.getBool('deep_search_enabled') ?? false;
+      if (_agentModeEnabled) {
+        await _initializeAgentService();
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading agent settings: $e');
+    }
+  }
+
+  /// Save agent settings to SharedPreferences via StorageServiceProvider
+  Future<void> _saveAgentSettings() async {
+    try {
+      final prefs = await StorageServiceProvider().getPrefs();
+      await prefs.setBool('agent_mode_enabled', _agentModeEnabled);
+      await prefs.setBool('deep_search_enabled', _deepSearchEnabled);
+    } catch (e) {
+      debugPrint('Error saving agent settings: $e');
+    }
   }
 
   Future<void> addWelcomeMessage(BuildContext context) async {
@@ -100,8 +222,17 @@ class ChatProvider extends ChangeNotifier {
     String content, {
     String? imageUrl,
     BuildContext? context,
+    List<UserIngredient>? userIngredients,
   }) async {
     if (content.trim().isEmpty && imageUrl == null) return;
+
+    // Always reload agent settings from SharedPreferences before sending a message
+    await _loadAgentSettings();
+
+    // Ensure agent service is initialized if agent mode is enabled
+    if (_agentModeEnabled && _chatAgentService == null) {
+      await _initializeAgentService();
+    }
 
     // Create user message
     final userMessage = ChatMessage(
@@ -129,39 +260,67 @@ class ChatProvider extends ChangeNotifier {
               ? AppLocalizations.of(context)!.aiThinking
               : 'AI is thinking...';
       notifyListeners();
-
       String response;
-      if (_isApiKeyConfigured) {
-        // Get real AI response
+      Map<String, dynamic>? responseMetadata;
+
+      if (_isApiKeyConfigured &&
+          _agentModeEnabled &&
+          _chatAgentService != null) {
+        debugPrint('🧠 [ChatProvider] Using full agent pipeline for reply');
+        final agentResponse = await _processWithAgentService(
+          content,
+          imageUrl,
+          userIngredients,
+        );
+        response = agentResponse['response'] as String;
+        responseMetadata = agentResponse['metadata'] as Map<String, dynamic>?;
+        // Ensure mode is set for UI detection
+        if (responseMetadata != null) {
+          responseMetadata['mode'] = 'full_agent_pipeline';
+        }
+      } else if (_isApiKeyConfigured) {
+        debugPrint('💬 [ChatProvider] Using fallback OpenAI service');
         response = await _openAIService.sendMessage(
           content,
           imageUrl: imageUrl,
         );
+        responseMetadata = {
+          'mode': 'fallback_openai',
+          'reason':
+              _agentModeEnabled
+                  ? (_chatAgentService == null
+                      ? 'Agent service was not initialized in time.'
+                      : 'Unknown error: agent pipeline not used.')
+                  : 'Agent mode is disabled.',
+          'agentModeEnabled': _agentModeEnabled,
+          'deepSearchEnabled': _deepSearchEnabled,
+          'apiKeyConfigured': _isApiKeyConfigured,
+        };
+        debugPrint('💬 [ChatProvider] Response metadata: $responseMetadata');
       } else {
-        // Generate test response
+        debugPrint('📝 [ChatProvider] Using test response');
         response =
             context != null
                 ? AppLocalizations.of(context)!.testChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
-
-        // Add a small delay to simulate AI thinking
         await Future.delayed(const Duration(milliseconds: 1500));
+        responseMetadata = null;
       }
 
-      // Create assistant message
+      // Create assistant message with metadata from agent processing
       final assistantMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         content: response,
         sender: MessageSender.assistant,
         timestamp: DateTime.now(),
         status: MessageStatus.sent,
+        metadata: responseMetadata,
       );
 
       _messages.add(assistantMessage);
       await _saveMessages();
     } catch (e) {
       debugPrint('Error sending message: $e');
-
       // Mark message as failed
       final failedMessage = userMessage.copyWith(status: MessageStatus.failed);
       final index = _messages.indexWhere((m) => m.id == userMessage.id);
@@ -272,5 +431,85 @@ class ChatProvider extends ChangeNotifier {
     _messages.removeWhere((message) => message.id == messageId);
     _saveMessages();
     notifyListeners();
+  }
+
+  /// Public method to reload agent settings from SharedPreferences
+  Future<void> reloadAgentSettings() async {
+    await _loadAgentSettings();
+  }
+
+  /// Process message using the agent service with real-time thinking steps
+  Future<Map<String, dynamic>> _processWithAgentService(
+    String content,
+    String? imageUrl,
+    List<UserIngredient>? userIngredients,
+  ) async {
+    try {
+      // Clear previous thinking steps
+      _currentThinkingSteps.clear();
+      _currentAgentStep = null;
+      notifyListeners();
+
+      // Convert ChatMessage list to agent_types.ChatMessage list for the agent service
+      final agentMessages =
+          _messages
+              .map(
+                (msg) => agent_types.ChatMessage(
+                  id: msg.id,
+                  content: msg.content,
+                  role:
+                      msg.sender == MessageSender.user
+                          ? ChatMessageRole.user.name
+                          : ChatMessageRole.assistant.name,
+                  timestamp: msg.timestamp,
+                  metadata: {'imageUrl': msg.imageUrl, ...?msg.metadata},
+                ),
+              )
+              .toList();
+
+      // Create bot configuration (default nutrition assistant)
+      final botConfig = agent_types.BotConfiguration(
+        type: 'nutrition_assistant',
+        name: 'PlatePal Assistant',
+        behaviorType: 'helpful_expert',
+      );
+
+      // Process with agent service using thinking step callback
+      final response = await _chatAgentService!.processMessage(
+        userMessage: content,
+        conversationHistory: agentMessages,
+        botConfig: botConfig,
+        imageUri: imageUrl,
+        userIngredients: userIngredients,
+        onThinkingStep: (step, details) {
+          _currentAgentStep = step;
+          _currentThinkingSteps.add(step);
+          if (details != null) {
+            _currentThinkingSteps.add('   $details');
+          }
+          notifyListeners();
+        },
+      );
+
+      // Clear thinking steps when done
+      _currentAgentStep = null;
+      notifyListeners();
+
+      // Return both response and metadata
+      return {'response': response.replyText, 'metadata': response.metadata};
+    } catch (e) {
+      debugPrint('❌ Agent service processing failed: $e');
+      // Clear thinking steps on error
+      _currentThinkingSteps.clear();
+      _currentAgentStep = null;
+      notifyListeners();
+
+      // Fallback to traditional service
+      final fallbackResponse = await _openAIService.sendMessage(
+        content,
+        imageUrl: imageUrl,
+      );
+      return {'response': fallbackResponse, 'metadata': null};
+    }
   }
 }

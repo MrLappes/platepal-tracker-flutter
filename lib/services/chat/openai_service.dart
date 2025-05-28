@@ -69,6 +69,96 @@ class ApiKeyTestResult {
   });
 }
 
+/// Response models for chat completions
+class ChatChoice {
+  final OpenAiMessage message;
+  final String finishReason;
+  final int index;
+
+  const ChatChoice({
+    required this.message,
+    required this.finishReason,
+    required this.index,
+  });
+
+  factory ChatChoice.fromJson(Map<String, dynamic> json) {
+    return ChatChoice(
+      message: OpenAiMessage.fromJson(json['message'] as Map<String, dynamic>),
+      finishReason: json['finish_reason'] as String,
+      index: json['index'] as int,
+    );
+  }
+}
+
+class OpenAiMessage {
+  final String role;
+  final String? content;
+
+  const OpenAiMessage({required this.role, this.content});
+
+  factory OpenAiMessage.fromJson(Map<String, dynamic> json) {
+    return OpenAiMessage(
+      role: json['role'] as String,
+      content: json['content'] as String?,
+    );
+  }
+}
+
+class ChatUsage {
+  final int promptTokens;
+  final int completionTokens;
+  final int totalTokens;
+
+  const ChatUsage({
+    required this.promptTokens,
+    required this.completionTokens,
+    required this.totalTokens,
+  });
+
+  factory ChatUsage.fromJson(Map<String, dynamic> json) {
+    return ChatUsage(
+      promptTokens: json['prompt_tokens'] as int,
+      completionTokens: json['completion_tokens'] as int,
+      totalTokens: json['total_tokens'] as int,
+    );
+  }
+}
+
+class ChatCompletionResponse {
+  final String id;
+  final String object;
+  final int created;
+  final String model;
+  final List<ChatChoice> choices;
+  final ChatUsage? usage;
+
+  const ChatCompletionResponse({
+    required this.id,
+    required this.object,
+    required this.created,
+    required this.model,
+    required this.choices,
+    this.usage,
+  });
+
+  factory ChatCompletionResponse.fromJson(Map<String, dynamic> json) {
+    return ChatCompletionResponse(
+      id: json['id'] as String,
+      object: json['object'] as String,
+      created: json['created'] as int,
+      model: json['model'] as String,
+      choices:
+          (json['choices'] as List<dynamic>)
+              .map((e) => ChatChoice.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      usage:
+          json['usage'] != null
+              ? ChatUsage.fromJson(json['usage'] as Map<String, dynamic>)
+              : null,
+    );
+  }
+}
+
 class OpenAIService {
   static const String _baseUrl = 'https://api.openai.com/v1';
   static const String _apiKeyKey = 'openai_api_key';
@@ -82,6 +172,10 @@ class OpenAIService {
     OpenAIModel(id: 'gpt-4o-mini', displayName: 'GPT-4O Mini'),
   ];
 
+  /// Get the currently selected model
+  String get selectedModel => _selectedModelCache ?? 'gpt-4o';
+  String? _selectedModelCache;
+
   Future<String?> _getApiKey() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_apiKeyKey);
@@ -89,12 +183,14 @@ class OpenAIService {
 
   Future<String> getSelectedModel() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_selectedModelKey) ?? 'gpt-4o';
+    _selectedModelCache = prefs.getString(_selectedModelKey) ?? 'gpt-4o';
+    return _selectedModelCache!;
   }
 
   Future<void> setSelectedModel(String model) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_selectedModelKey, model);
+    _selectedModelCache = model;
   }
 
   Future<bool> isConfigured() async {
@@ -381,6 +477,52 @@ Food description: $description
       }
     } catch (e) {
       throw Exception('Failed to analyze nutrition: $e');
+    }
+  }
+
+  /// Send a structured chat request to OpenAI
+  Future<ChatCompletionResponse> sendChatRequest({
+    required List<Map<String, dynamic>> messages,
+    double temperature = 0.7,
+    int? maxTokens,
+    Map<String, dynamic>? responseFormat,
+  }) async {
+    final apiKey = await _getApiKey();
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('OpenAI API key not configured');
+    }
+
+    final model = await getSelectedModel();
+    final requestBody = {
+      'model': model,
+      'messages': messages,
+      'temperature': temperature,
+      if (maxTokens != null) 'max_tokens': maxTokens,
+      if (responseFormat != null) 'response_format': responseFormat,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: json.encode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        return ChatCompletionResponse.fromJson(data);
+      } else {
+        final error = json.decode(response.body);
+        throw Exception('OpenAI API error: ${error['error']['message']}');
+      }
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Failed to send chat request: $e');
     }
   }
 }
