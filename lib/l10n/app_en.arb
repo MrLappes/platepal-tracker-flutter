@@ -773,10 +773,30 @@
   "nutritionAnalysis": "Nutrition Analysis",
   "@nutritionAnalysis": {
     "description": "Nutrition analysis section title"
-  },
-  "addToMeals": "Add to Meals",
+  },  "addToMeals": "Add to Meals",
   "@addToMeals": {
     "description": "Add to meals button text"
+  },  "details": "Details",
+  "@details": {
+    "description": "Details button text"
+  },
+  "tapToViewAgentSteps": "Tap to view agent steps",
+  "@tapToViewAgentSteps": {
+    "description": "Agent steps tap instruction"
+  },
+  "addedToMealsSuccess": "Added {dishName} to meals",
+  "@addedToMealsSuccess": {
+    "description": "Success message when dish is added to meals",
+    "placeholders": {
+      "dishName": {
+        "type": "String",
+        "description": "Name of the dish"
+      }
+    }
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
   },
   "servingSize": "Serving Size",
   "@servingSize": {
@@ -1212,7 +1232,8 @@
   "chatAgentInfoTitle": "What is Agent Mode?",
   "@chatAgentInfoTitle": { "description": "Card title for agent mode explanation" },
   "chatAgentInfoDescription": "Agent mode enables PlatePal's advanced multi-step reasoning pipeline for chat. This allows the assistant to analyze your query, gather context, and provide more accurate, explainable answers. Deep Search lets the agent use more data for even better results.",
-  "@chatAgentInfoDescription": { "description": "Card description for agent mode explanation" },
-  "chatSettingsSaved": "Chat settings saved successfully",
-  "@chatSettingsSaved": { "description": "Snackbar message when chat settings are saved" }
+  "@chatAgentInfoDescription": { "description": "Card description for agent mode explanation" },  "chatSettingsSaved": "Chat settings saved successfully",
+  "@chatSettingsSaved": { "description": "Snackbar message when chat settings are saved" },
+  "yesterday": "Yesterday",
+  "@yesterday": { "description": "Label for yesterday in date formatting" }
 }

@@ -356,9 +356,7 @@ class ChatAgentService {
       final duration = DateTime.now().difference(startTime);
       debugPrint(
         '🤖 ChatAgentService: Completed full pipeline in ${duration.inMilliseconds}ms',
-      );
-
-      // Return comprehensive ChatResponse with all step data
+      ); // Return comprehensive ChatResponse with all step data
       return ChatResponse(
         replyText: finalResponse,
         dishes: extractedDishes.cast(),
@@ -371,7 +369,11 @@ class ChatAgentService {
           'thinkingSteps': thinkingSteps,
           'stepsCompleted': stepResults.length,
           'hasImage': imageUri != null,
-          'dishesProcessed': extractedDishes.length,
+          'dishesProcessed': {
+            'validatedDishes':
+                extractedDishes.map((dish) => dish.toJson()).toList(),
+            'count': extractedDishes.length,
+          },
         },
       );
     } catch (e, stackTrace) {

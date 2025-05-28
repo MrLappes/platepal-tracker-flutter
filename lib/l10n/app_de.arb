@@ -221,6 +221,10 @@
   "imageSourceSelection": "Bildquelle auswählen",
   "nutritionAnalysis": "Nährwertanalyse",
   "addToMeals": "Zu Mahlzeiten hinzufügen",
+  "details": "Details",
+  "tapToViewAgentSteps": "Tippen, um Agent-Schritte anzuzeigen",
+  "addedToMealsSuccess": "{dishName} zu Mahlzeiten hinzugefügt",
+  "close": "Schließen",
   "servingSize": "Portionsgröße",
   "perServing": "pro Portion",
   "dishName": "Gerichtname",
@@ -326,7 +330,7 @@
   "chatAgentEnableSubtitle": "Verwende die mehrstufige Agenten-Pipeline für den Chat",
   "chatAgentDeepSearchTitle": "Deep Search aktivieren",
   "chatAgentDeepSearchSubtitle": "Erlaube dem Agenten, Deep Search für genauere Antworten zu verwenden",
-  "chatAgentInfoTitle": "Was ist der Agent-Modus?",
-  "chatAgentInfoDescription": "Der Agent-Modus aktiviert PlatePals fortschrittliche mehrstufige Denk-Pipeline für den Chat. So kann der Assistent deine Anfrage analysieren, Kontext sammeln und genauere, erklärbare Antworten liefern. Deep Search ermöglicht dem Agenten, noch mehr Daten für bessere Ergebnisse zu nutzen.",
-  "chatSettingsSaved": "Chat-Einstellungen erfolgreich gespeichert"
+  "chatAgentInfoTitle": "Was ist der Agent-Modus?",  "chatAgentInfoDescription": "Der Agent-Modus aktiviert PlatePals fortschrittliche mehrstufige Denk-Pipeline für den Chat. So kann der Assistent deine Anfrage analysieren, Kontext sammeln und genauere, erklärbare Antworten liefern. Deep Search ermöglicht dem Agenten, noch mehr Daten für bessere Ergebnisse zu nutzen.",
+  "chatSettingsSaved": "Chat-Einstellungen erfolgreich gespeichert",
+  "yesterday": "Gestern"
 }

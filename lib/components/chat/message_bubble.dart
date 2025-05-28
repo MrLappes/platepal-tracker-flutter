@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/chat_message.dart';
+import '../../models/dish_models.dart';
 import 'agent_steps_modal.dart';
+import 'dish_suggestion_card.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -127,7 +129,7 @@ class MessageBubble extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Tap to view agent steps',
+                                    localizations.tapToViewAgentSteps,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.primary,
                                       fontWeight: FontWeight.w500,
@@ -136,6 +138,11 @@ class MessageBubble extends StatelessWidget {
                                 ],
                               ),
                             ),
+                          ],
+                          // Display dishes if they exist in the metadata
+                          if (!isUser && _hasDishes()) ...[
+                            const SizedBox(height: 8),
+                            ..._buildDishCards(context),
                           ],
                         ],
                       ),
@@ -146,7 +153,7 @@ class MessageBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _formatTime(message.timestamp),
+                        _formatTime(context, message.timestamp),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
@@ -216,14 +223,15 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
+    final localizations = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays == 0) {
       return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return localizations.yesterday;
     } else {
       return '${dateTime.day}/${dateTime.month}';
     }
@@ -233,6 +241,118 @@ class MessageBubble extends StatelessWidget {
   bool _hasAgentMetadata() {
     return message.metadata != null &&
         message.metadata!['mode'] == 'full_agent_pipeline';
+  }
+
+  /// Check if this message has processed dishes
+  bool _hasDishes() {
+    final dishesProcessedRaw = message.metadata?['dishesProcessed'];
+
+    // Debug logging to understand the data structure
+    if (dishesProcessedRaw != null) {
+      debugPrint('dishesProcessed type: ${dishesProcessedRaw.runtimeType}');
+      debugPrint('dishesProcessed value: $dishesProcessedRaw');
+    }
+
+    if (dishesProcessedRaw == null ||
+        dishesProcessedRaw is! Map<String, dynamic>) {
+      return false;
+    }
+
+    final validatedDishes = dishesProcessedRaw['validatedDishes'];
+
+    return validatedDishes is List && validatedDishes.isNotEmpty;
+  }
+
+  /// Build dish suggestion cards from metadata
+  List<Widget> _buildDishCards(BuildContext context) {
+    final dishesProcessedRaw = message.metadata?['dishesProcessed'];
+    if (dishesProcessedRaw == null ||
+        dishesProcessedRaw is! Map<String, dynamic>) {
+      return [];
+    }
+
+    final validatedDishes = dishesProcessedRaw['validatedDishes'];
+
+    if (validatedDishes is! List || validatedDishes.isEmpty) {
+      return [];
+    }
+
+    return validatedDishes.map((dishData) {
+      try {
+        // Convert the dish data back to ProcessedDish
+        final dish = ProcessedDish.fromJson(dishData as Map<String, dynamic>);
+
+        return DishSuggestionCard(
+          dish: dish,
+          onAddToMeals: () => _handleAddToMeals(context, dish),
+          onViewDetails: () => _handleViewDishDetails(context, dish),
+        );
+      } catch (e) {
+        debugPrint('Error building dish card: $e');
+        return const SizedBox.shrink();
+      }
+    }).toList();
+  }
+
+  /// Handle adding dish to meals
+  void _handleAddToMeals(BuildContext context, ProcessedDish dish) {
+    // TODO: Implement meal logging functionality
+    final localizations = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(localizations.addedToMealsSuccess(dish.name)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Handle viewing dish details
+  void _handleViewDishDetails(BuildContext context, ProcessedDish dish) {
+    // TODO: Implement dish details view
+    final localizations = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(dish.name),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (dish.description != null) ...[
+                  Text(dish.description!),
+                  const SizedBox(height: 12),
+                ],
+                Text(
+                  '${localizations.calories}: ${dish.totalNutrition.calories.toStringAsFixed(0)}',
+                ),
+                Text(
+                  '${localizations.protein}: ${dish.totalNutrition.protein.toStringAsFixed(1)}g',
+                ),
+                Text(
+                  '${localizations.carbs}: ${dish.totalNutrition.carbs.toStringAsFixed(1)}g',
+                ),
+                Text(
+                  '${localizations.fat}: ${dish.totalNutrition.fat.toStringAsFixed(1)}g',
+                ),
+                if (dish.ingredients.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    '${localizations.ingredients}:',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  ...dish.ingredients.map((ing) => Text('• ${ing.name}')),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(localizations.close),
+              ),
+            ],
+          ),
+    );
   }
 
   /// Handle tap on assistant message to show agent steps
