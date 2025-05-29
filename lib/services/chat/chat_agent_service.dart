@@ -342,14 +342,13 @@ class ChatAgentService {
         }
       } catch (e) {
         debugPrint('⚠️ Error checking for dishes in response: $e');
-      }
-
-      // Step 6: Response Generation completed - Extract final response
+      } // Step 6: Response Generation completed - Extract final response
       final chatResponseData =
           responseResult.data!['chatResponse'] as Map<String, dynamic>?;
       final finalResponse =
           chatResponseData?['replyText'] as String? ??
           'I apologize, but I encountered an issue generating a response. Please try again.';
+      final recommendation = chatResponseData?['recommendation'] as String?;
       final extractedDishes =
           dishResult?.data?['validatedDishes'] as List? ?? [];
 
@@ -359,6 +358,7 @@ class ChatAgentService {
       ); // Return comprehensive ChatResponse with all step data
       return ChatResponse(
         replyText: finalResponse,
+        recommendation: recommendation,
         dishes: extractedDishes.cast(),
         metadata: {
           'processingTime': duration.inMilliseconds,

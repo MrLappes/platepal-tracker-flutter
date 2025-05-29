@@ -489,14 +489,17 @@ class ChatProvider extends ChangeNotifier {
           }
           notifyListeners();
         },
-      );
-
-      // Clear thinking steps when done
+      ); // Clear thinking steps when done
       _currentAgentStep = null;
       notifyListeners();
 
-      // Return both response and metadata
-      return {'response': response.replyText, 'metadata': response.metadata};
+      // Return both response and metadata, including recommendation
+      final combinedMetadata = {
+        ...?response.metadata,
+        if (response.recommendation != null)
+          'recommendation': response.recommendation,
+      };
+      return {'response': response.replyText, 'metadata': combinedMetadata};
     } catch (e) {
       debugPrint('❌ Agent service processing failed: $e');
       // Clear thinking steps on error
