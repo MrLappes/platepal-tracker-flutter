@@ -15,101 +15,105 @@ class AgentStepsModal extends StatelessWidget {
     final processingTime = metadata['processingTime'] as int? ?? 0;
     final botType = metadata['botType'] as String? ?? 'assistant';
     final deepSearchEnabled = metadata['deepSearchEnabled'] as bool? ?? false;
-
     return Dialog.fullscreen(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Agent Processing Steps'),
-          backgroundColor: theme.colorScheme.surface,
-          foregroundColor: theme.colorScheme.onSurface,
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Agent Processing Steps'),
+            backgroundColor: theme.colorScheme.surface,
+            foregroundColor: theme.colorScheme.onSurface,
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
           ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Summary Card
-              _buildSummaryCard(
-                context,
-                theme,
-                processingTime,
-                botType,
-                deepSearchEnabled,
-                steps.length,
-              ),
-              const SizedBox(height: 16), // Thinking Steps
-              if (thinkingSteps.isNotEmpty) ...[
-                _buildSectionCard(
-                  context,
-                  theme,
-                  '🧠 Thinking Process',
-                  'Real-time agent thinking steps',
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Summary Card
+                  _buildSummaryCard(
+                    context,
+                    theme,
+                    processingTime,
+                    botType,
+                    deepSearchEnabled,
+                    steps.length,
+                  ),
+                  const SizedBox(height: 16), // Thinking Steps
+                  if (thinkingSteps.isNotEmpty) ...[
+                    _buildSectionCard(
+                      context,
+                      theme,
+                      '🧠 Thinking Process',
+                      'Real-time agent thinking steps',
+                      Column(
                         children: [
-                          TextButton.icon(
-                            onPressed:
-                                () => _copyToClipboard(
-                                  context,
-                                  thinkingSteps.join('\n'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                onPressed:
+                                    () => _copyToClipboard(
+                                      context,
+                                      thinkingSteps.join('\n'),
+                                    ),
+                                icon: const Icon(Icons.copy, size: 16),
+                                label: const Text('Copy All'),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
-                            icon: const Icon(Icons.copy, size: 16),
-                            label: const Text('Copy All'),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
                               ),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
+                            ],
                           ),
+                          ...thinkingSteps
+                              .map<Widget>(
+                                (step) => _buildThinkingStepItem(
+                                  context,
+                                  theme,
+                                  step.toString(),
+                                ),
+                              )
+                              .toList(),
                         ],
                       ),
-                      ...thinkingSteps
-                          .map<Widget>(
-                            (step) => _buildThinkingStepItem(
-                              context,
-                              theme,
-                              step.toString(),
-                            ),
-                          )
-                          .toList(),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
-              // Detailed Steps
-              if (steps.isNotEmpty) ...[
-                _buildSectionCard(
-                  context,
-                  theme,
-                  '⚙️ Processing Steps',
-                  'Detailed step-by-step execution',
-                  Column(
-                    children:
-                        steps.asMap().entries.map<Widget>((entry) {
-                          final index = entry.key;
-                          final step = entry.value;
-                          return _buildDetailedStepItem(
-                            context,
-                            theme,
-                            index + 1,
-                            step,
-                          );
-                        }).toList(),
-                  ),
-                ),
-              ],
-            ],
+                  // Detailed Steps
+                  if (steps.isNotEmpty) ...[
+                    _buildSectionCard(
+                      context,
+                      theme,
+                      '⚙️ Processing Steps',
+                      'Detailed step-by-step execution',
+                      Column(
+                        children:
+                            steps.asMap().entries.map<Widget>((entry) {
+                              final index = entry.key;
+                              final step = entry.value;
+                              return _buildDetailedStepItem(
+                                context,
+                                theme,
+                                index + 1,
+                                step,
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
