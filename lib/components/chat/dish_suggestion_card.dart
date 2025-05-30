@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/dish_models.dart';
+import '../../models/dish.dart';
 import '../../services/storage/dish_service.dart';
+import '../../screens/dish_create_screen.dart';
 
 /// Nutrition profile types for dish analysis
 enum NutritionProfile {
@@ -250,11 +252,6 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
   }
 
   Future<void> _checkDishExists() async {
-    if (widget.isReferenced) {
-      setState(() => _dishExists = true);
-      return;
-    }
-
     try {
       final existingDishes = await _dishService.getAllDishes();
       final exists = existingDishes.any(
@@ -264,21 +261,122 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       setState(() => _dishExists = exists);
     } catch (error) {
       debugPrint('Error checking if dish exists: $error');
+      setState(() => _dishExists = false);
     }
   }
 
   Future<void> _handleInspect() async {
+    if (widget.isReferenced) {
+      // For referenced dishes, check if dish exists in database
+      await _handleReferencedDishInspect();
+    } else {
+      // For new dishes, navigate to creation screen
+      await _handleNewDishInspect();
+    }
+  }
+
+  Future<void> _handleReferencedDishInspect() async {
+    // For referenced dishes, always go directly to creation screen
+    // The _dishExists state is already determined in _checkDishExists()
+    await _openDishCreationScreen();
+  }
+
+  Future<void> _handleNewDishInspect() async {
+    await _openDishCreationScreen();
+  }
+
+  /// Opens the dish creation screen with pre-filled data for editing
+  Future<void> _openDishCreationScreen() async {
     setState(() => _loading = true);
     try {
-      final result = await widget.onInspect(widget.dish);
-      if (result != null) {
+      // Navigate to dish creation screen with pre-filled data
+      final result = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (context) => _buildDishCreationScreen()),
+      );
+      if (result == true) {
+        // Dish was created/updated successfully
+        final wasExisting = _dishExists;
         setState(() => _dishExists = true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                wasExisting
+                    ? 'Dish "${widget.dish.name}" updated successfully!'
+                    : 'Dish "${widget.dish.name}" created successfully!',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (error) {
-      debugPrint('Error inspecting dish: $error');
+      debugPrint('Error opening dish creation screen: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening dish screen: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() => _loading = false);
     }
+  }
+
+  Widget _buildDishCreationScreen() {
+    // Convert ProcessedDish to Dish for the creation screen
+    final dishData = Dish(
+      id: widget.dish.id,
+      name: widget.dish.name,
+      description: widget.dish.description,
+      imageUrl: widget.dish.imageUrl,
+      ingredients:
+          widget.dish.ingredients.map((ingredient) {
+            return Ingredient(
+              id: ingredient.id,
+              name: ingredient.name,
+              amount: ingredient.amount,
+              unit: ingredient.unit,
+              nutrition:
+                  ingredient.nutrition != null
+                      ? NutritionInfo(
+                        calories: ingredient.nutrition!.calories,
+                        protein: ingredient.nutrition!.protein,
+                        carbs: ingredient.nutrition!.carbs,
+                        fat: ingredient.nutrition!.fat,
+                        fiber: ingredient.nutrition!.fiber,
+                        sugar: ingredient.nutrition!.sugar,
+                        sodium: ingredient.nutrition!.sodium,
+                      )
+                      : null,
+              barcode: ingredient.barcode,
+            );
+          }).toList(),
+      nutrition: NutritionInfo(
+        calories: widget.dish.totalNutrition.calories,
+        protein: widget.dish.totalNutrition.protein,
+        carbs: widget.dish.totalNutrition.carbs,
+        fat: widget.dish.totalNutrition.fat,
+        fiber: widget.dish.totalNutrition.fiber,
+        sugar: widget.dish.totalNutrition.sugar,
+        sodium: widget.dish.totalNutrition.sodium,
+      ),
+      createdAt: widget.dish.createdAt,
+      updatedAt: widget.dish.updatedAt,
+      isFavorite: widget.dish.isFavorite,
+      category: widget.dish.mealType?.toJsonValue(),
+    );
+    return DishCreateScreenAdvanced(
+      heroTag: "dish_create_fab_suggestion_${widget.dish.id}",
+      dish: dishData,
+      onDishCreated: (createdDish) {
+        // The dish was successfully created/updated
+        // The navigation result will handle the main UI updates
+        debugPrint('Dish created/updated: ${createdDish.name}');
+      },
+    );
   }
 
   Widget _buildNutritionBar(
@@ -364,6 +462,79 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
     );
   }
 
+  /// Get contextual button text based on dish state
+  String _getButtonText(AppLocalizations l10n, bool isSpecialProfile) {
+    if (widget.isReferenced) {
+      // For referenced dishes
+      if (_dishExists) {
+        return isSpecialProfile
+            ? '${l10n.details} ${_nutritionProfile.emoji}'
+            : 'Edit Dish';
+      } else {
+        return 'Create Missing Dish';
+      }
+    } else {
+      // For new dishes
+      if (_dishExists) {
+        return isSpecialProfile
+            ? '${l10n.details} ${_nutritionProfile.emoji}'
+            : 'Edit Dish';
+      } else {
+        return 'Create Dish';
+      }
+    }
+  }
+
+  /// Get contextual button icon based on dish state
+  IconData _getButtonIcon(bool isSpecialProfile) {
+    if (isSpecialProfile) {
+      return Icons.analytics;
+    }
+
+    if (widget.isReferenced) {
+      // For referenced dishes
+      if (_dishExists) {
+        return Icons.edit;
+      } else {
+        return Icons.add_circle_outline;
+      }
+    } else {
+      // For new dishes
+      if (_dishExists) {
+        return Icons.edit;
+      } else {
+        return Icons.add;
+      }
+    }
+  }
+
+  /// Get tooltip text for the button based on current state
+  String _getButtonTooltip(AppLocalizations l10n) {
+    if (widget.isReferenced) {
+      if (_dishExists) {
+        return 'Edit this existing dish';
+      } else {
+        return 'This dish is referenced but not found in your database. Tap to create it.';
+      }
+    } else {
+      if (_dishExists) {
+        return 'A dish with this name already exists. Tap to edit it.';
+      } else {
+        return 'Create this new dish and add it to your collection';
+      }
+    }
+  }
+
+  /// Get visual state color for the card border
+  Color _getStateColor(ColorScheme colorScheme) {
+    if (widget.isReferenced && !_dishExists) {
+      return Colors.orange; // Warning color for missing referenced dishes
+    } else if (!widget.isReferenced && _dishExists) {
+      return Colors.blue; // Info color for duplicate names
+    }
+    return colorScheme.outline; // Default color
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -428,7 +599,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                     color:
                         isSpecialProfile
                             ? profileColor.withOpacity(0.4)
-                            : colorScheme.outline.withOpacity(0.2),
+                            : _getStateColor(colorScheme).withOpacity(0.2),
                     width: isSpecialProfile ? 2 : 1,
                   ),
                   boxShadow: [
@@ -587,6 +758,49 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                                   isDark,
                                 ),
                       ),
+
+                      // Status badge for dish state
+                      if (widget.isReferenced && !_dishExists) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              size: 14,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Referenced dish not found',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else if (!widget.isReferenced && _dishExists) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 14,
+                              color: Colors.blue,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Similar dish exists - tap to edit',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+
+                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
@@ -703,8 +917,8 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
               const SizedBox(width: 6),
               Text(
                 isSpecialProfile
-                    ? '${l10n.addToMeals} ${_nutritionProfile.emoji}'
-                    : l10n.addToMeals,
+                    ? '${l10n.logDish} ${_nutritionProfile.emoji}'
+                    : l10n.logDish,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onPrimary,
@@ -752,44 +966,45 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       ),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: _loading ? null : _handleInspect,
-          child:
-              _loading
-                  ? const Center(
-                    child: SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                  : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isSpecialProfile ? Icons.analytics : Icons.search,
-                        size: 18,
-                        color:
-                            isSpecialProfile
-                                ? profileColor
-                                : colorScheme.onPrimaryContainer,
+        child: Tooltip(
+          message: _getButtonTooltip(l10n),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: _loading ? null : _handleInspect,
+            child:
+                _loading
+                    ? const Center(
+                      child: SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        isSpecialProfile
-                            ? '${l10n.details} ${_nutritionProfile.emoji}'
-                            : l10n.details,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                    )
+                    : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _getButtonIcon(isSpecialProfile),
+                          size: 18,
                           color:
                               isSpecialProfile
                                   ? profileColor
                                   : colorScheme.onPrimaryContainer,
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _getButtonText(l10n, isSpecialProfile),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color:
+                                isSpecialProfile
+                                    ? profileColor
+                                    : colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+          ),
         ),
       ),
     );

@@ -12,12 +12,14 @@ class DishCreateScreenAdvanced extends StatefulWidget {
   final Dish? dish;
   final bool isFullScreen;
   final Function(Dish)? onDishCreated;
+  final String? heroTag;
 
   const DishCreateScreenAdvanced({
     super.key,
     this.dish,
     this.isFullScreen = false,
     this.onDishCreated,
+    this.heroTag,
   });
 
   @override
@@ -95,6 +97,18 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
   }
 
+  /// Determines if the dish should be updated (exists in DB) or created as new
+  Future<bool> _shouldUpdateDish(String dishId) async {
+    try {
+      final existingDish = await _dishService.getDishById(dishId);
+      return existingDish != null;
+    } catch (e) {
+      debugPrint('🍽️ Error checking dish existence: $e');
+      // If we can't check, assume it's a new dish to be safe
+      return false;
+    }
+  }
+
   Future<void> _saveDish() async {
     if (_nameController.text.trim().isEmpty) {
       _showErrorSnackBar(AppLocalizations.of(context)!.pleaseEnterDishName);
@@ -127,26 +141,40 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         isFavorite: _isFavorite,
         category: _selectedCategory,
       );
-      if (widget.dish != null) {
+      debugPrint('🍽️ Saving dish: ${dishData.name} with ID: ${dishData.id}');
+      debugPrint('🍽️ Dish has ${dishData.ingredients.length} ingredients');
+      debugPrint(
+        '🍽️ Dish nutrition: ${dishData.nutrition.calories} kcal',
+      ); // Determine if this is an update or create operation
+      final isUpdate = await _shouldUpdateDish(dishData.id);
+
+      if (isUpdate) {
+        debugPrint('🍽️ Updating existing dish...');
         await _dishService.updateDish(dishData);
         _showSuccessSnackBar(
           AppLocalizations.of(context)!.dishUpdatedSuccessfully,
         );
       } else {
+        debugPrint('🍽️ Creating new dish...');
         await _dishService.saveDish(dishData);
         _showSuccessSnackBar(
           AppLocalizations.of(context)!.dishCreatedSuccessfully,
         );
       }
 
+      debugPrint('🍽️ Dish saved successfully! Calling callback...');
       // Call the callback if provided
       widget.onDishCreated?.call(dishData);
 
       if (mounted) {
+        debugPrint('🍽️ Navigating back with success result...');
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      _showErrorSnackBar(AppLocalizations.of(context)!.errorSavingDish);
+      debugPrint('❌ Error saving dish: $e');
+      _showErrorSnackBar(
+        '${AppLocalizations.of(context)!.errorSavingDish}: $e',
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -533,10 +561,6 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   value: 'snack',
                   child: Text(AppLocalizations.of(context)!.snack),
                 ),
-                DropdownMenuItem(
-                  value: 'dessert',
-                  child: Text(AppLocalizations.of(context)!.dessert),
-                ),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -633,7 +657,45 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       ),
                     ),
                     title: Text(ingredient.name),
-                    subtitle: Text('${ingredient.amount} ${ingredient.unit}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${ingredient.amount} ${ingredient.unit}'),
+                        if (ingredient.nutrition != null) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                'P: ${ingredient.nutrition!.protein.toStringAsFixed(1)}g',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'C: ${ingredient.nutrition!.carbs.toStringAsFixed(1)}g',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.amber.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'F: ${ingredient.nutrition!.fat.toStringAsFixed(1)}g',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.teal.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
                     trailing: PopupMenuButton(
                       itemBuilder:
                           (context) => [
@@ -768,6 +830,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           _isLoading
               ? null
               : FloatingActionButton.extended(
+                heroTag:
+                    widget.heroTag ??
+                    "dish_create_fab_${DateTime.now().millisecondsSinceEpoch}",
                 onPressed: _saveDish,
                 icon: const Icon(Icons.save),
                 label: Text(
