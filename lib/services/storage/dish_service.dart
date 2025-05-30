@@ -388,4 +388,113 @@ class DishService {
       dishMaps.map((dishMap) => _getDishWithRelations(dishMap)),
     );
   }
+
+  // Meal logging methods
+  Future<String> logDish({
+    required String dishId,
+    required DateTime loggedAt,
+    required String mealType,
+    required double servingSize,
+  }) async {
+    final db = await _databaseService.database;
+
+    // Get the dish to calculate nutrition values
+    final dish = await getDishById(dishId);
+    if (dish == null) {
+      throw Exception('Dish not found');
+    }
+
+    // Calculate nutrition values based on serving size
+    final calories = dish.nutrition.calories * servingSize;
+    final protein = dish.nutrition.protein * servingSize;
+    final carbs = dish.nutrition.carbs * servingSize;
+    final fat = dish.nutrition.fat * servingSize;
+    final fiber = dish.nutrition.fiber * servingSize;
+
+    final logId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    await db.insert('dish_logs', {
+      'id': logId,
+      'dish_id': dishId,
+      'logged_at': loggedAt.toIso8601String(),
+      'meal_type': mealType,
+      'serving_size': servingSize,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'fiber': fiber,
+    });
+
+    return logId;
+  }
+
+  Future<List<DishLog>> getDishLogsForDate(DateTime date) async {
+    final db = await _databaseService.database;
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final List<Map<String, dynamic>> logMaps = await db.query(
+      'dish_logs',
+      where: 'logged_at >= ? AND logged_at < ?',
+      whereArgs: [startOfDay.toIso8601String(), endOfDay.toIso8601String()],
+      orderBy: 'logged_at ASC',
+    );
+
+    return logMaps.map((map) => DishLog.fromJson(map)).toList();
+  }
+
+  Future<Dish?> getDish(String id) => getDishById(id);
+
+  Future<List<int>> getDatesWithLogsInMonth(int year, int month) async {
+    final db = await _databaseService.database;
+    final startOfMonth = DateTime(year, month, 1);
+    final endOfMonth = DateTime(year, month + 1, 1);
+
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
+      SELECT DISTINCT strftime('%d', logged_at) as day
+      FROM dish_logs
+      WHERE logged_at >= ? AND logged_at < ?
+      ORDER BY day
+      ''',
+      [startOfMonth.toIso8601String(), endOfMonth.toIso8601String()],
+    );
+
+    return result.map((row) => int.parse(row['day'] as String)).toList();
+  }
+
+  Future<DailyMacroSummary> getMacroSummaryForDate(DateTime date) async {
+    final db = await _databaseService.database;
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
+      SELECT 
+        COALESCE(SUM(calories), 0) as total_calories,
+        COALESCE(SUM(protein), 0) as total_protein,
+        COALESCE(SUM(carbs), 0) as total_carbs,
+        COALESCE(SUM(fat), 0) as total_fat,
+        COALESCE(SUM(fiber), 0) as total_fiber
+      FROM dish_logs
+      WHERE logged_at >= ? AND logged_at < ?
+      ''',
+      [startOfDay.toIso8601String(), endOfDay.toIso8601String()],
+    );
+
+    final row = result.first;
+    return DailyMacroSummary(
+      calories: (row['total_calories'] as num).toDouble(),
+      protein: (row['total_protein'] as num).toDouble(),
+      carbs: (row['total_carbs'] as num).toDouble(),
+      fat: (row['total_fat'] as num).toDouble(),
+      fiber: (row['total_fiber'] as num).toDouble(),
+    );
+  }
+
+  Future<void> deleteDishLog(String logId) async {
+    final db = await _databaseService.database;
+    await db.delete('dish_logs', where: 'id = ?', whereArgs: [logId]);
+  }
 }

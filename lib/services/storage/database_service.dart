@@ -8,7 +8,7 @@ import '../../models/supplement.dart';
 
 class DatabaseService {
   static const String _databaseName = 'platepal.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
 
   // Private constructor for singleton pattern
   DatabaseService._();
@@ -192,9 +192,7 @@ class DatabaseService {
         sodium REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
       )
-    ''');
-
-    // Meal logs table
+    '''); // Meal logs table
     await db.execute('''
       CREATE TABLE meal_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -204,6 +202,23 @@ class DatabaseService {
         meal_type TEXT NOT NULL,
         logged_at TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES user_profiles (id),
+        FOREIGN KEY (dish_id) REFERENCES dishes (id)
+      )
+    ''');
+
+    // Dish logs table for calendar tracking
+    await db.execute('''
+      CREATE TABLE dish_logs (
+        id TEXT PRIMARY KEY,
+        dish_id TEXT NOT NULL,
+        logged_at TEXT NOT NULL,
+        meal_type TEXT NOT NULL,
+        serving_size REAL NOT NULL,
+        calories REAL NOT NULL,
+        protein REAL NOT NULL,
+        carbs REAL NOT NULL,
+        fat REAL NOT NULL,
+        fiber REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (dish_id) REFERENCES dishes (id)
       )
     ''');
@@ -221,11 +236,44 @@ class DatabaseService {
     await db.execute(
       'CREATE INDEX idx_meal_logs_logged_at ON meal_logs (logged_at)',
     );
+    await db.execute(
+      'CREATE INDEX idx_dish_logs_logged_at ON dish_logs (logged_at)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_dish_logs_dish_id ON dish_logs (dish_id)',
+    );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // Handle database migrations here
+    if (oldVersion < 2) {
+      // Add dish_logs table
+      await db.execute('''
+        CREATE TABLE dish_logs (
+          id TEXT PRIMARY KEY,
+          dish_id TEXT NOT NULL,
+          logged_at TEXT NOT NULL,
+          meal_type TEXT NOT NULL,
+          serving_size REAL NOT NULL,
+          calories REAL NOT NULL,
+          protein REAL NOT NULL,
+          carbs REAL NOT NULL,
+          fat REAL NOT NULL,
+          fiber REAL NOT NULL DEFAULT 0,
+          FOREIGN KEY (dish_id) REFERENCES dishes (id)
+        )
+      ''');
+
+      // Add indexes for dish_logs
+      await db.execute(
+        'CREATE INDEX idx_dish_logs_logged_at ON dish_logs (logged_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_dish_logs_dish_id ON dish_logs (dish_id)',
+      );
+    }
   }
+
   Future<void> close() async {
     final db = await instance.database;
     db.close();
