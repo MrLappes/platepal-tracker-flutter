@@ -27,9 +27,7 @@ class UserProfileService {
       whereArgs: [userId],
       orderBy: 'created_at DESC',
       limit: 1,
-    );
-
-    // Get the dietary preferences
+    ); // Get the dietary preferences
     final List<Map<String, dynamic>> prefMaps = await db.query(
       'dietary_preferences',
       where: 'user_id = ?',
@@ -38,49 +36,12 @@ class UserProfileService {
       limit: 1,
     );
 
-    if (goalsMaps.isEmpty || prefMaps.isEmpty) {
+    // If there are no fitness goals, return null (essential data missing)
+    if (goalsMaps.isEmpty) {
       return null;
     }
 
-    final int prefId = prefMaps.first['id'] as int;
-
-    // Get allergies
-    final List<Map<String, dynamic>> allergiesMaps = await db.query(
-      'allergies',
-      where: 'preference_id = ?',
-      whereArgs: [prefId],
-    );
-    final List<String> allergies =
-        allergiesMaps.map((map) => map['allergy'] as String).toList();
-
-    // Get dislikes
-    final List<Map<String, dynamic>> dislikesMaps = await db.query(
-      'dislikes',
-      where: 'preference_id = ?',
-      whereArgs: [prefId],
-    );
-    final List<String> dislikes =
-        dislikesMaps.map((map) => map['dislike'] as String).toList();
-
-    // Get cuisine preferences
-    final List<Map<String, dynamic>> cuisineMaps = await db.query(
-      'cuisine_preferences',
-      where: 'preference_id = ?',
-      whereArgs: [prefId],
-    );
-    final List<String> cuisinePreferences =
-        cuisineMaps.map((map) => map['cuisine'] as String).toList();
-
-    // Construct the dietary preferences
-    final DietaryPreferences preferences = DietaryPreferences(
-      allergies: allergies,
-      dislikes: dislikes,
-      dietType: prefMaps.first['diet_type'] as String,
-      preferOrganic: (prefMaps.first['prefer_organic'] as int) == 1,
-      cuisinePreferences: cuisinePreferences,
-    );
-
-    // Construct the fitness goals
+    // Construct fitness goals (always required)
     final FitnessGoals goals = FitnessGoals(
       goal: goalsMaps.first['goal'] as String,
       targetWeight: goalsMaps.first['target_weight'] as double,
@@ -89,6 +50,47 @@ class UserProfileService {
       targetCarbs: goalsMaps.first['target_carbs'] as double,
       targetFat: goalsMaps.first['target_fat'] as double,
     );
+
+    // Construct dietary preferences (optional)
+    DietaryPreferences? preferences;
+    if (prefMaps.isNotEmpty) {
+      final int prefId = prefMaps.first['id'] as int;
+
+      // Get allergies
+      final List<Map<String, dynamic>> allergiesMaps = await db.query(
+        'allergies',
+        where: 'preference_id = ?',
+        whereArgs: [prefId],
+      );
+      final List<String> allergies =
+          allergiesMaps.map((map) => map['allergy'] as String).toList();
+
+      // Get dislikes
+      final List<Map<String, dynamic>> dislikesMaps = await db.query(
+        'dislikes',
+        where: 'preference_id = ?',
+        whereArgs: [prefId],
+      );
+      final List<String> dislikes =
+          dislikesMaps.map((map) => map['dislike'] as String).toList();
+
+      // Get cuisine preferences
+      final List<Map<String, dynamic>> cuisineMaps = await db.query(
+        'cuisine_preferences',
+        where: 'preference_id = ?',
+        whereArgs: [prefId],
+      );
+      final List<String> cuisinePreferences =
+          cuisineMaps.map((map) => map['cuisine'] as String).toList();
+
+      preferences = DietaryPreferences(
+        allergies: allergies,
+        dislikes: dislikes,
+        dietType: prefMaps.first['diet_type'] as String,
+        preferOrganic: (prefMaps.first['prefer_organic'] as int) == 1,
+        cuisinePreferences: cuisinePreferences,
+      );
+    }
 
     // Construct and return the full user profile
     return UserProfile(
@@ -137,7 +139,7 @@ class UserProfileService {
       });
 
       // Save fitness goals
-      final goalsId = await txn.insert('fitness_goals', {
+      await txn.insert('fitness_goals', {
         'user_id': userProfile.id,
         'goal': userProfile.goals.goal,
         'target_weight': userProfile.goals.targetWeight,
@@ -149,37 +151,39 @@ class UserProfileService {
         'updated_at': DateTime.now().toIso8601String(),
       });
 
-      // Save dietary preferences
-      final prefsId = await txn.insert('dietary_preferences', {
-        'user_id': userProfile.id,
-        'diet_type': userProfile.preferences.dietType,
-        'prefer_organic': userProfile.preferences.preferOrganic ? 1 : 0,
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      });
-
-      // Save allergies
-      for (final allergy in userProfile.preferences.allergies) {
-        await txn.insert('allergies', {
-          'preference_id': prefsId,
-          'allergy': allergy,
+      // Save dietary preferences (only if they exist)
+      if (userProfile.preferences != null) {
+        final prefsId = await txn.insert('dietary_preferences', {
+          'user_id': userProfile.id,
+          'diet_type': userProfile.preferences!.dietType,
+          'prefer_organic': userProfile.preferences!.preferOrganic ? 1 : 0,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
         });
-      }
 
-      // Save dislikes
-      for (final dislike in userProfile.preferences.dislikes) {
-        await txn.insert('dislikes', {
-          'preference_id': prefsId,
-          'dislike': dislike,
-        });
-      }
+        // Save allergies
+        for (final allergy in userProfile.preferences!.allergies) {
+          await txn.insert('allergies', {
+            'preference_id': prefsId,
+            'allergy': allergy,
+          });
+        }
 
-      // Save cuisine preferences
-      for (final cuisine in userProfile.preferences.cuisinePreferences) {
-        await txn.insert('cuisine_preferences', {
-          'preference_id': prefsId,
-          'cuisine': cuisine,
-        });
+        // Save dislikes
+        for (final dislike in userProfile.preferences!.dislikes) {
+          await txn.insert('dislikes', {
+            'preference_id': prefsId,
+            'dislike': dislike,
+          });
+        }
+
+        // Save cuisine preferences
+        for (final cuisine in userProfile.preferences!.cuisinePreferences) {
+          await txn.insert('cuisine_preferences', {
+            'preference_id': prefsId,
+            'cuisine': cuisine,
+          });
+        }
       }
     });
 

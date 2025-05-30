@@ -8,11 +8,10 @@ class UserProfile {
   final double weight; // in kg
   final String activityLevel;
   final FitnessGoals goals;
-  final DietaryPreferences preferences;
+  final DietaryPreferences? preferences;
   final String preferredUnit; // metric or imperial
   final DateTime createdAt;
   final DateTime updatedAt;
-
   const UserProfile({
     required this.id,
     required this.name,
@@ -23,12 +22,11 @@ class UserProfile {
     required this.weight,
     required this.activityLevel,
     required this.goals,
-    required this.preferences,
+    this.preferences,
     this.preferredUnit = 'metric',
     required this.createdAt,
     required this.updatedAt,
   });
-
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       id: json['id'] as String,
@@ -40,15 +38,17 @@ class UserProfile {
       weight: (json['weight'] as num).toDouble(),
       activityLevel: json['activityLevel'] as String,
       goals: FitnessGoals.fromJson(json['goals'] as Map<String, dynamic>),
-      preferences: DietaryPreferences.fromJson(
-        json['preferences'] as Map<String, dynamic>,
-      ),
+      preferences:
+          json['preferences'] != null
+              ? DietaryPreferences.fromJson(
+                json['preferences'] as Map<String, dynamic>,
+              )
+              : null,
       preferredUnit: json['preferredUnit'] as String? ?? 'metric',
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -60,7 +60,7 @@ class UserProfile {
       'weight': weight,
       'activityLevel': activityLevel,
       'goals': goals.toJson(),
-      'preferences': preferences.toJson(),
+      'preferences': preferences?.toJson(),
       'preferredUnit': preferredUnit,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
