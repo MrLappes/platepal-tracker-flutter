@@ -206,7 +206,28 @@ class DishProcessingStep extends AgentStep {
   ) {
     try {
       final analyzedData = AnalyzedDishData.fromJson(dishData);
-      return analyzedData.toProcessedDish(imageUrl: uploadedImageUri);
+
+      // Calculate nutrition from ingredients instead of using estimated nutrition
+      final calculatedNutrition = _calculateNutritionFromIngredients(
+        analyzedData.ingredients,
+      );
+
+      final now = DateTime.now();
+      return ProcessedDish(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: analyzedData.dishName,
+        description: analyzedData.description,
+        ingredients: analyzedData.ingredients,
+        totalNutrition: calculatedNutrition, // Use calculated nutrition
+        servings: analyzedData.estimatedServings,
+        imageUrl: uploadedImageUri,
+        tags: analyzedData.detectedTags,
+        mealType: analyzedData.suggestedMealType,
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false,
+        cookingInstructions: analyzedData.preparationMethod,
+      );
     } catch (error) {
       debugPrint('❌ Error processing analyzed dish data: $error');
       return null;
@@ -237,18 +258,8 @@ class DishProcessingStep extends AgentStep {
         if (ingredient != null) {
           ingredients.add(ingredient);
         }
-      }
-
-      // Parse nutrition
-      final nutrition = BasicNutrition(
-        calories: _parseDouble(dishData['calories']) ?? 0.0,
-        protein: _parseDouble(dishData['protein']) ?? 0.0,
-        carbs: _parseDouble(dishData['carbs']) ?? 0.0,
-        fat: _parseDouble(dishData['fat']) ?? 0.0,
-        fiber: _parseDouble(dishData['fiber']) ?? 0.0,
-        sugar: _parseDouble(dishData['sugar']) ?? 0.0,
-        sodium: _parseDouble(dishData['sodium']) ?? 0.0,
-      );
+      } // Calculate nutrition from ingredients instead of using AI provided values
+      final nutrition = _calculateNutritionFromIngredients(ingredients);
 
       // Parse meal type
       MealType? mealType;
@@ -316,16 +327,60 @@ class DishProcessingStep extends AgentStep {
 
       // Parse nutrition if available
       BasicNutrition? nutrition;
+
+      // Handle existing nutrition object format
       if (ingredientData.containsKey('nutrition')) {
         nutrition = BasicNutrition.fromJson(
           ingredientData['nutrition'] as Map<String, dynamic>,
         );
-      } else if (ingredientData.containsKey('calories')) {
+      }
+      // Handle per-100g nutrition format from AI (this is the main format we expect)
+      else if (ingredientData.containsKey('caloriesPer100') ||
+          ingredientData.containsKey('proteinPer100') ||
+          ingredientData.containsKey('carbsPer100') ||
+          ingredientData.containsKey('fatPer100')) {
+        // Get the ingredient amount in grams
+        final amountInGrams = _getAmountInGrams(
+          amount ?? 1.0,
+          unit ?? 'g',
+          ingredientData['inGrams'],
+        );
+
+        // Calculate actual nutrition based on amount
+        final per100Calories =
+            _parseDouble(ingredientData['caloriesPer100']) ?? 0.0;
+        final per100Protein =
+            _parseDouble(ingredientData['proteinPer100']) ?? 0.0;
+        final per100Carbs = _parseDouble(ingredientData['carbsPer100']) ?? 0.0;
+        final per100Fat = _parseDouble(ingredientData['fatPer100']) ?? 0.0;
+        final per100Fiber = _parseDouble(ingredientData['fiberPer100']) ?? 0.0;
+        final per100Sugar = _parseDouble(ingredientData['sugarPer100']) ?? 0.0;
+        final per100Sodium =
+            _parseDouble(ingredientData['sodiumPer100']) ?? 0.0;
+
+        // Calculate actual nutrition for this ingredient's quantity
+        final multiplier = amountInGrams / 100.0;
+
+        nutrition = BasicNutrition(
+          calories: per100Calories * multiplier,
+          protein: per100Protein * multiplier,
+          carbs: per100Carbs * multiplier,
+          fat: per100Fat * multiplier,
+          fiber: per100Fiber * multiplier,
+          sugar: per100Sugar * multiplier,
+          sodium: per100Sodium * multiplier,
+        );
+      }
+      // Handle direct nutrition values (fallback)
+      else if (ingredientData.containsKey('calories')) {
         nutrition = BasicNutrition(
           calories: _parseDouble(ingredientData['calories']) ?? 0.0,
           protein: _parseDouble(ingredientData['protein']) ?? 0.0,
           carbs: _parseDouble(ingredientData['carbs']) ?? 0.0,
           fat: _parseDouble(ingredientData['fat']) ?? 0.0,
+          fiber: _parseDouble(ingredientData['fiber']) ?? 0.0,
+          sugar: _parseDouble(ingredientData['sugar']) ?? 0.0,
+          sodium: _parseDouble(ingredientData['sodium']) ?? 0.0,
         );
       }
 
@@ -369,5 +424,110 @@ class DishProcessingStep extends AgentStep {
   /// Generates a unique ingredient ID
   String _generateIngredientId() {
     return 'ingredient_${DateTime.now().millisecondsSinceEpoch}_${(1000 + (999 * DateTime.now().microsecond / 1000000)).round()}';
+  }
+
+  /// Calculates total nutrition from all ingredients
+  BasicNutrition _calculateNutritionFromIngredients(
+    List<FoodIngredient> ingredients,
+  ) {
+    double totalCalories = 0.0;
+    double totalProtein = 0.0;
+    double totalCarbs = 0.0;
+    double totalFat = 0.0;
+    double totalFiber = 0.0;
+    double totalSugar = 0.0;
+    double totalSodium = 0.0;
+
+    for (final ingredient in ingredients) {
+      if (ingredient.nutrition != null) {
+        totalCalories += ingredient.nutrition!.calories;
+        totalProtein += ingredient.nutrition!.protein;
+        totalCarbs += ingredient.nutrition!.carbs;
+        totalFat += ingredient.nutrition!.fat;
+        totalFiber += ingredient.nutrition!.fiber;
+        totalSugar += ingredient.nutrition!.sugar;
+        totalSodium += ingredient.nutrition!.sodium;
+      }
+    }
+
+    debugPrint(
+      '📊 Calculated nutrition from ${ingredients.length} ingredients:',
+    );
+    debugPrint('   Calories: ${totalCalories.toStringAsFixed(1)}');
+    debugPrint('   Protein: ${totalProtein.toStringAsFixed(1)}g');
+    debugPrint('   Carbs: ${totalCarbs.toStringAsFixed(1)}g');
+    debugPrint('   Fat: ${totalFat.toStringAsFixed(1)}g');
+
+    return BasicNutrition(
+      calories: totalCalories,
+      protein: totalProtein,
+      carbs: totalCarbs,
+      fat: totalFat,
+      fiber: totalFiber,
+      sugar: totalSugar,
+      sodium: totalSodium,
+    );
+  }
+
+  /// Converts ingredient amount to grams for nutrition calculation
+  double _getAmountInGrams(double amount, String unit, dynamic inGramsValue) {
+    // If inGrams is explicitly provided, use it
+    if (inGramsValue != null) {
+      final inGrams = _parseDouble(inGramsValue);
+      if (inGrams != null && inGrams > 0) {
+        return inGrams;
+      }
+    }
+
+    // Convert common units to grams
+    switch (unit.toLowerCase()) {
+      case 'g':
+      case 'gram':
+      case 'grams':
+        return amount;
+      case 'kg':
+      case 'kilogram':
+      case 'kilograms':
+        return amount * 1000;
+      case 'ml':
+      case 'milliliter':
+      case 'milliliters':
+        // Assume density of water (1ml = 1g) for liquids
+        return amount;
+      case 'l':
+      case 'liter':
+      case 'liters':
+        return amount * 1000;
+      case 'oz':
+      case 'ounce':
+      case 'ounces':
+        return amount * 28.35; // 1 oz ≈ 28.35g
+      case 'lb':
+      case 'pound':
+      case 'pounds':
+        return amount * 453.592; // 1 lb ≈ 453.592g
+      case 'cup':
+      case 'cups':
+        return amount *
+            240; // 1 cup ≈ 240g (varies by ingredient, but good average)
+      case 'tbsp':
+      case 'tablespoon':
+      case 'tablespoons':
+        return amount * 15; // 1 tbsp ≈ 15g
+      case 'tsp':
+      case 'teaspoon':
+      case 'teaspoons':
+        return amount * 5; // 1 tsp ≈ 5g
+      case 'piece':
+      case 'pieces':
+      case 'item':
+      case 'items':
+        // For pieces, assume a reasonable weight (this is imprecise but better than nothing)
+        return amount * 100; // Assume 100g per piece as default
+      default:
+        // Unknown unit, assume grams
+        debugPrint('⚠️ Unknown unit "$unit", assuming grams');
+        return amount;
+    }
   }
 }

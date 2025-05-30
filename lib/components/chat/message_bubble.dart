@@ -497,13 +497,12 @@ class MessageBubble extends StatelessWidget {
       try {
         // Convert the dish data back to ProcessedDish
         final dish = ProcessedDish.fromJson(dishData as Map<String, dynamic>);
-
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: DishSuggestionCard(
             dish: dish,
-            onAddToMeals: () => _handleAddToMeals(context, dish),
-            onViewDetails: () => _handleViewDishDetails(context, dish),
+            onLog: (dish) => _handleAddToMeals(context, dish),
+            onInspect: (dish) => _handleViewDishDetailsAsync(context, dish),
           ),
         );
       } catch (e) {
@@ -536,10 +535,13 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  /// Handle viewing dish details
-  void _handleViewDishDetails(BuildContext context, ProcessedDish dish) {
+  /// Handle viewing dish details (async version for DishSuggestionCard)
+  Future<ProcessedDish?> _handleViewDishDetailsAsync(
+    BuildContext context,
+    ProcessedDish dish,
+  ) async {
     final localizations = AppLocalizations.of(context)!;
-    showDialog(
+    return await showDialog<ProcessedDish?>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -578,6 +580,10 @@ class MessageBubble extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(localizations.close),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(dish),
+                child: const Text('Select'),
               ),
             ],
           ),
