@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
-import 'screens/nutrition_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/chat_screen.dart';
@@ -82,10 +81,6 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const MainNavigationScreen(),
     ),
     GoRoute(path: '/meals', builder: (context, state) => const MealsScreen()),
-    GoRoute(
-      path: '/nutrition',
-      builder: (context, state) => const NutritionScreen(),
-    ),
     GoRoute(path: '/menu', builder: (context, state) => const MenuScreen()),
     GoRoute(
       path: '/calendar',
