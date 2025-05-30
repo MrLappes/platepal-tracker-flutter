@@ -22,6 +22,29 @@ For existing dishes from the user's collection (these MUST have been provided to
   "suggestedServingSize": 1.0  // Always suggest a portion size
 }
 
+When creating new dishes, include these fields:
+{
+  "name": "Dish Name",
+  "description": "Brief description",
+  "ingredients": [  // FOCUS ON ACCURATE INGREDIENTS - the app will calculate totals
+    {
+      "name": "Ingredient name",
+      "quantity": 100,
+      "unit": "g",  // Use g, ml, oz, tbsp, tsp, cup, or piece
+      "inGrams": 100,  // Optional field for conversion, Use especially when unit is not g or ml
+      "caloriesPer100": 150,  // BE VERY ACCURATE with these nutritional values per 100g
+      "proteinPer100": 20,
+      "carbsPer100": 5,
+      "fatPer100": 8,
+      "fiberPer100": 0,
+      "userIngredientId": "ingredient-id",  // ONLY include this if it's a user-provided ingredient, you will get this ID from the user, if you don't have it, don't include this field
+      "useAsProvided": true  // Set to true to use the user's values, false to override with your values. Only use this if you have a user-provided ingredient ID
+    }
+  ],
+  "suggestedMealType": "breakfast|lunch|dinner|snack",  // ALWAYS include this, there are no other types, desert is also a snack
+  "suggestedServingSize": 1.0  // ALWAYS include serving size as a decimal (like 0.5, 1, or 2)
+}
+
 For user-provided ingredients:
 - The user may have scanned or searched for specific products/ingredients before their message
 - These ingredients will have a unique ID and precise nutritional information

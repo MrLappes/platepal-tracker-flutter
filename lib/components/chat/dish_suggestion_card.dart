@@ -1,299 +1,381 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/dish_models.dart';
-import '../../models/meal_type.dart';
+import '../../services/storage/dish_service.dart';
 
-class DishSuggestionCard extends StatelessWidget {
+class DishSuggestionCard extends StatefulWidget {
   final ProcessedDish dish;
-  final VoidCallback? onAddToMeals;
-  final VoidCallback? onViewDetails;
+  final bool isReferenced;
+  final VoidCallback? onPress;
+  final Function(ProcessedDish) onLog;
+  final Future<ProcessedDish?> Function(ProcessedDish) onInspect;
 
   const DishSuggestionCard({
     super.key,
     required this.dish,
-    this.onAddToMeals,
-    this.onViewDetails,
+    this.isReferenced = false,
+    this.onPress,
+    required this.onLog,
+    required this.onInspect,
   });
+
+  @override
+  State<DishSuggestionCard> createState() => _DishSuggestionCardState();
+}
+
+class _DishSuggestionCardState extends State<DishSuggestionCard>
+    with SingleTickerProviderStateMixin {
+  final DishService _dishService = DishService();
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+
+  bool _loading = false;
+  bool _dishExists = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize animations
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    // Start animation
+    _animationController.forward();
+
+    // Check if dish exists
+    _checkDishExists();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkDishExists() async {
+    if (widget.isReferenced) {
+      setState(() => _dishExists = true);
+      return;
+    }
+
+    try {
+      final existingDishes = await _dishService.getAllDishes();
+      final exists = existingDishes.any(
+        (existingDish) =>
+            existingDish.name.toLowerCase() == widget.dish.name.toLowerCase(),
+      );
+      setState(() => _dishExists = exists);
+    } catch (error) {
+      debugPrint('Error checking if dish exists: $error');
+    }
+  }
+
+  Future<void> _handleInspect() async {
+    setState(() => _loading = true);
+    try {
+      final result = await widget.onInspect(widget.dish);
+      if (result != null) {
+        setState(() => _dishExists = true);
+      }
+    } catch (error) {
+      debugPrint('Error inspecting dish: $error');
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  Widget _buildNutritionBar(
+    String label,
+    double value,
+    double maxValue,
+    Color color,
+  ) {
+    final percentage = (value / maxValue).clamp(0.0, 1.0);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 12,
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: percentage,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 28,
+            child: Text(
+              '${value.round()}g',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      margin: const EdgeInsets.only(top: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.primary.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with dish name and meal type
-            Row(
-              children: [
-                Icon(
-                  Icons.restaurant_menu,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    dish.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-                if (dish.mealType != null) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getMealTypeColor(dish.mealType!).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: _getMealTypeColor(
-                          dish.mealType!,
-                        ).withOpacity(0.3),
-                      ),
-                    ),
-                    child: Text(
-                      _getMealTypeDisplayName(dish.mealType!, localizations),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: _getMealTypeColor(dish.mealType!),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-
-            // Description if available
-            if (dish.description != null && dish.description!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                dish.description!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.8),
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-
-            const SizedBox(height: 12),
-
-            // Nutrition information
-            Container(
-              padding: const EdgeInsets.all(12),
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(
-                  0.5,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors:
+                      isDark
+                          ? [
+                            colorScheme.surfaceContainer,
+                            colorScheme.surfaceContainerHighest,
+                          ]
+                          : [colorScheme.surface, colorScheme.surfaceContainer],
                 ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        localizations.nutritionAnalysis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        '${dish.servings.toStringAsFixed(1)} ${dish.servings == 1 ? 'serving' : 'servings'}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _NutrientChip(
-                          label: localizations.calories,
-                          value:
-                              '${dish.totalNutrition.calories.toStringAsFixed(0)}',
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _NutrientChip(
-                          label: localizations.protein,
-                          value:
-                              '${dish.totalNutrition.protein.toStringAsFixed(1)}g',
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _NutrientChip(
-                          label: localizations.carbs,
-                          value:
-                              '${dish.totalNutrition.carbs.toStringAsFixed(1)}g',
-                          color: Colors.orange,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _NutrientChip(
-                          label: localizations.fat,
-                          value:
-                              '${dish.totalNutrition.fat.toStringAsFixed(1)}g',
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: colorScheme.outline.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-            ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Dish title and calories
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.dish.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${widget.dish.totalNutrition.calories.round()} kcal',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
-            // Ingredients preview
-            if (dish.ingredients.isNotEmpty) ...[
-              const SizedBox(height: 12),
+                    const SizedBox(height: 12), // Nutrition indicators
+                    _buildNutritionBar(
+                      'P',
+                      widget.dish.totalNutrition.protein,
+                      50,
+                      Colors.green,
+                    ),
+                    _buildNutritionBar(
+                      'C',
+                      widget.dish.totalNutrition.carbs,
+                      100,
+                      Colors.blue,
+                    ),
+                    _buildNutritionBar(
+                      'F',
+                      widget.dish.totalNutrition.fat,
+                      40,
+                      Colors.pink,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Action buttons
+                    SizedBox(
+                      width: double.infinity,
+                      child:
+                          _dishExists
+                              ? _buildLogButton(theme, colorScheme, l10n)
+                              : _buildInspectButton(
+                                theme,
+                                colorScheme,
+                                l10n,
+                                isDark,
+                              ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLogButton(
+    ThemeData theme,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            colorScheme.primary,
+            colorScheme.primary
+                .withBlue(colorScheme.primary.blue + 20)
+                .withRed(colorScheme.primary.red - 20),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => widget.onLog(widget.dish),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add, size: 18, color: colorScheme.onPrimary),
+              const SizedBox(width: 6),
               Text(
-                '${localizations.ingredients}:',
+                l10n.addToMeals,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                dish.ingredients.take(3).map((ing) => ing.name).join(', ') +
-                    (dish.ingredients.length > 3
-                        ? ', and ${dish.ingredients.length - 3} more...'
-                        : ''),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ],
-
-            // Action buttons
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onAddToMeals,
-                    icon: const Icon(Icons.add_circle_outline, size: 18),
-                    label: Text(localizations.addToMeals),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                  ),
-                ),
-                if (onViewDetails != null) ...[
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: onViewDetails,
-                    icon: const Icon(Icons.info_outline, size: 18),
-                    label: Text(localizations.details),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Color _getMealTypeColor(MealType mealType) {
-    switch (mealType) {
-      case MealType.breakfast:
-        return Colors.orange;
-      case MealType.lunch:
-        return Colors.green;
-      case MealType.dinner:
-        return Colors.purple;
-      case MealType.snack:
-        return Colors.blue;
-    }
-  }
-
-  String _getMealTypeDisplayName(
-    MealType mealType,
-    AppLocalizations localizations,
+  Widget _buildInspectButton(
+    ThemeData theme,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+    bool isDark,
   ) {
-    switch (mealType) {
-      case MealType.breakfast:
-        return localizations.breakfast;
-      case MealType.lunch:
-        return localizations.lunch;
-      case MealType.dinner:
-        return localizations.dinner;
-      case MealType.snack:
-        return localizations.snack;
-    }
-  }
-}
-
-class _NutrientChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _NutrientChip({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      height: 40,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.3),
+          width: 1,
+        ),
       ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: _loading ? null : _handleInspect,
+          child: Opacity(
+            opacity: _loading ? 0.7 : 1.0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _loading ? Icons.hourglass_empty : Icons.visibility_outlined,
+                  size: 18,
+                  color: colorScheme.onSurface,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _loading ? l10n.loading : l10n.details,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: color,
-              fontSize: 10,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
