@@ -173,3 +173,130 @@ class NutritionInfo {
     };
   }
 }
+
+class DishLog {
+  final String id;
+  final String dishId;
+  final Dish? dish;
+  final DateTime loggedAt;
+  final String mealType;
+  final double servingSize;
+  final double calories;
+  final double protein;
+  final double carbs;
+  final double fat;
+  final double fiber;
+
+  const DishLog({
+    required this.id,
+    required this.dishId,
+    this.dish,
+    required this.loggedAt,
+    required this.mealType,
+    required this.servingSize,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    this.fiber = 0.0,
+  });
+
+  factory DishLog.fromJson(Map<String, dynamic> json) {
+    return DishLog(
+      id: json['id'] as String,
+      dishId: json['dishId'] as String,
+      dish:
+          json['dish'] != null
+              ? Dish.fromJson(json['dish'] as Map<String, dynamic>)
+              : null,
+      loggedAt: DateTime.parse(json['loggedAt'] as String),
+      mealType: json['mealType'] as String,
+      servingSize: (json['servingSize'] as num).toDouble(),
+      calories: (json['calories'] as num).toDouble(),
+      protein: (json['protein'] as num).toDouble(),
+      carbs: (json['carbs'] as num).toDouble(),
+      fat: (json['fat'] as num).toDouble(),
+      fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'dishId': dishId,
+      'dish': dish?.toJson(),
+      'loggedAt': loggedAt.toIso8601String(),
+      'mealType': mealType,
+      'servingSize': servingSize,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'fiber': fiber,
+    };
+  }
+
+  DishLog copyWith({
+    String? id,
+    String? dishId,
+    Dish? dish,
+    DateTime? loggedAt,
+    String? mealType,
+    double? servingSize,
+    double? calories,
+    double? protein,
+    double? carbs,
+    double? fat,
+    double? fiber,
+  }) {
+    return DishLog(
+      id: id ?? this.id,
+      dishId: dishId ?? this.dishId,
+      dish: dish ?? this.dish,
+      loggedAt: loggedAt ?? this.loggedAt,
+      mealType: mealType ?? this.mealType,
+      servingSize: servingSize ?? this.servingSize,
+      calories: calories ?? this.calories,
+      protein: protein ?? this.protein,
+      carbs: carbs ?? this.carbs,
+      fat: fat ?? this.fat,
+      fiber: fiber ?? this.fiber,
+    );
+  }
+}
+
+class DailyMacroSummary {
+  final double calories;
+  final double protein;
+  final double carbs;
+  final double fat;
+  final double fiber;
+
+  const DailyMacroSummary({
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    required this.fiber,
+  });
+
+  factory DailyMacroSummary.fromJson(Map<String, dynamic> json) {
+    return DailyMacroSummary(
+      calories: (json['calories'] as num).toDouble(),
+      protein: (json['protein'] as num).toDouble(),
+      carbs: (json['carbs'] as num).toDouble(),
+      fat: (json['fat'] as num).toDouble(),
+      fiber: (json['fiber'] as num).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'fiber': fiber,
+    };
+  }
+}

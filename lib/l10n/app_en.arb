@@ -96,10 +96,45 @@
   },  "fat": "Fat",
   "@fat": {
     "description": "Fat label"
-  },
-  "calendar": "Calendar",
+  },  "calendar": "Calendar",
   "@calendar": {
     "description": "Calendar label"
+  },
+  "unknownDish": "Unknown Dish",
+  "@unknownDish": {
+    "description": "Label for dish when name is not available"
+  },
+  "noMealsLoggedForDay": "No meals logged for this day",
+  "@noMealsLoggedForDay": {
+    "description": "Message shown when no meals are logged for selected day"
+  },
+  "nutritionSummary": "Nutrition Summary",
+  "@nutritionSummary": {
+    "description": "Title for nutrition summary section"
+  },
+  "getAiTip": "Get AI Tip",
+  "@getAiTip": {
+    "description": "Button text to get AI nutrition tip"
+  },
+  "deleteLog": "Delete Log",
+  "@deleteLog": {
+    "description": "Title for delete log dialog"
+  },
+  "deleteLogConfirmation": "Are you sure you want to delete this logged meal?",
+  "@deleteLogConfirmation": {
+    "description": "Confirmation message for deleting a meal log"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "mealLogDeletedSuccessfully": "Meal log deleted successfully",
+  "@mealLogDeletedSuccessfully": {
+    "description": "Success message after deleting a meal log"
+  },
+  "failedToDeleteMealLog": "Failed to delete meal log",
+  "@failedToDeleteMealLog": {
+    "description": "Error message when meal log deletion fails"
   },  "chat": "Chat",
   "@chat": {
     "description": "Chat label"
