@@ -217,7 +217,6 @@ class ContextGatheringStep extends AgentStep {
   }
 
   // --- Formatting and helper methods ---
-
   String _formatUserProfile(UserProfile userProfile) {
     final buffer = StringBuffer();
     buffer.writeln('**Age:** ${userProfile.age}');
@@ -230,23 +229,26 @@ class ContextGatheringStep extends AgentStep {
     buffer.writeln(
       '**Fitness Goal:** ${_formatFitnessGoalString(userProfile.goals.goal)}',
     );
-    buffer.writeln(
-      '**Dietary Preferences:** ${userProfile.preferences.dietType}',
-    );
-    if (userProfile.preferences.allergies.isNotEmpty) {
+
+    if (userProfile.preferences != null) {
       buffer.writeln(
-        '**Allergies:** ${userProfile.preferences.allergies.join(", ")}',
+        '**Dietary Preferences:** ${userProfile.preferences!.dietType}',
       );
-    }
-    if (userProfile.preferences.dislikes.isNotEmpty) {
-      buffer.writeln(
-        '**Dislikes:** ${userProfile.preferences.dislikes.join(", ")}',
-      );
-    }
-    if (userProfile.preferences.cuisinePreferences.isNotEmpty) {
-      buffer.writeln(
-        '**Cuisine Preferences:** ${userProfile.preferences.cuisinePreferences.join(", ")}',
-      );
+      if (userProfile.preferences!.allergies.isNotEmpty) {
+        buffer.writeln(
+          '**Allergies:** ${userProfile.preferences!.allergies.join(", ")}',
+        );
+      }
+      if (userProfile.preferences!.dislikes.isNotEmpty) {
+        buffer.writeln(
+          '**Dislikes:** ${userProfile.preferences!.dislikes.join(", ")}',
+        );
+      }
+      if (userProfile.preferences!.cuisinePreferences.isNotEmpty) {
+        buffer.writeln(
+          '**Cuisine Preferences:** ${userProfile.preferences!.cuisinePreferences.join(", ")}',
+        );
+      }
     }
     return buffer.toString();
   }

@@ -1,10 +1,14 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/dish.dart';
+import '../models/user_profile.dart';
 import '../services/storage/dish_service.dart';
-import '../components/calendar/macro_summary.dart';
+import '../repositories/user_profile_repository.dart';
+import '../services/user_session_service.dart';
+import '../services/chat/openai_service.dart';
 import '../components/calendar/calendar_day_detail.dart';
-import '../components/calendar/day_selector.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -15,28 +19,44 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   final DishService _dishService = DishService();
+  late final UserProfileRepository _userProfileRepository;
+  final OpenAIService _openAIService = OpenAIService();
   DateTime _selectedDate = DateTime.now();
-  DateTime _weekStartDate = DateTime.now();
-  DateTime _calendarMonth = DateTime.now();
   bool _isLoading = true;
-  List<int> _datesWithLogs = [];
   DailyMacroSummary? _selectedDaySummary;
   List<DishLog> _selectedDayLogs = [];
+  UserProfile? _userProfile;
+  bool _isLoadingAiTip = false;
 
+  // Calendar navigation state
+  late DateTime _weekStartDate;
+  int _calendarMonth = DateTime.now().month - 1; // 0-based
+  int _calendarYear = DateTime.now().year;
+  List<int> _datesWithLogs = [];
   @override
   void initState() {
     super.initState();
+    _initializeServices();
     _initializeCalendar();
     _fetchCalendarData();
+  }
+
+  Future<void> _initializeServices() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userSessionService = UserSessionService(prefs);
+    _userProfileRepository = UserProfileRepository(
+      userSessionService: userSessionService,
+    );
   }
 
   void _initializeCalendar() {
     final today = DateTime.now();
     _selectedDate = today;
-    _calendarMonth = DateTime(today.year, today.month, 1);
+    _calendarMonth = today.month - 1; // 0-based
+    _calendarYear = today.year;
 
-    // Set week start to Sunday
-    final dayOfWeek = today.weekday % 7; // Convert to 0=Sunday
+    // Set week to current week (starting from Sunday)
+    final dayOfWeek = today.weekday % 7; // Convert to Sunday = 0
     _weekStartDate = today.subtract(Duration(days: dayOfWeek));
   }
 
@@ -44,22 +64,52 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Get dates with logs for current month
-      final dates = await _dishService.getDatesWithLogsInMonth(
-        _calendarMonth.year,
-        _calendarMonth.month,
-      );
-
-      setState(() {
-        _datesWithLogs = dates;
-      });
-
-      // Load selected date data
+      await _loadUserProfile();
+      await _loadCalendarDates();
       await _handleDateSelect(_selectedDate);
     } catch (error) {
       debugPrint('Error fetching calendar data: $error');
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final userProfile = await _userProfileRepository.getCurrentUserProfile();
+      debugPrint('Loaded user profile: ${userProfile != null}');
+      if (userProfile != null) {
+        debugPrint('User profile id: ${userProfile.id}');
+        debugPrint('User profile has goals');
+        debugPrint(
+          'User goals: ${userProfile.goals.targetCalories} cal, ${userProfile.goals.targetProtein}g protein',
+        );
+      } else {
+        debugPrint('User profile not found');
+      }
+
+      setState(() {
+        _userProfile = userProfile;
+      });
+    } catch (error) {
+      debugPrint('Error loading user profile: $error');
+    }
+  }
+
+  Future<void> _loadCalendarDates() async {
+    try {
+      final dates = await _dishService.getDatesWithLogsInMonth(
+        _calendarYear,
+        _calendarMonth + 1, // Convert from 0-based to 1-based month
+      );
+      setState(() {
+        _datesWithLogs = dates;
+      });
+    } catch (error) {
+      debugPrint('Error fetching dates with logs: $error');
+      setState(() {
+        _datesWithLogs = [];
+      });
     }
   }
 
@@ -89,39 +139,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  Future<void> _onRefresh() async {
-    await _fetchCalendarData();
-  }
-
-  void _goToPreviousWeek() {
-    final newWeekStart = _weekStartDate.subtract(const Duration(days: 7));
-    setState(() {
-      _weekStartDate = newWeekStart;
-      _calendarMonth = DateTime(newWeekStart.year, newWeekStart.month, 1);
-    });
-    _fetchCalendarData();
-  }
-
-  void _goToNextWeek() {
-    final newWeekStart = _weekStartDate.add(const Duration(days: 7));
-    setState(() {
-      _weekStartDate = newWeekStart;
-      _calendarMonth = DateTime(newWeekStart.year, newWeekStart.month, 1);
-    });
-    _fetchCalendarData();
-  }
-
-  void _goToToday() {
-    final today = DateTime.now();
-    setState(() {
-      _selectedDate = today;
-      _calendarMonth = DateTime(today.year, today.month, 1);
-      final dayOfWeek = today.weekday % 7;
-      _weekStartDate = today.subtract(Duration(days: dayOfWeek));
-    });
-    _fetchCalendarData();
-  }
-
   Future<void> _handleDeleteLog(DishLog log) async {
     final l10n = AppLocalizations.of(context)!;
 
@@ -146,14 +163,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
     );
-
     if (confirmed == true) {
       try {
         await _dishService.deleteDishLog(log.id);
         setState(() {
           _selectedDayLogs.removeWhere((l) => l.id == log.id);
         });
-        await _fetchCalendarData();
+        // Only reload the selected date and calendar dates, not user profile
+        await _loadCalendarDates();
+        await _handleDateSelect(_selectedDate);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -173,6 +191,515 @@ class _CalendarScreenState extends State<CalendarScreen> {
         }
       }
     }
+  }
+
+  Future<void> _getAiTip() async {
+    // Check if OpenAI service is configured
+    final isConfigured = await _openAIService.isConfigured();
+    if (!isConfigured) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Please configure your OpenAI API key in settings to use AI tips',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isLoadingAiTip = true);
+
+    try {
+      // Build context for AI recommendation
+      final summary = _selectedDaySummary;
+      final profile = _userProfile;
+      final goals = profile?.goals;
+
+      String contextMessage = 'Based on my nutrition today:\n';
+
+      if (summary != null) {
+        contextMessage += '- Calories: ${summary.calories.toStringAsFixed(0)}';
+        if (goals != null) {
+          contextMessage +=
+              ' / ${goals.targetCalories.toStringAsFixed(0)} target';
+        }
+        contextMessage += '\n- Protein: ${summary.protein.toStringAsFixed(1)}g';
+        if (goals != null) {
+          contextMessage +=
+              ' / ${goals.targetProtein.toStringAsFixed(0)}g target';
+        }
+        contextMessage += '\n- Carbs: ${summary.carbs.toStringAsFixed(1)}g';
+        if (goals != null) {
+          contextMessage +=
+              ' / ${goals.targetCarbs.toStringAsFixed(0)}g target';
+        }
+        contextMessage += '\n- Fat: ${summary.fat.toStringAsFixed(1)}g';
+        if (goals != null) {
+          contextMessage += ' / ${goals.targetFat.toStringAsFixed(0)}g target';
+        }
+        if (summary.fiber > 0) {
+          contextMessage += '\n- Fiber: ${summary.fiber.toStringAsFixed(1)}g';
+        }
+      }
+
+      if (goals != null) {
+        contextMessage += '\n\nMy fitness goals: ${goals.goal}';
+        contextMessage += ', target weight: ${goals.targetWeight}kg';
+        if (profile != null) {
+          contextMessage += ', activity level: ${profile.activityLevel}';
+        }
+      }
+
+      if (_selectedDayLogs.isNotEmpty) {
+        contextMessage += '\n\nMeals eaten today:';
+        for (final log in _selectedDayLogs) {
+          contextMessage +=
+              '\n- ${log.dish?.name ?? "Unknown"} (${log.mealType})';
+        }
+      }
+
+      contextMessage +=
+          '\n\nPlease provide a brief, actionable nutrition tip or recommendation to help me reach my goals. Keep it under 100 words.';
+      final response = await _openAIService.sendMessage(contextMessage);
+
+      _showAiTipDialog(response);
+    } catch (error) {
+      debugPrint('Error getting AI tip: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to get AI tip. Please try again.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isLoadingAiTip = false);
+    }
+  }
+
+  void _showAiTipDialog(String tip) {
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  Icons.auto_awesome,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text('AI Nutrition Tip'),
+              ],
+            ),
+            content: Text(tip),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.ok),
+              ),
+            ],
+          ),
+    );
+  }
+
+  // Calendar navigation methods
+  void _goToPreviousMonth() {
+    setState(() {
+      if (_calendarMonth == 0) {
+        _calendarMonth = 11;
+        _calendarYear--;
+      } else {
+        _calendarMonth--;
+      }
+      _updateWeekForMonth();
+    });
+    _loadCalendarDates(); // Only reload calendar dates, not user profile
+  }
+
+  void _goToNextMonth() {
+    setState(() {
+      if (_calendarMonth == 11) {
+        _calendarMonth = 0;
+        _calendarYear++;
+      } else {
+        _calendarMonth++;
+      }
+      _updateWeekForMonth();
+    });
+    _loadCalendarDates(); // Only reload calendar dates, not user profile
+  }
+
+  void _goToPreviousWeek() {
+    setState(() {
+      _weekStartDate = _weekStartDate.subtract(const Duration(days: 7));
+      _calendarMonth = _weekStartDate.month - 1;
+      _calendarYear = _weekStartDate.year;
+    });
+    _loadCalendarDates(); // Only reload calendar dates, not user profile
+  }
+
+  void _goToNextWeek() {
+    setState(() {
+      _weekStartDate = _weekStartDate.add(const Duration(days: 7));
+      _calendarMonth = _weekStartDate.month - 1;
+      _calendarYear = _weekStartDate.year;
+    });
+    _loadCalendarDates(); // Only reload calendar dates, not user profile
+  }
+
+  void _goToToday() {
+    final today = DateTime.now();
+    setState(() {
+      _selectedDate = today;
+      _calendarMonth = today.month - 1;
+      _calendarYear = today.year;
+      final dayOfWeek = today.weekday % 7;
+      _weekStartDate = today.subtract(Duration(days: dayOfWeek));
+    });
+    _loadCalendarDates(); // Only reload calendar dates
+    _handleDateSelect(today); // Load data for today
+  }
+
+  void _updateWeekForMonth() {
+    final firstDayOfMonth = DateTime(_calendarYear, _calendarMonth + 1, 1);
+    final dayOfWeek = firstDayOfMonth.weekday % 7;
+    _weekStartDate = firstDayOfMonth.subtract(Duration(days: dayOfWeek));
+  }
+
+  List<DateTime> _generateWeekDays() {
+    return List.generate(7, (index) {
+      return _weekStartDate.add(Duration(days: index));
+    });
+  }
+
+  String _getWeekRangeText() {
+    final weekEndDate = _weekStartDate.add(const Duration(days: 6));
+    final monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final startMonth = monthNames[_weekStartDate.month - 1];
+    final endMonth = monthNames[weekEndDate.month - 1];
+
+    if (_weekStartDate.month == weekEndDate.month) {
+      return '$startMonth ${_weekStartDate.day}-${weekEndDate.day}, ${_weekStartDate.year}';
+    } else {
+      return '$startMonth ${_weekStartDate.day} - $endMonth ${weekEndDate.day}, ${_weekStartDate.year}';
+    }
+  }
+
+  String _getMonthYearText() {
+    final monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return '${monthNames[_calendarMonth]} $_calendarYear';
+  }
+
+  Widget _buildWeekView() {
+    final weekDays = _generateWeekDays();
+    final today = DateTime.now();
+    final dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    return Row(
+      children:
+          weekDays.asMap().entries.map((entry) {
+            final index = entry.key;
+            final date = entry.value;
+            final isSelected =
+                date.day == _selectedDate.day &&
+                date.month == _selectedDate.month &&
+                date.year == _selectedDate.year;
+            final isToday =
+                date.day == today.day &&
+                date.month == today.month &&
+                date.year == today.year;
+            final hasLogs =
+                _datesWithLogs.contains(date.day) &&
+                date.month == _calendarMonth + 1 &&
+                date.year == _calendarYear;
+
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => _handleDateSelect(date),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : isToday
+                            ? Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.2)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        dayNames[index],
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color:
+                              isSelected
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        date.day.toString(),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              isSelected
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : isToday
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (hasLogs && !isSelected)
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+    );
+  }
+
+  Widget _buildNutritionSummaryCard() {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final summary = _selectedDaySummary!;
+    final goals = _userProfile?.goals;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.nutritionSummary,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _isLoadingAiTip ? null : _getAiTip,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_isLoadingAiTip)
+                          SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                          )
+                        else
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 14,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        const SizedBox(width: 4),
+                        Text(
+                          l10n.getAiTip,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Calories
+            _buildMacroBar(
+              label: l10n.calories,
+              current: summary.calories,
+              target: goals?.targetCalories,
+              unit: 'kcal',
+              color: _getCaloriesColor(summary.calories, goals?.targetCalories),
+            ),
+
+            // Protein
+            _buildMacroBar(
+              label: l10n.protein,
+              current: summary.protein,
+              target: goals?.targetProtein,
+              unit: 'g',
+              color: _getProteinColor(summary.protein, goals?.targetProtein),
+            ),
+
+            // Carbs
+            _buildMacroBar(
+              label: l10n.carbs,
+              current: summary.carbs,
+              target: goals?.targetCarbs,
+              unit: 'g',
+              color: _getCarbsColor(summary.carbs, goals?.targetCarbs),
+            ),
+
+            // Fat
+            _buildMacroBar(
+              label: l10n.fat,
+              current: summary.fat,
+              target: goals?.targetFat,
+              unit: 'g',
+              color: _getFatColor(summary.fat, goals?.targetFat),
+            ),
+
+            // Fiber (only show if has value)
+            if (summary.fiber > 0)
+              _buildMacroBar(
+                label: l10n.fiber,
+                current: summary.fiber,
+                target: null, // No fiber target in current model
+                unit: 'g',
+                color: _getFiberColor(summary.fiber),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMacroBar({
+    required String label,
+    required double current,
+    double? target,
+    required String unit,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final progressWidth = _getProgressWidth(current, target);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                '${current.toStringAsFixed(1)}${target != null ? ' / ${target.toStringAsFixed(0)}' : ''} $unit',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Stack(
+              children: [
+                // Grey background bar (full width)
+                Container(
+                  width: double.infinity,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: colorScheme.outline.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                // Colored progress bar (starts from left)
+                FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: progressWidth,
+                  child: Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLogItem(BuildContext context, DishLog log) {
@@ -235,73 +762,146 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Single consolidated day selector with navigation
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: DaySelector(
-                selectedDate: _selectedDate,
-                weekStartDate: _weekStartDate,
-                datesWithLogs: _datesWithLogs,
-                onDateSelected: _handleDateSelect,
-                onPreviousWeek: _goToPreviousWeek,
-                onNextWeek: _goToNextWeek,
-                onToday: _goToToday,
-              ),
-            ),
-
-            // Daily detail view
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _onRefresh,
-                color: colorScheme.primary,
-                child:
-                    _isLoading
-                        ? Center(
-                          child: CircularProgressIndicator(
-                            color: colorScheme.primary,
-                          ),
-                        )
-                        : SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (_selectedDaySummary != null)
-                                MacroSummary(
-                                  calories: _selectedDaySummary!.calories,
-                                  protein: _selectedDaySummary!.protein,
-                                  carbs: _selectedDaySummary!.carbs,
-                                  fat: _selectedDaySummary!.fat,
-                                  fiber: _selectedDaySummary!.fiber,
-                                ),
-
-                              const SizedBox(height: 16),
-
-                              CalendarDayDetail(
-                                date: _selectedDate,
-                                renderLogItem:
-                                    (context, log) =>
-                                        _buildLogItem(context, log),
-                              ),
-                            ],
+        child:
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                  onRefresh: _fetchCalendarData,
+                  child: Column(
+                    children: [
+                      // Month header
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainer,
+                          border: Border(
+                            bottom: BorderSide(
+                              color: colorScheme.outline.withOpacity(0.2),
+                            ),
                           ),
                         ),
-              ),
-            ),
-          ],
-        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              onPressed: _goToPreviousMonth,
+                              icon: const Icon(Icons.chevron_left),
+                            ),
+                            Text(
+                              _getMonthYearText(),
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _goToNextMonth,
+                              icon: const Icon(Icons.chevron_right),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Week view header with Today button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              onPressed: _goToPreviousWeek,
+                              icon: const Icon(Icons.keyboard_arrow_left),
+                            ),
+                            GestureDetector(
+                              onTap: _goToToday,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainer,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      size: 16,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _getWeekRangeText(),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _goToNextWeek,
+                              icon: const Icon(Icons.keyboard_arrow_right),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Week view
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: _buildWeekView(),
+                      ),
+
+                      // Nutrition Summary
+                      if (_selectedDaySummary != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: _buildNutritionSummaryCard(),
+                        ),
+
+                      // Date selector and details
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              children: [
+                                // Calendar Day Detail
+                                CalendarDayDetail(
+                                  date: _selectedDate,
+                                  renderLogItem:
+                                      (context, log) =>
+                                          _buildLogItem(context, log),
+                                ),
+                                // Add some bottom padding to ensure there's enough space to scroll
+                                const SizedBox(height: 100),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
       ),
       floatingActionButton: FloatingActionButton(
-        heroTag: "calendar_fab", // Unique hero tag to avoid conflicts
+        heroTag: "calendar_fab",
         onPressed: () {
           Navigator.of(context).pushNamed('/dishes');
         },
@@ -310,6 +910,120 @@ class _CalendarScreenState extends State<CalendarScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  } // Helper methods for progress bar colors and calculations
+
+  double _getProgressWidth(double current, double? target) {
+    if (target == null) return 0.2;
+
+    if (current > target * 1.5) {
+      return 1.0;
+    }
+
+    return min(1.0, current / target);
+  }
+
+  Color _getCaloriesColor(double current, double? target) {
+    if (target == null) return Colors.grey;
+
+    const yellow = Color(0xFFfacc15);
+    const green = Color(0xFF4ade80);
+    const red = Color(0xFFef4444);
+
+    final ratio = current / target;
+
+    if (ratio < 0.9) {
+      final factor = min(1.0, ratio / 0.9);
+      return _interpolateColor(yellow, green, factor);
+    } else if (ratio >= 0.9 && ratio <= 1.1) {
+      return green;
+    } else if (ratio > 1.1 && ratio <= 1.2) {
+      final factor = (ratio - 1.1) / 0.1;
+      return _interpolateColor(green, yellow, factor);
+    } else {
+      final factor = min(1.0, (ratio - 1.2) / 0.3);
+      return _interpolateColor(yellow, red, factor);
+    }
+  }
+
+  Color _getProteinColor(double current, double? target) {
+    if (target == null) return Colors.grey;
+
+    const lightGreen = Color(0xFFa3e635);
+    const green = Color(0xFF4ade80);
+    const darkGreen = Color(0xFF16a34a);
+
+    final ratio = current / target;
+
+    if (ratio < 0.7) {
+      final factor = min(1.0, ratio / 0.7);
+      return _interpolateColor(const Color(0xFFd1d5db), lightGreen, factor);
+    } else if (ratio >= 0.7 && ratio < 0.9) {
+      final factor = (ratio - 0.7) / 0.2;
+      return _interpolateColor(lightGreen, green, factor);
+    } else {
+      return darkGreen;
+    }
+  }
+
+  Color _getCarbsColor(double current, double? target) {
+    if (target == null) return Colors.grey;
+
+    const yellow = Color(0xFFfacc15);
+    const green = Color(0xFF4ade80);
+    const red = Color(0xFFef4444);
+
+    final optimalTarget = target;
+    final distance = (current - optimalTarget).abs() / optimalTarget;
+
+    if (distance <= 0.2) {
+      return green;
+    } else if (distance <= 0.5) {
+      final factor = (distance - 0.2) / 0.3;
+      return _interpolateColor(green, yellow, factor);
+    } else {
+      final factor = min(1.0, (distance - 0.5) / 0.5);
+      return _interpolateColor(yellow, red, factor);
+    }
+  }
+
+  Color _getFatColor(double current, double? target) {
+    if (target == null) return Colors.grey;
+
+    const green = Color(0xFF4ade80);
+    const yellow = Color(0xFFfacc15);
+    const red = Color(0xFFef4444);
+
+    final ratio = current / target;
+
+    if (ratio < 0.8) {
+      return green;
+    } else if (ratio >= 0.8 && ratio <= 1) {
+      final factor = (ratio - 0.8) / 0.2;
+      return _interpolateColor(green, yellow, factor);
+    } else {
+      final factor = min(1.0, (ratio - 1) / 0.2);
+      return _interpolateColor(yellow, red, factor);
+    }
+  }
+
+  Color _getFiberColor(double current) {
+    // For fiber, we don't have targets in the user profile yet, so use a simple color scheme
+    const yellow = Color(0xFFfacc15);
+    const green = Color(0xFF4ade80);
+
+    // Assume 25g is a good fiber target for color calculation
+    final assumedTarget = 25.0;
+    final ratio = current / assumedTarget;
+
+    if (ratio < 1) {
+      return _interpolateColor(yellow, green, ratio);
+    }
+    return green;
+  }
+
+  Color _interpolateColor(Color start, Color end, double t) {
+    t = t.clamp(0.0, 1.0);
+    return Color.lerp(start, end, t) ?? start;
   }
 }
 
