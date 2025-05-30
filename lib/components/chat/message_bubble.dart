@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/chat_message.dart';
 import '../../models/dish_models.dart';
+import '../../models/dish.dart';
+import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
 
@@ -523,15 +525,69 @@ class MessageBubble extends StatelessWidget {
     }
   }
 
-  /// Handle adding dish to meals
-  void _handleAddToMeals(BuildContext context, ProcessedDish dish) {
-    // TODO: Implement meal logging functionality
-    final localizations = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(localizations.addedToMealsSuccess(dish.name)),
-        duration: const Duration(seconds: 2),
-      ),
+  /// Convert ProcessedDish to Dish model
+  Dish _convertToDish(ProcessedDish processedDish) {
+    // Convert BasicNutrition to NutritionInfo
+    final nutritionInfo = NutritionInfo(
+      calories: processedDish.totalNutrition.calories,
+      protein: processedDish.totalNutrition.protein,
+      carbs: processedDish.totalNutrition.carbs,
+      fat: processedDish.totalNutrition.fat,
+      fiber: processedDish.totalNutrition.fiber,
+      sugar: processedDish.totalNutrition.sugar,
+      sodium: processedDish.totalNutrition.sodium,
+    );
+
+    // Convert ingredients
+    final ingredients =
+        processedDish.ingredients.map((ingredient) {
+          return Ingredient(
+            id:
+                ingredient.id ??
+                DateTime.now().millisecondsSinceEpoch.toString(),
+            name: ingredient.name,
+            amount: ingredient.amount,
+            unit: ingredient.unit ?? 'g',
+            // Add basic nutrition if available or null
+            nutrition:
+                ingredient.nutrition != null
+                    ? NutritionInfo(
+                      calories: ingredient.nutrition!.calories,
+                      protein: ingredient.nutrition!.protein,
+                      carbs: ingredient.nutrition!.carbs,
+                      fat: ingredient.nutrition!.fat,
+                      fiber: ingredient.nutrition!.fiber ?? 0,
+                      sugar: ingredient.nutrition!.sugar ?? 0,
+                      sodium: ingredient.nutrition!.sodium ?? 0,
+                    )
+                    : null,
+          );
+        }).toList();
+    return Dish(
+      id: processedDish.id,
+      name: processedDish.name,
+      description: processedDish.description,
+      imageUrl: processedDish.imageUrl,
+      ingredients: ingredients,
+      nutrition: nutritionInfo,
+      createdAt: processedDish.createdAt,
+      updatedAt: processedDish.updatedAt,
+      isFavorite: processedDish.isFavorite,
+      category: processedDish.mealType?.toString().split('.').last,
+    );
+  }
+
+  /// Handle adding dish to meals by showing the dish log modal
+  void _handleAddToMeals(BuildContext context, ProcessedDish processedDish) {
+    // Convert ProcessedDish to Dish
+    final dish = _convertToDish(processedDish);
+
+    // Show dish log modal
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DishLogModal(dish: dish),
     );
   }
 

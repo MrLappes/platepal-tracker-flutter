@@ -200,18 +200,21 @@ class DishLog {
     required this.fat,
     this.fiber = 0.0,
   });
-
   factory DishLog.fromJson(Map<String, dynamic> json) {
     return DishLog(
-      id: json['id'] as String,
-      dishId: json['dishId'] as String,
+      id: json['id']?.toString() ?? '',
+      dishId:
+          json['dishId'] != null
+              ? json['dishId'].toString()
+              : json['dish_id'].toString(),
       dish:
           json['dish'] != null
               ? Dish.fromJson(json['dish'] as Map<String, dynamic>)
               : null,
-      loggedAt: DateTime.parse(json['loggedAt'] as String),
-      mealType: json['mealType'] as String,
-      servingSize: (json['servingSize'] as num).toDouble(),
+      loggedAt: DateTime.parse(json['loggedAt'] ?? json['logged_at'] as String),
+      mealType: json['mealType'] ?? json['meal_type'] as String,
+      servingSize:
+          (json['servingSize'] ?? json['serving_size'] as num).toDouble(),
       calories: (json['calories'] as num).toDouble(),
       protein: (json['protein'] as num).toDouble(),
       carbs: (json['carbs'] as num).toDouble(),

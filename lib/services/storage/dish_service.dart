@@ -1,20 +1,29 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../models/dish.dart';
 import 'database_service.dart';
 
 class DishService {
   final DatabaseService _databaseService = DatabaseService.instance;
-
   // Get all dishes
   Future<List<Dish>> getAllDishes() async {
+    debugPrint('🔍 DishService: Getting all dishes from database...');
     final db = await _databaseService.database;
 
     // Get all dishes
     final List<Map<String, dynamic>> dishMaps = await db.query('dishes');
+    debugPrint('🔍 DishService: Found ${dishMaps.length} dishes in database');
 
-    return Future.wait(
+    final dishes = await Future.wait(
       dishMaps.map((dishMap) => _getDishWithRelations(dishMap)),
     );
+
+    debugPrint('🔍 DishService: Returning ${dishes.length} dishes');
+    for (final dish in dishes) {
+      debugPrint('   - ${dish.name} (ID: ${dish.id})');
+    }
+
+    return dishes;
   }
 
   // Get dish by ID
@@ -136,9 +145,13 @@ class DishService {
 
   // Save a new dish
   Future<Dish> saveDish(Dish dish) async {
+    debugPrint(
+      '🍽️ DishService: Starting to save dish: ${dish.name} (ID: ${dish.id})',
+    );
     final db = await _databaseService.database;
 
     await db.transaction((txn) async {
+      debugPrint('🍽️ DishService: Inserting dish into database...');
       // Insert dish
       await txn.insert('dishes', {
         'id': dish.id,
@@ -151,6 +164,7 @@ class DishService {
         'updated_at': dish.updatedAt.toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
+      debugPrint('🍽️ DishService: Inserting dish nutrition...');
       // Insert dish nutrition
       await txn.insert('dish_nutrition', {
         'dish_id': dish.id,
@@ -163,6 +177,9 @@ class DishService {
         'sodium': dish.nutrition.sodium,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
+      debugPrint(
+        '🍽️ DishService: Inserting ${dish.ingredients.length} ingredients...',
+      );
       // Insert ingredients and their relationships
       for (final ingredient in dish.ingredients) {
         // Insert ingredient if not exists
@@ -196,6 +213,7 @@ class DishService {
       }
     });
 
+    debugPrint('🍽️ DishService: Dish saved successfully: ${dish.name}');
     return dish;
   }
 

@@ -301,6 +301,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "calendar_fab", // Unique hero tag to avoid conflicts
         onPressed: () {
           Navigator.of(context).pushNamed('/dishes');
         },

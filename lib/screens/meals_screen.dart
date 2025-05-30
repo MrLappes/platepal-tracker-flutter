@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../components/ui/empty_state_widget.dart';
 import '../components/ui/loading_widget.dart';
+import '../components/modals/dish_log_modal.dart';
 import '../models/dish.dart';
 import '../services/storage/dish_service.dart';
 import 'dish_create_screen.dart';
@@ -13,7 +14,7 @@ class MealsScreen extends StatefulWidget {
   State<MealsScreen> createState() => _MealsScreenState();
 }
 
-class _MealsScreenState extends State<MealsScreen> {
+class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategoryFilter = 'all';
   List<Dish> _dishes = [];
@@ -24,16 +25,43 @@ class _MealsScreenState extends State<MealsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDishes();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh dishes when app comes back to foreground
+      debugPrint('🔄 MealsScreen: App resumed, refreshing dishes...');
+      _loadDishes();
+    }
+  }
+
+  // Add a method to refresh when screen becomes visible
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh dishes every time dependencies change (e.g., when coming back to this screen)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        debugPrint(
+          '🔄 MealsScreen: Dependencies changed, refreshing dishes...',
+        );
+        _loadDishes();
+      }
+    });
+  }
+
   Future<void> _loadDishes() async {
+    debugPrint('🔄 MealsScreen: Loading dishes...');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -41,12 +69,19 @@ class _MealsScreenState extends State<MealsScreen> {
 
     try {
       final dishes = await _dishService.getAllDishes();
+      debugPrint(
+        '🔄 MealsScreen: Loaded ${dishes.length} dishes from database',
+      );
+      for (final dish in dishes) {
+        debugPrint('   - ${dish.name} (ID: ${dish.id})');
+      }
 
       setState(() {
         _dishes = dishes;
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('❌ MealsScreen: Error loading dishes: $e');
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -98,6 +133,15 @@ class _MealsScreenState extends State<MealsScreen> {
             icon: const Icon(Icons.add),
             onPressed: _createNewDish,
             tooltip: localizations.addMeal,
+          ),
+          // Add a refresh button for manual refresh
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              debugPrint('🔄 MealsScreen: Manual refresh triggered');
+              _loadDishes();
+            },
+            tooltip: 'Refresh dishes',
           ),
         ],
       ),
@@ -158,8 +202,6 @@ class _MealsScreenState extends State<MealsScreen> {
                         _buildFilterChip(localizations.dinner, 'dinner'),
                         const SizedBox(width: 8),
                         _buildFilterChip(localizations.snack, 'snack'),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(localizations.dessert, 'dessert'),
                       ],
                     ),
                   ),
@@ -173,6 +215,7 @@ class _MealsScreenState extends State<MealsScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "meals_fab", // Unique hero tag to avoid conflicts
         onPressed: _createNewDish,
         tooltip: localizations.createDish,
         child: const Icon(Icons.add),
@@ -209,39 +252,47 @@ class _MealsScreenState extends State<MealsScreen> {
     final localizations = AppLocalizations.of(context)!;
 
     if (_isLoading) {
-      return const LoadingWidget();
+      return CustomScrollView(
+        slivers: [SliverFillRemaining(child: const LoadingWidget())],
+      );
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              localizations.errorLoadingDishes,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _error!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
+      return CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    localizations.errorLoadingDishes,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _error!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadDishes,
+                    child: Text(localizations.retry),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadDishes,
-              child: Text(localizations.retry),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
@@ -249,48 +300,65 @@ class _MealsScreenState extends State<MealsScreen> {
 
     if (filteredDishes.isEmpty) {
       if (_dishes.isEmpty) {
-        return EmptyStateWidget(
-          icon: Icons.restaurant,
-          title: localizations.noDishesCreated,
-          subtitle: localizations.createFirstDish,
-          onAction: _createNewDish,
-          actionLabel: localizations.createDish,
+        return CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              child: EmptyStateWidget(
+                icon: Icons.restaurant,
+                title: localizations.noDishesCreated,
+                subtitle: localizations.createFirstDish,
+                onAction: _createNewDish,
+                actionLabel: localizations.createDish,
+              ),
+            ),
+          ],
         );
       } else {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.search_off, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              Text(
-                localizations.noDishesFound,
-                style: const TextStyle(fontSize: 18),
+        return CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text(
+                      localizations.noDishesFound,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      localizations.tryAdjustingSearch,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                localizations.tryAdjustingSearch,
-                style: const TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       }
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.8,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: filteredDishes.length,
-      itemBuilder: (context, index) {
-        final dish = filteredDishes[index];
-        return _buildDishCard(dish);
-      },
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.8,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final dish = filteredDishes[index];
+              return _buildDishCard(dish);
+            }, childCount: filteredDishes.length),
+          ),
+        ),
+      ],
     );
   }
 
@@ -457,7 +525,11 @@ class _MealsScreenState extends State<MealsScreen> {
       MaterialPageRoute(
         builder:
             (context) => DishCreateScreenAdvanced(
+              heroTag: "dish_create_fab_meals_new",
               onDishCreated: (dish) {
+                debugPrint(
+                  '🍽️ MealsScreen: onDishCreated callback triggered for: ${dish.name}',
+                );
                 _loadDishes(); // Refresh the list
               },
             ),
@@ -465,11 +537,12 @@ class _MealsScreenState extends State<MealsScreen> {
     );
   }
 
-  void _viewDishDetails(Dish dish) {
+  void _editDishDetails(Dish dish) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder:
             (context) => DishCreateScreenAdvanced(
+              heroTag: "dish_create_fab_meals_edit",
               dish: dish,
               onDishCreated: (dish) {
                 _loadDishes(); // Refresh the list
@@ -479,10 +552,19 @@ class _MealsScreenState extends State<MealsScreen> {
     );
   }
 
+  void _viewDishDetails(Dish dish) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows modal to take up more space
+      backgroundColor: Colors.transparent, // Makes the modal look better
+      builder: (context) => DishLogModal(dish: dish),
+    );
+  }
+
   void _handleDishAction(String action, Dish dish) {
     switch (action) {
       case 'edit':
-        _viewDishDetails(dish);
+        _editDishDetails(dish);
         break;
       case 'favorite':
         _toggleFavorite(dish);
