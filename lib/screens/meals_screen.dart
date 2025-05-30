@@ -4,7 +4,7 @@ import '../components/ui/empty_state_widget.dart';
 import '../components/ui/loading_widget.dart';
 import '../models/dish.dart';
 import '../services/storage/dish_service.dart';
-import '../screens/dish_create_screen_advanced.dart';
+import 'dish_create_screen.dart';
 
 class MealsScreen extends StatefulWidget {
   const MealsScreen({super.key});
