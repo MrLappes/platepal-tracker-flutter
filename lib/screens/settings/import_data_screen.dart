@@ -12,7 +12,6 @@ class ImportDataScreen extends StatefulWidget {
 
 class _ImportDataScreenState extends State<ImportDataScreen> {
   final ImportExportService _importExportService = ImportExportService();
-
   bool _isImporting = false;
   bool _isRestoring = false;
   bool _hasBackupAvailable = false;
@@ -24,6 +23,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
   List<String> _importErrors = [];
   ImportDetailedResults? _lastResults;
   bool _showAdvancedOptions = false;
+
+  // Progress tracking
+  int _currentProgress = 0;
+  int _totalItems = 0;
+  String _currentType = '';
 
   @override
   void initState() {
@@ -62,7 +66,29 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(strokeWidth: 3),
+          // Progress indicator
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  strokeWidth: 8,
+                  value:
+                      _totalItems > 0 ? _currentProgress / _totalItems : null,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                ),
+                if (_totalItems > 0)
+                  Text(
+                    '${((_currentProgress / _totalItems) * 100).round()}%',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
           Text(
             _isRestoring
@@ -71,14 +97,32 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(
-            _isRestoring
-                ? 'Undoing the last import...'
-                : 'Processing your data...',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          if (_totalItems > 0 && !_isRestoring) ...[
+            Text(
+              'Processing $_currentProgress of $_totalItems items',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
+            if (_currentType.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Current: $_currentType',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ] else
+            Text(
+              _isRestoring
+                  ? 'Undoing the last import...'
+                  : 'Preparing your data...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
         ],
       ),
     );
@@ -641,12 +685,14 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
 
   Future<void> _performImport() async {
     if (_selectedFilePath == null || _selectedDataTypes.isEmpty) return;
-
     setState(() {
       _isImporting = true;
       _lastError = null;
       _importErrors.clear();
       _lastResults = null;
+      _currentProgress = 0;
+      _totalItems = 0;
+      _currentType = '';
     });
 
     try {
@@ -656,11 +702,19 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       if (!backupCreated) {
         debugPrint('Warning: Failed to create backup before import');
       }
-
       final result = await _importExportService.importData(
         filePath: _selectedFilePath!,
         dataTypes: _selectedDataTypes.toList(),
         duplicateHandling: _duplicateHandling,
+        onProgress: (current, total, currentType) {
+          if (mounted) {
+            setState(() {
+              _currentProgress = current;
+              _totalItems = total;
+              _currentType = currentType;
+            });
+          }
+        },
       );
 
       if (mounted) {
