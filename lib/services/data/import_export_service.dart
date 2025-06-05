@@ -104,6 +104,7 @@ class ImportExportService {
     required List<DataType> dataTypes,
     required DuplicateHandling duplicateHandling,
     Map<String, dynamic>? jsonData,
+    Function(int current, int total, String currentType)? onProgress,
   }) async {
     try {
       Map<String, dynamic> importData;
@@ -171,9 +172,14 @@ class ImportExportService {
 
       // Sort data types by dependency order to ensure dishes are imported before meal logs
       final sortedDataTypes = _sortDataTypesByDependency(dataTypes);
-      debugPrint(
-        '🔄 Processing data types in dependency order: ${sortedDataTypes.map((t) => t.name).join(' → ')}',
-      );
+
+      // Calculate total items for progress tracking
+      int totalItems = 0;
+      int currentProgress = 0;
+      for (final type in sortedDataTypes) {
+        final items = _getItemsForDataType(type, importData);
+        totalItems += items.length;
+      }
 
       for (final type in sortedDataTypes) {
         final result = await _importDataTypeDetailed(
@@ -185,6 +191,9 @@ class ImportExportService {
         totalProcessed += result.itemsProcessed;
         totalDuplicates += result.duplicatesFound;
         errors.addAll(result.errors);
+
+        currentProgress += result.itemsProcessed;
+        onProgress?.call(currentProgress, totalItems, type.name);
       }
 
       return ImportExportResult(
@@ -257,29 +266,24 @@ class ImportExportService {
   Future<ImportExportResult> _processMealLogs(Map<String, dynamic> data) async {
     final List<String> errors = [];
     int itemsProcessed = 0;
-    int duplicatesFound = 0;
-
-    debugPrint('🍽️ Processing meal logs from import data...');
+    int duplicatesFound = 0; // Processing meal logs from import data
 
     if (data.containsKey('mealLogs')) {
       final mealLogsData = data['mealLogs'] as List<dynamic>? ?? [];
-      debugPrint('🍽️ Found ${mealLogsData.length} meal logs to process');
+      // Found ${mealLogsData.length} meal logs to process
       for (int i = 0; i < mealLogsData.length; i++) {
         try {
           final mealLogData = mealLogsData[i];
-          debugPrint('🔍 Processing raw meal log data [$i]: $mealLogData');
+          // Processing raw meal log data [$i]: $mealLogData
 
           if (mealLogData is Map<String, dynamic>) {
             final convertedMealLog = _createMealLogFromImportData(mealLogData);
-            debugPrint('🔄 Converted meal log data [$i]: $convertedMealLog');
-            debugPrint(
-              '🍽️ Processing meal log $i: ${convertedMealLog['dishId']}',
-            );
+            // Converted meal log data [$i]: $convertedMealLog            // Processing meal log $i: ${convertedMealLog['dishId']}
 
             final success = await _saveMealLogFromImport(convertedMealLog);
             if (success) {
               itemsProcessed++;
-              debugPrint('✅ Meal log $i processed successfully');
+              // Meal log $i processed successfully
             } else {
               final errorMsg =
                   'Failed to save meal log for dish ${convertedMealLog['dishId']}';
@@ -299,11 +303,7 @@ class ImportExportService {
       }
     } else {
       debugPrint('⚠️ No mealLogs found in import data');
-    }
-
-    debugPrint(
-      '🍽️ Meal log processing complete: $itemsProcessed processed, ${errors.length} errors',
-    );
+    }    // Meal log processing complete: $itemsProcessed processed, ${errors.length} errors
 
     return ImportExportResult(
       success: errors.isEmpty,
@@ -317,7 +317,7 @@ class ImportExportService {
   /// Save meal log from import data
   Future<bool> _saveMealLogFromImport(Map<String, dynamic> mealLogData) async {
     try {
-      debugPrint('🍽️ Attempting to save meal log: ${mealLogData}');
+      // Attempting to save meal log: ${mealLogData}
 
       // Ensure we have a valid dish ID
       final dishId = mealLogData['dishId'] as String?;
@@ -364,7 +364,7 @@ class ImportExportService {
         servingSize: servingSize,
       );
 
-      debugPrint('✅ Meal log saved to both tables with ID: $mealLogId');
+      // Meal log saved to both tables with ID: $mealLogId
       return mealLogId > 0;
     } catch (e) {
       debugPrint('❌ Error saving meal log: $e');
@@ -634,7 +634,7 @@ class ImportExportService {
     ImportDetailedResults detailedResults,
   ) async {
     try {
-      debugPrint('🔄 Processing data type: ${type.name}');
+      // Processing data type: ${type.name}
 
       // Special handling for meal logs
       if (type == DataType.mealLogs) {
@@ -659,7 +659,7 @@ class ImportExportService {
           break;
       }
 
-      debugPrint('🔄 Found ${items.length} items to process for ${type.name}');
+      // Found ${items.length} items to process for ${type.name}
 
       int processed = 0;
       int duplicates = 0;
@@ -726,11 +726,7 @@ class ImportExportService {
         duplicates: duplicates,
         skipped: skipped,
         errors: errors.length,
-      );
-
-      debugPrint(
-        '✅ ${type.name} processing complete: $processed processed, ${errors.length} errors',
-      );
+      );      // ${type.name} processing complete: $processed processed, ${errors.length} errors
 
       return ImportExportResult(
         success: errors.isEmpty,
@@ -751,34 +747,30 @@ class ImportExportService {
     }
   }
 
-  List<dynamic> _extractDishesFromData(Map<String, dynamic> data) {
-    debugPrint('🍽️ _extractDishesFromData: Analyzing import data structure');
-    debugPrint('🍽️ Available top-level keys: ${data.keys.toList()}');
+  List<dynamic> _extractDishesFromData(Map<String, dynamic> data) {    // _extractDishesFromData: Analyzing import data structure
+    // Available top-level keys: ${data.keys.toList()}
 
     // Check if it's the new format first
     if (data.containsKey('dishes') && data['dishes'] is List) {
-      final dishes = data['dishes'] as List<dynamic>;
-      debugPrint(
-        '🍽️ Found dishes array with ${dishes.length} items (new format)',
-      );
+      final dishes = data['dishes'] as List<dynamic>;      // Found dishes array with ${dishes.length} items (new format)
       return dishes;
     }
 
     // Check if it's a single dish (old format)
     if (data.containsKey('name') && data.containsKey('calories')) {
-      debugPrint('🍽️ Found single dish data (old format)');
+      // Found single dish data (old format)
       return [_convertOldDishFormat(data)];
     }
 
     // Check if it's the old React Native export format with table data
     if (data.containsKey('dishes') && data['dishes'] is Map) {
       final dishesTable = data['dishes'] as Map<String, dynamic>;
-      debugPrint('🍽️ Found dishes table, keys: ${dishesTable.keys.toList()}');
+      // Found dishes table, keys: ${dishesTable.keys.toList()}
 
       if (dishesTable.containsKey('data') && dishesTable['data'] is List) {
         final dishes = <Map<String, dynamic>>[];
         final dishRows = dishesTable['data'] as List<dynamic>;
-        debugPrint('🍽️ Found ${dishRows.length} dish rows in table format');
+        // Found ${dishRows.length} dish rows in table format
 
         for (final row in dishRows) {
           if (row is Map<String, dynamic>) {
@@ -791,15 +783,12 @@ class ImportExportService {
           final ingredientsTable = data['ingredients'] as Map<String, dynamic>;
           if (ingredientsTable.containsKey('data') &&
               ingredientsTable['data'] is List) {
-            final ingredientRows = ingredientsTable['data'] as List<dynamic>;
-            debugPrint(
-              '🍽️ Found ${ingredientRows.length} ingredient rows, attaching to dishes',
-            );
+            final ingredientRows = ingredientsTable['data'] as List<dynamic>;            // Found ${ingredientRows.length} ingredient rows, attaching to dishes
             _attachIngredientsTooDishes(dishes, ingredientRows);
           }
         }
 
-        debugPrint('🍽️ Returning ${dishes.length} converted dishes');
+        // Returning ${dishes.length} converted dishes
         return dishes;
       }
     }
@@ -1257,7 +1246,7 @@ class ImportExportService {
             debugPrint('⏭️ Skipping duplicate dish: ${dish.name}');
             return;
           case DuplicateHandling.overwrite:
-            debugPrint('🔄 Updating existing dish: ${dish.name}');
+            // Updating existing dish: ${dish.name}
             await _dishService.updateDish(dish);
             break;
           case DuplicateHandling.merge:
@@ -1441,7 +1430,7 @@ class ImportExportService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('last_backup_path', backupPath);
       await prefs.setInt('last_backup_timestamp', timestamp);
-      debugPrint('✅ Backup created successfully: $backupPath');
+      // Backup created successfully: $backupPath
       return true;
     } catch (e) {
       debugPrint('❌ Failed to create backup: $e');
@@ -1585,6 +1574,20 @@ class ImportExportService {
     }
 
     return sorted;
+  }
+
+  /// Helper method to get items for a data type (used for progress calculation)
+  List<dynamic> _getItemsForDataType(DataType type, Map<String, dynamic> data) {
+    switch (type) {
+      case DataType.dishes:
+        return _extractDishesFromData(data);
+      case DataType.mealLogs:
+        return _extractMealLogsFromData(data);
+      case DataType.userProfiles:
+        return _extractUserProfilesFromData(data);
+      default:
+        return data[type.name] as List<dynamic>? ?? [];
+    }
   }
 }
 
