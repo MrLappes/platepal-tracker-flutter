@@ -198,7 +198,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Barcode scanning coming soon!'),
+                          content: Text(l10n.barcodeScanningComingSoon),
                           backgroundColor: colorScheme.primary,
                         ),
                       );
@@ -213,7 +213,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Product search coming soon!'),
+                          content: Text(l10n.productSearchComingSoon),
                           backgroundColor: colorScheme.primary,
                         ),
                       );

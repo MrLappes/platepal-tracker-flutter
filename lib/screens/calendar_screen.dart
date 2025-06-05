@@ -194,6 +194,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _getAiTip() async {
+    final l10n = AppLocalizations.of(context)!;
     // Check if OpenAI service is configured
     final isConfigured = await _openAIService.isConfigured();
     if (!isConfigured) {
@@ -201,7 +202,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Please configure your OpenAI API key in settings to use AI tips',
+              l10n.configureApiKeyForAiTips,
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
@@ -271,7 +272,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to get AI tip. Please try again.'),
+            content: Text(l10n.failedToGetAiTip),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -296,7 +297,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text('AI Nutrition Tip'),
+                Text(l10n.aiNutritionTip),
               ],
             ),
             content: Text(tip),

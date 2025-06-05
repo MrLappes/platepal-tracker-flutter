@@ -201,6 +201,7 @@ class LinkHandler {
 
   /// Test method to verify URL launching capabilities
   static Future<void> testUrlLaunching(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final urls = [
       'https://flutter.dev',
       'https://github.com/MrLappes/platepal-tracker',
@@ -218,7 +219,7 @@ class LinkHandler {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$url: ${canLaunch ? "Available" : "Not available"}'),
+            content: Text('$url: ${canLaunch ? l10n.available : l10n.notAvailable}'),
             duration: const Duration(seconds: 1),
           ),
         );

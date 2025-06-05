@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:convert';
 
 class AgentStepsModal extends StatelessWidget {
@@ -10,6 +11,7 @@ class AgentStepsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final steps = metadata['stepResults'] as List? ?? [];
     final thinkingSteps = metadata['thinkingSteps'] as List? ?? [];
     final processingTime = metadata['processingTime'] as int? ?? 0;
@@ -19,7 +21,7 @@ class AgentStepsModal extends StatelessWidget {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Agent Processing Steps'),
+            title: Text(l10n.agentProcessingSteps),
             backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             leading: IconButton(
@@ -61,7 +63,7 @@ class AgentStepsModal extends StatelessWidget {
                                       thinkingSteps.join('\n'),
                                     ),
                                 icon: const Icon(Icons.copy, size: 16),
-                                label: const Text('Copy All'),
+                                label: Text(l10n.copyAll),
                                 style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -602,7 +604,7 @@ class AgentStepsModal extends StatelessWidget {
                     onPressed:
                         () => _showFullDataDialog(context, title, jsonString),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: const Text('View Full Data'),
+                    label: Text(l10n.viewFullData),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -703,7 +705,7 @@ class AgentStepsModal extends StatelessWidget {
                           enhancedSystemPrompt,
                         ),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: const Text('View Full Prompt'),
+                    label: Text(l10n.viewFullPrompt),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -812,7 +814,7 @@ class AgentStepsModal extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Copied to clipboard'),
+        content: Text(l10n.copiedToClipboard),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

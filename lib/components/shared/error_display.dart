@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ErrorDisplay extends StatelessWidget {
   final String error;
@@ -10,6 +11,7 @@ class ErrorDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       color: theme.colorScheme.errorContainer,
@@ -47,7 +49,7 @@ class ErrorDisplay extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(l10n.retry),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: theme.colorScheme.onErrorContainer,
                   backgroundColor: theme.colorScheme.errorContainer,
