@@ -72,9 +72,6 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       debugPrint(
         '🔄 MealsScreen: Loaded ${dishes.length} dishes from database',
       );
-      for (final dish in dishes) {
-        debugPrint('   - ${dish.name} (ID: ${dish.id})');
-      }
 
       setState(() {
         _dishes = dishes;
@@ -340,21 +337,17 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         );
       }
     }
-
     return CustomScrollView(
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(16),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.8,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
+          sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final dish = filteredDishes[index];
-              return _buildDishCard(dish);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildDishCard(dish),
+              );
             }, childCount: filteredDishes.length),
           ),
         ),
@@ -364,6 +357,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
   Widget _buildDishCard(Dish dish) {
     final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return Card(
       elevation: 2,
@@ -371,150 +365,231 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       child: InkWell(
         onTap: () => _viewDishDetails(dish),
         borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Dish image
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Dish image or placeholder
+              Container(
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
-                  ),
+                  borderRadius: BorderRadius.circular(8),
                   color: theme.colorScheme.surfaceVariant,
                 ),
                 child:
                     dish.imageUrl != null
                         ? ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(12),
-                          ),
+                          borderRadius: BorderRadius.circular(8),
                           child: Image.network(
                             dish.imageUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
+                              return Icon(
                                 Icons.restaurant,
-                                size: 48,
-                                color: Colors.grey,
+                                size: 24,
+                                color: theme.colorScheme.outline,
                               );
                             },
                           ),
                         )
-                        : const Icon(
+                        : Icon(
                           Icons.restaurant,
-                          size: 48,
-                          color: Colors.grey,
+                          size: 24,
+                          color: theme.colorScheme.outline,
                         ),
               ),
-            ),
 
-            // Dish info
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
+              const SizedBox(width: 16),
+
+              // Dish info
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Dish name with overflow handling
                     Text(
                       dish.name,
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${dish.nutrition.calories.toStringAsFixed(0)} kcal',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    Row(
+
+                    const SizedBox(height: 8),
+
+                    // Nutrition info row
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        if (dish.isFavorite)
-                          Icon(
-                            Icons.favorite,
-                            size: 16,
-                            color: theme.colorScheme.error,
-                          ),
-                        const Spacer(),
-                        PopupMenuButton<String>(
-                          onSelected: (value) => _handleDishAction(value, dish),
-                          itemBuilder:
-                              (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.edit, size: 18),
-                                      const SizedBox(width: 8),
-                                      Text(AppLocalizations.of(context)!.edit),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'favorite',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        dish.isFavorite
-                                            ? Icons.favorite_border
-                                            : Icons.favorite,
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        dish.isFavorite
-                                            ? AppLocalizations.of(
-                                              context,
-                                            )!.removeFromFavorites
-                                            : AppLocalizations.of(
-                                              context,
-                                            )!.addToFavorites,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.delete,
-                                        size: 18,
-                                        color: theme.colorScheme.error,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        AppLocalizations.of(context)!.delete,
-                                        style: TextStyle(
-                                          color: theme.colorScheme.error,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                          child: Icon(
-                            Icons.more_vert,
-                            size: 18,
+                        // Calories with fire icon
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_fire_department,
+                              size: 12,
+                              color: theme.colorScheme.outline,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${dish.nutrition.calories.round()} kcal',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        // Macros
+                        Text(
+                          'P: ${dish.nutrition.protein.round()}g',
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.outline,
+                            fontSize: 11,
                           ),
                         ),
+
+                        Text(
+                          ' • ',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontSize: 11,
+                          ),
+                        ),
+
+                        Text(
+                          'C: ${dish.nutrition.carbs.round()}g',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontSize: 11,
+                          ),
+                        ),
+
+                        Text(
+                          ' • ',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontSize: 11,
+                          ),
+                        ),
+
+                        Text(
+                          'F: ${dish.nutrition.fat.round()}g',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontSize: 11,
+                          ),
+                        ),
+
+                        // Favorite indicator
+                        if (dish.isFavorite) ...[
+                          const SizedBox(width: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.favorite,
+                                size: 12,
+                                color: theme.colorScheme.error,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                localizations.favorite,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.error,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+
+              // Navigation arrow
+              Icon(
+                Icons.keyboard_arrow_right,
+                size: 20,
+                color: theme.colorScheme.outline,
+              ),
+
+              const SizedBox(width: 8),
+
+              // Three-dot menu button
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: PopupMenuButton<String>(
+                  onSelected: (value) => _handleDishAction(value, dish),
+                  icon: Icon(
+                    Icons.more_vert,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  itemBuilder:
+                      (context) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit, size: 18),
+                              const SizedBox(width: 8),
+                              Text(localizations.edit),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'favorite',
+                          child: Row(
+                            children: [
+                              Icon(
+                                dish.isFavorite
+                                    ? Icons.favorite_border
+                                    : Icons.favorite,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                dish.isFavorite
+                                    ? localizations.removeFromFavorites
+                                    : localizations.addToFavorites,
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete,
+                                size: 18,
+                                color: theme.colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                localizations.delete,
+                                style: TextStyle(
+                                  color: theme.colorScheme.error,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
