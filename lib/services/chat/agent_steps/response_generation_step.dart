@@ -81,10 +81,20 @@ class ResponseGenerationStep extends AgentStep {
                     text.length > 100 ? '${text.substring(0, 100)}...' : text;
                 debugPrint('    [$j] text: $preview');
               } else if (item['type'] == 'image_url') {
-                final url = item['url'] as String;
-                final preview =
-                    url.length > 100 ? '${url.substring(0, 100)}...' : url;
-                debugPrint('    [$j] image_url: $preview');
+                String? url;
+                if (item['url'] is String) {
+                  url = item['url'] as String;
+                } else if (item['image_url'] is Map &&
+                    (item['image_url'] as Map)['url'] is String) {
+                  url = (item['image_url'] as Map)['url'] as String;
+                }
+                if (url != null) {
+                  final preview =
+                      url.length > 100 ? '${url.substring(0, 100)}...' : url;
+                  debugPrint('    [$j] image_url: $preview');
+                } else {
+                  debugPrint('    [$j] image_url: (no url found)');
+                }
               }
             } else {
               // For SDK objects or unknown types, just log the type
