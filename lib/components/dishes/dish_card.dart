@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/dish.dart';
 import '../ui/custom_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DishCard extends StatelessWidget {
   final Dish dish;
@@ -18,6 +19,7 @@ class DishCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return CustomCard(
       onTap: onTap,
       child: Column(
@@ -66,7 +68,7 @@ class DishCard extends StatelessWidget {
                               children: [
                                 Icon(Icons.edit),
                                 SizedBox(width: 8),
-                                Text('Edit'),
+                                Text(l10n.edit),
                               ],
                             ),
                           ),
@@ -77,7 +79,7 @@ class DishCard extends StatelessWidget {
                               children: [
                                 Icon(Icons.delete),
                                 SizedBox(width: 8),
-                                Text('Delete'),
+                                Text(l10n.delete),
                               ],
                             ),
                           ),
