@@ -303,7 +303,7 @@ class ImportExportService {
       }
     } else {
       debugPrint('⚠️ No mealLogs found in import data');
-    }    // Meal log processing complete: $itemsProcessed processed, ${errors.length} errors
+    } // Meal log processing complete: $itemsProcessed processed, ${errors.length} errors
 
     return ImportExportResult(
       success: errors.isEmpty,
@@ -726,7 +726,7 @@ class ImportExportService {
         duplicates: duplicates,
         skipped: skipped,
         errors: errors.length,
-      );      // ${type.name} processing complete: $processed processed, ${errors.length} errors
+      ); // ${type.name} processing complete: $processed processed, ${errors.length} errors
 
       return ImportExportResult(
         success: errors.isEmpty,
@@ -747,12 +747,17 @@ class ImportExportService {
     }
   }
 
-  List<dynamic> _extractDishesFromData(Map<String, dynamic> data) {    // _extractDishesFromData: Analyzing import data structure
+  List<dynamic> _extractDishesFromData(Map<String, dynamic> data) {
+    // _extractDishesFromData: Analyzing import data structure
     // Available top-level keys: ${data.keys.toList()}
 
     // Check if it's the new format first
     if (data.containsKey('dishes') && data['dishes'] is List) {
-      final dishes = data['dishes'] as List<dynamic>;      // Found dishes array with ${dishes.length} items (new format)
+      final dishes =
+          data['dishes']
+              as List<
+                dynamic
+              >; // Found dishes array with ${dishes.length} items (new format)
       return dishes;
     }
 
@@ -783,7 +788,11 @@ class ImportExportService {
           final ingredientsTable = data['ingredients'] as Map<String, dynamic>;
           if (ingredientsTable.containsKey('data') &&
               ingredientsTable['data'] is List) {
-            final ingredientRows = ingredientsTable['data'] as List<dynamic>;            // Found ${ingredientRows.length} ingredient rows, attaching to dishes
+            final ingredientRows =
+                ingredientsTable['data']
+                    as List<
+                      dynamic
+                    >; // Found ${ingredientRows.length} ingredient rows, attaching to dishes
             _attachIngredientsTooDishes(dishes, ingredientRows);
           }
         }
