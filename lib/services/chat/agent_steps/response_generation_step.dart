@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:platepal_tracker/models/user_ingredient.dart';
 import '../../../models/chat_types.dart';
 import '../openai_service.dart';
 import '../../chat/system_prompts.dart';
+import '../../../utils/image_utils.dart';
 
 /// Generates the main AI response based on gathered context and user message
 class ResponseGenerationStep extends AgentStep {
@@ -33,8 +33,7 @@ class ResponseGenerationStep extends AgentStep {
           '🤖 ResponseGenerationStep: No thinking result found, defaulting to include conversation history',
         );
       }
-
-      final messages = _buildConversationMessages(
+      final messages = await _buildConversationMessages(
         input.enhancedSystemPrompt ?? '',
         input.conversationHistory,
         input.userMessage,
@@ -51,87 +50,71 @@ class ResponseGenerationStep extends AgentStep {
         includeConversationHistory: includeConversationHistory,
       );
       debugPrint('🤖 ResponseGenerationStep: Sending request to OpenAI');
-      debugPrint('🤖 ResponseGenerationStep: Prompt/messages:');
-      for (final msg in messages) {
-        debugPrint('  [${msg['role']}] ${msg['content']}');
-      }
-      final response = await _openaiService.sendChatRequest(
-        messages: messages,
-        temperature: 0.7,
-        responseFormat: {'type': 'json_object'},
-      );
-      final content = response.choices.first.message.content ?? '{}';
       debugPrint(
-        '🤖 ResponseGenerationStep: Raw API response received: $content',
+        '🤖 ResponseGenerationStep: Messages count: ${messages.length}',
       );
+      debugPrint('🤖 ResponseGenerationStep: Prompt/messages:');
+      for (int i = 0; i < messages.length; i++) {
+        final msg = messages[i];
+        final role = msg['role'];
+        final content = msg['content'];
 
-      // --- Robust JSON or plain text handling ---
-      Map<String, dynamic>? parsedResponse;
-      String? fallbackText;
-      try {
-        // Try to extract JSON from the content, even if text is before/after
-        final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
-        if (jsonMatch != null) {
-          parsedResponse =
-              json.decode(jsonMatch.group(0)!) as Map<String, dynamic>;
+        if (content is String) {
+          // Text-only message
+          final preview =
+              content.length > 200
+                  ? '${content.substring(0, 200)}...'
+                  : content;
+          debugPrint('  [$i] [$role] (text): $preview');
+        } else if (content is List) {
+          // Vision API message with text and image
+          debugPrint(
+            '  [$i] [$role] (vision): ${content.length} content items',
+          );
+          for (int j = 0; j < content.length; j++) {
+            final item = content[j];
+            // Only log type if item is a map (plain data)
+            if (item is Map<String, dynamic> && item.containsKey('type')) {
+              if (item['type'] == 'text') {
+                final text = item['text'] as String;
+                final preview =
+                    text.length > 100 ? '${text.substring(0, 100)}...' : text;
+                debugPrint('    [$j] text: $preview');
+              } else if (item['type'] == 'image_url') {
+                final url = item['url'] as String;
+                final preview =
+                    url.length > 100 ? '${url.substring(0, 100)}...' : url;
+                debugPrint('    [$j] image_url: $preview');
+              }
+            } else {
+              // For SDK objects or unknown types, just log the type
+              debugPrint('    [$j] item type: ${item.runtimeType}');
+            }
+          }
         } else {
-          // Not a JSON object, treat as plain text
-          fallbackText = content.trim();
+          debugPrint('  [$i] [$role] (unknown): ${content.toString()}');
         }
-      } catch (parseError) {
-        debugPrint(
-          '❌ ResponseGenerationStep: Failed to parse response as JSON: $parseError',
-        );
-        fallbackText = content.trim();
       }
-      if (parsedResponse == null) {
-        // Fallback: treat as plain text response
-        parsedResponse = {
-          'replyText': fallbackText ?? "I'm not sure how to respond to that.",
-          'dishes': [],
-          'recommendation': null,
-        };
-      }
-      // Validate required keys and types
-      final valid = AgentStepSchemaValidator.validateJson(
-        parsedResponse,
-        ['replyText'],
-        typeMap: {'replyText': String},
+      // --- Instead of building OpenAI message dicts, just call the OpenAI service ---
+      final openaiResponse = await _openaiService.sendMessage(
+        input.userMessage,
+        imageUrl: input.imageUri,
+        // Optionally: isHighDetail: true/false or other params as needed
       );
-      if (!valid) {
-        debugPrint(
-          '❌ ResponseGenerationStep: AI response failed schema validation',
-        );
-        return ChatStepResult.failure(
-          stepName: stepName,
-          error: ChatAgentError(
-            type: ChatErrorType.verificationError,
-            message: 'AI response failed schema validation',
-            details: parsedResponse.toString(),
-            retryable: true,
-          ),
-        );
-      }
-
-      // --- Build ChatResponse ---
+      // openaiResponse is a String (the reply text), but you may want to adapt this if your service returns more
+      // For now, just use it as replyText
       final chatResponse = ChatResponse(
-        replyText:
-            parsedResponse['replyText'] as String? ??
-            "I'm not sure how to respond to that.",
-        dishes: null, // Dishes will be processed in separate pipeline step
-        recommendation: parsedResponse['recommendation'] as String?,
-        metadata: {
-          'modelUsed': _openaiService.selectedModel,
-          'tokensUsed': response.usage?.totalTokens,
-          'rawResponse': parsedResponse,
-        },
+        replyText: openaiResponse,
+        dishes: null,
+        recommendation: null,
+        metadata: {'modelUsed': _openaiService.selectedModel},
       );
       debugPrint('✅ ResponseGenerationStep: Successfully generated response');
       return ChatStepResult.success(
         stepName: stepName,
         data: {
           'chatResponse': chatResponse.toJson(),
-          'parsedResponse': parsedResponse,
+          'parsedResponse': openaiResponse,
           'conversationHistoryIncluded': includeConversationHistory,
         },
       );
@@ -179,16 +162,18 @@ class ResponseGenerationStep extends AgentStep {
       );
     }
     // Optionally: check for suspicious values, empty reply, etc.
-    if ((chatResponseJson['replyText'] as String).trim().isEmpty) {
+    final replyText = chatResponseJson['replyText'];
+    if (replyText == null ||
+        (replyText is String && replyText.trim().isEmpty)) {
       return ChatStepVerificationResult.invalid(
-        message: 'Empty reply text in chatResponse',
+        message: 'Empty or missing reply text in chatResponse',
       );
     }
     return ChatStepVerificationResult.valid();
   }
 
   /// Builds the conversation messages for the OpenAI request
-  List<Map<String, dynamic>> _buildConversationMessages(
+  Future<List<Map<String, dynamic>>> _buildConversationMessages(
     String systemPrompt,
     List<ChatMessage> conversationHistory,
     String userMessage,
@@ -196,7 +181,7 @@ class ResponseGenerationStep extends AgentStep {
     List<UserIngredient>? userIngredients, {
     String? contextSummary,
     bool includeConversationHistory = true,
-  }) {
+  }) async {
     final messages = <Map<String, dynamic>>[];
 
     // Always start with baseChatPrompt, then append any additional systemPrompt and contextSummary
@@ -251,10 +236,11 @@ class ResponseGenerationStep extends AgentStep {
       debugPrint(
         '🤖 ResponseGenerationStep: Skipping conversation history per thinking step analysis',
       );
-    }
-
-    // Add current user message with enhancements
-    String enhancedUserMessage = userMessage;
+    } // Add current user message with enhancements
+    String enhancedUserMessage =
+        userMessage.trim().isEmpty
+            ? "The user didn't add text, work with the attachments by themselves"
+            : userMessage;
 
     // Add user ingredients if provided
     if (userIngredients != null && userIngredients.isNotEmpty) {
@@ -264,16 +250,66 @@ class ResponseGenerationStep extends AgentStep {
           )
           .join(', ');
       enhancedUserMessage += '\n\nIngredients I want to use: $ingredientsList';
-    }
-
-    // Handle image if present
+    } // Handle image if present
     if (imageUri != null) {
-      // For now, just note the image presence
-      // TODO: Implement image processing when OpenAI service supports it
-      enhancedUserMessage += '\n\n[User uploaded an image with this message]';
-    }
+      // Check if the current model supports vision
+      final currentModel = _openaiService.selectedModel;
+      if (!ImageUtils.isImageCapableModel(currentModel)) {
+        debugPrint(
+          '⚠️ ResponseGenerationStep: Model $currentModel does not support vision, skipping image',
+        );
+        enhancedUserMessage +=
+            '\n\n[Note: User uploaded an image, but the current model does not support vision]';
+        messages.add({'role': 'user', 'content': enhancedUserMessage});
+      } else {
+        // Use OpenAI Vision API format for images (plain map, not SDK)
+        debugPrint(
+          '🤖 ResponseGenerationStep: Processing image with vision API',
+        );
+        debugPrint('🤖 ResponseGenerationStep: Image URI: $imageUri');
+        debugPrint('🤖 ResponseGenerationStep: Using model: $currentModel');
+        try {
+          final base64Image = await ImageUtils.resizeAndEncodeImage(
+            imageUri,
+            isHighDetail: false,
+          );
+          final imageDataUrl = ImageUtils.createImageDataUrl(
+            base64Image,
+            imagePath: imageUri,
+          );
 
-    messages.add({'role': 'user', 'content': enhancedUserMessage});
+          debugPrint(
+            '🤖 ResponseGenerationStep: Successfully converted image to base64',
+          );
+          debugPrint(
+            '🤖 ResponseGenerationStep: Data URL length: ${imageDataUrl.length}',
+          );
+          debugPrint(
+            '🤖 ResponseGenerationStep: Data URL preview: ${imageDataUrl.length > 200 ? imageDataUrl.substring(0, 200) : imageDataUrl}...',
+          );
+
+          // Use OpenAI Vision API format for images (plain map, not SDK)
+          final contentItems = [
+            {'type': 'text', 'text': enhancedUserMessage},
+            {
+              'type': 'image_url',
+              'image_url': {'url': imageDataUrl},
+            },
+          ];
+          messages.add({'role': 'user', 'content': contentItems});
+        } catch (imageError) {
+          debugPrint(
+            '❌ ResponseGenerationStep: Error processing image: $imageError',
+          );
+          // Fallback to text-only message with note about image
+          enhancedUserMessage +=
+              '\n\n[Note: User uploaded an image, but it could not be processed]';
+          messages.add({'role': 'user', 'content': enhancedUserMessage});
+        }
+      }
+    } else {
+      messages.add({'role': 'user', 'content': enhancedUserMessage});
+    }
 
     return messages;
   }

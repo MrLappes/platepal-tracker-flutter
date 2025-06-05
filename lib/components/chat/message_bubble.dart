@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -111,20 +112,7 @@ class MessageBubble extends StatelessWidget {
             if (message.hasImage) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  message.imageUrl!,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: double.infinity,
-                      height: 200,
-                      color: theme.colorScheme.surfaceContainerHigh,
-                      child: const Icon(Icons.error),
-                    );
-                  },
-                ),
+                child: _buildImageWidget(message.imageUrl!, theme),
               ),
               const SizedBox(height: 12),
             ],
@@ -644,5 +632,46 @@ class MessageBubble extends StatelessWidget {
             ],
           ),
     );
+  }
+
+  /// Build image widget that handles both local files and network URLs
+  Widget _buildImageWidget(String imageUrl, ThemeData theme) {
+    // Check if it's a local file path
+    if (imageUrl.startsWith('/') ||
+        imageUrl.contains('\\') ||
+        imageUrl.startsWith('file://')) {
+      // Handle local file
+      final file = File(imageUrl);
+      return Image.file(
+        file,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: double.infinity,
+            height: 200,
+            color: theme.colorScheme.surfaceContainerHigh,
+            child: const Icon(Icons.error),
+          );
+        },
+      );
+    } else {
+      // Handle network URL
+      return Image.network(
+        imageUrl,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: double.infinity,
+            height: 200,
+            color: theme.colorScheme.surfaceContainerHigh,
+            child: const Icon(Icons.error),
+          );
+        },
+      );
+    }
   }
 }
