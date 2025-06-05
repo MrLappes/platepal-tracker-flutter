@@ -627,7 +627,7 @@ class MessageBubble extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(dish),
-                child: const Text('Select'),
+                child: Text(localizations.select),
               ),
             ],
           ),
