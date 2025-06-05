@@ -214,7 +214,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         });
       }
     } catch (e) {
-      _showErrorSnackBar('Error picking image: $e');
+      _showErrorSnackBar(AppLocalizations.of(context)!.errorPickingImage(e.toString()));
     }
   }
 
@@ -469,7 +469,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   child: ElevatedButton.icon(
                     onPressed: () {
                       // TODO: Implement barcode scanning
-                      _showErrorSnackBar('Barcode scanning coming soon!');
+                      _showErrorSnackBar(AppLocalizations.of(context)!.barcodeScanningComingSoon);
                     },
                     icon: const Icon(Icons.qr_code_scanner),
                     label: Text(AppLocalizations.of(context)!.scanBarcode),
@@ -484,7 +484,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   child: ElevatedButton.icon(
                     onPressed: () {
                       // TODO: Implement product search
-                      _showErrorSnackBar('Product search coming soon!');
+                      _showErrorSnackBar(AppLocalizations.of(context)!.productSearchComingSoon);
                     },
                     icon: const Icon(Icons.search),
                     label: Text(AppLocalizations.of(context)!.searchProduct),

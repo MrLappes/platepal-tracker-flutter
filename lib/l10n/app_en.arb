@@ -1785,5 +1785,43 @@
   "dishLoggedSuccessfully": "Dish logged successfully!",
   "@dishLoggedSuccessfully": {
     "description": "Success message when dish is logged"
-  }
+  },
+  "select": "Select",
+  "@select": {
+    "description": "Generic select button text"
+  },
+  "errorOpeningDishScreen": "Error opening dish screen: {error}",
+  "@errorOpeningDishScreen": {
+    "description": "Error message when dish screen fails to open",
+    "placeholders": {"error": {}}
+  },
+  "errorPickingImage": "Error picking image: {error}",
+  "@errorPickingImage": {
+    "description": "Error message when image picker fails",
+    "placeholders": {"error": {}}
+  },
+  "agentProcessingSteps": "Agent Processing Steps",
+  "@agentProcessingSteps": {"description": "Title for agent steps modal"},
+  "copyAll": "Copy All",
+  "@copyAll": {"description": "Button text to copy all"},
+  "viewFullData": "View Full Data",
+  "@viewFullData": {"description": "Button text to view full data"},
+  "viewFullPrompt": "View Full Prompt",
+  "@viewFullPrompt": {"description": "Button text to view full prompt"},
+  "copiedToClipboard": "Copied to clipboard",
+  "@copiedToClipboard": {"description": "Snack bar text after copying"},
+  "barcodeScanningComingSoon": "Barcode scanning coming soon!",
+  "@barcodeScanningComingSoon": {"description": "Placeholder snackbar for barcode"},
+  "productSearchComingSoon": "Product search coming soon!",
+  "@productSearchComingSoon": {"description": "Placeholder snackbar for search"},
+  "configureApiKeyForAiTips": "Please configure your OpenAI API key in settings to use AI tips",
+  "@configureApiKeyForAiTips": {"description": "Prompt to configure API key for AI tips"},
+  "failedToGetAiTip": "Failed to get AI tip. Please try again.",
+  "@failedToGetAiTip": {"description": "Error getting AI tip"},
+  "aiNutritionTip": "AI Nutrition Tip",
+  "@aiNutritionTip": {"description": "Title for AI nutrition tips"},
+  "available": "Available",
+  "@available": {"description": "Link availability true"},
+  "notAvailable": "Not available",
+  "@notAvailable": {"description": "Link availability false"}
 }
