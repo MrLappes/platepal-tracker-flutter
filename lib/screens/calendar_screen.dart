@@ -400,11 +400,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final startMonth = monthNames[_weekStartDate.month - 1];
     final endMonth = monthNames[weekEndDate.month - 1];
 
-    if (_weekStartDate.month == weekEndDate.month) {
-      return '$startMonth ${_weekStartDate.day}-${weekEndDate.day}, ${_weekStartDate.year}';
-    } else {
+    if (_weekStartDate.year == weekEndDate.year) {
+      if (_weekStartDate.month == weekEndDate.month) {
+        return '$startMonth ${_weekStartDate.day}-${weekEndDate.day}, ${_weekStartDate.year}';
+      }
       return '$startMonth ${_weekStartDate.day} - $endMonth ${weekEndDate.day}, ${_weekStartDate.year}';
     }
+
+    return '$startMonth ${_weekStartDate.day}, ${_weekStartDate.year} - $endMonth ${weekEndDate.day}, ${weekEndDate.year}';
   }
 
   String _getMonthYearText() {
