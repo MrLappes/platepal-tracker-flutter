@@ -177,11 +177,208 @@
   "exportData": "Export Data",
   "@exportData": {
     "description": "Export data option"
-  },
-  "importData": "Import Data",
+  },  "importData": "Import Data",
   "@importData": {
     "description": "Import data option"
-  },  "about": "About",
+  },
+  "selectFile": "Select File",
+  "@selectFile": {
+    "description": "Button text to select a file"
+  },
+  "selectFilesToImport": "Select files to import",
+  "@selectFilesToImport": {
+    "description": "Button text to select files for import"
+  },
+  "importFromFile": "Import from File",
+  "@importFromFile": {
+    "description": "Import from file option"
+  },
+  "importJson": "Import JSON",
+  "@importJson": {
+    "description": "Import JSON file option"
+  },
+  "importCsv": "Import CSV",
+  "@importCsv": {
+    "description": "Import CSV file option"
+  },
+  "exportAsJson": "Export as JSON",
+  "@exportAsJson": {
+    "description": "Export as JSON option"
+  },
+  "exportAsCsv": "Export as CSV",
+  "@exportAsCsv": {
+    "description": "Export as CSV option"
+  },
+  "selectDataToExport": "Select data to export",
+  "@selectDataToExport": {
+    "description": "Title for export data selection"
+  },
+  "selectDataToImport": "Select data to import",
+  "@selectDataToImport": {
+    "description": "Title for import data selection"
+  },
+  "userProfiles": "User Profiles",
+  "@userProfiles": {
+    "description": "User profiles data type"
+  },
+  "mealLogs": "Meal Logs",
+  "@mealLogs": {
+    "description": "Meal logs data type"
+  },
+  "dishes": "Dishes",
+  "@dishes": {
+    "description": "Dishes data type"
+  },
+  "ingredients": "Ingredients",
+  "@ingredients": {
+    "description": "Ingredients data type"
+  },
+  "supplements": "Supplements",
+  "@supplements": {
+    "description": "Supplements data type"
+  },
+  "nutritionGoalsData": "Nutrition Goals",
+  "@nutritionGoalsData": {
+    "description": "Nutrition goals data type"
+  },
+  "allData": "All Data",
+  "@allData": {
+    "description": "All data option"
+  },
+  "importProgress": "Importing data...",
+  "@importProgress": {
+    "description": "Import progress message"
+  },
+  "exportProgress": "Exporting data...",
+  "@exportProgress": {
+    "description": "Export progress message"
+  },
+  "importSuccessful": "Data imported successfully",
+  "@importSuccessful": {
+    "description": "Import success message"
+  },
+  "exportSuccessful": "Data exported successfully",
+  "@exportSuccessful": {
+    "description": "Export success message"
+  },
+  "importFailed": "Import failed",
+  "@importFailed": {
+    "description": "Import failed message"
+  },
+  "exportFailed": "Export failed",
+  "@exportFailed": {
+    "description": "Export failed message"
+  },
+  "noFileSelected": "No file selected",
+  "@noFileSelected": {
+    "description": "No file selected error"
+  },
+  "invalidFileFormat": "Invalid file format",
+  "@invalidFileFormat": {
+    "description": "Invalid file format error"
+  },
+  "fileNotFound": "File not found",
+  "@fileNotFound": {
+    "description": "File not found error"
+  },
+  "dataValidationFailed": "Data validation failed",
+  "@dataValidationFailed": {
+    "description": "Data validation failed error"
+  },
+  "importedItemsCount": "Imported {count} items",
+  "@importedItemsCount": {
+    "description": "Shows how many items were imported",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of imported items"
+      }
+    }
+  },
+  "exportedItemsCount": "Exported {count} items",
+  "@exportedItemsCount": {
+    "description": "Shows how many items were exported",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of exported items"
+      }
+    }
+  },
+  "backupAndRestore": "Backup & Restore",
+  "@backupAndRestore": {
+    "description": "Backup and restore section title"
+  },
+  "createBackup": "Create Backup",
+  "@createBackup": {
+    "description": "Create backup button"
+  },
+  "restoreFromBackup": "Restore from Backup",
+  "@restoreFromBackup": {
+    "description": "Restore from backup button"
+  },
+  "backupCreatedSuccessfully": "Backup created successfully",
+  "@backupCreatedSuccessfully": {
+    "description": "Backup creation success message"
+  },
+  "restoreSuccessful": "Restore completed successfully",
+  "@restoreSuccessful": {
+    "description": "Restore success message"
+  },
+  "warningDataWillBeReplaced": "Warning: Existing data will be replaced",
+  "@warningDataWillBeReplaced": {
+    "description": "Warning message about data replacement"
+  },
+  "confirmRestore": "Are you sure you want to restore? This will replace all existing data.",
+  "@confirmRestore": {
+    "description": "Confirmation message for restore operation"
+  },
+  "fileSize": "File size: {size}",
+  "@fileSize": {
+    "description": "Shows file size",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "description": "File size string"
+      }
+    }
+  },
+  "duplicateItemsFound": "Duplicate items found: {count}",
+  "@duplicateItemsFound": {
+    "description": "Shows number of duplicate items found",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of duplicate items"
+      }
+    }
+  },
+  "howToHandleDuplicates": "How to handle duplicates?",
+  "@howToHandleDuplicates": {
+    "description": "Question about handling duplicate items"
+  },
+  "skipDuplicates": "Skip Duplicates",
+  "@skipDuplicates": {
+    "description": "Skip duplicates option"
+  },
+  "overwriteDuplicates": "Overwrite Duplicates",
+  "@overwriteDuplicates": {
+    "description": "Overwrite duplicates option"
+  },
+  "mergeDuplicates": "Merge Duplicates",
+  "@mergeDuplicates": {
+    "description": "Merge duplicates option"
+  },
+  "formatNotSupported": "Format not supported: {format}",
+  "@formatNotSupported": {
+    "description": "Format not supported error",
+    "placeholders": {
+      "format": {
+        "type": "String",
+        "description": "File format"
+      }
+    }
+  },"about": "About",
   "@about": {
     "description": "About option"
   },
@@ -1357,7 +1554,11 @@
   "edit": "Edit",
   "@edit": { "description": "Menu item text to edit" },
   "retry": "Retry",
-  "@retry": { "description": "Button text to retry action" },
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "errorLoggingDish": "There was an error logging the dish",
+  "@errorLoggingDish": { "description": "Warning for dish logging errors" },
   "allCategories": "All Categories",
   "@allCategories": { "description": "Filter option to show all categories" },
   "searchDishes": "Search dishes...",
@@ -1456,9 +1657,15 @@
   "noIngredientsAdded": "No ingredients added yet",
   "markAsFavorite": "Mark as favorite",  
   "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
   "createFirstDish": "Create your first dish to start building your recipe collection",
+  "@createFirstDish": { "description": "Empty state subtitle encouraging dish creation" },
   "noDishesFound": "No dishes found",
+  "@noDishesFound": { "description": "Message when search returns no results" },
   "tryAdjustingSearch": "Try adjusting your search terms or filters",
+  "@tryAdjustingSearch": { "description": "Suggestion when no search results found" },
   "addToFavorites": "Add to Favorites",
   "removeFromFavorites": "Remove from Favorites",
   "failedToDeleteDish": "Failed to delete dish",
@@ -1578,9 +1785,5 @@
   "dishLoggedSuccessfully": "Dish logged successfully!",
   "@dishLoggedSuccessfully": {
     "description": "Success message when dish is logged"
-  },
-  "errorLoggingDish": "Error logging dish",
-  "@errorLoggingDish": {
-    "description": "Error message when dish logging fails"
   }
 }

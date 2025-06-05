@@ -22,20 +22,37 @@ class Dish {
     this.isFavorite = false,
     this.category,
   });
-
   factory Dish.fromJson(Map<String, dynamic> json) {
+    // Handle nutrition data - can be nested object or direct fields
+    NutritionInfo nutrition;
+    if (json['nutrition'] != null &&
+        json['nutrition'] is Map<String, dynamic>) {
+      nutrition = NutritionInfo.fromJson(
+        json['nutrition'] as Map<String, dynamic>,
+      );
+    } else {
+      // Handle direct nutrition fields in dish object
+      nutrition = NutritionInfo(
+        calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+        protein: (json['protein'] as num?)?.toDouble() ?? 0.0,
+        carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
+        fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
+        fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
+        sugar: (json['sugar'] as num?)?.toDouble() ?? 0.0,
+        sodium: (json['sodium'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
+
     return Dish(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
-      imageUrl: json['imageUrl'] as String?,
+      imageUrl: json['imageUrl'] as String? ?? json['imageUri'] as String?,
       ingredients:
           (json['ingredients'] as List<dynamic>)
               .map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
               .toList(),
-      nutrition: NutritionInfo.fromJson(
-        json['nutrition'] as Map<String, dynamic>,
-      ),
+      nutrition: nutrition,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       isFavorite: json['isFavorite'] as bool? ?? false,
@@ -101,12 +118,11 @@ class Ingredient {
     this.nutrition,
     this.barcode,
   });
-
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
       id: json['id'] as String,
       name: json['name'] as String,
-      amount: (json['amount'] as num).toDouble(),
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       unit: json['unit'] as String,
       nutrition:
           json['nutrition'] != null
@@ -148,13 +164,12 @@ class NutritionInfo {
     this.sugar = 0.0,
     this.sodium = 0.0,
   });
-
   factory NutritionInfo.fromJson(Map<String, dynamic> json) {
     return NutritionInfo(
-      calories: (json['calories'] as num).toDouble(),
-      protein: (json['protein'] as num).toDouble(),
-      carbs: (json['carbs'] as num).toDouble(),
-      fat: (json['fat'] as num).toDouble(),
+      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+      protein: (json['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
       fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
       sugar: (json['sugar'] as num?)?.toDouble() ?? 0.0,
       sodium: (json['sodium'] as num?)?.toDouble() ?? 0.0,
@@ -214,11 +229,12 @@ class DishLog {
       loggedAt: DateTime.parse(json['loggedAt'] ?? json['logged_at'] as String),
       mealType: json['mealType'] ?? json['meal_type'] as String,
       servingSize:
-          (json['servingSize'] ?? json['serving_size'] as num).toDouble(),
-      calories: (json['calories'] as num).toDouble(),
-      protein: (json['protein'] as num).toDouble(),
-      carbs: (json['carbs'] as num).toDouble(),
-      fat: (json['fat'] as num).toDouble(),
+          (json['servingSize'] ?? json['serving_size'] as num?)?.toDouble() ??
+          1.0,
+      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+      protein: (json['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
       fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -282,14 +298,13 @@ class DailyMacroSummary {
     required this.fat,
     required this.fiber,
   });
-
   factory DailyMacroSummary.fromJson(Map<String, dynamic> json) {
     return DailyMacroSummary(
-      calories: (json['calories'] as num).toDouble(),
-      protein: (json['protein'] as num).toDouble(),
-      carbs: (json['carbs'] as num).toDouble(),
-      fat: (json['fat'] as num).toDouble(),
-      fiber: (json['fiber'] as num).toDouble(),
+      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+      protein: (json['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
+      fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

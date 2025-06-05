@@ -1,0 +1,464 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+class ImportProfileCompletionScreen extends StatefulWidget {
+  final Map<String, dynamic> incompleteProfile;
+  final VoidCallback onCompleted;
+  final VoidCallback onSkipped;
+
+  const ImportProfileCompletionScreen({
+    super.key,
+    required this.incompleteProfile,
+    required this.onCompleted,
+    required this.onSkipped,
+  });
+
+  @override
+  State<ImportProfileCompletionScreen> createState() =>
+      _ImportProfileCompletionScreenState();
+}
+
+class _ImportProfileCompletionScreenState
+    extends State<ImportProfileCompletionScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _ageController;
+  late TextEditingController _heightController;
+  late TextEditingController _weightController;
+
+  String _selectedGender = 'other';
+  String _selectedActivityLevel = 'sedentary';
+  String _selectedFitnessGoal = 'maintainWeight';
+  String _selectedUnitSystem = 'metric';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    final profile = widget.incompleteProfile;
+
+    _nameController = TextEditingController(text: profile['name'] ?? '');
+    _emailController = TextEditingController(text: profile['email'] ?? '');
+    _ageController = TextEditingController(
+      text: profile['age']?.toString() ?? '',
+    );
+    _heightController = TextEditingController(
+      text: profile['height']?.toString() ?? '',
+    );
+    _weightController = TextEditingController(
+      text: profile['weight']?.toString() ?? '',
+    );
+
+    _selectedGender = profile['gender'] ?? 'other';
+    _selectedActivityLevel = profile['activityLevel'] ?? 'sedentary';
+    _selectedFitnessGoal = profile['fitnessGoal'] ?? 'maintainWeight';
+    _selectedUnitSystem = profile['unitSystem'] ?? 'metric';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _ageController.dispose();
+    _heightController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Complete Profile'),
+        backgroundColor: theme.colorScheme.surfaceVariant,
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Header Card
+            Card(
+              color: theme.colorScheme.primaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.person_add,
+                      size: 48,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Complete Your Profile',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'We found some missing information in your imported profile. Please fill in the required fields to continue.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Personal Information
+            Text(l10n.personalInformation, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 16),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: l10n.name,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n.requiredField;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: l10n.email,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.email),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n.requiredField;
+                        }
+                        if (!value.contains('@')) {
+                          return l10n.invalidEmail;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _ageController,
+                            decoration: InputDecoration(
+                              labelText: l10n.age,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.cake),
+                              suffixText: l10n.years,
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.requiredField;
+                              }
+                              final age = int.tryParse(value);
+                              if (age == null || age < 13 || age > 120) {
+                                return l10n.ageRange;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedGender,
+                            decoration: InputDecoration(
+                              labelText: l10n.gender,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.wc),
+                            ),
+                            items: [
+                              DropdownMenuItem(
+                                value: 'male',
+                                child: Text(l10n.male),
+                              ),
+                              DropdownMenuItem(
+                                value: 'female',
+                                child: Text(l10n.female),
+                              ),
+                              DropdownMenuItem(
+                                value: 'other',
+                                child: Text(l10n.other),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedGender = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _heightController,
+                            decoration: InputDecoration(
+                              labelText: l10n.height,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.height),
+                              suffixText:
+                                  _selectedUnitSystem == 'metric'
+                                      ? l10n.cm
+                                      : l10n.inches,
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.requiredField;
+                              }
+                              final height = double.tryParse(value);
+                              if (height == null) {
+                                return 'Invalid number';
+                              }
+                              if (_selectedUnitSystem == 'metric') {
+                                if (height < 100 || height > 250) {
+                                  return l10n.heightRange;
+                                }
+                              } else {
+                                if (height < 36 || height > 96) {
+                                  return 'Height must be between 36-96 inches';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _weightController,
+                            decoration: InputDecoration(
+                              labelText: l10n.weight,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.monitor_weight),
+                              suffixText:
+                                  _selectedUnitSystem == 'metric'
+                                      ? l10n.kg
+                                      : l10n.lb,
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.requiredField;
+                              }
+                              final weight = double.tryParse(value);
+                              if (weight == null) {
+                                return 'Invalid number';
+                              }
+                              if (_selectedUnitSystem == 'metric') {
+                                if (weight < 30 || weight > 300) {
+                                  return l10n.weightRange;
+                                }
+                              } else {
+                                if (weight < 66 || weight > 660) {
+                                  return 'Weight must be between 66-660 lb';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Preferences
+            Text(l10n.preferences, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 16),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: _selectedUnitSystem,
+                      decoration: InputDecoration(
+                        labelText: l10n.unitSystem,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.straighten),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'metric',
+                          child: Text(l10n.metric),
+                        ),
+                        DropdownMenuItem(
+                          value: 'imperial',
+                          child: Text(l10n.imperial),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedUnitSystem = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    DropdownButtonFormField<String>(
+                      value: _selectedActivityLevel,
+                      decoration: InputDecoration(
+                        labelText: l10n.activityLevel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.directions_run),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'sedentary',
+                          child: Text(l10n.sedentary),
+                        ),
+                        DropdownMenuItem(
+                          value: 'lightlyActive',
+                          child: Text(l10n.lightlyActive),
+                        ),
+                        DropdownMenuItem(
+                          value: 'moderatelyActive',
+                          child: Text(l10n.moderatelyActive),
+                        ),
+                        DropdownMenuItem(
+                          value: 'veryActive',
+                          child: Text(l10n.veryActive),
+                        ),
+                        DropdownMenuItem(
+                          value: 'extraActive',
+                          child: Text(l10n.extraActive),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedActivityLevel = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    DropdownButtonFormField<String>(
+                      value: _selectedFitnessGoal,
+                      decoration: InputDecoration(
+                        labelText: l10n.fitnessGoal,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.flag),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'loseWeight',
+                          child: Text(l10n.loseWeight),
+                        ),
+                        DropdownMenuItem(
+                          value: 'maintainWeight',
+                          child: Text(l10n.maintainWeight),
+                        ),
+                        DropdownMenuItem(
+                          value: 'gainWeight',
+                          child: Text(l10n.gainWeight),
+                        ),
+                        DropdownMenuItem(
+                          value: 'buildMuscle',
+                          child: Text(l10n.buildMuscle),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedFitnessGoal = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+            top: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+          ),
+        ),
+        child: SafeArea(
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: widget.onSkipped,
+                  child: const Text('Skip for Now'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 2,
+                child: FilledButton(
+                  onPressed: _saveProfile,
+                  child: Text(l10n.save),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _saveProfile() {
+    if (_formKey.currentState!.validate()) {
+      // Update the profile with completed data
+      widget.incompleteProfile.addAll({
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'age': int.parse(_ageController.text),
+        'gender': _selectedGender,
+        'height': double.parse(_heightController.text),
+        'weight': double.parse(_weightController.text),
+        'activityLevel': _selectedActivityLevel,
+        'fitnessGoal': _selectedFitnessGoal,
+        'unitSystem': _selectedUnitSystem,
+      });
+
+      widget.onCompleted();
+    }
+  }
+}

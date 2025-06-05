@@ -172,8 +172,6 @@ class DatabaseService {
         carbs REAL NOT NULL,
         fat REAL NOT NULL,
         fiber REAL NOT NULL DEFAULT 0,
-        sugar REAL NOT NULL DEFAULT 0,
-        sodium REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (dish_id) REFERENCES dishes (id) ON DELETE CASCADE
       )
     ''');
@@ -188,11 +186,11 @@ class DatabaseService {
         carbs REAL NOT NULL,
         fat REAL NOT NULL,
         fiber REAL NOT NULL DEFAULT 0,
-        sugar REAL NOT NULL DEFAULT 0,
-        sodium REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
       )
-    '''); // Meal logs table
+    ''');
+
+    // Meal logs table
     await db.execute('''
       CREATE TABLE meal_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

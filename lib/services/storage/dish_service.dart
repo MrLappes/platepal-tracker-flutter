@@ -515,4 +515,146 @@ class DishService {
     final db = await _databaseService.database;
     await db.delete('dish_logs', where: 'id = ?', whereArgs: [logId]);
   }
+
+  Future<bool> saveDishFromImport(Map<String, dynamic> dishData) async {
+    try {
+      final db = await _databaseService.database;
+
+      // Parse category with fallback
+      String category =
+          dishData['category'] ?? dishData['defaultMealType'] ?? 'lunch';
+
+      // Ensure category is one of the valid meal types
+      if (![
+        'breakfast',
+        'lunch',
+        'dinner',
+        'snack',
+      ].contains(category.toLowerCase())) {
+        category = 'lunch';
+      }
+
+      // Start transaction
+      await db.transaction((txn) async {
+        // Insert dish with safe null handling
+        await txn.insert('dishes', {
+          'id': dishData['id'] ?? _generateId(),
+          'name': dishData['name'] ?? 'Unknown Dish',
+          'description': dishData['description'] ?? '',
+          'image_url': dishData['imageUrl'] ?? dishData['imageUri'] ?? '',
+          'category': category,
+          'is_favorite': (dishData['isFavorite'] == true) ? 1 : 0,
+          'created_at':
+              dishData['createdAt'] ?? DateTime.now().toIso8601String(),
+          'updated_at':
+              dishData['updatedAt'] ?? DateTime.now().toIso8601String(),
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+        // Insert nutrition with safe parsing
+        final nutrition = dishData['nutrition'] as Map<String, dynamic>? ?? {};
+        await txn.insert('dish_nutrition', {
+          'dish_id': dishData['id'],
+          'calories':
+              _safeParseDouble(nutrition['calories'] ?? dishData['calories']) ??
+              0.0,
+          'protein':
+              _safeParseDouble(nutrition['protein'] ?? dishData['protein']) ??
+              0.0,
+          'carbs':
+              _safeParseDouble(nutrition['carbs'] ?? dishData['carbs']) ?? 0.0,
+          'fat': _safeParseDouble(nutrition['fat'] ?? dishData['fat']) ?? 0.0,
+          'fiber':
+              _safeParseDouble(nutrition['fiber'] ?? dishData['fiber']) ?? 0.0,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+        // Insert ingredients with safe parsing
+        final ingredients = dishData['ingredients'] as List<dynamic>? ?? [];
+        for (final ingredientData in ingredients) {
+          if (ingredientData is Map<String, dynamic>) {
+            final ingredientId = ingredientData['id'] ?? _generateId();
+
+            // Insert ingredient
+            await txn.insert('ingredients', {
+              'id': ingredientId,
+              'name': ingredientData['name'] ?? 'Unknown Ingredient',
+              'barcode': ingredientData['barcode'],
+            }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+            // Insert ingredient nutrition
+            await txn.insert('ingredient_nutrition', {
+              'ingredient_id': ingredientId,
+              'calories':
+                  _safeParseDouble(
+                    ingredientData['caloriesPer100'] ??
+                        ingredientData['calories'],
+                  ) ??
+                  0.0,
+              'protein':
+                  _safeParseDouble(
+                    ingredientData['proteinPer100'] ??
+                        ingredientData['protein'],
+                  ) ??
+                  0.0,
+              'carbs':
+                  _safeParseDouble(
+                    ingredientData['carbsPer100'] ?? ingredientData['carbs'],
+                  ) ??
+                  0.0,
+              'fat':
+                  _safeParseDouble(
+                    ingredientData['fatPer100'] ?? ingredientData['fat'],
+                  ) ??
+                  0.0,
+              'fiber':
+                  _safeParseDouble(
+                    ingredientData['fiberPer100'] ?? ingredientData['fiber'],
+                  ) ??
+                  0.0,
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+            // Insert dish-ingredient relationship
+            await txn.insert('dish_ingredients', {
+              'dish_id': dishData['id'],
+              'ingredient_id': ingredientId,
+              'amount':
+                  _safeParseDouble(
+                    ingredientData['quantity'] ?? ingredientData['amount'],
+                  ) ??
+                  0.0,
+              'unit': ingredientData['unit'] ?? 'g',
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
+          }
+        }
+      });
+
+      return true;
+    } catch (e) {
+      print('Error saving dish from import: $e');
+      return false;
+    }
+  }
+
+  /// Safely parses a value to double, handling null and various types
+  double? _safeParseDouble(dynamic value) {
+    if (value == null) return null;
+
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is num) return value.toDouble();
+
+    if (value is String) {
+      if (value.isEmpty) return null;
+      try {
+        return double.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  String _generateId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
 }
