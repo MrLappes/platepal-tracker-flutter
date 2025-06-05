@@ -9,7 +9,6 @@ import 'openai_service.dart';
 import '../storage/dish_service.dart';
 import 'agent_steps/thinking_step.dart';
 import 'agent_steps/context_gathering_step.dart';
-import 'agent_steps/image_processing_step.dart';
 import 'agent_steps/dish_processing_step.dart';
 import 'agent_steps/response_generation_step.dart';
 import 'agent_steps/deep_search_verification_step.dart';
@@ -25,11 +24,9 @@ class ChatAgentService {
   final MealRepository _mealRepository;
   final UserProfileRepository _userProfileRepository;
   final DishService _dishService;
-
   // Agent steps
   late final ThinkingStep _thinkingStep;
   late final ContextGatheringStep _contextGatheringStep;
-  late final ImageProcessingStep _imageProcessingStep;
   late final DishProcessingStep _dishProcessingStep;
   late final ResponseGenerationStep _responseGenerationStep;
   late final DeepSearchVerificationStep _deepSearchVerificationStep;
@@ -65,7 +62,6 @@ class ChatAgentService {
       mealRepository: _mealRepository,
       userProfileRepository: _userProfileRepository,
     );
-    _imageProcessingStep = ImageProcessingStep(openaiService: _openaiService);
     _dishProcessingStep = DishProcessingStep(
       dishRepository: _dishRepository,
       dishService: _dishService,
@@ -232,35 +228,8 @@ class ChatAgentService {
         }
       }
 
-      // Step 4: Image Processing (if image provided)
-      ChatStepResult? imageResult;
-      if (imageUri != null && imageUri.isNotEmpty) {
-        debugPrint('📸 Step 3: Processing image...');
-        final imageStepText = '📸 Analyzing uploaded image...';
-        thinkingSteps.add(imageStepText);
-        _onThinkingStep?.call(
-          imageStepText,
-          'Identifying food items, portions, and visual details from your image',
-        );
-
-        final imageInput = contextInput.copyWith(
-          metadata: {...contextInput.metadata!, ...contextResult.data!},
-        );
-        imageResult = await _imageProcessingStep.execute(imageInput);
-        stepResults.add(imageResult);
-
-        if (!imageResult.success) {
-          return _handleStepFailure(
-            'image_processing',
-            imageResult,
-            stepResults,
-            thinkingSteps,
-          );
-        }
-      }
-
-      // Step 4: Response Generation - Create final response
-      debugPrint('✍️ Step 4: Generating response...');
+      // Step 3: Response Generation - Create final response
+      debugPrint('✍️ Step 3: Generating response...');
       final responseStepText = '✍️ Crafting your personalized response...';
       thinkingSteps.add(responseStepText);
       _onThinkingStep?.call(
@@ -285,14 +254,9 @@ class ChatAgentService {
       } catch (e) {
         debugPrint('⚠️ Failed to extract enhanced system prompt: $e');
       }
-
       final responseInput = contextInput.copyWith(
         enhancedSystemPrompt: () => enhancedSystemPrompt,
-        metadata: {
-          ...contextInput.metadata!,
-          ...contextResult.data!,
-          if (imageResult != null) ...imageResult.data!,
-        },
+        metadata: {...contextInput.metadata!, ...contextResult.data!},
       );
       final responseResult = await _responseGenerationStep.execute(
         responseInput,

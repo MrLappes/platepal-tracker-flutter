@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/chat_message.dart';
-import '../models/nutrition_analysis.dart';
 import '../models/chat_types.dart' as agent_types;
 import '../models/chat_types.dart' show ChatMessageRole;
 import '../models/user_ingredient.dart';
@@ -389,30 +388,6 @@ class ChatProvider extends ChangeNotifier {
 
       // Mark message as failed again
       _messages[messageIndex] = message.copyWith(status: MessageStatus.failed);
-    } finally {
-      _isLoading = false;
-      _currentTypingMessage = null;
-      notifyListeners();
-    }
-  }
-
-  Future<NutritionAnalysis?> analyzeNutrition(
-    String content, {
-    String? imageUrl,
-  }) async {
-    try {
-      _isLoading = true;
-      _currentTypingMessage = 'Analyzing nutrition...';
-      notifyListeners();
-
-      final analysis = await _openAIService.analyzeNutrition(
-        content,
-        imageUrl: imageUrl,
-      );
-      return analysis;
-    } catch (e) {
-      debugPrint('Error analyzing nutrition: $e');
-      return null;
     } finally {
       _isLoading = false;
       _currentTypingMessage = null;

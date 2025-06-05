@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../models/nutrition_analysis.dart';
+import '../../../utils/image_utils.dart'; // Adjust the import based on your project structure
 
 class OpenAIModel {
   final String id;
@@ -160,7 +161,6 @@ class ChatCompletionResponse {
 }
 
 class OpenAIService {
-  static const String _baseUrl = 'https://api.openai.com/v1';
   static const String _apiKeyKey = 'openai_api_key';
   static const String _selectedModelKey = 'openai_selected_model';
 
@@ -175,7 +175,6 @@ class OpenAIService {
   /// Get the currently selected model
   String get selectedModel => _selectedModelCache ?? 'gpt-4o';
   String? _selectedModelCache;
-
   Future<String?> _getApiKey() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_apiKeyKey);
@@ -199,81 +198,63 @@ class OpenAIService {
   }
 
   Future<ApiKeyTestResult> testApiKey(String apiKey, String model) async {
+    // Test the API key by sending a minimal chat completion request
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: json.encode({
-          'model': model,
-          'messages': [
-            {
-              'role': 'system',
-              'content':
-                  'You are an assistant for PlatePal Tracker, a nutrition tracking app. Reply with a short welcome message.',
-            },
-            {
-              'role': 'user',
-              'content': 'Say hello to the new user of PlatePal Tracker',
-            },
-          ],
-          'max_tokens': 100,
-        }),
-      );
-
+      final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      };
+      final body = jsonEncode({
+        'model': model,
+        'messages': [
+          {
+            'role': 'system',
+            'content':
+                'You are an assistant for PlatePal Tracker, a nutrition tracking app. Reply with a short welcome message.',
+          },
+          {
+            'role': 'user',
+            'content': 'Say hello to the new user of PlatePal Tracker',
+          },
+        ],
+        'max_tokens': 100,
+      });
+      final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final content = data['choices'][0]['message']['content'] as String?;
-
-        if (content == null || content.isEmpty) {
+        final data = jsonDecode(response.body);
+        final content = data['choices']?[0]?['message']?['content'] ?? '';
+        if (content.isEmpty) {
           return const ApiKeyTestResult(
             success: false,
             message:
                 'Received empty response from OpenAI. The API key might be valid but the model may not be available.',
           );
         }
-
         return ApiKeyTestResult(success: true, message: content);
       } else {
-        final error = json.decode(response.body);
         String errorMessage =
             'Network error occurred while testing the API key.';
         bool isAuthError = false;
-
-        switch (response.statusCode) {
-          case 401:
-            errorMessage =
-                'Invalid API key. Please check your key and try again.';
-            isAuthError = true;
-            break;
-          case 403:
-            errorMessage =
-                'Access denied. Your account may not have permission to use this service.';
-            isAuthError = true;
-            break;
-          case 429:
-            errorMessage =
-                'Rate limit exceeded or insufficient quota. Please check your plan and billing details.';
-            break;
-          case 404:
-            errorMessage =
-                'The model "$model" was not found or is not available for your account.';
-            break;
-          default:
-            if (error['error'] != null && error['error']['message'] != null) {
-              errorMessage = error['error']['message'];
-              if (errorMessage.toLowerCase().contains('model') &&
-                  (errorMessage.toLowerCase().contains('does not exist') ||
-                      errorMessage.toLowerCase().contains('not found') ||
-                      errorMessage.toLowerCase().contains('not available'))) {
-                errorMessage =
-                    'The model "$model" is not available for your account. Try a different model.';
-              }
-            }
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['error']?['message'] ?? errorMessage;
+        } catch (_) {}
+        if (response.statusCode == 401) {
+          errorMessage =
+              'Invalid API key. Please check your key and try again.';
+          isAuthError = true;
+        } else if (response.statusCode == 403) {
+          errorMessage =
+              'Access denied. Your account may not have permission to use this service.';
+          isAuthError = true;
+        } else if (response.statusCode == 429) {
+          errorMessage =
+              'Rate limit exceeded or insufficient quota. Please check your plan and billing details.';
+        } else if (response.statusCode == 404) {
+          errorMessage =
+              'The model "$model" was not found or is not available for your account.';
         }
-
         return ApiKeyTestResult(
           success: false,
           message: errorMessage,
@@ -290,32 +271,36 @@ class OpenAIService {
 
   Future<List<OpenAIModel>> getAvailableModels(String apiKey) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/models'),
-        headers: {'Authorization': 'Bearer $apiKey'},
-      );
-
+      final url = Uri.parse('https://api.openai.com/v1/models');
+      final headers = {'Authorization': 'Bearer $apiKey'};
+      final response = await http.get(url, headers: headers);
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final models =
-            (data['data'] as List)
+        final data = jsonDecode(response.body);
+        final models = (data['data'] as List<dynamic>?) ?? [];
+        final filteredModels =
+            models
                 .where(
                   (model) =>
+                      model['id'] != null &&
                       model['id'].toString().startsWith('gpt-') &&
                       !model['id'].toString().contains('instruct') &&
                       model['id'].toString() != 'gpt',
                 )
-                .map((model) => OpenAIModel.fromJson(model))
+                .map(
+                  (model) => OpenAIModel(
+                    id: model['id'],
+                    displayName: OpenAIModel._formatModelDisplayName(
+                      model['id'],
+                    ),
+                  ),
+                )
                 .toList();
-
-        // Sort GPT-4 models first, then others
-        models.sort((a, b) {
+        filteredModels.sort((a, b) {
           if (a.id.contains('gpt-4') && !b.id.contains('gpt-4')) return -1;
           if (!a.id.contains('gpt-4') && b.id.contains('gpt-4')) return 1;
           return a.displayName.compareTo(b.displayName);
         });
-
-        return models.isEmpty ? _defaultModels : models;
+        return filteredModels.isEmpty ? _defaultModels : filteredModels;
       } else {
         return _defaultModels;
       }
@@ -328,200 +313,148 @@ class OpenAIService {
     return _defaultModels;
   }
 
-  Future<String> sendMessage(String message, {String? imageUrl}) async {
+  Future<String> sendMessage(
+    String message, {
+    String? imageUrl,
+    bool isHighDetail = false,
+  }) async {
     final apiKey = await _getApiKey();
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('OpenAI API key not configured');
     }
-
-    final selectedModel = await getSelectedModel();
-    final messages = <Map<String, dynamic>>[
-      {
-        'role': 'system',
-        'content':
-            '''You are a helpful nutrition and fitness assistant for PlatePal Tracker app. 
-You help users with meal planning, nutrition analysis, and fitness goals. 
-Be friendly, informative, and provide practical advice. 
-Keep responses concise but helpful.''',
-      },
-    ];
-
+    final model = await getSelectedModel();
+    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey',
+    };
+    List<Map<String, dynamic>> requestMessages;
     if (imageUrl != null) {
-      messages.add({
-        'role': 'user',
-        'content': [
-          {'type': 'text', 'text': message},
-          {
-            'type': 'image_url',
-            'image_url': {'url': imageUrl},
-          },
-        ],
-      });
-    } else {
-      messages.add({'role': 'user', 'content': message});
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
+      String imageDataUrl;
+      try {
+        final base64String = await ImageUtils.resizeAndEncodeImage(
+          imageUrl,
+          isHighDetail: isHighDetail,
+        );
+        imageDataUrl = ImageUtils.createImageDataUrl(
+          base64String,
+          imagePath: imageUrl,
+        );
+        debugPrint(
+          'imageDataUrl (first 100 chars): \\${imageDataUrl.substring(0, imageDataUrl.length > 100 ? 100 : imageDataUrl.length)}',
+        );
+      } catch (e) {
+        throw Exception('Failed to process image file: $e');
+      }
+      requestMessages = [
+        {
+          'role': 'assistant',
+          'content': [
+            {'type': 'text', 'text': message},
+          ],
         },
-        body: json.encode({
-          'model': imageUrl != null ? 'gpt-4-vision-preview' : selectedModel,
-          'messages': messages,
-          'max_tokens': 1000,
-          'temperature': 0.7,
-        }),
-      );
-
+        {
+          'role': 'user',
+          'content': [
+            {
+              'type': 'image_url',
+              'image_url': {'url': imageDataUrl},
+            },
+          ],
+        },
+      ];
+    } else {
+      requestMessages = [
+        {
+          'role': 'system',
+          'content':
+              'You are a helpful nutrition and fitness assistant for PlatePal Tracker app.',
+        },
+        {'role': 'user', 'content': message},
+      ];
+    }
+    final body = jsonEncode({
+      'model': model,
+      'messages': requestMessages,
+      'temperature': 0.7,
+      'max_tokens': 1000,
+    });
+    try {
+      final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final content = data['choices'][0]['message']['content'] as String;
-        return content.trim();
+        final data = jsonDecode(response.body);
+        final choices = data['choices'] as List<dynamic>?;
+        if (choices != null && choices.isNotEmpty) {
+          final texts = choices
+              .map((choice) => choice['message']?['content'])
+              .where(
+                (text) => text != null && text.toString().trim().isNotEmpty,
+              )
+              .join('\n\n');
+          return texts.isNotEmpty ? texts : 'No response received';
+        } else {
+          return 'No response received';
+        }
       } else {
-        final error = json.decode(response.body);
-        throw Exception('OpenAI API error: ${error['error']['message']}');
+        String errorMessage = 'OpenAI API error: ${response.statusCode}';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['error']?['message'] ?? errorMessage;
+        } catch (_) {}
+        throw Exception(errorMessage);
       }
     } catch (e) {
       throw Exception('Failed to send message: $e');
     }
   }
 
-  Future<NutritionAnalysis?> analyzeNutrition(
-    String description, {
-    String? imageUrl,
-  }) async {
-    final apiKey = await _getApiKey();
-    if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('OpenAI API key not configured');
-    }
-
-    final selectedModel = await getSelectedModel();
-    final prompt = '''
-Analyze the nutrition of this food item and return ONLY a JSON object with this exact structure:
-{
-  "dishName": "name of the dish",
-  "ingredients": ["ingredient1", "ingredient2", "..."],
-  "nutritionInfo": {
-    "calories": 0,
-    "protein": 0,
-    "carbs": 0,
-    "fat": 0,
-    "fiber": 0,
-    "sugar": 0,
-    "sodium": 0
-  },
-  "servingSize": "serving size description",
-  "cookingInstructions": "brief cooking instructions if applicable",
-  "mealType": "breakfast/lunch/dinner/snack",
-  "confidence": 0.95
-}
-
-Food description: $description
-''';
-
-    final messages = <Map<String, dynamic>>[
-      {
-        'role': 'system',
-        'content':
-            'You are a nutrition analysis expert. Return only valid JSON with nutrition data.',
-      },
-    ];
-
-    if (imageUrl != null) {
-      messages.add({
-        'role': 'user',
-        'content': [
-          {'type': 'text', 'text': prompt},
-          {
-            'type': 'image_url',
-            'image_url': {'url': imageUrl},
-          },
-        ],
-      });
-    } else {
-      messages.add({'role': 'user', 'content': prompt});
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: json.encode({
-          'model': imageUrl != null ? 'gpt-4-vision-preview' : selectedModel,
-          'messages': messages,
-          'max_tokens': 1000,
-          'temperature': 0.3,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final content = data['choices'][0]['message']['content'] as String;
-
-        // Try to parse the JSON response
-        try {
-          final jsonData = json.decode(content.trim());
-          return NutritionAnalysis.fromJson(jsonData);
-        } catch (parseError) {
-          throw Exception('Failed to parse nutrition analysis: $parseError');
-        }
-      } else {
-        final error = json.decode(response.body);
-        throw Exception('OpenAI API error: ${error['error']['message']}');
-      }
-    } catch (e) {
-      throw Exception('Failed to analyze nutrition: $e');
-    }
-  }
-
-  /// Send a structured chat request to OpenAI
+  /// Send a structured chat request to OpenAI using manual HTTP requests
   Future<ChatCompletionResponse> sendChatRequest({
     required List<Map<String, dynamic>> messages,
     double temperature = 0.7,
     int? maxTokens,
     Map<String, dynamic>? responseFormat,
+    String? imageUri,
   }) async {
     final apiKey = await _getApiKey();
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('OpenAI API key not configured');
     }
-
     final model = await getSelectedModel();
-    final requestBody = {
+    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey',
+    };
+    final body = <String, dynamic>{
       'model': model,
       'messages': messages,
       'temperature': temperature,
-      if (maxTokens != null) 'max_tokens': maxTokens,
-      if (responseFormat != null) 'response_format': responseFormat,
     };
-
+    if (maxTokens != null) {
+      body['max_tokens'] = maxTokens;
+    }
+    if (responseFormat != null) {
+      body['response_format'] = responseFormat;
+    }
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: json.encode(requestBody),
+        url,
+        headers: headers,
+        body: jsonEncode(body),
       );
-
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body);
         return ChatCompletionResponse.fromJson(data);
       } else {
-        final error = json.decode(response.body);
-        throw Exception('OpenAI API error: ${error['error']['message']}');
+        String errorMessage = 'OpenAI API error: ${response.statusCode}';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['error']?['message'] ?? errorMessage;
+        } catch (_) {}
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      if (e is Exception) {
-        rethrow;
-      }
       throw Exception('Failed to send chat request: $e');
     }
   }

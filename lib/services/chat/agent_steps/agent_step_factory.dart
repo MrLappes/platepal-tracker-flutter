@@ -9,7 +9,6 @@ import '../../storage/dish_service.dart';
 import 'thinking_step.dart';
 import 'response_generation_step.dart';
 import 'dish_processing_step.dart';
-import 'image_processing_step.dart';
 import 'error_handling_step.dart';
 import 'deep_search_verification_step.dart';
 
@@ -61,15 +60,11 @@ class AgentStepFactory {
         );
       case 'response_generation':
         return ResponseGenerationStep(openaiService: _openaiService);
-
       case 'dish_processing':
         return DishProcessingStep(
           dishRepository: _dishRepository,
           dishService: _dishService,
         );
-
-      case 'image_processing':
-        return ImageProcessingStep(openaiService: _openaiService);
 
       case 'error_handling':
         return ErrorHandlingStep();
