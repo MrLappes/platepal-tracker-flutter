@@ -107,8 +107,6 @@ class MealLogService {
     double totalCarbs = 0;
     double totalFat = 0;
     double totalFiber = 0;
-    double totalSugar = 0;
-    double totalSodium = 0;
 
     final Map<String, List<MealLog>> mealsByType = {
       'breakfast': [],
@@ -124,8 +122,6 @@ class MealLogService {
       totalCarbs += mealLog.dish.nutrition.carbs * servingMultiplier;
       totalFat += mealLog.dish.nutrition.fat * servingMultiplier;
       totalFiber += mealLog.dish.nutrition.fiber * servingMultiplier;
-      totalSugar += mealLog.dish.nutrition.sugar * servingMultiplier;
-      totalSodium += mealLog.dish.nutrition.sodium * servingMultiplier;
 
       final type = mealLog.mealType.toLowerCase();
       if (mealsByType.containsKey(type)) {
@@ -141,8 +137,6 @@ class MealLogService {
       totalCarbs: totalCarbs,
       totalFat: totalFat,
       totalFiber: totalFiber,
-      totalSugar: totalSugar,
-      totalSodium: totalSodium,
       mealLogs: mealLogs,
       mealsByType: mealsByType,
       startDate: startDate,
@@ -168,6 +162,17 @@ class MealLog {
     required this.loggedAt,
   });
 
+  factory MealLog.fromJson(Map<String, dynamic> json) {
+    return MealLog(
+      id: json['id'] as int,
+      userId: json['userId'] as String,
+      dish: Dish.fromJson(json['dish'] as Map<String, dynamic>),
+      servingSize: (json['servingSize'] as num).toDouble(),
+      mealType: json['mealType'] as String,
+      loggedAt: DateTime.parse(json['loggedAt'] as String),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -186,8 +191,6 @@ class NutritionSummary {
   final double totalCarbs;
   final double totalFat;
   final double totalFiber;
-  final double totalSugar;
-  final double totalSodium;
   final List<MealLog> mealLogs;
   final Map<String, List<MealLog>> mealsByType;
   final DateTime startDate;
@@ -199,8 +202,6 @@ class NutritionSummary {
     required this.totalCarbs,
     required this.totalFat,
     required this.totalFiber,
-    required this.totalSugar,
-    required this.totalSodium,
     required this.mealLogs,
     required this.mealsByType,
     required this.startDate,

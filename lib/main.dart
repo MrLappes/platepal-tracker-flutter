@@ -22,6 +22,7 @@ import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/chat_provider.dart';
 import 'providers/storage_provider.dart';
+import 'providers/app_state_provider.dart';
 
 void main() {
   runApp(
@@ -31,6 +32,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => MealProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => AppStateProvider()),
       ],
       child: StorageProvider(child: const PlatePalApp()),
     ),
