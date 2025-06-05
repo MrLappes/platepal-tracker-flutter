@@ -548,9 +548,25 @@
   ,"select": "Auswählen",
   "@select": {"description": "Allgemeiner Auswahltext"},
   "errorOpeningDishScreen": "Fehler beim Öffnen des Gerichtsbildschirms: {error}",
-  "@errorOpeningDishScreen": {"description": "Fehler beim Öffnen", "placeholders": {"error": {}}},
+  "@errorOpeningDishScreen": {
+    "description": "Fehler beim Öffnen des Gerichtsbildschirms",
+    "placeholders": {
+      "error": {
+        "type": "Object",
+        "description": "The error message"
+      }
+    }
+  },
   "errorPickingImage": "Fehler beim Auswählen des Bildes: {error}",
-  "@errorPickingImage": {"description": "Fehler beim Bild wählen", "placeholders": {"error": {}}},
+  "@errorPickingImage": {
+    "description": "Fehler beim Bild auswählen",
+    "placeholders": {
+      "error": {
+        "type": "Object",
+        "description": "The error message"
+      }
+    }
+  },
   "agentProcessingSteps": "Agenten-Prozessschritte",
   "@agentProcessingSteps": {"description": "Titel für Agenten-Schritte"},
   "copyAll": "Alles kopieren",
