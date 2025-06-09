@@ -315,7 +315,11 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.errorOpeningDishScreen(error.toString())),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.errorOpeningDishScreen(error.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
