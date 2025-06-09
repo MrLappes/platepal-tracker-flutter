@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/user_profile.dart';
 import '../../utils/service_extensions.dart';
+import '../../services/health_service.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -31,6 +33,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   UserProfile? _originalProfile;
 
+  // Health service integration
+  final HealthService _healthService = HealthService();
+  bool _isHealthAvailable = false;
+  bool _isHealthSyncing = false;
+
   // Activity levels with their descriptions
   final Map<String, String> _activityLevels = {
     'sedentary': 'sedentary',
@@ -47,12 +54,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     'gain_weight': 'gainWeight',
     'build_muscle': 'buildMuscle',
   };
-
   @override
   void initState() {
     super.initState();
     _loadProfile();
     _addTextFieldListeners();
+    _initializeHealthService();
   }
 
   @override
@@ -78,6 +85,132 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   void _onFieldChanged() {
     if (!_hasUnsavedChanges) {
       setState(() => _hasUnsavedChanges = true);
+    }
+  }
+
+  // Health service initialization
+  Future<void> _initializeHealthService() async {
+    await _healthService.loadConnectionStatus();
+    final available = await _healthService.isHealthDataAvailable();
+    setState(() {
+      _isHealthAvailable = available;
+    });
+  } // Connect to health data
+
+  Future<void> _connectToHealth() async {
+    setState(() => _isHealthSyncing = true);
+
+    try {
+      // Show info about permission request
+      final localizations = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Requesting health permissions...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final result = await _healthService.connectToHealthWithDetails();
+
+      if (result.success) {
+        await _syncHealthData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                localizations?.healthConnected ??
+                    'Health data connected successfully!',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          // Show appropriate dialog based on error type
+          switch (result.error) {
+            case HealthConnectionError.permissionDenied:
+              await _showHealthPermissionDeniedDialog();
+              break;
+            case HealthConnectionError.platformNotSupported:
+              await _showHealthErrorDialog(result.message);
+              break;
+            case HealthConnectionError.unknown:
+            default:
+              await _showHealthErrorDialog(result.message);
+              break;
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        await _showHealthErrorDialog(e.toString());
+      }
+    } finally {
+      setState(() => _isHealthSyncing = false);
+    }
+  }
+
+  // Sync health data
+  Future<void> _syncHealthData() async {
+    if (!_healthService.isConnected) return;
+
+    setState(() => _isHealthSyncing = true);
+
+    try {
+      final healthData = await _healthService.syncHealthData();
+      if (healthData != null && mounted) {
+        // Update form fields with health data if available
+        if (healthData.containsKey('weight')) {
+          final weight = healthData['weight']['value'] as num;
+          if (_selectedUnitSystem == 'metric') {
+            _weightController.text = weight.round().toString();
+          } else {
+            _weightController.text = (weight * 2.2046).round().toString();
+          }
+        }
+
+        if (healthData.containsKey('height')) {
+          final height = healthData['height']['value'] as num;
+          if (_selectedUnitSystem == 'metric') {
+            _heightController.text = height.round().toString();
+          } else {
+            _heightController.text = (height / 2.54).round().toString();
+          }
+        }
+
+        if (healthData.containsKey('bodyFat')) {
+          final bodyFat = healthData['bodyFat']['value'] as num;
+          _bodyFatController.text = bodyFat.toStringAsFixed(1);
+        }
+
+        _onFieldChanged();
+
+        final localizations = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              localizations?.healthSyncSuccess ??
+                  'Health data synced successfully',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final localizations = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              localizations?.healthSyncFailed ?? 'Failed to sync health data',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isHealthSyncing = false);
     }
   }
 
@@ -395,18 +528,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     return null;
   }
 
-  String? _validateEmail(String? value) {
-    final localizations = AppLocalizations.of(context);
-    if (value == null || value.trim().isEmpty) {
-      return localizations?.requiredField ?? 'This field is required';
-    }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
-      return localizations?.invalidEmail ??
-          'Please enter a valid email address';
-    }
-    return null;
-  }
-
   String? _validateAge(String? value) {
     final localizations = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
@@ -595,12 +716,21 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             // Fitness Goals Section
             _buildSectionHeader(localizations?.fitnessGoals ?? 'Fitness Goals'),
             _buildFitnessGoalsCard(localizations),
-            const SizedBox(height: 24),
-
-            // Preferences Section
+            const SizedBox(height: 24), // Preferences Section
             _buildSectionHeader(localizations?.preferences ?? 'Preferences'),
             _buildPreferencesCard(localizations),
-            const SizedBox(height: 24), // Current Stats Section (Read-only)
+            const SizedBox(height: 24),
+
+            // Health Data Sync Section (if available)
+            if (_isHealthAvailable) ...[
+              _buildSectionHeader(
+                localizations?.healthDataSync ?? 'Health Data Sync',
+              ),
+              _buildHealthSyncCard(localizations),
+              const SizedBox(height: 24),
+            ],
+
+            // Current Stats Section (Read-only)
             if (_originalProfile != null) ...[
               _buildSectionHeader(
                 localizations?.currentStats ?? 'Current Stats',
@@ -838,6 +968,179 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildHealthSyncCard(AppLocalizations? localizations) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _healthService.isConnected
+                      ? Icons.health_and_safety
+                      : Icons.health_and_safety_outlined,
+                  color:
+                      _healthService.isConnected ? Colors.green : Colors.grey,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _healthService.isConnected
+                            ? (localizations?.healthConnected ??
+                                'Health data connected')
+                            : (localizations?.healthDisconnected ??
+                                'Health data not connected'),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color:
+                              _healthService.isConnected
+                                  ? Colors.green
+                                  : Colors.grey[700],
+                        ),
+                      ),
+                      if (_healthService.isConnected &&
+                          _healthService.lastSyncDate != null)
+                        Text(
+                          'Last synced: ${_formatLastSyncDate(_healthService.lastSyncDate!)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                if (!_healthService.isConnected) ...[
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isHealthSyncing ? null : _connectToHealth,
+                      icon:
+                          _isHealthSyncing
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.add_link),
+                      label: Text(
+                        localizations?.connectToHealth ?? 'Connect to Health',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isHealthSyncing ? null : _syncHealthData,
+                      icon:
+                          _isHealthSyncing
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.sync),
+                      label: Text(
+                        localizations?.syncHealthData ?? 'Sync Health Data',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton(
+                    onPressed:
+                        _isHealthSyncing
+                            ? null
+                            : () async {
+                              await _healthService.disconnectFromHealth();
+                              setState(() {});
+                            },
+                    child: const Icon(Icons.link_off),
+                  ),
+                ],
+              ],
+            ),
+            if (!_healthService.isConnected) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceVariant.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Connect to Health Data',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sync your weight, height, and daily burned calories from your device\'s health app. When you tap "Connect to Health", you\'ll be asked to grant permissions.',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatLastSyncDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
   }
 
   Widget _buildCurrentStatsCard(AppLocalizations? localizations) {
@@ -1195,6 +1498,117 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  // Show health permission denied dialog
+  Future<void> _showHealthPermissionDeniedDialog() async {
+    final localizations = AppLocalizations.of(context);
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            localizations?.healthPermissionDenied ?? 'Health Permission Denied',
+          ),
+          content: Text(
+            localizations?.healthPermissionDeniedMessage ??
+                'To sync your health data, PlatePal needs access to your health information. You can grant permissions in your phone\'s settings.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(localizations?.cancel ?? 'Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(localizations?.openSettings ?? 'Open Settings'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _openHealthSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show health error dialog
+  Future<void> _showHealthErrorDialog(String error) async {
+    final localizations = AppLocalizations.of(context);
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            localizations?.healthNotAvailable ?? 'Health Data Not Available',
+          ),
+          content: Text(
+            localizations?.healthNotAvailableMessage ??
+                'Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(localizations?.cancel ?? 'Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(localizations?.openSettings ?? 'Open Settings'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _openHealthSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Open device health settings
+  Future<void> _openHealthSettings() async {
+    try {
+      // For Android, try Health Connect first
+      bool launched = await launchUrl(
+        Uri.parse('android-app://com.google.android.apps.healthdata/'),
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        // Fallback to general app settings
+        launched = await launchUrl(
+          Uri.parse('app-settings:'),
+          mode: LaunchMode.externalApplication,
+        );
+      }
+
+      if (!launched) {
+        // Final fallback to device settings
+        launched = await launchUrl(
+          Uri.parse('android.settings.APPLICATION_SETTINGS'),
+          mode: LaunchMode.externalApplication,
+        );
+      }
+    } catch (e) {
+      // Show error if unable to open settings
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Unable to open settings. Please go to your device settings manually.',
+            ),
+            backgroundColor: Colors.orange,
           ),
         );
       }

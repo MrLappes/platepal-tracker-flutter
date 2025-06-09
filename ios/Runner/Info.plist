@@ -42,8 +42,20 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
+	
+	<!-- HealthKit Permissions -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>PlatePal Tracker needs access to your health data to sync your weight, height, and other health metrics with your nutrition tracking. This helps provide more accurate calorie recommendations and track your fitness progress.</string>
+	
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>PlatePal Tracker would like to update your health data with nutrition information from meals you track.</string>
+	
+	<!-- Required for HealthKit -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>healthkit</string>
+	</array>
 </dict>
 </plist>

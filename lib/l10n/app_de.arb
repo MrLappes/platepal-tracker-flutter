@@ -690,9 +690,73 @@
   "editUserProfile": "Benutzerprofil bearbeiten",
   "@editUserProfile": {
     "description": "Benutzerprofil bearbeiten Dialog Titel"
-  },
-  "editBotProfile": "Bot-Profil bearbeiten",
+  },  "editBotProfile": "Bot-Profil bearbeiten",
   "@editBotProfile": {
     "description": "Bot-Profil bearbeiten Dialog Titel"
+  },
+  "connectToHealth": "Mit Gesundheit verbinden",
+  "@connectToHealth": {
+    "description": "Mit Gesundheit verbinden Button Text"
+  },
+  "healthDataSync": "Gesundheitsdaten-Synchronisation",
+  "@healthDataSync": {
+    "description": "Gesundheitsdaten-Synchronisation Bereich Titel"
+  },
+  "healthConnected": "Gesundheitsdaten verbunden",
+  "@healthConnected": {
+    "description": "Gesundheitsdaten verbunden Status Nachricht"
+  },
+  "healthDisconnected": "Gesundheitsdaten nicht verbunden",
+  "@healthDisconnected": {
+    "description": "Gesundheitsdaten getrennt Status Nachricht"
+  },
+  "syncHealthData": "Gesundheitsdaten synchronisieren",
+  "@syncHealthData": {
+    "description": "Gesundheitsdaten synchronisieren Button Text"
+  },
+  "healthPermissionRequired": "Gesundheitsberechtigungen sind erforderlich, um Ihre Daten zu synchronisieren",
+  "@healthPermissionRequired": {
+    "description": "Gesundheitsberechtigung erforderlich Nachricht"
+  },
+  "healthSyncSuccess": "Gesundheitsdaten erfolgreich synchronisiert",
+  "@healthSyncSuccess": {
+    "description": "Gesundheitssynchronisation erfolgreich Nachricht"
+  },
+  "healthSyncFailed": "Synchronisation der Gesundheitsdaten fehlgeschlagen",
+  "@healthSyncFailed": {
+    "description": "Gesundheitssynchronisation fehlgeschlagen Nachricht"
+  },  "lastSynced": "Zuletzt synchronisiert: {date}",
+  "@lastSynced": {
+    "description": "Zeitstempel der letzten Synchronisation",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "Das Datum, an dem die Gesundheitsdaten zuletzt synchronisiert wurden"
+      }
+    }
+  },
+  "healthPermissionDenied": "Gesundheitsberechtigung Verweigert",
+  "@healthPermissionDenied": {
+    "description": "Health permission denied dialog title"
+  },
+  "healthPermissionDeniedMessage": "Um deine Gesundheitsdaten zu synchronisieren, benötigt PlatePal Zugriff auf deine Gesundheitsinformationen. Du kannst Berechtigungen in den Einstellungen deines Telefons erteilen.",
+  "@healthPermissionDeniedMessage": {
+    "description": "Health permission denied dialog message"
+  },
+  "openSettings": "Einstellungen Öffnen",
+  "@openSettings": {
+    "description": "Open settings button text"
+  },
+  "cancel": "Abbrechen",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "healthNotAvailable": "Gesundheitsdaten Nicht Verfügbar",
+  "@healthNotAvailable": {
+    "description": "Health data not available dialog title"
+  },
+  "healthNotAvailableMessage": "Gesundheitsdaten sind auf diesem Gerät nicht verfügbar. Stelle sicher, dass du Health Connect (Android) oder die Health-App (iOS) installiert und konfiguriert hast.",
+  "@healthNotAvailableMessage": {
+    "description": "Health data not available dialog message"
   }
 }

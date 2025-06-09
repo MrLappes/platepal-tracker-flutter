@@ -664,9 +664,73 @@
   "editUserProfile": "Editar Perfil de Usuario",
   "@editUserProfile": {
     "description": "Título del diálogo editar perfil de usuario"
-  },
-  "editBotProfile": "Editar Perfil del Bot",
+  },  "editBotProfile": "Editar Perfil del Bot",
   "@editBotProfile": {
     "description": "Título del diálogo editar perfil del bot"
+  },
+  "connectToHealth": "Conectar con Salud",
+  "@connectToHealth": {
+    "description": "Texto del botón conectar con salud"
+  },
+  "healthDataSync": "Sincronización de Datos de Salud",
+  "@healthDataSync": {
+    "description": "Título de la sección de sincronización de datos de salud"
+  },
+  "healthConnected": "Datos de salud conectados",
+  "@healthConnected": {
+    "description": "Mensaje de estado de datos de salud conectados"
+  },
+  "healthDisconnected": "Datos de salud no conectados",
+  "@healthDisconnected": {
+    "description": "Mensaje de estado de datos de salud desconectados"
+  },
+  "syncHealthData": "Sincronizar Datos de Salud",
+  "@syncHealthData": {
+    "description": "Texto del botón sincronizar datos de salud"
+  },
+  "healthPermissionRequired": "Se requieren permisos de salud para sincronizar tus datos",
+  "@healthPermissionRequired": {
+    "description": "Mensaje de permisos de salud requeridos"
+  },
+  "healthSyncSuccess": "Datos de salud sincronizados exitosamente",
+  "@healthSyncSuccess": {
+    "description": "Mensaje de éxito de sincronización de salud"
+  },
+  "healthSyncFailed": "Error al sincronizar datos de salud",
+  "@healthSyncFailed": {
+    "description": "Mensaje de error de sincronización de salud"
+  },  "lastSynced": "Última sincronización: {date}",
+  "@lastSynced": {
+    "description": "Marca de tiempo de última sincronización",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "La fecha en que se sincronizaron por última vez los datos de salud"
+      }
+    }
+  },
+  "healthPermissionDenied": "Permiso de Salud Denegado",
+  "@healthPermissionDenied": {
+    "description": "Health permission denied dialog title"
+  },
+  "healthPermissionDeniedMessage": "Para sincronizar tus datos de salud, PlatePal necesita acceso a tu información de salud. Puedes otorgar permisos en la configuración de tu teléfono.",
+  "@healthPermissionDeniedMessage": {
+    "description": "Health permission denied dialog message"
+  },
+  "openSettings": "Abrir Configuración",
+  "@openSettings": {
+    "description": "Open settings button text"
+  },
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "healthNotAvailable": "Datos de Salud No Disponibles",
+  "@healthNotAvailable": {
+    "description": "Health data not available dialog title"
+  },
+  "healthNotAvailableMessage": "Los datos de salud no están disponibles en este dispositivo. Asegúrate de tener Health Connect (Android) o la app Salud (iOS) instalada y configurada.",
+  "@healthNotAvailableMessage": {
+    "description": "Health data not available dialog message"
   }
 }

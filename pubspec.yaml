@@ -55,10 +55,13 @@ dependencies:
   image: ^4.0.17
   share_plus: ^7.2.2
   cross_file: ^0.3.4+1
-    # UI and utilities
+  # UI and utilities
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.10+1
   url_launcher: ^6.3.1
+  
+  # Health data integration
+  health: ^11.1.0
 
 dev_dependencies:
   flutter_test:
