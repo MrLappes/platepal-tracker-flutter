@@ -6,8 +6,10 @@ import '../models/chat_message.dart';
 import '../models/chat_types.dart' as agent_types;
 import '../models/chat_types.dart' show ChatMessageRole;
 import '../models/user_ingredient.dart';
+import '../models/chat_profile.dart';
 import '../services/chat/openai_service.dart';
 import '../services/chat/chat_agent_service.dart';
+import '../services/storage/chat_profile_service.dart';
 import '../repositories/dish_repository.dart';
 import '../repositories/meal_repository.dart';
 import '../repositories/user_profile_repository.dart';
@@ -29,7 +31,8 @@ class ChatProvider extends ChangeNotifier {
 
   // Agent thinking steps for real-time display
   List<String> _currentThinkingSteps = [];
-  String? _currentAgentStep;
+  String? _currentAgentStep; // Profile management
+  ChatProfiles? _currentChatProfiles;
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isLoading => _isLoading;
@@ -77,6 +80,7 @@ class ChatProvider extends ChangeNotifier {
     await _checkApiKeyConfiguration();
     await _loadMessages();
     await _loadAgentSettings();
+    await _loadProfiles();
   }
 
   /// Initialize agent service when needed
@@ -413,6 +417,79 @@ class ChatProvider extends ChangeNotifier {
     await _loadAgentSettings();
   }
 
+  /// Load profiles from storage
+  Future<void> _loadProfiles() async {
+    try {
+      _currentChatProfiles = await ChatProfileService.loadChatProfiles();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading chat profiles: $e');
+      // Create default profiles if loading fails
+      _currentChatProfiles = ChatProfiles.createDefault();
+      await ChatProfileService.saveChatProfiles(_currentChatProfiles!);
+      notifyListeners();
+    }
+  }
+
+  /// Update user profile
+  Future<void> updateUserProfile(ChatUserProfile userProfile) async {
+    if (_currentChatProfiles == null) return;
+
+    try {
+      final updatedProfiles = _currentChatProfiles!.copyWith(
+        userProfile: userProfile,
+      );
+
+      await ChatProfileService.saveChatProfiles(updatedProfiles);
+      _currentChatProfiles = updatedProfiles;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating user profile: $e');
+    }
+  }
+
+  /// Update bot profile
+  Future<void> updateBotProfile(ChatBotProfile botProfile) async {
+    if (_currentChatProfiles == null) return;
+
+    try {
+      final updatedProfiles = _currentChatProfiles!.copyWith(
+        botProfile: botProfile,
+      );
+
+      await ChatProfileService.saveChatProfiles(updatedProfiles);
+      _currentChatProfiles = updatedProfiles;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating bot profile: $e');
+    }
+  }
+
+  /// Reset profiles to default
+  Future<void> resetProfilesToDefault() async {
+    try {
+      _currentChatProfiles = ChatProfiles.createDefault();
+      await ChatProfileService.saveChatProfiles(_currentChatProfiles!);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error resetting profiles: $e');
+    }
+  }
+
+  /// Get current chat profiles
+  ChatProfiles? get currentChatProfiles => _currentChatProfiles;
+
+  /// Get current user profile
+  ChatUserProfile? get currentUserProfile => _currentChatProfiles?.userProfile;
+
+  /// Get current bot profile
+  ChatBotProfile? get currentBotProfile => _currentChatProfiles?.botProfile;
+
+  /// Public method to reload profiles from storage
+  Future<void> reloadProfiles() async {
+    await _loadProfiles();
+  }
+
   /// Process message using the agent service with real-time thinking steps
   Future<Map<String, dynamic>> _processWithAgentService(
     String content,
@@ -440,13 +517,17 @@ class ChatProvider extends ChangeNotifier {
                   metadata: {'imageUrl': msg.imageUrl, ...?msg.metadata},
                 ),
               )
-              .toList();
-
-      // Create bot configuration (default nutrition assistant)
+              .toList(); // Create bot configuration using current bot profile
+      final botProfile = currentBotProfile;
       final botConfig = agent_types.BotConfiguration(
         type: 'nutrition_assistant',
-        name: 'PlatePal Assistant',
-        behaviorType: 'helpful_expert',
+        name: botProfile?.name ?? 'PlatePal Assistant',
+        behaviorType: botProfile?.behaviorType ?? 'helpful_expert',
+        additionalConfig: {
+          if (botProfile?.personalityType != null)
+            'personalityType': botProfile!.personalityType,
+          ...?botProfile?.additionalConfig,
+        },
       );
 
       // Process with agent service using thinking step callback

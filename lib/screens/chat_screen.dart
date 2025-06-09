@@ -6,6 +6,8 @@ import '../providers/chat_provider.dart';
 import '../components/chat/message_bubble.dart';
 import '../components/chat/chat_input.dart';
 import '../components/chat/chat_welcome.dart';
+import '../components/chat/chat_header.dart';
+import '../components/chat/user_profile_customization_dialog.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -46,7 +48,19 @@ class _ChatScreenState extends State<ChatScreen> {
       value: _chatProvider,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(localizations.chatAssistant),
+          title: Consumer<ChatProvider>(
+            builder: (context, chatProvider, _) {
+              final botProfile = chatProvider.currentBotProfile;
+              return botProfile != null
+                  ? ChatHeader(
+                    botProfile: botProfile,
+                    onBotProfileUpdated: (updatedProfile) {
+                      chatProvider.updateBotProfile(updatedProfile);
+                    },
+                  )
+                  : Text(localizations.chatAssistant);
+            },
+          ),
           backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: Theme.of(context).colorScheme.onSurface,
           elevation: 0,
@@ -54,15 +68,29 @@ class _ChatScreenState extends State<ChatScreen> {
             Consumer<ChatProvider>(
               builder: (context, chatProvider, _) {
                 if (!chatProvider.hasMessages) return const SizedBox.shrink();
-
                 return PopupMenuButton<String>(
                   onSelected: (value) {
                     if (value == 'clear') {
                       _showClearChatDialog(context, chatProvider);
+                    } else if (value == 'edit_profile') {
+                      _showUserProfileDialog(context, chatProvider);
                     }
                   },
                   itemBuilder:
                       (context) => [
+                        PopupMenuItem(
+                          value: 'edit_profile',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.person_outline,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text('Edit Profile'),
+                            ],
+                          ),
+                        ),
                         PopupMenuItem(
                           value: 'clear',
                           child: Row(
@@ -263,6 +291,8 @@ class _ChatScreenState extends State<ChatScreen> {
         final message = chatProvider.messages[index];
         return MessageBubble(
           message: message,
+          userProfile: chatProvider.currentUserProfile,
+          botProfile: chatProvider.currentBotProfile,
           onRetry:
               message.hasFailed
                   ? () =>
@@ -441,6 +471,22 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Text(localizations.clearChat),
               ),
             ],
+          ),
+    );
+  }
+
+  void _showUserProfileDialog(BuildContext context, ChatProvider chatProvider) {
+    final userProfile = chatProvider.currentUserProfile;
+    if (userProfile == null) return;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => UserProfileCustomizationDialog(
+            initialProfile: userProfile,
+            onProfileUpdated: (updatedProfile) {
+              chatProvider.updateUserProfile(updatedProfile);
+            },
           ),
     );
   }
