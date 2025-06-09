@@ -23,8 +23,8 @@
   "protein": "Protein",  "carbs": "Kohlenhydrate",  "fat": "Fett",  "calendar": "Kalender",
   "unknownDish": "Unbekanntes Gericht",
   "noMealsLoggedForDay": "Keine Mahlzeiten für diesen Tag protokolliert",
-  "nutritionSummary": "Nährwert-Zusammenfassung",
-  "getAiTip": "KI-Tipp erhalten",
+  "nutritionSummary": "Nährwerte",
+  "getAiTip": "KI-Tipp",
   "deleteLog": "Protokoll löschen",
   "deleteLogConfirmation": "Sind Sie sicher, dass Sie diese protokollierte Mahlzeit löschen möchten?",
   "delete": "Löschen",
@@ -590,5 +590,17 @@
   "available": "Verfügbar",
   "@available": {"description": "Link verfügbar"},
   "notAvailable": "Nicht verfügbar",
-  "@notAvailable": {"description": "Link nicht verfügbar"}
+  "@notAvailable": {"description": "Link nicht verfügbar"},
+  "chatAndAiSettings": "Chat & KI Einstellungen",
+  "@chatAndAiSettings": {
+    "description": "Titel für Chat und KI Einstellungen Sektion"
+  },
+  "chatAgentOptions": "Chat-Agent Optionen",
+  "@chatAgentOptions": {
+    "description": "Titel für Chat-Agent Optionen"
+  },
+  "enableAgentModeDeepSearch": "Agent-Modus, Deep Search und mehr aktivieren",
+  "@enableAgentModeDeepSearch": {
+    "description": "Untertitel für Chat-Agent Optionen"
+  }
 }

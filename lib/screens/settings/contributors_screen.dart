@@ -30,10 +30,15 @@ class _ContributorsScreenState extends State<ContributorsScreen>
     with TickerProviderStateMixin {
   late AnimationController _headerController;
   late AnimationController _contentController;
+  late AnimationController _iconController;
+  late AnimationController _pulseController;
   late ScrollController _scrollController;
 
   late Animation<double> _headerOpacity;
   late Animation<Offset> _contentSlide;
+  late Animation<double> _iconScale;
+  late Animation<double> _iconRotate;
+  late Animation<double> _pulseAnimation;
 
   bool _isScrolled = false;
 
@@ -64,6 +69,16 @@ class _ContributorsScreenState extends State<ContributorsScreen>
       vsync: this,
     );
 
+    _iconController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+
     _scrollController = ScrollController();
 
     // Create animations
@@ -78,6 +93,18 @@ class _ContributorsScreenState extends State<ContributorsScreen>
       CurvedAnimation(parent: _contentController, curve: Curves.elasticOut),
     );
 
+    _iconScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _iconController, curve: Curves.elasticOut),
+    );
+
+    _iconRotate = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _iconController, curve: Curves.easeInOut),
+    );
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
     // Add scroll listener
     _scrollController.addListener(_onScroll);
 
@@ -89,6 +116,13 @@ class _ContributorsScreenState extends State<ContributorsScreen>
     _headerController.forward();
     await Future.delayed(const Duration(milliseconds: 300));
     if (mounted) _contentController.forward();
+
+    // Icon animation with delay
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (mounted) _iconController.forward();
+
+    // Start pulse animation
+    if (mounted) _pulseController.repeat(reverse: true);
   }
 
   void _onScroll() {
@@ -104,6 +138,8 @@ class _ContributorsScreenState extends State<ContributorsScreen>
   void dispose() {
     _headerController.dispose();
     _contentController.dispose();
+    _iconController.dispose();
+    _pulseController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -131,7 +167,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
         slivers: [
           // Animated Header as SliverAppBar
           SliverAppBar(
-            expandedHeight: 180,
+            expandedHeight: 200,
             floating: false,
             pinned: true,
             elevation: 0,
@@ -171,6 +207,62 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Center(
+                    child: AnimatedBuilder(
+                      animation: Listenable.merge([
+                        _iconScale,
+                        _iconRotate,
+                        _pulseAnimation,
+                      ]),
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _iconScale.value * _pulseAnimation.value,
+                          child: Transform.rotate(
+                            angle: _iconRotate.value * 2 * 3.14159,
+                            child: Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.asset(
+                                  'assets/icons/icon.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline
+                                              .withValues(alpha: 0.2),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.restaurant_menu,
+                                        size: 40,
+                                        color: Color(
+                                          0xFFe384c7,
+                                        ), // PlatePal color for the icon
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

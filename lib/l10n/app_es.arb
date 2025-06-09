@@ -564,5 +564,17 @@
   "available": "Disponible",
   "@available": {"description": "Enlace disponible"},
   "notAvailable": "No disponible",
-  "@notAvailable": {"description": "Enlace no disponible"}
+  "@notAvailable": {"description": "Enlace no disponible"},
+  "chatAndAiSettings": "Configuración de Chat e IA",
+  "@chatAndAiSettings": {
+    "description": "Título de la sección de configuración de chat e IA"
+  },
+  "chatAgentOptions": "Opciones de Agente de Chat",
+  "@chatAgentOptions": {
+    "description": "Título de opciones de agente de chat"
+  },
+  "enableAgentModeDeepSearch": "Habilitar modo agente, búsqueda profunda y más",
+  "@enableAgentModeDeepSearch": {
+    "description": "Subtítulo de opciones de agente de chat"
+  }
 }

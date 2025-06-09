@@ -604,7 +604,7 @@ class AgentStepsModal extends StatelessWidget {
                     onPressed:
                         () => _showFullDataDialog(context, title, jsonString),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: Text(l10n.viewFullData),
+                    label: Text(AppLocalizations.of(context)!.viewFullData),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -705,7 +705,7 @@ class AgentStepsModal extends StatelessWidget {
                           enhancedSystemPrompt,
                         ),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: Text(l10n.viewFullPrompt),
+                    label: Text(AppLocalizations.of(context)!.viewFullPrompt),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -814,7 +814,7 @@ class AgentStepsModal extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.copiedToClipboard),
+        content: Text(AppLocalizations.of(context)!.copiedToClipboard),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

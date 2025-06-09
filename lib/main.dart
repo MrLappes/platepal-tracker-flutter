@@ -90,7 +90,7 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(path: '/chat', builder: (context, state) => const ChatScreen()),
     GoRoute(
-      path: '/statistics',
+      path: '/settings/statistics',
       builder: (context, state) => const StatisticsScreen(),
     ), // Settings routes
     GoRoute(

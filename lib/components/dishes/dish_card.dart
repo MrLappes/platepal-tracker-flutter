@@ -59,31 +59,33 @@ class DishCard extends StatelessWidget {
                         break;
                     }
                   },
-                  itemBuilder:
-                      (context) => [
-                        if (onEdit != null)
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                Icon(Icons.edit),
-                                SizedBox(width: 8),
-                                Text(l10n.edit),
-                              ],
-                            ),
+                  itemBuilder: (context) {
+                    final l10n = AppLocalizations.of(context)!;
+                    return [
+                      if (onEdit != null)
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit),
+                              const SizedBox(width: 8),
+                              Text(l10n.edit),
+                            ],
                           ),
-                        if (onDelete != null)
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete),
-                                SizedBox(width: 8),
-                                Text(l10n.delete),
-                              ],
-                            ),
+                        ),
+                      if (onDelete != null)
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete),
+                              const SizedBox(width: 8),
+                              Text(l10n.delete),
+                            ],
                           ),
-                      ],
+                        ),
+                    ];
+                  },
                 ),
             ],
           ),

@@ -1823,5 +1823,17 @@
   "available": "Available",
   "@available": {"description": "Link availability true"},
   "notAvailable": "Not available",
-  "@notAvailable": {"description": "Link availability false"}
+  "@notAvailable": {"description": "Link availability false"},
+  "chatAndAiSettings": "Chat & AI Settings",
+  "@chatAndAiSettings": {
+    "description": "Chat and AI settings section title"
+  },
+  "chatAgentOptions": "Chat Agent Options",
+  "@chatAgentOptions": {
+    "description": "Chat agent options title"
+  },
+  "enableAgentModeDeepSearch": "Enable agent mode, deep search, and more",
+  "@enableAgentModeDeepSearch": {
+    "description": "Chat agent options subtitle"
+  }
 }

@@ -38,17 +38,17 @@ class MenuScreen extends StatelessWidget {
               ),
               _buildSettingsTile(
                 context,
-                title: 'Statistics',
-                subtitle: 'View weight and health trends',
-                icon: Icons.analytics,
-                onTap: () => context.push('/statistics'),
-              ),
-              _buildSettingsTile(
-                context,
                 title: AppLocalizations.of(context)!.nutritionGoals,
                 subtitle: AppLocalizations.of(context)!.setNutritionTargets,
                 icon: Icons.track_changes,
                 onTap: () => context.push('/settings/nutrition-goals'),
+              ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context)!.viewStatistics,
+                subtitle: AppLocalizations.of(context)!.currentStats,
+                icon: Icons.analytics,
+                onTap: () => context.push('/settings/statistics'),
               ),
             ],
           ),
@@ -63,6 +63,7 @@ class MenuScreen extends StatelessWidget {
             ],
           ),
 
+          // AI & Features Section
           _buildSettingsSection(
             context,
             title: AppLocalizations.of(context)!.aiFeatures,
@@ -74,6 +75,14 @@ class MenuScreen extends StatelessWidget {
                 subtitle: AppLocalizations.of(context)!.configureApiKey,
                 icon: Icons.key,
                 onTap: () => context.push('/settings/api-key'),
+              ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context)!.chatAgentOptions,
+                subtitle:
+                    AppLocalizations.of(context)!.enableAgentModeDeepSearch,
+                icon: Icons.psychology,
+                onTap: () => context.push('/settings/chat-agent'),
               ),
             ],
           ),
@@ -117,22 +126,6 @@ class MenuScreen extends StatelessWidget {
                 subtitle: AppLocalizations.of(context)!.viewContributors,
                 icon: Icons.people,
                 onTap: () => context.push('/settings/contributions'),
-              ),
-            ],
-          ),
-
-          // Chat & AI Settings Section
-          _buildSettingsSection(
-            context,
-            title: 'Chat & AI Settings',
-            icon: Icons.chat,
-            children: [
-              _buildSettingsTile(
-                context,
-                title: 'Chat Agent Options',
-                subtitle: 'Enable agent mode, deep search, and more',
-                icon: Icons.psychology,
-                onTap: () => context.push('/settings/chat-agent'),
               ),
             ],
           ),
