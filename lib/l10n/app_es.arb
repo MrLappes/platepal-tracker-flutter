@@ -572,9 +572,101 @@
   "chatAgentOptions": "Opciones de Agente de Chat",
   "@chatAgentOptions": {
     "description": "Título de opciones de agente de chat"
-  },
-  "enableAgentModeDeepSearch": "Habilitar modo agente, búsqueda profunda y más",
+  },  "enableAgentModeDeepSearch": "Habilitar modo agente, búsqueda profunda y más",
   "@enableAgentModeDeepSearch": {
     "description": "Subtítulo de opciones de agente de chat"
+  },
+
+  "chatProfiles": "Perfiles de Chat",
+  "@chatProfiles": {
+    "description": "Título de sección de perfiles de chat"
+  },
+  "userChatProfile": "Tu Perfil",
+  "@userChatProfile": {
+    "description": "Sección de perfil de chat del usuario"
+  },
+  "botChatProfile": "Perfil del Bot",
+  "@botChatProfile": {
+    "description": "Sección de perfil de chat del bot"
+  },
+  "customizeUserProfile": "Personaliza tu perfil de chat",
+  "@customizeUserProfile": {
+    "description": "Subtítulo para personalización de perfil de usuario"
+  },
+  "customizeBotProfile": "Personaliza la personalidad y apariencia del bot",
+  "@customizeBotProfile": {
+    "description": "Subtítulo para personalización de perfil del bot"
+  },
+  "username": "Nombre de usuario",
+  "@username": {
+    "description": "Etiqueta del campo nombre de usuario"
+  },
+  "botName": "Nombre del Bot",
+  "@botName": {
+    "description": "Etiqueta del campo nombre del bot"
+  },
+  "avatar": "Avatar",
+  "@avatar": {
+    "description": "Etiqueta del campo avatar"
+  },
+  "changeAvatar": "Cambiar Avatar",
+  "@changeAvatar": {
+    "description": "Texto del botón cambiar avatar"
+  },
+  "removeAvatar": "Eliminar Avatar",
+  "@removeAvatar": {
+    "description": "Texto del botón eliminar avatar"
+  },
+  "personality": "Personalidad",
+  "@personality": {
+    "description": "Etiqueta del campo personalidad"
+  },
+  "selectPersonality": "Seleccionar Personalidad",
+  "@selectPersonality": {
+    "description": "Título del dropdown seleccionar personalidad"
+  },
+  "professionalNutritionist": "Nutricionista Profesional",
+  "@professionalNutritionist": {
+    "description": "Tipo de personalidad nutricionista profesional"
+  },
+  "casualGymBro": "Gym Bro Casual",
+  "@casualGymBro": {
+    "description": "Tipo de personalidad gym bro casual"
+  },
+  "angryGreg": "Greg Enojado",
+  "@angryGreg": {
+    "description": "Tipo de personalidad Greg enojado"
+  },
+  "veryAngryBro": "Bro Muy Enojado",
+  "@veryAngryBro": {
+    "description": "Tipo de personalidad bro muy enojado"
+  },
+  "fitnessCoach": "Entrenador de Fitness",
+  "@fitnessCoach": {
+    "description": "Tipo de personalidad entrenador de fitness"
+  },
+  "niceAndFriendly": "Amable y Amigable",
+  "@niceAndFriendly": {
+    "description": "Tipo de personalidad amable y amigable"
+  },
+  "selectImage": "Seleccionar Imagen",
+  "@selectImage": {
+    "description": "Texto del botón seleccionar imagen"
+  },
+  "profileSaved": "Perfil guardado exitosamente",
+  "@profileSaved": {
+    "description": "Mensaje de éxito al guardar perfil"
+  },
+  "profileSaveFailed": "Error al guardar perfil",
+  "@profileSaveFailed": {
+    "description": "Mensaje de error al guardar perfil"
+  },
+  "editUserProfile": "Editar Perfil de Usuario",
+  "@editUserProfile": {
+    "description": "Título del diálogo editar perfil de usuario"
+  },
+  "editBotProfile": "Editar Perfil del Bot",
+  "@editBotProfile": {
+    "description": "Título del diálogo editar perfil del bot"
   }
 }

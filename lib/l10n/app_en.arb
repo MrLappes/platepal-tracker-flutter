@@ -1831,9 +1831,101 @@
   "chatAgentOptions": "Chat Agent Options",
   "@chatAgentOptions": {
     "description": "Chat agent options title"
-  },
-  "enableAgentModeDeepSearch": "Enable agent mode, deep search, and more",
+  },  "enableAgentModeDeepSearch": "Enable agent mode, deep search, and more",
   "@enableAgentModeDeepSearch": {
     "description": "Chat agent options subtitle"
+  },
+
+  "chatProfiles": "Chat Profiles",
+  "@chatProfiles": {
+    "description": "Chat profiles section title"
+  },
+  "userChatProfile": "Your Profile",
+  "@userChatProfile": {
+    "description": "User chat profile section"
+  },
+  "botChatProfile": "Bot Profile",
+  "@botChatProfile": {
+    "description": "Bot chat profile section"
+  },
+  "customizeUserProfile": "Customize your chat profile",
+  "@customizeUserProfile": {
+    "description": "Subtitle for user profile customization"
+  },
+  "customizeBotProfile": "Customize the bot's personality and appearance",
+  "@customizeBotProfile": {
+    "description": "Subtitle for bot profile customization"
+  },
+  "username": "Username",
+  "@username": {
+    "description": "Username field label"
+  },
+  "botName": "Bot Name",
+  "@botName": {
+    "description": "Bot name field label"
+  },
+  "avatar": "Avatar",
+  "@avatar": {
+    "description": "Avatar field label"
+  },
+  "changeAvatar": "Change Avatar",
+  "@changeAvatar": {
+    "description": "Change avatar button text"
+  },
+  "removeAvatar": "Remove Avatar",
+  "@removeAvatar": {
+    "description": "Remove avatar button text"
+  },
+  "personality": "Personality",
+  "@personality": {
+    "description": "Personality field label"
+  },
+  "selectPersonality": "Select Personality",
+  "@selectPersonality": {
+    "description": "Select personality dropdown title"
+  },
+  "professionalNutritionist": "Professional Nutritionist",
+  "@professionalNutritionist": {
+    "description": "Professional nutritionist personality type"
+  },
+  "casualGymBro": "Casual Gym Bro",
+  "@casualGymBro": {
+    "description": "Casual gym bro personality type"
+  },
+  "angryGreg": "Angry Greg",
+  "@angryGreg": {
+    "description": "Angry Greg personality type"
+  },
+  "veryAngryBro": "Very Angry Bro",
+  "@veryAngryBro": {
+    "description": "Very angry bro personality type"
+  },
+  "fitnessCoach": "Fitness Coach",
+  "@fitnessCoach": {
+    "description": "Fitness coach personality type"
+  },
+  "niceAndFriendly": "Nice & Friendly",
+  "@niceAndFriendly": {
+    "description": "Nice and friendly personality type"
+  },
+  "selectImage": "Select Image",
+  "@selectImage": {
+    "description": "Select image button text"
+  },
+  "profileSaved": "Profile saved successfully",
+  "@profileSaved": {
+    "description": "Profile save success message"
+  },
+  "profileSaveFailed": "Failed to save profile",
+  "@profileSaveFailed": {
+    "description": "Profile save error message"
+  },
+  "editUserProfile": "Edit User Profile",
+  "@editUserProfile": {
+    "description": "Edit user profile dialog title"
+  },
+  "editBotProfile": "Edit Bot Profile",
+  "@editBotProfile": {
+    "description": "Edit bot profile dialog title"
   }
 }

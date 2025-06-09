@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/chat_message.dart';
+import '../../models/chat_profile.dart';
 import '../../models/dish_models.dart';
 import '../../models/dish.dart';
 import '../modals/dish_log_modal.dart';
@@ -12,59 +14,33 @@ import 'dish_suggestion_card.dart';
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final VoidCallback? onRetry;
+  final ChatUserProfile? userProfile;
+  final ChatBotProfile? botProfile;
 
-  const MessageBubble({super.key, required this.message, this.onRetry});
+  const MessageBubble({
+    super.key,
+    required this.message,
+    this.onRetry,
+    this.userProfile,
+    this.botProfile,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context)!;
     final isUser = message.isFromUser;
-    final isDark = theme.brightness == Brightness.dark;
-
-    // Determine alignment and layout based on sender
-    final avatar = Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child:
-            isUser
-                ? Container(
-                  color: theme.colorScheme.secondary,
-                  child: Icon(
-                    Icons.person,
-                    size: 24,
-                    color: theme.colorScheme.onSecondary,
-                  ),
-                )
-                : Container(
-                  color: theme.colorScheme.primary,
-                  child: Icon(
-                    Icons.smart_toy,
-                    size: 24,
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-      ),
-    );
-
+    final isDark =
+        theme.brightness ==
+        Brightness.dark; // Determine alignment and layout based on sender
+    final avatar = _buildAvatar(context, theme, isUser);
     final nameAndTime = Expanded(
       child: Row(
         children: [
           Text(
-            isUser ? 'You' : 'PlatePal Assistant',
+            isUser
+                ? (userProfile?.username ?? 'You')
+                : (botProfile?.name ?? 'PlatePal Assistant'),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurface,
@@ -673,5 +649,106 @@ class MessageBubble extends StatelessWidget {
         },
       );
     }
+  }
+
+  /// Build avatar widget based on user/bot profile
+  Widget _buildAvatar(BuildContext context, ThemeData theme, bool isUser) {
+    final avatarUrl = isUser ? userProfile?.avatarUrl : botProfile?.avatarUrl;
+
+    // Debug logging to check if avatar URLs are being passed correctly
+    debugPrint('MessageBubble avatar debug:');
+    debugPrint('  isUser: $isUser');
+    debugPrint('  userProfile?.avatarUrl: ${userProfile?.avatarUrl}');
+    debugPrint('  botProfile?.avatarUrl: ${botProfile?.avatarUrl}');
+    debugPrint('  final avatarUrl: $avatarUrl');
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child:
+            avatarUrl != null
+                ? _buildAvatarImage(avatarUrl, theme, isUser)
+                : _buildDefaultAvatar(theme, isUser),
+      ),
+    );
+  }
+
+  /// Build avatar image handling both local files and network URLs
+  Widget _buildAvatarImage(String avatarUrl, ThemeData theme, bool isUser) {
+    // Check if it's a local file path
+    if (avatarUrl.startsWith('/') ||
+        avatarUrl.contains('\\') ||
+        avatarUrl.startsWith('file://')) {
+      // Handle local file
+      final file = File(avatarUrl);
+      return Image.file(
+        file,
+        width: 36,
+        height: 36,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint(
+            'Local avatar image failed to load: $avatarUrl, error: $error',
+          );
+          return _buildDefaultAvatar(theme, isUser);
+        },
+      );
+    } else {
+      // Handle network URL with CachedNetworkImage
+      return CachedNetworkImage(
+        imageUrl: avatarUrl,
+        width: 36,
+        height: 36,
+        fit: BoxFit.cover,
+        placeholder:
+            (context, url) => Container(
+              color:
+                  isUser
+                      ? theme.colorScheme.secondary.withOpacity(0.3)
+                      : theme.colorScheme.primary.withOpacity(0.3),
+              child: Icon(
+                isUser ? Icons.person : Icons.smart_toy,
+                size: 20,
+                color:
+                    isUser
+                        ? theme.colorScheme.secondary
+                        : theme.colorScheme.primary,
+              ),
+            ),
+        errorWidget: (context, url, error) {
+          debugPrint(
+            'Network avatar image failed to load: $url, error: $error',
+          );
+          return _buildDefaultAvatar(theme, isUser);
+        },
+      );
+    }
+  }
+
+  Widget _buildDefaultAvatar(ThemeData theme, bool isUser) {
+    return Container(
+      color: isUser ? theme.colorScheme.secondary : theme.colorScheme.primary,
+      child: Icon(
+        isUser ? Icons.person : Icons.smart_toy,
+        size: 24,
+        color:
+            isUser
+                ? theme.colorScheme.onSecondary
+                : theme.colorScheme.onPrimary,
+      ),
+    );
   }
 }
