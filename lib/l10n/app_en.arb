@@ -1923,9 +1923,73 @@
   "editUserProfile": "Edit User Profile",
   "@editUserProfile": {
     "description": "Edit user profile dialog title"
-  },
-  "editBotProfile": "Edit Bot Profile",
+  },  "editBotProfile": "Edit Bot Profile",
   "@editBotProfile": {
     "description": "Edit bot profile dialog title"
+  },
+  "connectToHealth": "Connect to Health",
+  "@connectToHealth": {
+    "description": "Connect to health button text"
+  },
+  "healthDataSync": "Health Data Sync",
+  "@healthDataSync": {
+    "description": "Health data sync section title"
+  },
+  "healthConnected": "Health data connected",
+  "@healthConnected": {
+    "description": "Health data connected status message"
+  },
+  "healthDisconnected": "Health data not connected",
+  "@healthDisconnected": {
+    "description": "Health data disconnected status message"
+  },
+  "syncHealthData": "Sync Health Data",
+  "@syncHealthData": {
+    "description": "Sync health data button text"
+  },
+  "healthPermissionRequired": "Health permissions are required to sync your data",
+  "@healthPermissionRequired": {
+    "description": "Health permission required message"
+  },
+  "healthSyncSuccess": "Health data synced successfully",
+  "@healthSyncSuccess": {
+    "description": "Health sync success message"
+  },
+  "healthSyncFailed": "Failed to sync health data",
+  "@healthSyncFailed": {
+    "description": "Health sync failed message"
+  },  "lastSynced": "Last synced: {date}",
+  "@lastSynced": {
+    "description": "Last synced timestamp",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "description": "The date when health data was last synced"
+      }
+    }
+  },
+  "healthPermissionDenied": "Health Permission Denied",
+  "@healthPermissionDenied": {
+    "description": "Health permission denied dialog title"
+  },
+  "healthPermissionDeniedMessage": "To sync your health data, PlatePal needs access to your health information. You can grant permissions in your phone's settings.",
+  "@healthPermissionDeniedMessage": {
+    "description": "Health permission denied dialog message"
+  },
+  "openSettings": "Open Settings",
+  "@openSettings": {
+    "description": "Open settings button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "healthNotAvailable": "Health Data Not Available",
+  "@healthNotAvailable": {
+    "description": "Health data not available dialog title"
+  },
+  "healthNotAvailableMessage": "Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.",
+  "@healthNotAvailableMessage": {
+    "description": "Health data not available dialog message"
   }
 }
