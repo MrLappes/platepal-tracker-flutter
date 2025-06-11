@@ -334,42 +334,96 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 16),
 
-                    // Macronutrients
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildNutritionField(
-                            controller: _proteinController,
-                            label: l10n.protein,
-                            suffix: l10n.grams,
-                            icon: Icons.fitness_center_outlined,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildNutritionField(
-                            controller: _carbsController,
-                            label: l10n.carbs,
-                            suffix: l10n.grams,
-                            icon: Icons.grain_outlined,
-                            color: Colors.amber,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildNutritionField(
-                            controller: _fatController,
-                            label: l10n.fat,
-                            suffix: l10n.grams,
-                            icon: Icons.water_drop_outlined,
-                            color: Colors.teal,
-                          ),
-                        ),
-                      ],
+                    // Macronutrients - responsive layout
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isNarrow = constraints.maxWidth < 400;
+
+                        if (isNarrow) {
+                          // Narrow screen: 2 fields per row max
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildNutritionField(
+                                      controller: _proteinController,
+                                      label: l10n.protein,
+                                      suffix: l10n.grams,
+                                      icon: Icons.fitness_center_outlined,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildNutritionField(
+                                      controller: _carbsController,
+                                      label: l10n.carbs,
+                                      suffix: l10n.grams,
+                                      icon: Icons.grain_outlined,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildNutritionField(
+                                      controller: _fatController,
+                                      label: l10n.fat,
+                                      suffix: l10n.grams,
+                                      icon: Icons.water_drop_outlined,
+                                      color: Colors.teal,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Empty space to maintain layout consistency
+                                  const Expanded(child: SizedBox()),
+                                ],
+                              ),
+                            ],
+                          );
+                        } else {
+                          // Wide screen: 3 fields in one row
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _buildNutritionField(
+                                  controller: _proteinController,
+                                  label: l10n.protein,
+                                  suffix: l10n.grams,
+                                  icon: Icons.fitness_center_outlined,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildNutritionField(
+                                  controller: _carbsController,
+                                  label: l10n.carbs,
+                                  suffix: l10n.grams,
+                                  icon: Icons.grain_outlined,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildNutritionField(
+                                  controller: _fatController,
+                                  label: l10n.fat,
+                                  suffix: l10n.grams,
+                                  icon: Icons.water_drop_outlined,
+                                  color: Colors.teal,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
 
                     const SizedBox(height: 32),
