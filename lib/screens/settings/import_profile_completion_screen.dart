@@ -77,7 +77,7 @@ class _ImportProfileCompletionScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text('Complete Profile'),
-        backgroundColor: theme.colorScheme.surfaceVariant,
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
       ),
       body: Form(
         key: _formKey,
@@ -416,7 +416,9 @@ class _ImportProfileCompletionScreenState
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           border: Border(
-            top: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+            top: BorderSide(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+            ),
           ),
         ),
         child: SafeArea(

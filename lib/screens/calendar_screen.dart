@@ -201,9 +201,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              l10n.configureApiKeyForAiTips,
-            ),
+            content: Text(l10n.configureApiKeyForAiTips),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -465,7 +463,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             : isToday
                             ? Theme.of(
                               context,
-                            ).colorScheme.primary.withOpacity(0.2)
+                            ).colorScheme.primary.withValues(alpha: 0.2)
                             : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -682,7 +680,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   width: double.infinity,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: colorScheme.outline.withOpacity(0.2),
+                    color: colorScheme.outline.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -717,7 +715,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -766,7 +764,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
@@ -785,7 +782,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           color: colorScheme.surfaceContainer,
                           border: Border(
                             bottom: BorderSide(
-                              color: colorScheme.outline.withOpacity(0.2),
+                              color: colorScheme.outline.withValues(alpha: 0.2),
                             ),
                           ),
                         ),

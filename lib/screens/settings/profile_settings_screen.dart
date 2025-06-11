@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/user_profile.dart';
@@ -221,7 +220,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       // Load from SQLite database
       final userProfile = await context.userProfileService.getUserProfile('1');
 
-      if (userProfile != null) {
+      if (userProfile != null && mounted) {
         _originalProfile = userProfile;
 
         // Load metrics history to get the latest body fat percentage
@@ -232,7 +231,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 const Duration(days: 30),
               ), // Last 30 days
             );
-      } else {
+      } else if (mounted) {
         // Create a default profile if none exists
         final migratedProfile = await context.userProfileService.getUserProfile(
           '1',
@@ -263,9 +262,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             createdAt: DateTime.now().subtract(const Duration(days: 30)),
             updatedAt: DateTime.now(),
           );
-
-          // Save the default profile to the database
-          await context.userProfileService.saveUserProfile(_originalProfile!);
+          if (mounted) {
+            // Save the default profile to the database
+            await context.userProfileService.saveUserProfile(_originalProfile!);
+          }
         }
       }
 
@@ -390,7 +390,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       final bool heightChanged =
           previousHeight != null && (height - previousHeight).abs() > 0.1;
 
-      if (weightChanged || heightChanged || bodyFat != null) {
+      if ((weightChanged || heightChanged || bodyFat != null) && mounted) {
         await context.userProfileService.updateUserMetrics(
           userId: updatedProfile.id,
           weight: weight,
@@ -1085,12 +1085,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.surfaceVariant.withOpacity(0.3),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: Theme.of(
                       context,
-                    ).colorScheme.outline.withOpacity(0.2),
+                    ).colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Column(

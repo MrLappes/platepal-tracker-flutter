@@ -5,13 +5,13 @@ import '../services/storage/storage_service_provider.dart';
 class StorageProvider extends StatefulWidget {
   final Widget child;
 
-  const StorageProvider({Key? key, required this.child}) : super(key: key);
+  const StorageProvider({super.key, required this.child});
 
   @override
-  _StorageProviderState createState() => _StorageProviderState();
+  StorageProviderState createState() => StorageProviderState();
 }
 
-class _StorageProviderState extends State<StorageProvider> {
+class StorageProviderState extends State<StorageProvider> {
   final StorageServiceProvider _storageServiceProvider =
       StorageServiceProvider();
   bool _initialized = false;

@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Health Connect Package Query -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+    
     <!-- Health Connect Permissions -->
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.READ_HEIGHT" />
@@ -12,9 +17,9 @@
     <uses-permission android:name="android.permission.health.WRITE_NUTRITION" />
     
     <application
-        android:label="platepal_tracker"
+        android:label="PlatePal Tracker"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

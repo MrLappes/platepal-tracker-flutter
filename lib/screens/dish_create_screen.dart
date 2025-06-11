@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/dish.dart';
@@ -133,7 +132,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
             _descriptionController.text.trim().isEmpty
                 ? null
                 : _descriptionController.text.trim(),
-        imageUrl: _selectedImage != null ? _selectedImage!.path : null,
+        imageUrl: _selectedImage?.path,
         ingredients: _ingredients,
         nutrition: nutrition,
         createdAt: widget.dish?.createdAt ?? DateTime.now(),
@@ -151,15 +150,19 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       if (isUpdate) {
         debugPrint('🍽️ Updating existing dish...');
         await _dishService.updateDish(dishData);
-        _showSuccessSnackBar(
-          AppLocalizations.of(context)!.dishUpdatedSuccessfully,
-        );
+        if (mounted) {
+          _showSuccessSnackBar(
+            AppLocalizations.of(context)!.dishUpdatedSuccessfully,
+          );
+        }
       } else {
         debugPrint('🍽️ Creating new dish...');
         await _dishService.saveDish(dishData);
-        _showSuccessSnackBar(
-          AppLocalizations.of(context)!.dishCreatedSuccessfully,
-        );
+        if (mounted) {
+          _showSuccessSnackBar(
+            AppLocalizations.of(context)!.dishCreatedSuccessfully,
+          );
+        }
       }
 
       debugPrint('🍽️ Dish saved successfully! Calling callback...');
@@ -172,9 +175,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       }
     } catch (e) {
       debugPrint('❌ Error saving dish: $e');
-      _showErrorSnackBar(
-        '${AppLocalizations.of(context)!.errorSavingDish}: $e',
-      );
+      if (mounted) {
+        _showErrorSnackBar(AppLocalizations.of(context)!.errorSavingDish);
+      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -214,7 +217,12 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         });
       }
     } catch (e) {
-      _showErrorSnackBar(AppLocalizations.of(context)!.errorPickingImage(e.toString()));
+      if (mounted) {
+        _showErrorSnackBar(
+          AppLocalizations.of(context)!.errorPickingImage(e.toString()),
+        );
+      }
+      debugPrint('❌ Error picking image: $e');
     }
   }
 
@@ -389,7 +397,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   border: Border.all(
                     color: Theme.of(
                       context,
-                    ).colorScheme.outline.withOpacity(0.3),
+                    ).colorScheme.outline.withValues(alpha: 0.3),
                   ),
                 ),
                 child: ClipRRect(
@@ -406,7 +414,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   border: Border.all(
                     color: Theme.of(
                       context,
-                    ).colorScheme.outline.withOpacity(0.3),
+                    ).colorScheme.outline.withValues(alpha: 0.3),
                     style: BorderStyle.solid,
                   ),
                   color: Theme.of(context).colorScheme.surfaceContainer,
@@ -469,7 +477,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   child: ElevatedButton.icon(
                     onPressed: () {
                       // TODO: Implement barcode scanning
-                      _showErrorSnackBar(AppLocalizations.of(context)!.barcodeScanningComingSoon);
+                      _showErrorSnackBar(
+                        AppLocalizations.of(context)!.barcodeScanningComingSoon,
+                      );
                     },
                     icon: const Icon(Icons.qr_code_scanner),
                     label: Text(AppLocalizations.of(context)!.scanBarcode),
@@ -484,7 +494,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   child: ElevatedButton.icon(
                     onPressed: () {
                       // TODO: Implement product search
-                      _showErrorSnackBar(AppLocalizations.of(context)!.productSearchComingSoon);
+                      _showErrorSnackBar(
+                        AppLocalizations.of(context)!.productSearchComingSoon,
+                      );
                     },
                     icon: const Icon(Icons.search),
                     label: Text(AppLocalizations.of(context)!.searchProduct),
@@ -650,7 +662,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     leading: CircleAvatar(
                       backgroundColor: Theme.of(
                         context,
-                      ).primaryColor.withOpacity(0.1),
+                      ).primaryColor.withValues(alpha: 0.1),
                       child: Icon(
                         Icons.restaurant,
                         color: Theme.of(context).primaryColor,

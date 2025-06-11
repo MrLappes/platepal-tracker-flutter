@@ -32,7 +32,7 @@ class ChatHeader extends StatelessWidget {
         shape: BoxShape.circle,
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -96,7 +96,7 @@ class ChatHeader extends StatelessWidget {
         color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.2),
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
             width: 1,
           ),
         ),

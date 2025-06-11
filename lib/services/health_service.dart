@@ -50,7 +50,7 @@ class HealthService {
   Future<bool> isHealthDataAvailable() async {
     try {
       // Check if the platform supports health data (Android Health Connect or iOS HealthKit)
-      return await Health().isDataTypeAvailable(HealthDataType.STEPS);
+      return Health().isDataTypeAvailable(HealthDataType.STEPS);
     } catch (e) {
       developer.log(
         'Error checking health data availability: $e',

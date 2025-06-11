@@ -129,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
           end: Alignment.bottomCenter,
           colors: [
             Theme.of(context).colorScheme.surface,
-            Theme.of(context).colorScheme.surface.withOpacity(0.8),
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -154,7 +154,9 @@ class _ChatScreenState extends State<ChatScreen> {
               color: Theme.of(context).colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.shadow.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, -2),
                 ),
@@ -187,7 +189,7 @@ class _ChatScreenState extends State<ChatScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            theme.colorScheme.primary.withOpacity(0.1),
+            theme.colorScheme.primary.withValues(alpha: 0.1),
             theme.colorScheme.surface,
           ],
         ),
@@ -230,7 +232,7 @@ class _ChatScreenState extends State<ChatScreen> {
               Text(
                 localizations.configureApiKeyToUseChat,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -345,7 +347,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.shadow.withOpacity(0.1),
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -372,7 +374,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Text(
                           currentStep ?? message,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.8,
+                            ),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -403,7 +407,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   color: theme
                                                       .colorScheme
                                                       .onSurface
-                                                      .withOpacity(0.6),
+                                                      .withValues(alpha: 0.6),
                                                   fontSize: 11,
                                                 ),
                                           ),
@@ -423,7 +427,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   color: theme
                                                       .colorScheme
                                                       .onSurface
-                                                      .withOpacity(0.6),
+                                                      .withValues(alpha: 0.6),
                                                   fontSize: 11,
                                                 ),
                                           ),

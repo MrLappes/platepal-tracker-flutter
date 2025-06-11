@@ -1,4 +1,4 @@
-package com.platepal.platepal_tracker
+package com.platepal.platepaltracker
 
 import io.flutter.embedding.android.FlutterActivity
 

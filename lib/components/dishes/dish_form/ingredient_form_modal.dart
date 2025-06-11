@@ -522,17 +522,17 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
-            suffixStyle: TextStyle(color: color.withOpacity(0.7)),
+            suffixStyle: TextStyle(color: color.withValues(alpha: 0.7)),
             prefixIcon: Icon(icon, size: 18, color: color),
             filled: true,
             fillColor: colorScheme.surfaceContainer,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: color.withOpacity(0.3)),
+              borderSide: BorderSide(color: color.withValues(alpha: 0.3)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: color.withOpacity(0.3)),
+              borderSide: BorderSide(color: color.withValues(alpha: 0.3)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

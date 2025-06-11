@@ -153,7 +153,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                 color: theme.colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -173,9 +173,8 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: theme.colorScheme.surfaceVariant.withOpacity(
-                        0.3,
-                      ),
+                      fillColor: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
@@ -232,7 +231,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           _selectedCategoryFilter = selected ? value : 'all';
         });
       },
-      backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+      backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(
+        alpha: 0.3,
+      ),
       selectedColor: theme.colorScheme.primaryContainer,
       checkmarkColor: theme.colorScheme.onPrimaryContainer,
       labelStyle: TextStyle(
@@ -375,7 +376,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                 ),
                 child:
                     dish.imageUrl != null
@@ -525,7 +526,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
               // Three-dot menu button
               Container(
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: PopupMenuButton<String>(

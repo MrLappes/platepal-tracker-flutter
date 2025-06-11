@@ -93,19 +93,19 @@ class DishCard extends StatelessWidget {
           Row(
             children: [
               _NutrientChip(
-                label: 'Protein',
+                label: l10n.protein,
                 value: '${dish.nutrition.protein.toStringAsFixed(1)}g',
                 color: Colors.blue,
               ),
               const SizedBox(width: 8),
               _NutrientChip(
-                label: 'Carbs',
+                label: l10n.carbs,
                 value: '${dish.nutrition.carbs.toStringAsFixed(1)}g',
                 color: Colors.orange,
               ),
               const SizedBox(width: 8),
               _NutrientChip(
-                label: 'Fat',
+                label: l10n.fat,
                 value: '${dish.nutrition.fat.toStringAsFixed(1)}g',
                 color: Colors.green,
               ),

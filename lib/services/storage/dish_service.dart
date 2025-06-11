@@ -629,7 +629,7 @@ class DishService {
 
       return true;
     } catch (e) {
-      print('Error saving dish from import: $e');
+      debugPrint('Error saving dish from import: $e');
       return false;
     }
   }

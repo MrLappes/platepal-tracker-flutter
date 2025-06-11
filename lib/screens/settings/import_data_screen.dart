@@ -77,7 +77,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                   strokeWidth: 8,
                   value:
                       _totalItems > 0 ? _currentProgress / _totalItems : null,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
                 if (_totalItems > 0)
                   Text(
@@ -528,7 +529,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 height: 120,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surface.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ListView.builder(
@@ -649,7 +652,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: Theme.of(context).primaryColor,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          disabledBackgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
           disabledForegroundColor:
               Theme.of(context).colorScheme.onSurfaceVariant,
         ),
@@ -726,18 +730,19 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
         if (result.success) {
           // Refresh backup availability after successful import
           await _checkBackupAvailability();
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(
-                  context,
-                )!.importedItemsCount(result.itemsProcessed),
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.importedItemsCount(result.itemsProcessed),
+                ),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
               ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+            );
+          }
 
           // Close the screen after successful import
           Future.delayed(const Duration(seconds: 2), () {
@@ -920,14 +925,15 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
         if (result.success) {
           // Refresh backup availability
           await _checkBackupAvailability();
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Successfully restored from backup!'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Successfully restored from backup!'),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
 
           // Close the screen after successful restore
           Future.delayed(const Duration(seconds: 2), () {

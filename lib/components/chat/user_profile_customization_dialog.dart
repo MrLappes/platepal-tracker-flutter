@@ -110,7 +110,7 @@ class _UserProfileCustomizationDialogState
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.profileSaved)));
         Navigator.of(context).pop();
-      } else {
+      } else if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.profileSaveFailed)));

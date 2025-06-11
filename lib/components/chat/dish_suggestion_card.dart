@@ -407,7 +407,9 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                 color:
                     isHighlight
                         ? color
-                        : theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.7,
+                        ),
               ),
             ),
           ),
@@ -416,11 +418,14 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
             child: Container(
               height: isHighlight ? 8 : 6,
               decoration: BoxDecoration(
-                color: theme.colorScheme.onSurface.withOpacity(0.1),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(isHighlight ? 4 : 3),
                 border:
                     isHighlight
-                        ? Border.all(color: color.withOpacity(0.3), width: 1)
+                        ? Border.all(
+                          color: color.withValues(alpha: 0.3),
+                          width: 1,
+                        )
                         : null,
               ),
               child: FractionallySizedBox(
@@ -434,7 +439,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                         isHighlight
                             ? [
                               BoxShadow(
-                                color: color.withOpacity(0.4),
+                                color: color.withValues(alpha: 0.4),
                                 blurRadius: 4,
                                 offset: const Offset(0, 1),
                               ),
@@ -456,7 +461,9 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                 color:
                     isHighlight
                         ? color
-                        : theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.7,
+                        ),
               ),
               textAlign: TextAlign.right,
             ),
@@ -581,12 +588,12 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                         isSpecialProfile
                             ? isDark
                                 ? [
-                                  profileColor.withOpacity(0.15),
-                                  profileColor.withOpacity(0.08),
+                                  profileColor.withValues(alpha: 0.15),
+                                  profileColor.withValues(alpha: 0.08),
                                 ]
                                 : [
-                                  profileColor.withOpacity(0.1),
-                                  profileColor.withOpacity(0.05),
+                                  profileColor.withValues(alpha: 0.1),
+                                  profileColor.withValues(alpha: 0.05),
                                 ]
                             : isDark
                             ? [
@@ -602,16 +609,18 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                   border: Border.all(
                     color:
                         isSpecialProfile
-                            ? profileColor.withOpacity(0.4)
-                            : _getStateColor(colorScheme).withOpacity(0.2),
+                            ? profileColor.withValues(alpha: 0.4)
+                            : _getStateColor(
+                              colorScheme,
+                            ).withValues(alpha: 0.2),
                     width: isSpecialProfile ? 2 : 1,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color:
                           isSpecialProfile
-                              ? profileColor.withOpacity(0.2)
-                              : colorScheme.shadow.withOpacity(0.1),
+                              ? profileColor.withValues(alpha: 0.2)
+                              : colorScheme.shadow.withValues(alpha: 0.1),
                       blurRadius: isSpecialProfile ? 12 : 8,
                       offset: const Offset(0, 2),
                     ),
@@ -630,10 +639,10 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: profileColor.withOpacity(0.2),
+                            color: profileColor.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: profileColor.withOpacity(0.5),
+                              color: profileColor.withValues(alpha: 0.5),
                               width: 1,
                             ),
                           ),
@@ -688,13 +697,17 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             decoration: BoxDecoration(
                               color:
                                   isSpecialProfile
-                                      ? profileColor.withOpacity(0.2)
-                                      : colorScheme.primary.withOpacity(0.15),
+                                      ? profileColor.withValues(alpha: 0.2)
+                                      : colorScheme.primary.withValues(
+                                        alpha: 0.15,
+                                      ),
                               borderRadius: BorderRadius.circular(12),
                               border:
                                   isSpecialProfile
                                       ? Border.all(
-                                        color: profileColor.withOpacity(0.5),
+                                        color: profileColor.withValues(
+                                          alpha: 0.5,
+                                        ),
                                         width: 1,
                                       )
                                       : null,
@@ -878,13 +891,19 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
         isSpecialProfile
             ? [
               profileColor,
-              profileColor.withBlue((profileColor.blue + 30).clamp(0, 255)),
+              profileColor.withBlue(
+                ((profileColor.b + 30).clamp(0, 255)).toInt(),
+              ),
             ]
             : [
               colorScheme.primary,
               colorScheme.primary
-                  .withBlue((colorScheme.primary.blue + 20).clamp(0, 255))
-                  .withRed((colorScheme.primary.red - 20).clamp(0, 255)),
+                  .withBlue(
+                    ((colorScheme.primary.b + 20).clamp(0, 255)).toInt(),
+                  )
+                  .withRed(
+                    ((colorScheme.primary.r - 20).clamp(0, 255)).toInt(),
+                  ),
             ];
 
     return Container(
@@ -899,7 +918,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
         boxShadow: [
           BoxShadow(
             color: (isSpecialProfile ? profileColor : colorScheme.primary)
-                .withOpacity(0.3),
+                .withValues(alpha: 0.3),
             blurRadius: isSpecialProfile ? 6 : 4,
             offset: const Offset(0, 2),
           ),
@@ -949,20 +968,20 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       decoration: BoxDecoration(
         color:
             isSpecialProfile
-                ? profileColor.withOpacity(isDark ? 0.3 : 0.1)
+                ? profileColor.withValues(alpha: isDark ? 0.3 : 0.1)
                 : colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color:
               isSpecialProfile
-                  ? profileColor.withOpacity(0.5)
-                  : colorScheme.primary.withOpacity(0.3),
+                  ? profileColor.withValues(alpha: 0.5)
+                  : colorScheme.primary.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: (isSpecialProfile ? profileColor : colorScheme.primary)
-                .withOpacity(0.2),
+                .withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),

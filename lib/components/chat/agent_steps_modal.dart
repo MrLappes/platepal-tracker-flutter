@@ -76,15 +76,13 @@ class AgentStepsModal extends StatelessWidget {
                               ),
                             ],
                           ),
-                          ...thinkingSteps
-                              .map<Widget>(
-                                (step) => _buildThinkingStepItem(
-                                  context,
-                                  theme,
-                                  step.toString(),
-                                ),
-                              )
-                              .toList(),
+                          ...thinkingSteps.map<Widget>(
+                            (step) => _buildThinkingStepItem(
+                              context,
+                              theme,
+                              step.toString(),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -266,7 +264,7 @@ class AgentStepsModal extends StatelessWidget {
             Text(
               subtitle,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 12),
@@ -300,7 +298,8 @@ class AgentStepsModal extends StatelessWidget {
             child: Text(
               value,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: color ?? theme.colorScheme.onSurface.withOpacity(0.8),
+                color:
+                    color ?? theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -334,7 +333,7 @@ class AgentStepsModal extends StatelessWidget {
             decoration: BoxDecoration(
               color:
                   isSubStep
-                      ? theme.colorScheme.primary.withOpacity(0.5)
+                      ? theme.colorScheme.primary.withValues(alpha: 0.5)
                       : theme.colorScheme.primary,
               shape: BoxShape.circle,
             ),
@@ -345,7 +344,7 @@ class AgentStepsModal extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 color:
                     isSubStep
-                        ? theme.colorScheme.onSurface.withOpacity(0.7)
+                        ? theme.colorScheme.onSurface.withValues(alpha: 0.7)
                         : theme.colorScheme.onSurface,
                 fontSize: isSubStep ? 13 : 14,
               ),
@@ -439,7 +438,7 @@ class AgentStepsModal extends StatelessWidget {
               Text(
                 '• ${executionTime}ms',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -579,13 +578,15 @@ class AgentStepsModal extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 isError
-                    ? Colors.red.withOpacity(0.1)
+                    ? Colors.red.withValues(alpha: 0.1)
                     : isMetadata
-                    ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
                     : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
             border:
-                isError ? Border.all(color: Colors.red.withOpacity(0.3)) : null,
+                isError
+                    ? Border.all(color: Colors.red.withValues(alpha: 0.3))
+                    : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,10 +672,10 @@ class AgentStepsModal extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.2),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: theme.colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.primary.withValues(alpha: 0.3),
               ),
             ),
             child: Column(
@@ -683,7 +684,7 @@ class AgentStepsModal extends StatelessWidget {
                 Text(
                   'Length: ${enhancedSystemPrompt.length} characters',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 8),
