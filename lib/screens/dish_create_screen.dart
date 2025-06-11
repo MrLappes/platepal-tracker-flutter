@@ -2,7 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../models/dish.dart';
+import '../models/product.dart';
 import '../services/storage/dish_service.dart';
 import '../components/dishes/dish_form/ingredient_form_modal.dart';
 import '../components/dishes/dish_form/smart_nutrition_card.dart';
@@ -273,9 +277,99 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     );
   }
 
+  void _openBarcodeScanner() {
+    // Open ingredient form modal with scanner integration
+    IngredientFormModal.show(
+      context,
+      onSave: (ingredient) {
+        setState(() {
+          _ingredients.add(ingredient);
+          _recalculateNutrition();
+        });
+        _showSuccessSnackBar(
+          AppLocalizations.of(context)!.productAddedSuccessfully,
+        );
+      },
+      onProductScanned: (product) {
+        // Auto-fill dish info when product is scanned from within ingredient form
+        _updateDishFromProduct(product);
+      },
+    );
+  }
+
+  void _openProductSearch() {
+    // Open ingredient form modal with search integration
+    IngredientFormModal.show(
+      context,
+      onSave: (ingredient) {
+        setState(() {
+          _ingredients.add(ingredient);
+          _recalculateNutrition();
+        });
+        _showSuccessSnackBar(
+          AppLocalizations.of(context)!.productAddedSuccessfully,
+        );
+      },
+      onProductScanned: (product) {
+        // Auto-fill dish info when product is searched from within ingredient form
+        _updateDishFromProduct(product);
+      },
+    );
+  }
+
+  /// Update dish name and image from scanned product
+  void _updateDishFromProduct(Product product) {
+    // Auto-set dish name if not already set
+    if (_nameController.text.trim().isEmpty && product.name != null) {
+      setState(() {
+        _nameController.text = product.name!;
+      });
+    }
+
+    // Auto-set dish image if not already set and product has image
+    if (_selectedImage == null && product.imageUrl != null) {
+      _downloadAndSetProductImage(product.imageUrl!);
+    }
+  }
+
+  /// Download product image and set it as dish image
+  Future<void> _downloadAndSetProductImage(String imageUrl) async {
+    try {
+      debugPrint('📸 Downloading product image: $imageUrl');
+
+      // Download the image
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        // Get the app's temporary directory
+        final tempDir = await getTemporaryDirectory();
+
+        // Create a unique filename
+        final fileName =
+            'product_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final filePath = path.join(tempDir.path, fileName);
+
+        // Write the image data to file
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        // Set the downloaded image as the dish image
+        if (mounted) {
+          setState(() {
+            _selectedImage = file;
+          });
+          debugPrint('✅ Product image downloaded and set successfully');
+        }
+      } else {
+        debugPrint('❌ Failed to download image: HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('❌ Error downloading product image: $e');
+      // Don't show error to user as this is a nice-to-have feature
+    }
+  }
+
   void _recalculateNutrition() {
     if (_ingredients.isEmpty) return;
-
     double totalCalories = 0;
     double totalProtein = 0;
     double totalCarbs = 0;
@@ -475,12 +569,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      // TODO: Implement barcode scanning
-                      _showErrorSnackBar(
-                        AppLocalizations.of(context)!.barcodeScanningComingSoon,
-                      );
-                    },
+                    onPressed: _openBarcodeScanner,
                     icon: const Icon(Icons.qr_code_scanner),
                     label: Text(AppLocalizations.of(context)!.scanBarcode),
                     style: ElevatedButton.styleFrom(
@@ -492,12 +581,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      // TODO: Implement product search
-                      _showErrorSnackBar(
-                        AppLocalizations.of(context)!.productSearchComingSoon,
-                      );
-                    },
+                    onPressed: _openProductSearch,
                     icon: const Icon(Icons.search),
                     label: Text(AppLocalizations.of(context)!.searchProduct),
                     style: ElevatedButton.styleFrom(

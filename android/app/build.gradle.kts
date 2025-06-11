@@ -38,18 +38,19 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-    }
-
+    }    
     signingConfigs {
         create("release") {
             if (keystoreProperties.containsKey("storeFile")) {
-                                keyAlias = keystoreProperties["keyAlias"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
                 storeFile = file(keystoreProperties["storeFile"] as String)
                 storePassword = keystoreProperties["storePassword"] as String
             }
         }
-    }    buildTypes {
+    }
+
+    buildTypes {
         release {
             // Use the release signing config for production builds
             signingConfig = if (keystoreProperties.containsKey("storeFile")) {

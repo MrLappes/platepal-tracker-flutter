@@ -1524,9 +1524,10 @@
   "ingredients": "Ingredients",
   "@ingredients": { "description": "Label for ingredients section" },
   "addIngredient": "Add Ingredient",
-  "@addIngredient": { "description": "Button text to add ingredient" },
-  "noIngredientsAdded": "No ingredients added yet",
+  "@addIngredient": { "description": "Button text to add ingredient" },  "noIngredientsAdded": "No ingredients added yet",
   "@noIngredientsAdded": { "description": "Empty state text for ingredients list" },
+  "ingredientsAdded": "Ingredients Added",
+  "@ingredientsAdded": { "description": "Label for added ingredients preview in chat" },
   "options": "Options",
   "@options": { "description": "Section title for dish options" },
   "markAsFavorite": "Mark as favorite dish",
@@ -1987,9 +1988,179 @@
   "healthNotAvailable": "Health Data Not Available",
   "@healthNotAvailable": {
     "description": "Health data not available dialog title"
-  },
-  "healthNotAvailableMessage": "Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.",
+  },  "healthNotAvailableMessage": "Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.",
   "@healthNotAvailableMessage": {
     "description": "Health data not available dialog message"
+  },
+  "scanBarcode": "Scan Barcode",
+  "@scanBarcode": {
+    "description": "Scan barcode button text"
+  },
+  "searchProduct": "Search Product",
+  "@searchProduct": {
+    "description": "Search product button text"
+  },
+  "barcodeScanningComingSoon": "Barcode scanning feature is coming soon!",
+  "@barcodeScanningComingSoon": {
+    "description": "Placeholder message for barcode scanning"
+  },
+  "productSearchComingSoon": "Product search feature is coming soon!",
+  "@productSearchComingSoon": {
+    "description": "Placeholder message for product search"
+  },
+  "scanBarcodeToAddProduct": "Scan a barcode to quickly add products",
+  "@scanBarcodeToAddProduct": {
+    "description": "Instruction text for barcode scanning"
+  },
+  "searchForProducts": "Search for products by name",
+  "@searchForProducts": {
+    "description": "Instruction text for product search"
+  },
+  "productNotFound": "Product not found",
+  "@productNotFound": {
+    "description": "Message when product is not found"
+  },
+  "productAddedSuccessfully": "Product added successfully",
+  "@productAddedSuccessfully": {
+    "description": "Success message when product is added"
+  },
+  "errorScanningBarcode": "Error scanning barcode: {error}",
+  "@errorScanningBarcode": {
+    "description": "Error message for barcode scanning",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error message"
+      }
+    }
+  },
+  "errorSearchingProduct": "Error searching for product: {error}",
+  "@errorSearchingProduct": {
+    "description": "Error message for product search",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "The error message"
+      }
+    }
+  },
+  "barcodeScanner": "Barcode Scanner",
+  "@barcodeScanner": {
+    "description": "Barcode scanner title"
+  },
+  "productSearch": "Product Search",
+  "@productSearch": {
+    "description": "Product search title"
+  },
+  "tapToScan": "Tap to scan a barcode",
+  "@tapToScan": {
+    "description": "Instruction to tap to scan"
+  },
+  "scanningBarcode": "Scanning barcode...",
+  "@scanningBarcode": {
+    "description": "Status message while scanning"
+  },
+  "searchProducts": "Search products...",
+  "@searchProducts": {
+    "description": "Placeholder text for product search"
+  },
+  "noProductsFound": "No products found",
+  "@noProductsFound": {
+    "description": "Message when no products are found in search"
+  },
+  "addToIngredients": "Add to Ingredients",
+  "@addToIngredients": {
+    "description": "Button to add product to ingredients"
+  },
+  "productDetails": "Product Details",
+  "@productDetails": {
+    "description": "Product details title"
+  },
+  "brand": "Brand",
+  "@brand": {
+    "description": "Product brand label"
+  },
+  "quantity": "Quantity",
+  "@quantity": {
+    "description": "Product quantity label"
+  },
+  "nutritionPer100g": "Nutrition per 100g",
+  "@nutritionPer100g": {
+    "description": "Nutrition information per 100g label"
+  },
+  "cameraPermissionRequired": "Camera permission is required for barcode scanning",
+  "@cameraPermissionRequired": {
+    "description": "Message when camera permission is needed"
+  },
+  "grantCameraPermission": "Grant Camera Permission",
+  "@grantCameraPermission": {
+    "description": "Button to grant camera permission"
+  },  "openSettings": "Open Settings",
+  "@openSettings": {
+    "description": "Button to open device settings"
+  },
+  "searchProduct": "Search Product",
+  "@searchProduct": {
+    "description": "Search product button text"
+  },
+  "productSearchComingSoon": "Product search coming soon",
+  "@productSearchComingSoon": {
+    "description": "Message shown when product search is not yet implemented"
+  },
+  "barcodeScanningComingSoon": "Barcode scanning coming soon",
+  "@barcodeScanningComingSoon": {
+    "description": "Message shown when barcode scanning is not yet implemented"
+  },
+  "productAddedSuccessfully": "Product added successfully",
+  "@productAddedSuccessfully": {
+    "description": "Success message when product is added to ingredients"
+  },
+  "scanningBarcode": "Scanning barcode...",
+  "@scanningBarcode": {
+    "description": "Message shown while scanning barcode"
+  },
+  "barcodeNotFound": "Product not found for this barcode",
+  "@barcodeNotFound": {
+    "description": "Error message when product is not found for scanned barcode"
+  },
+  "searchProducts": "Search Products",
+  "@searchProducts": {
+    "description": "Title for product search screen"
+  },
+  "enterProductName": "Enter product name",
+  "@enterProductName": {
+    "description": "Hint text for product search input"
+  },
+  "noProductsFound": "No products found",
+  "@noProductsFound": {
+    "description": "Message when no products are found in search"
+  },
+  "tryDifferentKeywords": "Try different keywords",
+  "@tryDifferentKeywords": {
+    "description": "Suggestion when no products are found"
+  },
+  "productDetails": "Product Details",
+  "@productDetails": {
+    "description": "Title for product details"
+  },
+  "addToIngredients": "Add to Ingredients",
+  "@addToIngredients": {
+    "description": "Button to add product to ingredients list"
+  },
+  "servingSize": "Serving Size",
+  "@servingSize": {
+    "description": "Label for serving size selection"
+  },
+  "selectServingSize": "Select Serving Size",
+  "@selectServingSize": {
+    "description": "Title for serving size selection dialog"
+  },
+  "cameraPermissionRequired": "Camera permission is required for barcode scanning",
+  "@cameraPermissionRequired": {
+    "description": "Message when camera permission is needed"
+  },
+  "enableCameraPermission": "Please enable camera permission in settings to scan barcodes",
+  "@enableCameraPermission": {
+    "description": "Instructions to enable camera permission"
   }
 }

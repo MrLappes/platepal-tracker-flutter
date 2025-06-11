@@ -163,11 +163,12 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
             child: ChatInput(
-              onSendMessage: (message, {imageUrl}) {
+              onSendMessage: (message, {imageUrl, ingredients}) {
                 chatProvider.sendMessage(
                   message,
                   imageUrl: imageUrl,
                   context: context,
+                  userIngredients: ingredients,
                 );
                 _scrollToBottom();
               },

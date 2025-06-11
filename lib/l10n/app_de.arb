@@ -475,6 +475,7 @@
   "markAsFavorite": "Als Favorit markieren",
   "errorLoggingDish": "Fehler beim eintragen des Gerichtes",
   "noIngredientsAdded": "Keine Zutaten hinzugefügt",
+  "ingredientsAdded": "Zutaten hinzugefügt",
   "errorSavingDish": "Fehler beim Speichern des Gerichts",
   "amount": "Menge",
   "add": "Hinzufügen",
@@ -758,5 +759,27 @@
   "healthNotAvailableMessage": "Gesundheitsdaten sind auf diesem Gerät nicht verfügbar. Stelle sicher, dass du Health Connect (Android) oder die Health-App (iOS) installiert und konfiguriert hast.",
   "@healthNotAvailableMessage": {
     "description": "Health data not available dialog message"
-  }
+  },
+  "scanBarcodeToAddProduct": "Barcode scannen, um Produkt hinzuzufügen",
+  "searchForProducts": "Nach Produkten suchen",
+  "productNotFound": "Produkt nicht gefunden",
+  "productAddedSuccessfully": "Produkt erfolgreich hinzugefügt",
+  "errorScanningBarcode": "Fehler beim Scannen des Barcodes",
+  "errorSearchingProduct": "Fehler bei der Produktsuche",
+  "barcodeScanner": "Barcode-Scanner",
+  "productSearch": "Produktsuche",
+  "tapToScan": "Zum Scannen tippen",
+  "scanningBarcode": "Barcode wird gescannt...",
+  "searchProducts": "Produkte suchen",
+  "noProductsFound": "Keine Produkte gefunden",
+  "addToIngredients": "Zu Zutaten hinzufügen",
+  "productDetails": "Produktdetails",
+  "brand": "Marke",
+  "cameraPermissionRequired": "Kameraberechtigung erforderlich",
+  "grantCameraPermission": "Kameraberechtigung erteilen",
+  "barcodeNotFound": "Barcode nicht gefunden",
+  "enterProductName": "Produktnamen eingeben",
+  "tryDifferentKeywords": "Versuchen Sie andere Suchbegriffe",
+  "selectServingSize": "Portionsgröße auswählen",
+  "enableCameraPermission": "Kameraberechtigung aktivieren"
 }

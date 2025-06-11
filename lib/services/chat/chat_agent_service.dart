@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../../models/chat_types.dart';
 import '../../models/user_ingredient.dart';
@@ -273,9 +274,26 @@ class ChatAgentService {
       } // Step 5: Dish Processing (if AI response contains dishes)
       ChatStepResult? dishResult;
       try {
-        // Get the raw AI response that contains potential dishes array
-        final aiResponse =
-            responseResult.data?['parsedResponse'] as Map<String, dynamic>?;
+        // Get the raw AI response that might contain dishes array in JSON format
+        final parsedResponse =
+            responseResult.data?['parsedResponse'] as String?;
+        Map<String, dynamic>? aiResponse;
+
+        // Try to parse the response as JSON to look for dishes
+        if (parsedResponse != null && parsedResponse.trim().isNotEmpty) {
+          try {
+            // Check if response looks like JSON (starts with { and ends with })
+            final trimmed = parsedResponse.trim();
+            if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+              aiResponse = jsonDecode(parsedResponse) as Map<String, dynamic>?;
+            }
+          } catch (e) {
+            debugPrint(
+              '🔍 AI response is not JSON format, skipping dish processing: $e',
+            );
+            // Response is plain text, no dishes to process
+          }
+        }
 
         if (aiResponse != null && _responseHasDishes(aiResponse)) {
           debugPrint('🍽️ Step 5: Processing dishes from AI response...');

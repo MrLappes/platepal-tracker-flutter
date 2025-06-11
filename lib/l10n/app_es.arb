@@ -400,6 +400,7 @@
   "ingredients": "Ingredientes",
   "addIngredient": "Agregar Ingrediente",
   "noIngredientsAdded": "No se han agregado ingredientes aún",
+  "ingredientsAdded": "Ingredientes agregados",
   "options": "Opciones",
   "markAsFavorite": "Marcar como plato favorito",
   "editDish": "Editar Plato",
@@ -732,5 +733,27 @@
   "healthNotAvailableMessage": "Los datos de salud no están disponibles en este dispositivo. Asegúrate de tener Health Connect (Android) o la app Salud (iOS) instalada y configurada.",
   "@healthNotAvailableMessage": {
     "description": "Health data not available dialog message"
-  }
+  },
+  "scanBarcodeToAddProduct": "Escanea el código de barras para agregar producto",
+  "searchForProducts": "Buscar productos",
+  "productNotFound": "Producto no encontrado",
+  "productAddedSuccessfully": "Producto agregado exitosamente",
+  "errorScanningBarcode": "Error al escanear el código de barras",
+  "errorSearchingProduct": "Error al buscar el producto",
+  "barcodeScanner": "Escáner de código de barras",
+  "productSearch": "Búsqueda de producto",
+  "tapToScan": "Toca para escanear",
+  "scanningBarcode": "Escaneando código de barras...",
+  "searchProducts": "Buscar productos",
+  "noProductsFound": "No se encontraron productos",
+  "addToIngredients": "Agregar a ingredientes",
+  "productDetails": "Detalles del producto",
+  "brand": "Marca",
+  "cameraPermissionRequired": "Se requiere permiso de cámara",
+  "grantCameraPermission": "Otorgar permiso de cámara",
+  "barcodeNotFound": "Código de barras no encontrado",
+  "enterProductName": "Ingresa el nombre del producto",
+  "tryDifferentKeywords": "Intenta con diferentes palabras clave",
+  "selectServingSize": "Selecciona el tamaño de la porción",
+  "enableCameraPermission": "Habilitar permiso de cámara"
 }
