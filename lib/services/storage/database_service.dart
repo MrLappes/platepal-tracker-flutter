@@ -1,10 +1,6 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import '../../models/dish.dart';
-import '../../models/user_profile.dart';
-import '../../models/nutrition_analysis.dart';
-import '../../models/supplement.dart';
 
 class DatabaseService {
   static const String _databaseName = 'platepal.db';

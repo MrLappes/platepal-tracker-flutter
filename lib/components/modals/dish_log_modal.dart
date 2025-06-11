@@ -130,7 +130,7 @@ class _DishLogModalState extends State<DishLogModal> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -144,7 +144,7 @@ class _DishLogModalState extends State<DishLogModal> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.5),
+                  color: Colors.grey.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -180,8 +180,8 @@ class _DishLogModalState extends State<DishLogModal> {
                           Text(
                             widget.dish.name,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onPrimary.withOpacity(
-                                0.8,
+                              color: theme.colorScheme.onPrimary.withValues(
+                                alpha: 0.8,
                               ),
                             ),
                           ),
@@ -219,8 +219,8 @@ class _DishLogModalState extends State<DishLogModal> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: theme.colorScheme.outline.withOpacity(
-                                  0.5,
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.5,
                                 ),
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -276,7 +276,7 @@ class _DishLogModalState extends State<DishLogModal> {
                                           color:
                                               isSelected
                                                   ? mealType['color']
-                                                      .withOpacity(0.2)
+                                                      .withValues(alpha: 0.2)
                                                   : theme.colorScheme.surface,
                                           borderRadius: BorderRadius.circular(
                                             12,
@@ -286,7 +286,7 @@ class _DishLogModalState extends State<DishLogModal> {
                                                 isSelected
                                                     ? mealType['color']
                                                     : theme.colorScheme.outline
-                                                        .withOpacity(0.3),
+                                                        .withValues(alpha: 0.3),
                                             width: isSelected ? 2 : 1,
                                           ),
                                         ),
@@ -446,7 +446,7 @@ class _DishLogModalState extends State<DishLogModal> {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: theme.colorScheme.outline.withOpacity(0.2),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
                     ),
                   ),
                 ),

@@ -3,9 +3,9 @@
     "short_name": "platepal_tracker",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#3d403e",
+    "theme_color": "#fba9eb",
+    "description": "Track your meals with PlatePal Tracker",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

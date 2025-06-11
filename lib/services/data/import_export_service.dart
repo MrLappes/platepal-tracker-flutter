@@ -54,7 +54,7 @@ class ImportExportService {
             }
           }
         } catch (e) {
-          print('Error exporting ${type.name}: $e');
+          debugPrint('Error exporting ${type.name}: $e');
           return ImportExportResult(
             success: false,
             message: 'Failed to export ${type.name}: $e',
@@ -79,7 +79,7 @@ class ImportExportService {
         await file.writeAsString(csvData);
       }
 
-      print('Export successful: ${file.path} ($itemsProcessed items)');
+      debugPrint('Export successful: ${file.path} ($itemsProcessed items)');
       return ImportExportResult(
         success: true,
         message: 'Data exported successfully to ${file.path}',
@@ -88,7 +88,7 @@ class ImportExportService {
         errors: [],
       );
     } catch (e) {
-      print('Export failed: $e');
+      debugPrint('Export failed: $e');
       return ImportExportResult(
         success: false,
         message: 'Export failed: $e',

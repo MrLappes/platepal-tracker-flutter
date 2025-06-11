@@ -328,8 +328,9 @@ class OpenAIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $apiKey',
     };
-    
-    const systemPrompt = 'You are a helpful nutrition and fitness assistant for PlatePal Tracker app.';
+
+    const systemPrompt =
+        'You are a helpful nutrition and fitness assistant for PlatePal Tracker app.';
     List<Map<String, dynamic>> requestMessages;
     if (imageUrl != null) {
       String imageDataUrl;
@@ -346,7 +347,7 @@ class OpenAIService {
           'imageDataUrl (first 100 chars): ${imageDataUrl.substring(0, imageDataUrl.length > 100 ? 100 : imageDataUrl.length)}',
         );
       } catch (e) {
-        throw Exception('Failed to process image file: ' + e.toString());
+        throw Exception('Failed to process image file: $e');
       }
       requestMessages = [
         {'role': 'system', 'content': systemPrompt},
@@ -356,7 +357,10 @@ class OpenAIService {
             {'type': 'text', 'text': message},
             {
               'type': 'image_url',
-              'image_url': {'url': imageDataUrl, 'detail': isHighDetail ? 'high' : 'low'},
+              'image_url': {
+                'url': imageDataUrl,
+                'detail': isHighDetail ? 'high' : 'low',
+              },
             },
           ],
         },

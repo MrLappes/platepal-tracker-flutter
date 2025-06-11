@@ -8,7 +8,9 @@ import '../../../services/storage/dish_service.dart';
 
 /// Processes and validates dishes from AI responses using new dish models
 class DishProcessingStep extends AgentStep {
+  // ignore: unused_field
   final DishRepository? _dishRepository;
+  // ignore: unused_field
   final DishService? _dishService;
 
   DishProcessingStep({DishRepository? dishRepository, DishService? dishService})

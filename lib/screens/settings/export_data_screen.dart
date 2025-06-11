@@ -112,7 +112,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -600,7 +600,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: Theme.of(context).primaryColor,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          disabledBackgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
           disabledForegroundColor:
               Theme.of(context).colorScheme.onSurfaceVariant,
         ),
@@ -625,7 +626,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: SelectableText(
@@ -668,7 +670,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           text: 'PlatePal Data Export - $fileName',
           subject: 'PlatePal Data Export',
         );
-      } else {
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Export file not found. Please export data again.'),
@@ -678,6 +680,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to share file: ${e.toString()}'),

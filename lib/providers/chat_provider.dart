@@ -30,7 +30,7 @@ class ChatProvider extends ChangeNotifier {
   bool _deepSearchEnabled = false;
 
   // Agent thinking steps for real-time display
-  List<String> _currentThinkingSteps = [];
+  final List<String> _currentThinkingSteps = [];
   String? _currentAgentStep; // Profile management
   ChatProfiles? _currentChatProfiles;
 
@@ -260,6 +260,7 @@ class ChatProvider extends ChangeNotifier {
       _isLoading = true;
       _currentTypingMessage =
           context != null
+              // ignore: use_build_context_synchronously
               ? AppLocalizations.of(context)!.aiThinking
               : 'AI is thinking...';
       notifyListeners();
@@ -304,6 +305,7 @@ class ChatProvider extends ChangeNotifier {
         debugPrint('📝 [ChatProvider] Using test response');
         response =
             context != null
+                // ignore: use_build_context_synchronously
                 ? AppLocalizations.of(context)!.testChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
         await Future.delayed(const Duration(milliseconds: 1500));

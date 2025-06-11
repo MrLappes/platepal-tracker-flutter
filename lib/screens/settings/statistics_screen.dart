@@ -96,10 +96,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             startDate = DateTime(now.year, now.month - 1, now.day);
         }
 
-        final history = await context.userProfileService.getUserMetricsHistory(
-          _userProfile!.id,
-          startDate: startDate,
-        );
+        var history = <Map<String, dynamic>>[];
+        if (mounted) {
+          history = await context.userProfileService.getUserMetricsHistory(
+            _userProfile!.id,
+            startDate: startDate,
+          );
+        } else {
+          setState(() {
+            _error = "No metrics history found";
+            _isLoading = false;
+          });
+          return;
+        }
 
         // Load calorie data from meal logs
         final calorieData = await _loadCalorieHistory(startDate);
@@ -815,7 +824,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: 'BMI',
                     value:
                         _currentBMI != null
-                            ? '${_currentBMI!.toStringAsFixed(1)}'
+                            ? _currentBMI!.toStringAsFixed(1)
                             : '-',
                     detail: _getBMICategory(_currentBMI),
                   ),

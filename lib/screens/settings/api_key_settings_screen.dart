@@ -56,6 +56,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         _fetchAvailableModels(apiKey);
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(
         localizations?.failedToLoadApiKey ?? 'Failed to load API key',
@@ -103,6 +104,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         }
       });
     } catch (e) {
+      // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
       setState(() {
         _modelError =
@@ -223,6 +225,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         throw Exception('Could not launch $url');
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(
         localizations?.linkError ?? 'An error occurred opening the link',
@@ -253,17 +256,20 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
           _fetchAvailableModels(clipboardData.text!);
         }
 
+        // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
         _showSuccessSnackBar(
           localizations?.pastedFromClipboard ?? 'Pasted from clipboard',
         );
       } else {
+        // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
         _showErrorSnackBar(
           localizations?.clipboardEmpty ?? 'Clipboard is empty',
         );
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(
         localizations?.failedToAccessClipboard ?? 'Failed to access clipboard',

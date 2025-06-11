@@ -51,7 +51,7 @@ class MessageBubble extends StatelessWidget {
             Text(
               '(bot)',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -60,7 +60,7 @@ class MessageBubble extends StatelessWidget {
           Text(
             _formatTime(context, message.timestamp),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -71,10 +71,13 @@ class MessageBubble extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: _getMessageGradient(isUser, isDark, theme),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.05), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -120,7 +123,9 @@ class MessageBubble extends StatelessWidget {
                     Text(
                       'Sending...',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                     ),
                   ] else if (message.hasFailed) ...[
@@ -167,10 +172,10 @@ class MessageBubble extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -204,7 +209,7 @@ class MessageBubble extends StatelessWidget {
                           : theme.colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Column(
@@ -241,12 +246,12 @@ class MessageBubble extends StatelessWidget {
                   color:
                       isDark
                           ? theme.colorScheme.secondaryContainer
-                          : theme.colorScheme.secondaryContainer.withOpacity(
-                            0.3,
+                          : theme.colorScheme.secondaryContainer.withValues(
+                            alpha: 0.3,
                           ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: theme.colorScheme.secondary.withOpacity(0.3),
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -331,13 +336,13 @@ class MessageBubble extends StatelessWidget {
             isDark
                 ? [
                   // Dark theme user gradients - based on current theme's primary color
-                  theme.colorScheme.primary.withOpacity(0.3),
-                  theme.colorScheme.primary.withOpacity(0.2),
+                  theme.colorScheme.primary.withValues(alpha: 0.3),
+                  theme.colorScheme.primary.withValues(alpha: 0.2),
                 ]
                 : [
                   // Light theme user gradients - softer primary colors
-                  theme.colorScheme.primary.withOpacity(0.1),
-                  theme.colorScheme.primary.withOpacity(0.05),
+                  theme.colorScheme.primary.withValues(alpha: 0.1),
+                  theme.colorScheme.primary.withValues(alpha: 0.05),
                 ],
       );
     } else {
@@ -364,7 +369,7 @@ class MessageBubble extends StatelessWidget {
   Color _getTextColor(bool isUser, bool isDark, ThemeData theme) {
     if (isUser) {
       return isDark
-          ? Colors.white.withOpacity(0.95)
+          ? Colors.white.withValues(alpha: 0.95)
           : theme.colorScheme.onSurface;
     } else {
       return theme.colorScheme.onSurface;
@@ -506,12 +511,10 @@ class MessageBubble extends StatelessWidget {
     final ingredients =
         processedDish.ingredients.map((ingredient) {
           return Ingredient(
-            id:
-                ingredient.id ??
-                DateTime.now().millisecondsSinceEpoch.toString(),
+            id: ingredient.id,
             name: ingredient.name,
             amount: ingredient.amount,
-            unit: ingredient.unit ?? 'g',
+            unit: ingredient.unit,
             // Add basic nutrition if available or null
             nutrition:
                 ingredient.nutrition != null
@@ -520,9 +523,9 @@ class MessageBubble extends StatelessWidget {
                       protein: ingredient.nutrition!.protein,
                       carbs: ingredient.nutrition!.carbs,
                       fat: ingredient.nutrition!.fat,
-                      fiber: ingredient.nutrition!.fiber ?? 0,
-                      sugar: ingredient.nutrition!.sugar ?? 0,
-                      sodium: ingredient.nutrition!.sodium ?? 0,
+                      fiber: ingredient.nutrition!.fiber,
+                      sugar: ingredient.nutrition!.sugar,
+                      sodium: ingredient.nutrition!.sodium,
                     )
                     : null,
           );
@@ -670,7 +673,7 @@ class MessageBubble extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -717,8 +720,8 @@ class MessageBubble extends StatelessWidget {
             (context, url) => Container(
               color:
                   isUser
-                      ? theme.colorScheme.secondary.withOpacity(0.3)
-                      : theme.colorScheme.primary.withOpacity(0.3),
+                      ? theme.colorScheme.secondary.withValues(alpha: 0.3)
+                      : theme.colorScheme.primary.withValues(alpha: 0.3),
               child: Icon(
                 isUser ? Icons.person : Icons.smart_toy,
                 size: 20,

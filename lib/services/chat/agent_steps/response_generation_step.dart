@@ -206,7 +206,7 @@ class ResponseGenerationStep extends AgentStep {
     // Add system prompt
     messages.insert(0, {'role': 'system', 'content': fullSystemPrompt});
     debugPrint(
-      '🤖 ResponseGenerationStep: System prompt added: ' + fullSystemPrompt,
+      '🤖 ResponseGenerationStep: System prompt added: $fullSystemPrompt',
     );
 
     // Conditionally add conversation history based on needsConversationHistory flag
@@ -216,8 +216,9 @@ class ResponseGenerationStep extends AgentStep {
       );
       // Add conversation history (simplified)
       for (final historyMessage in conversationHistory) {
-        if (historyMessage.role == 'system' || historyMessage.isLoading)
+        if (historyMessage.role == 'system' || historyMessage.isLoading) {
           continue;
+        }
 
         String enhancedContent = historyMessage.content;
 
