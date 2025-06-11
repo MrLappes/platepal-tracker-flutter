@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:platepal_tracker/models/user_ingredient.dart';
 import '../../../models/chat_types.dart';
+import '../../../models/dish.dart';
 import '../openai_service.dart';
 import '../../chat/system_prompts.dart';
 import '../../../utils/image_utils.dart';
@@ -105,19 +107,82 @@ class ResponseGenerationStep extends AgentStep {
           debugPrint('  [$i] [$role] (unknown): ${content.toString()}');
         }
       }
-      // --- Instead of building OpenAI message dicts, just call the OpenAI service ---
-      final openaiResponse = await _openaiService.sendMessage(
-        input.userMessage,
-        imageUrl: input.imageUri,
-        // Optionally: isHighDetail: true/false or other params as needed
+
+      debugPrint(
+        '🤖 ResponseGenerationStep: Sending ${messages.length} messages to OpenAI',
       );
-      // openaiResponse is a String (the reply text), but you may want to adapt this if your service returns more
-      // For now, just use it as replyText
+
+      // Use the properly constructed messages array with ingredients and context
+      final chatCompletionResponse = await _openaiService.sendChatRequest(
+        messages: messages,
+        temperature: 0.7,
+        maxTokens: 2000,
+      );
+      final openaiResponse =
+          chatCompletionResponse.choices.first.message.content ?? '';
+      debugPrint(
+        '🤖 ResponseGenerationStep: Received response: ${openaiResponse.length} characters',
+      );
+
+      // Parse the JSON response from OpenAI
+      String replyText;
+      List<Dish>? dishes;
+      String? recommendation;
+
+      try {
+        // Check if response looks like JSON (starts with { and ends with })
+        final trimmed = openaiResponse.trim();
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+          debugPrint('🤖 ResponseGenerationStep: Parsing JSON response');
+          final jsonResponse =
+              jsonDecode(openaiResponse) as Map<String, dynamic>;
+
+          replyText =
+              jsonResponse['replyText'] as String? ?? 'No response text found.';
+          recommendation = jsonResponse['recommendation'] as String?;
+
+          // Parse dishes if present
+          final dishesJson = jsonResponse['dishes'] as List<dynamic>?;
+          if (dishesJson != null) {
+            dishes =
+                dishesJson
+                    .map(
+                      (dishData) =>
+                          _createDishFromJson(dishData as Map<String, dynamic>),
+                    )
+                    .where((dish) => dish != null)
+                    .cast<Dish>()
+                    .toList();
+          }
+
+          debugPrint(
+            '🤖 ResponseGenerationStep: Successfully parsed JSON response',
+          );
+          debugPrint('   Reply text length: ${replyText.length}');
+          debugPrint('   Dishes count: ${dishes?.length ?? 0}');
+          debugPrint('   Has recommendation: ${recommendation != null}');
+        } else {
+          debugPrint(
+            '🤖 ResponseGenerationStep: Response is not JSON, using as plain text',
+          );
+          replyText = openaiResponse;
+        }
+      } catch (e) {
+        debugPrint(
+          '⚠️ ResponseGenerationStep: Failed to parse JSON response: $e',
+        );
+        debugPrint('   Using raw response as reply text');
+        replyText = openaiResponse;
+      }
+
       final chatResponse = ChatResponse(
-        replyText: openaiResponse,
-        dishes: null,
-        recommendation: null,
-        metadata: {'modelUsed': _openaiService.selectedModel},
+        replyText: replyText,
+        dishes: dishes,
+        recommendation: recommendation,
+        metadata: {
+          'modelUsed': _openaiService.selectedModel,
+          'tokensUsed': chatCompletionResponse.usage?.totalTokens,
+        },
       );
       debugPrint('✅ ResponseGenerationStep: Successfully generated response');
       return ChatStepResult.success(
@@ -323,6 +388,90 @@ class ResponseGenerationStep extends AgentStep {
     }
 
     return messages;
+  }
+
+  /// Helper method to create a Dish object from JSON data
+  Dish? _createDishFromJson(Map<String, dynamic> dishData) {
+    try {
+      // Extract basic dish information
+      final name = dishData['name'] as String?;
+      final description = dishData['description'] as String?;
+
+      if (name == null || name.trim().isEmpty) {
+        debugPrint(
+          '⚠️ ResponseGenerationStep: Dish missing required name field',
+        );
+        return null;
+      }
+
+      // Parse nutritional information with defaults
+      final nutritionData =
+          dishData['nutrition'] as Map<String, dynamic>? ?? {};
+      final nutrition = NutritionInfo(
+        calories: _parseDouble(nutritionData['calories']),
+        protein: _parseDouble(nutritionData['protein']),
+        carbs: _parseDouble(nutritionData['carbs']),
+        fat: _parseDouble(nutritionData['fat']),
+        fiber: _parseDouble(nutritionData['fiber']),
+        sugar: _parseDouble(nutritionData['sugar']),
+        sodium: _parseDouble(nutritionData['sodium']),
+      );
+
+      // Parse ingredients list
+      final ingredientsData = dishData['ingredients'] as List<dynamic>? ?? [];
+      final ingredients =
+          ingredientsData
+              .map((ingData) {
+                if (ingData is Map<String, dynamic>) {
+                  final ingredientName = ingData['name'] as String?;
+                  final quantity = ingData['quantity'];
+                  final unit = ingData['unit'] as String?;
+
+                  if (ingredientName != null &&
+                      ingredientName.trim().isNotEmpty) {
+                    return Ingredient(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: ingredientName.trim(),
+                      amount: _parseDouble(quantity),
+                      unit: unit ?? 'g',
+                    );
+                  }
+                }
+                return null;
+              })
+              .where((ingredient) => ingredient != null)
+              .cast<Ingredient>()
+              .toList();
+
+      return Dish(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: name.trim(),
+        description: description?.trim() ?? '',
+        ingredients: ingredients,
+        nutrition: nutrition,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isFavorite: false,
+        category: dishData['category'] as String?,
+      );
+    } catch (e) {
+      debugPrint(
+        '⚠️ ResponseGenerationStep: Error creating dish from JSON: $e',
+      );
+      debugPrint('   Dish data: $dishData');
+      return null;
+    }
+  }
+
+  /// Helper method to safely parse double values from JSON
+  double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
   }
 
   ChatErrorType _classifyError(dynamic error) {

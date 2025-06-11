@@ -78,7 +78,6 @@ class DishService {
         where: 'ingredient_id = ?',
         whereArgs: [ingredientId],
       );
-
       NutritionInfo? ingredientNutrition;
       if (ingNutritionMaps.isNotEmpty) {
         ingredientNutrition = NutritionInfo(
@@ -87,8 +86,9 @@ class DishService {
           carbs: ingNutritionMaps.first['carbs'] as double,
           fat: ingNutritionMaps.first['fat'] as double,
           fiber: ingNutritionMaps.first['fiber'] as double,
-          sugar: ingNutritionMaps.first['sugar'] as double,
-          sodium: ingNutritionMaps.first['sodium'] as double,
+          // Note: sugar and sodium default to 0.0 since they're not in current database schema
+          sugar: 0.0,
+          sodium: 0.0,
           // No micronutrients as per requirement
         );
       }
@@ -103,9 +103,7 @@ class DishService {
           nutrition: ingredientNutrition,
         ),
       );
-    }
-
-    // Construct dish nutrition info
+    } // Construct dish nutrition info
     final NutritionInfo dishNutrition;
     if (nutritionMaps.isNotEmpty) {
       dishNutrition = NutritionInfo(
@@ -114,8 +112,9 @@ class DishService {
         carbs: nutritionMaps.first['carbs'] as double,
         fat: nutritionMaps.first['fat'] as double,
         fiber: nutritionMaps.first['fiber'] as double,
-        sugar: nutritionMaps.first['sugar'] as double,
-        sodium: nutritionMaps.first['sodium'] as double,
+        // Note: sugar and sodium default to 0.0 since they're not in current database schema
+        sugar: 0.0,
+        sodium: 0.0,
         // No micronutrients as per requirement
       );
     } else {
@@ -163,9 +162,8 @@ class DishService {
         'created_at': dish.createdAt.toIso8601String(),
         'updated_at': dish.updatedAt.toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
-
       debugPrint('🍽️ DishService: Inserting dish nutrition...');
-      // Insert dish nutrition
+      // Insert dish nutrition (only columns that exist in current schema)
       await txn.insert('dish_nutrition', {
         'dish_id': dish.id,
         'calories': dish.nutrition.calories,
@@ -173,8 +171,7 @@ class DishService {
         'carbs': dish.nutrition.carbs,
         'fat': dish.nutrition.fat,
         'fiber': dish.nutrition.fiber,
-        'sugar': dish.nutrition.sugar,
-        'sodium': dish.nutrition.sodium,
+        // Note: sugar and sodium are not stored in current database schema
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
       debugPrint(
@@ -183,13 +180,15 @@ class DishService {
       // Insert ingredients and their relationships
       for (final ingredient in dish.ingredients) {
         // Insert ingredient if not exists
-        await txn.insert('ingredients', {
-          'id': ingredient.id,
-          'name': ingredient.name,
-          'barcode': ingredient.barcode,
-        }, conflictAlgorithm: ConflictAlgorithm.ignore);
-
-        // Insert ingredient nutrition if available
+        await txn.insert(
+          'ingredients',
+          {
+            'id': ingredient.id,
+            'name': ingredient.name,
+            'barcode': ingredient.barcode,
+          },
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        ); // Insert ingredient nutrition if available
         if (ingredient.nutrition != null) {
           await txn.insert('ingredient_nutrition', {
             'ingredient_id': ingredient.id,
@@ -198,8 +197,7 @@ class DishService {
             'carbs': ingredient.nutrition!.carbs,
             'fat': ingredient.nutrition!.fat,
             'fiber': ingredient.nutrition!.fiber,
-            'sugar': ingredient.nutrition!.sugar,
-            'sodium': ingredient.nutrition!.sodium,
+            // Note: sugar and sodium are not stored in current database schema
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
 
@@ -235,9 +233,7 @@ class DishService {
         },
         where: 'id = ?',
         whereArgs: [dish.id],
-      );
-
-      // Update dish nutrition
+      ); // Update dish nutrition (only columns that exist in current schema)
       await txn.update(
         'dish_nutrition',
         {
@@ -246,8 +242,7 @@ class DishService {
           'carbs': dish.nutrition.carbs,
           'fat': dish.nutrition.fat,
           'fiber': dish.nutrition.fiber,
-          'sugar': dish.nutrition.sugar,
-          'sodium': dish.nutrition.sodium,
+          // Note: sugar and sodium are not stored in current database schema
         },
         where: 'dish_id = ?',
         whereArgs: [dish.id],
@@ -263,13 +258,15 @@ class DishService {
       // Insert updated ingredients and relationships
       for (final ingredient in dish.ingredients) {
         // Insert ingredient if not exists
-        await txn.insert('ingredients', {
-          'id': ingredient.id,
-          'name': ingredient.name,
-          'barcode': ingredient.barcode,
-        }, conflictAlgorithm: ConflictAlgorithm.ignore);
-
-        // Insert or update ingredient nutrition if available
+        await txn.insert(
+          'ingredients',
+          {
+            'id': ingredient.id,
+            'name': ingredient.name,
+            'barcode': ingredient.barcode,
+          },
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        ); // Insert or update ingredient nutrition if available
         if (ingredient.nutrition != null) {
           await txn.insert('ingredient_nutrition', {
             'ingredient_id': ingredient.id,
@@ -278,8 +275,7 @@ class DishService {
             'carbs': ingredient.nutrition!.carbs,
             'fat': ingredient.nutrition!.fat,
             'fiber': ingredient.nutrition!.fiber,
-            'sugar': ingredient.nutrition!.sugar,
-            'sodium': ingredient.nutrition!.sodium,
+            // Note: sugar and sodium are not stored in current database schema
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
 

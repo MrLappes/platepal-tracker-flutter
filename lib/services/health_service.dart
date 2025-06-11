@@ -217,15 +217,21 @@ class HealthService {
 
   /// Process raw health data into organized metrics
   Map<String, dynamic> _processHealthData(List<HealthDataPoint> healthData) {
-    Map<String, dynamic> processedData =
-        {}; // Group data by type and get most recent values
+    Map<String, dynamic> processedData = {};
+
+    // Group data by type and get most recent values
     for (HealthDataPoint point in healthData) {
+      // Extract numeric value from HealthValue
+      double? numericValue = _extractNumericValue(point.value);
+      if (numericValue == null)
+        continue; // Skip if we can't extract a numeric value
+
       switch (point.type) {
         case HealthDataType.WEIGHT:
           if (!processedData.containsKey('weight') ||
               point.dateFrom.isAfter(processedData['weight']['date'])) {
             processedData['weight'] = {
-              'value': point.value,
+              'value': numericValue,
               'unit': 'kg',
               'date': point.dateFrom,
             };
@@ -236,7 +242,7 @@ class HealthService {
           if (!processedData.containsKey('height') ||
               point.dateFrom.isAfter(processedData['height']['date'])) {
             processedData['height'] = {
-              'value': point.value,
+              'value': numericValue,
               'unit': 'cm',
               'date': point.dateFrom,
             };
@@ -247,7 +253,7 @@ class HealthService {
           if (!processedData.containsKey('bodyFat') ||
               point.dateFrom.isAfter(processedData['bodyFat']['date'])) {
             processedData['bodyFat'] = {
-              'value': point.value,
+              'value': numericValue,
               'unit': '%',
               'date': point.dateFrom,
             };
@@ -261,8 +267,7 @@ class HealthService {
             processedData['activeCalories'] = <String, double>{};
           }
           processedData['activeCalories'][dateKey] =
-              (processedData['activeCalories'][dateKey] ?? 0.0) +
-              (point.value as num).toDouble();
+              (processedData['activeCalories'][dateKey] ?? 0.0) + numericValue;
           break;
 
         case HealthDataType.BASAL_ENERGY_BURNED:
@@ -272,8 +277,7 @@ class HealthService {
             processedData['basalCalories'] = <String, double>{};
           }
           processedData['basalCalories'][dateKey] =
-              (processedData['basalCalories'][dateKey] ?? 0.0) +
-              (point.value as num).toDouble();
+              (processedData['basalCalories'][dateKey] ?? 0.0) + numericValue;
           break;
 
         case HealthDataType.STEPS:
@@ -283,15 +287,14 @@ class HealthService {
             processedData['steps'] = <String, int>{};
           }
           processedData['steps'][dateKey] =
-              (processedData['steps'][dateKey] ?? 0) +
-              (point.value as num).toInt();
+              (processedData['steps'][dateKey] ?? 0) + numericValue.toInt();
           break;
 
         case HealthDataType.HEART_RATE:
           if (!processedData.containsKey('heartRate') ||
               point.dateFrom.isAfter(processedData['heartRate']['date'])) {
             processedData['heartRate'] = {
-              'value': point.value,
+              'value': numericValue,
               'unit': 'bpm',
               'date': point.dateFrom,
             };
@@ -305,6 +308,23 @@ class HealthService {
     }
 
     return processedData;
+  }
+
+  /// Extract numeric value from HealthValue
+  double? _extractNumericValue(HealthValue value) {
+    try {
+      if (value is NumericHealthValue) {
+        return value.numericValue.toDouble();
+      }
+      // Handle other HealthValue types if needed in the future
+      return null;
+    } catch (e) {
+      developer.log(
+        'Error extracting numeric value from HealthValue: $e',
+        name: 'HealthService',
+      );
+      return null;
+    }
   }
 
   /// Get today's burned calories (active + basal)
@@ -325,7 +345,10 @@ class HealthService {
 
       double totalCalories = 0.0;
       for (HealthDataPoint point in healthData) {
-        totalCalories += (point.value as num).toDouble();
+        final numericValue = _extractNumericValue(point.value);
+        if (numericValue != null) {
+          totalCalories += numericValue;
+        }
       }
 
       return totalCalories > 0 ? totalCalories : null;

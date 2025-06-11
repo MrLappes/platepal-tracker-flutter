@@ -229,15 +229,25 @@ class ChatProvider extends ChangeNotifier {
   }) async {
     if (content.trim().isEmpty && imageUrl == null) return;
 
+    // Debug: Print what we received
+    print(
+      '🔍 DEBUG: ChatProvider received ${userIngredients?.length ?? 0} ingredients',
+    );
+    if (userIngredients != null) {
+      for (final ingredient in userIngredients) {
+        print(
+          '   - ${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
+        );
+      }
+    }
+
     // Always reload agent settings from SharedPreferences before sending a message
     await _loadAgentSettings();
 
     // Ensure agent service is initialized if agent mode is enabled
     if (_agentModeEnabled && _chatAgentService == null) {
       await _initializeAgentService();
-    }
-
-    // Create user message
+    } // Create user message
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: content,
@@ -245,6 +255,13 @@ class ChatProvider extends ChangeNotifier {
       timestamp: DateTime.now(),
       status: MessageStatus.sending,
       imageUrl: imageUrl,
+      metadata:
+          userIngredients != null && userIngredients.isNotEmpty
+              ? {
+                'userIngredients':
+                    userIngredients.map((e) => e.toJson()).toList(),
+              }
+              : null,
     );
 
     _messages.add(userMessage);

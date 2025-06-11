@@ -7,6 +7,7 @@ import '../../models/chat_message.dart';
 import '../../models/chat_profile.dart';
 import '../../models/dish_models.dart';
 import '../../models/dish.dart';
+import '../../models/user_ingredient.dart';
 import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
@@ -105,6 +106,10 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
             ),
+            if (isUser && _hasUserIngredients()) ...[
+              const SizedBox(height: 12),
+              _buildUserIngredientsDisplay(context, theme),
+            ],
             if (message.isSending || message.hasFailed) ...[
               const SizedBox(height: 8),
               Row(
@@ -439,6 +444,12 @@ class MessageBubble extends StatelessWidget {
     return validatedDishes is List && validatedDishes.isNotEmpty;
   }
 
+  /// Check if this message has user ingredients
+  bool _hasUserIngredients() {
+    final userIngredients = message.metadata?['userIngredients'];
+    return userIngredients is List && userIngredients.isNotEmpty;
+  }
+
   /// Check if this message has a recommendation
   bool _hasRecommendation() {
     final recommendation = message.metadata?['recommendation'];
@@ -751,6 +762,80 @@ class MessageBubble extends StatelessWidget {
             isUser
                 ? theme.colorScheme.onSecondary
                 : theme.colorScheme.onPrimary,
+      ),
+    );
+  }
+
+  /// Build user ingredients display
+  Widget _buildUserIngredientsDisplay(BuildContext context, ThemeData theme) {
+    final userIngredientsData = message.metadata?['userIngredients'] as List?;
+    if (userIngredientsData == null || userIngredientsData.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final localizations = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.restaurant,
+                size: 16,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                localizations.ingredientsAdded,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children:
+                userIngredientsData.map((ingredientData) {
+                  final ingredient = UserIngredient.fromJson(
+                    ingredientData as Map<String, dynamic>,
+                  );
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ],
       ),
     );
   }

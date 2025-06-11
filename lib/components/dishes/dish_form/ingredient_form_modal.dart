@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../models/dish.dart';
+import '../../../models/product.dart';
+import '../../scanner/barcode_scanner_screen.dart';
+import '../../scanner/product_search_screen.dart';
 
 class IngredientFormModal extends StatefulWidget {
   final Ingredient? ingredient;
   final Function(Ingredient) onSave;
+  final Function(Product)? onProductScanned;
 
-  const IngredientFormModal({super.key, this.ingredient, required this.onSave});
+  const IngredientFormModal({
+    super.key,
+    this.ingredient,
+    required this.onSave,
+    this.onProductScanned,
+  });
 
   @override
   State<IngredientFormModal> createState() => _IngredientFormModalState();
@@ -16,14 +25,18 @@ class IngredientFormModal extends StatefulWidget {
     BuildContext context, {
     Ingredient? ingredient,
     required Function(Ingredient) onSave,
+    Function(Product)? onProductScanned,
   }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder:
-          (context) =>
-              IngredientFormModal(ingredient: ingredient, onSave: onSave),
+          (context) => IngredientFormModal(
+            ingredient: ingredient,
+            onSave: onSave,
+            onProductScanned: onProductScanned,
+          ),
     );
   }
 }
@@ -195,14 +208,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                   child: _buildQuickActionButton(
                     icon: Icons.qr_code_scanner,
                     label: l10n.scanBarcode,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.barcodeScanningComingSoon),
-                          backgroundColor: colorScheme.primary,
-                        ),
-                      );
-                    },
+                    onTap: _openBarcodeScanner,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -210,14 +216,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                   child: _buildQuickActionButton(
                     icon: Icons.search,
                     label: l10n.searchProduct,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.productSearchComingSoon),
-                          backgroundColor: colorScheme.primary,
-                        ),
-                      );
-                    },
+                    onTap: _openProductSearch,
                   ),
                 ),
               ],
@@ -703,5 +702,75 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
         ),
       ],
     );
+  }
+
+  /// Open barcode scanner to add product as ingredient
+  void _openBarcodeScanner() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => BarcodeScannerScreen(
+              onProductFound: (product) {
+                _prefillFormWithProduct(product);
+              },
+            ),
+      ),
+    );
+  }
+
+  /// Open product search to add product as ingredient
+  void _openProductSearch() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => ProductSearchScreen(
+              onProductSelected: (product) {
+                _prefillFormWithProduct(product);
+              },
+            ),
+      ),
+    );
+  }
+
+  /// Pre-fill form with product data
+  void _prefillFormWithProduct(Product product) {
+    // Check if widget is still mounted before calling setState
+    if (!mounted) return;
+
+    // Call the onProductScanned callback if provided (for dish name/image auto-fill)
+    widget.onProductScanned?.call(product);
+
+    setState(() {
+      // Set ingredient name from product
+      if (product.name != null) {
+        _nameController.text = product.name!;
+      }
+
+      // Set default quantity to 100g
+      _quantityController.text = '100';
+      _selectedUnit = 'g';
+
+      // Set nutrition data if available
+      if (product.hasNutrition) {
+        final nutrition = product.nutrition!;
+        _caloriesController.text = nutrition.calories.toStringAsFixed(1);
+        _proteinController.text = nutrition.protein.toStringAsFixed(1);
+        _carbsController.text = nutrition.carbs.toStringAsFixed(1);
+        _fatController.text = nutrition.fat.toStringAsFixed(1);
+        _fiberController.text = nutrition.fiber.toStringAsFixed(1);
+      }
+    });
+
+    // Show success message if still mounted
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Product information loaded. Adjust quantity and save.',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 }
