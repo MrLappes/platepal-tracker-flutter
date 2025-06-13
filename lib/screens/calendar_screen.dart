@@ -8,6 +8,7 @@ import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
 import '../services/chat/openai_service.dart';
 import '../components/calendar/calendar_day_detail.dart';
+import '../components/calendar/macro_summary.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   List<DishLog> _selectedDayLogs = [];
   UserProfile? _userProfile;
   bool _isLoadingAiTip = false;
+  bool _isMacroSummaryExpanded = true;
 
   // Calendar navigation state
   late DateTime _weekStartDate;
@@ -514,196 +516,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildNutritionSummaryCard() {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final summary = _selectedDaySummary!;
-    final goals = _userProfile?.goals;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.nutritionSummary,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _isLoadingAiTip ? null : _getAiTip,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_isLoadingAiTip)
-                          SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
-                          )
-                        else
-                          Icon(
-                            Icons.auto_awesome,
-                            size: 14,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.getAiTip,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Calories
-            _buildMacroBar(
-              label: l10n.calories,
-              current: summary.calories,
-              target: goals?.targetCalories,
-              unit: 'kcal',
-              color: _getCaloriesColor(summary.calories, goals?.targetCalories),
-            ),
-
-            // Protein
-            _buildMacroBar(
-              label: l10n.protein,
-              current: summary.protein,
-              target: goals?.targetProtein,
-              unit: 'g',
-              color: _getProteinColor(summary.protein, goals?.targetProtein),
-            ),
-
-            // Carbs
-            _buildMacroBar(
-              label: l10n.carbs,
-              current: summary.carbs,
-              target: goals?.targetCarbs,
-              unit: 'g',
-              color: _getCarbsColor(summary.carbs, goals?.targetCarbs),
-            ),
-
-            // Fat
-            _buildMacroBar(
-              label: l10n.fat,
-              current: summary.fat,
-              target: goals?.targetFat,
-              unit: 'g',
-              color: _getFatColor(summary.fat, goals?.targetFat),
-            ),
-
-            // Fiber (only show if has value)
-            if (summary.fiber > 0)
-              _buildMacroBar(
-                label: l10n.fiber,
-                current: summary.fiber,
-                target: null, // No fiber target in current model
-                unit: 'g',
-                color: _getFiberColor(summary.fiber),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMacroBar({
-    required String label,
-    required double current,
-    double? target,
-    required String unit,
-    required Color color,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final progressWidth = _getProgressWidth(current, target);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                '${current.toStringAsFixed(1)}${target != null ? ' / ${target.toStringAsFixed(0)}' : ''} $unit',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Container(
-            height: 8,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Stack(
-              children: [
-                // Grey background bar (full width)
-                Container(
-                  width: double.infinity,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: colorScheme.outline.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                // Colored progress bar (starts from left)
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: progressWidth,
-                  child: Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLogItem(BuildContext context, DishLog log) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -755,7 +567,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               color: colorScheme.error,
               size: 20,
             ),
-            tooltip: l10n.deleteLog,
           ),
         ],
       ),
@@ -868,13 +679,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         child: _buildWeekView(),
                       ),
 
-                      // Nutrition Summary
-                      if (_selectedDaySummary != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _buildNutritionSummaryCard(),
-                        ),
-
                       // Date selector and details
                       Expanded(
                         child: SingleChildScrollView(
@@ -883,6 +687,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               children: [
+                                // Collapsible Macro Summary
+                                if (_selectedDaySummary != null)
+                                  MacroSummary(
+                                    calories: _selectedDaySummary!.calories,
+                                    protein: _selectedDaySummary!.protein,
+                                    carbs: _selectedDaySummary!.carbs,
+                                    fat: _selectedDaySummary!.fat,
+                                    fiber: _selectedDaySummary!.fiber,
+                                    calorieTarget:
+                                        _userProfile?.goals.targetCalories,
+                                    proteinTarget:
+                                        _userProfile?.goals.targetProtein,
+                                    carbsTarget:
+                                        _userProfile?.goals.targetCarbs,
+                                    fatTarget: _userProfile?.goals.targetFat,
+                                    fiberTarget:
+                                        _userProfile?.goals.targetFiber,
+                                    isCollapsible: true,
+                                    initiallyExpanded: _isMacroSummaryExpanded,
+                                  ),
+
                                 // Calendar Day Detail
                                 CalendarDayDetail(
                                   date: _selectedDate,
@@ -901,18 +726,123 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                 ),
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: "calendar_fab",
-        onPressed: () {
-          Navigator.of(context).pushNamed('/dishes');
-        },
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        child: const Icon(Icons.add),
-      ),
     );
-  } // Helper methods for progress bar colors and calculations
+  }
 
+  Widget _buildMacroBar({
+    required String label,
+    required double current,
+    double? target,
+    required String unit,
+    required Color color,
+    required BuildContext context,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final progressWidth = _getProgressWidth(current, target);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              target != null
+                  ? '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit} / ${target.toStringAsFixed(target == target.toInt() ? 0 : 1)}${unit}'
+                  : '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Container(
+          height: 8,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progressWidth,
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactMacroItem(
+    String label,
+    double current,
+    double? target,
+    Color color,
+  ) {
+    final theme = Theme.of(context);
+    final progressWidth = _getProgressWidth(current, target);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
+        const SizedBox(height: 2),
+        Container(
+          height: 4,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progressWidth,
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          current.toStringAsFixed(0),
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 10,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getFiberColorWithTarget(double current, double? target) {
+    if (target == null || target == 0) return Colors.grey;
+
+    const yellow = Color(0xFFfacc15);
+    const green = Color(0xFF4ade80);
+
+    final ratio = current / target;
+
+    if (ratio < 1) {
+      return _interpolateColor(yellow, green, ratio);
+    }
+    return green;
+  }
+
+  // Helper methods for progress bar colors and calculations
   double _getProgressWidth(double current, double? target) {
     if (target == null) return 0.2;
 
@@ -1005,21 +935,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       final factor = min(1.0, (ratio - 1) / 0.2);
       return _interpolateColor(yellow, red, factor);
     }
-  }
-
-  Color _getFiberColor(double current) {
-    // For fiber, we don't have targets in the user profile yet, so use a simple color scheme
-    const yellow = Color(0xFFfacc15);
-    const green = Color(0xFF4ade80);
-
-    // Assume 25g is a good fiber target for color calculation
-    final assumedTarget = 25.0;
-    final ratio = current / assumedTarget;
-
-    if (ratio < 1) {
-      return _interpolateColor(yellow, green, ratio);
-    }
-    return green;
   }
 
   Color _interpolateColor(Color start, Color end, double t) {

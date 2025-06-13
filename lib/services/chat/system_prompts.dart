@@ -45,6 +45,13 @@ When creating new dishes, include these fields:
   "suggestedServingSize": 1.0  // ALWAYS include serving size as a decimal (like 0.5, 1, or 2)
 }
 
+Ask about teaspoon sizes, if unsure one teaspoon is about 5 grams, one tablespoon is about 15 grams.
+fluids inside teaspoons and tablespoons are usually measured in milliliters, where 1 teaspoon is about 4 ml and 1 tablespoon is about 10 ml.
+
+When providing meal suggestions:
+
+When providing nutritional information:
+
 For user-provided ingredients:
 - The user may have scanned or searched for specific products/ingredients before their message
 - These ingredients will have a unique ID and precise nutritional information

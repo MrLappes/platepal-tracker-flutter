@@ -101,6 +101,7 @@ class UserProfileRepository {
             targetProtein: 150.0,
             targetCarbs: 250.0,
             targetFat: 67.0,
+            targetFiber: 25.0,
           ),
           preferences: DietaryPreferences(
             dietType: 'omnivore',
