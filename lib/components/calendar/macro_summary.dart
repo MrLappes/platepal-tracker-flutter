@@ -15,6 +15,7 @@ class MacroSummary extends StatefulWidget {
   final double? fiberTarget;
   final bool isCollapsible;
   final bool initiallyExpanded;
+  final VoidCallback? onAiTipPressed;
 
   const MacroSummary({
     super.key,
@@ -30,6 +31,7 @@ class MacroSummary extends StatefulWidget {
     this.fiberTarget,
     this.isCollapsible = false,
     this.initiallyExpanded = true,
+    this.onAiTipPressed,
   });
 
   @override
@@ -244,6 +246,42 @@ class _MacroSummaryState extends State<MacroSummary> {
                       ),
                     ),
                     const Spacer(),
+                    // AI Tip button
+                    if (widget.onAiTipPressed != null) ...[
+                      GestureDetector(
+                        onTap: widget.onAiTipPressed,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                size: 12,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                l10n.getAiTip,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     // Quick stats when collapsed
                     if (!_isExpanded) ...[
                       Text(

@@ -706,6 +706,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         _userProfile?.goals.targetFiber,
                                     isCollapsible: true,
                                     initiallyExpanded: _isMacroSummaryExpanded,
+                                    onAiTipPressed: _getAiTip,
                                   ),
 
                                 // Calendar Day Detail
