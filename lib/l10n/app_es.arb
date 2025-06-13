@@ -755,5 +755,15 @@
   "enterProductName": "Ingresa el nombre del producto",
   "tryDifferentKeywords": "Intenta con diferentes palabras clave",
   "selectServingSize": "Selecciona el tamaño de la porción",
-  "enableCameraPermission": "Habilitar permiso de cámara"
+  "enableCameraPermission": "Habilitar permiso de cámara",
+  "macroCustomization": "Personalización de Macros",
+  "macroCustomizationInfo": "Personaliza tus objetivos de macros. Todos los porcentajes deben sumar 100%.",
+  "macroTargetsUpdated": "Objetivos de macros actualizados exitosamente",
+  "save": "Guardar",
+  "discardChanges": "Descartar",
+  "saveChanges": "Guardar",
+  "resetToDefaults": "Restablecer por Defecto",
+  "fiber": "Fibra",
+  "unsavedChanges": "Cambios sin Guardar",
+  "unsavedChangesMessage": "Tienes cambios sin guardar. ¿Quieres guardarlos antes de salir?"
 }

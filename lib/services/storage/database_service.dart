@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseService {
   static const String _databaseName = 'platepal.db';
-  static const int _databaseVersion = 2;
+  static const int _databaseVersion = 3;
 
   // Private constructor for singleton pattern
   DatabaseService._();
@@ -60,9 +60,7 @@ class DatabaseService {
         recorded_date TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES user_profiles (id)
       )
-    ''');
-
-    // Fitness goals table
+    '''); // Fitness goals table
     await db.execute('''
       CREATE TABLE fitness_goals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,6 +71,7 @@ class DatabaseService {
         target_protein REAL NOT NULL,
         target_carbs REAL NOT NULL,
         target_fat REAL NOT NULL,
+        target_fiber REAL NOT NULL DEFAULT 25.0,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES user_profiles (id)
@@ -265,6 +264,14 @@ class DatabaseService {
       await db.execute(
         'CREATE INDEX idx_dish_logs_dish_id ON dish_logs (dish_id)',
       );
+    }
+
+    if (oldVersion < 3) {
+      // Add target_fiber column to fitness_goals table
+      await db.execute('''
+        ALTER TABLE fitness_goals 
+        ADD COLUMN target_fiber REAL NOT NULL DEFAULT 25.0
+      ''');
     }
   }
 

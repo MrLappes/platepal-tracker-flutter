@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user_profile.dart';
 import '../../utils/service_extensions.dart';
 import '../../services/health_service.dart';
+import '../../services/user_session_service.dart';
+import 'macro_customization_screen.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -76,8 +79,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     _nameController.addListener(_onFieldChanged);
     _ageController.addListener(_onFieldChanged);
     _heightController.addListener(_onFieldChanged);
-    _weightController.addListener(_onFieldChanged);
-    _targetWeightController.addListener(_onFieldChanged);
+    _weightController.addListener(_onWeightChanged);
+    _targetWeightController.addListener(_onTargetWeightChanged);
     _bodyFatController.addListener(_onFieldChanged);
   }
 
@@ -85,6 +88,111 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     if (!_hasUnsavedChanges) {
       setState(() => _hasUnsavedChanges = true);
     }
+  }
+
+  void _onWeightChanged() {
+    _onFieldChanged();
+    _updateGoalBasedOnWeights();
+  }
+
+  void _onTargetWeightChanged() {
+    _onFieldChanged();
+    _updateGoalBasedOnWeights();
+  }
+
+  void _updateGoalBasedOnWeights() {
+    final currentWeight = double.tryParse(_weightController.text);
+    final targetWeight = double.tryParse(_targetWeightController.text);
+
+    if (currentWeight == null || targetWeight == null) return;
+
+    // Convert weights to metric for comparison if needed
+    double actualCurrentWeight = currentWeight;
+    double actualTargetWeight = targetWeight;
+
+    if (_selectedUnitSystem == 'imperial') {
+      actualCurrentWeight = currentWeight / 2.2046;
+      actualTargetWeight = targetWeight / 2.2046;
+    }
+
+    final weightDifference = actualTargetWeight - actualCurrentWeight;
+    const threshold = 2.0; // kg threshold for maintaining weight
+
+    String newGoal = _selectedFitnessGoal;
+
+    if (weightDifference.abs() <= threshold) {
+      newGoal = 'maintain_weight';
+    } else if (weightDifference < -threshold) {
+      newGoal = 'lose_weight';
+    } else if (weightDifference > threshold) {
+      newGoal = 'gain_weight';
+    }
+
+    if (newGoal != _selectedFitnessGoal) {
+      setState(() {
+        _selectedFitnessGoal = newGoal;
+      });
+    }
+  }
+
+  void _adjustTargetWeightForGoal(String newGoal) {
+    final currentWeight = double.tryParse(_weightController.text);
+    if (currentWeight == null) return;
+
+    // Convert to metric for calculations if needed
+    double actualCurrentWeight = currentWeight;
+    if (_selectedUnitSystem == 'imperial') {
+      actualCurrentWeight = currentWeight / 2.2046;
+    }
+
+    double newTargetWeight = actualCurrentWeight;
+
+    switch (newGoal) {
+      case 'maintain_weight':
+        newTargetWeight = actualCurrentWeight;
+        break;
+      case 'lose_weight':
+        // If current target is higher than current weight, adjust to 10% lower
+        final currentTarget = double.tryParse(_targetWeightController.text);
+        if (currentTarget != null) {
+          double actualCurrentTarget = currentTarget;
+          if (_selectedUnitSystem == 'imperial') {
+            actualCurrentTarget = currentTarget / 2.2046;
+          }
+          if (actualCurrentTarget >= actualCurrentWeight) {
+            newTargetWeight = actualCurrentWeight * 0.9; // 10% lower
+          } else {
+            return; // Keep current target if it's already lower
+          }
+        } else {
+          newTargetWeight = actualCurrentWeight * 0.9; // 10% lower
+        }
+        break;
+      case 'gain_weight':
+        // If current target is lower than current weight, adjust to 10% higher
+        final currentTarget = double.tryParse(_targetWeightController.text);
+        if (currentTarget != null) {
+          double actualCurrentTarget = currentTarget;
+          if (_selectedUnitSystem == 'imperial') {
+            actualCurrentTarget = currentTarget / 2.2046;
+          }
+          if (actualCurrentTarget <= actualCurrentWeight) {
+            newTargetWeight = actualCurrentWeight * 1.1; // 10% higher
+          } else {
+            return; // Keep current target if it's already higher
+          }
+        } else {
+          newTargetWeight = actualCurrentWeight * 1.1; // 10% higher
+        }
+        break;
+    }
+
+    // Convert back to display units if needed
+    if (_selectedUnitSystem == 'imperial') {
+      newTargetWeight = newTargetWeight * 2.2046;
+    }
+
+    _targetWeightController.text = newTargetWeight.round().toString();
   }
 
   // Health service initialization
@@ -217,8 +325,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     try {
       setState(() => _isLoading = true);
 
+      // Get current user ID from session service
+      final prefs = await SharedPreferences.getInstance();
+      final userSessionService = UserSessionService(prefs);
+      final currentUserId = userSessionService.getCurrentUserId();
+
       // Load from SQLite database
-      final userProfile = await context.userProfileService.getUserProfile('1');
+      final userProfile = await context.userProfileService.getUserProfile(
+        currentUserId,
+      );
 
       if (userProfile != null && mounted) {
         _originalProfile = userProfile;
@@ -234,14 +349,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       } else if (mounted) {
         // Create a default profile if none exists
         final migratedProfile = await context.userProfileService.getUserProfile(
-          '1',
+          currentUserId,
         );
         if (migratedProfile != null) {
           _originalProfile = migratedProfile;
         } else {
           // Create a default profile if none exists
           _originalProfile = UserProfile(
-            id: '1',
+            id: currentUserId,
             name: 'John Doe',
             email: 'john.doe@example.com',
             age: 25,
@@ -256,6 +371,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               targetProtein: 140.0,
               targetCarbs: 275.0,
               targetFat: 75.0,
+              targetFiber: 25.0,
             ),
             preferences: const DietaryPreferences(),
             preferredUnit: 'metric',
@@ -285,13 +401,24 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     if (profile.preferredUnit == 'metric') {
       _heightController.text = profile.height.round().toString();
       _weightController.text = profile.weight.round().toString();
-      _targetWeightController.text =
-          profile.goals.targetWeight.round().toString();
+      // For maintain_weight goal, set target weight to current weight
+      if (profile.goals.goal == 'maintain_weight') {
+        _targetWeightController.text = profile.weight.round().toString();
+      } else {
+        _targetWeightController.text =
+            profile.goals.targetWeight.round().toString();
+      }
     } else {
       _heightController.text = (profile.height / 2.54).round().toString();
       _weightController.text = (profile.weight * 2.2046).round().toString();
-      _targetWeightController.text =
-          (profile.goals.targetWeight * 2.2046).round().toString();
+      // For maintain_weight goal, set target weight to current weight
+      if (profile.goals.goal == 'maintain_weight') {
+        _targetWeightController.text =
+            (profile.weight * 2.2046).round().toString();
+      } else {
+        _targetWeightController.text =
+            (profile.goals.targetWeight * 2.2046).round().toString();
+      }
     }
 
     // Body fat percentage (optional field) - Try to get the last recorded body fat percentage
@@ -347,13 +474,16 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         dailyCalories,
         weight,
         _selectedFitnessGoal,
-      );
-
-      // Use a constant email instead of getting from form
+      ); // Use a constant email instead of getting from form
       const defaultEmail = "user@platepal.app";
 
+      // Get current user ID from session service
+      final prefs = await SharedPreferences.getInstance();
+      final userSessionService = UserSessionService(prefs);
+      final currentUserId = userSessionService.getCurrentUserId();
+
       final updatedProfile = UserProfile(
-        id: _originalProfile?.id ?? '1',
+        id: _originalProfile?.id ?? currentUserId,
         name: _nameController.text.trim(),
         email: defaultEmail, // Use default email
         age: age,
@@ -368,6 +498,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           targetProtein: macros['protein']!,
           targetCarbs: macros['carbs']!,
           targetFat: macros['fat']!,
+          targetFiber: macros['fiber']!,
         ),
         preferences:
             _originalProfile?.preferences ?? const DietaryPreferences(),
@@ -498,26 +629,29 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     double weight,
     String goal,
   ) {
-    double protein, carbs, fat;
+    // High protein diet: 40% protein, 30% carbs, 30% fat
+    // This helps preserve muscle mass during weight loss and supports muscle building
 
-    switch (goal) {
-      case 'lose_weight':
-        protein = weight * 2.2; // Higher protein for fat loss
-        fat = calories * 0.25 / 9;
-        carbs = (calories - (protein * 4) - (fat * 9)) / 4;
-        break;
-      case 'build_muscle':
-        protein = weight * 2.0; // High protein for muscle building
-        fat = calories * 0.25 / 9;
-        carbs = (calories - (protein * 4) - (fat * 9)) / 4;
-        break;
-      default:
-        protein = weight * 1.6; // Moderate protein
-        fat = calories * 0.25 / 9;
-        carbs = (calories - (protein * 4) - (fat * 9)) / 4;
+    double protein =
+        (calories * 0.40) / 4; // 40% of calories from protein (4 cal/g)
+    double carbs =
+        (calories * 0.30) / 4; // 30% of calories from carbs (4 cal/g)
+    double fat = (calories * 0.30) / 9; // 30% of calories from fat (9 cal/g)
+
+    // Calculate fiber target based on calories (14g per 1000 calories)
+    double fiber = (calories / 1000) * 14;
+
+    return {'protein': protein, 'carbs': carbs, 'fat': fat, 'fiber': fiber};
+  }
+
+  Future<void> _navigateToMacroCustomization() async {
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const MacroCustomizationScreen(),
+        ),
+      );
     }
-
-    return {'protein': protein, 'carbs': carbs, 'fat': fat};
   }
 
   String? _validateRequired(String? value, String fieldName) {
@@ -917,6 +1051,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               onChanged: (value) {
                 setState(() {
                   _selectedFitnessGoal = value!;
+                  _adjustTargetWeightForGoal(value);
                   _onFieldChanged();
                 });
               },
@@ -929,6 +1064,19 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               icon: Icons.track_changes,
               keyboardType: TextInputType.number,
               validator: _validateWeight,
+            ),
+            const SizedBox(height: 16),
+            // Macro customization button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _navigateToMacroCustomization(),
+                icon: const Icon(Icons.tune),
+                label: Text('Customize Macro Ratios'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
             ),
           ],
         ),

@@ -39,9 +39,7 @@ class UserProfileService {
     // If there are no fitness goals, return null (essential data missing)
     if (goalsMaps.isEmpty) {
       return null;
-    }
-
-    // Construct fitness goals (always required)
+    } // Construct fitness goals (always required)
     final FitnessGoals goals = FitnessGoals(
       goal: goalsMaps.first['goal'] as String,
       targetWeight: goalsMaps.first['target_weight'] as double,
@@ -49,6 +47,7 @@ class UserProfileService {
       targetProtein: goalsMaps.first['target_protein'] as double,
       targetCarbs: goalsMaps.first['target_carbs'] as double,
       targetFat: goalsMaps.first['target_fat'] as double,
+      targetFiber: (goalsMaps.first['target_fiber'] as double?) ?? 25.0,
     );
 
     // Construct dietary preferences (optional)
@@ -136,9 +135,7 @@ class UserProfileService {
         'weight': userProfile.weight,
         'height': userProfile.height,
         'recorded_date': DateTime.now().toIso8601String(),
-      });
-
-      // Save fitness goals
+      }); // Save fitness goals
       await txn.insert('fitness_goals', {
         'user_id': userProfile.id,
         'goal': userProfile.goals.goal,
@@ -147,6 +144,7 @@ class UserProfileService {
         'target_protein': userProfile.goals.targetProtein,
         'target_carbs': userProfile.goals.targetCarbs,
         'target_fat': userProfile.goals.targetFat,
+        'target_fiber': userProfile.goals.targetFiber,
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       });

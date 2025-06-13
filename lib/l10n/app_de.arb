@@ -781,5 +781,15 @@
   "enterProductName": "Produktnamen eingeben",
   "tryDifferentKeywords": "Versuchen Sie andere Suchbegriffe",
   "selectServingSize": "Portionsgröße auswählen",
-  "enableCameraPermission": "Kameraberechtigung aktivieren"
+  "enableCameraPermission": "Kameraberechtigung aktivieren",
+  "macroCustomization": "Makro-Anpassung",
+  "macroCustomizationInfo": "Passen Sie Ihre Makro-Ziele an. Alle Prozentsätze müssen sich zu 100% addieren.",
+  "macroTargetsUpdated": "Makro-Ziele erfolgreich aktualisiert",
+  "save": "Speichern",
+  "discardChanges": "Verwerfen",
+  "saveChanges": "Speichern",
+  "resetToDefaults": "Auf Standard zurücksetzen",
+  "fiber": "Ballaststoffe",
+  "unsavedChanges": "Ungespeicherte Änderungen",
+  "unsavedChangesMessage": "Sie haben ungespeicherte Änderungen. Möchten Sie diese vor dem Verlassen speichern?"
 }

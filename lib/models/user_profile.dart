@@ -107,6 +107,7 @@ class FitnessGoals {
   final double targetProtein;
   final double targetCarbs;
   final double targetFat;
+  final double targetFiber;
 
   const FitnessGoals({
     required this.goal,
@@ -115,8 +116,8 @@ class FitnessGoals {
     required this.targetProtein,
     required this.targetCarbs,
     required this.targetFat,
+    required this.targetFiber,
   });
-
   factory FitnessGoals.fromJson(Map<String, dynamic> json) {
     return FitnessGoals(
       goal: json['goal'] as String,
@@ -125,6 +126,7 @@ class FitnessGoals {
       targetProtein: (json['targetProtein'] as num).toDouble(),
       targetCarbs: (json['targetCarbs'] as num).toDouble(),
       targetFat: (json['targetFat'] as num).toDouble(),
+      targetFiber: (json['targetFiber'] as num?)?.toDouble() ?? 25.0,
     );
   }
 
@@ -136,6 +138,7 @@ class FitnessGoals {
       'targetProtein': targetProtein,
       'targetCarbs': targetCarbs,
       'targetFat': targetFat,
+      'targetFiber': targetFiber,
     };
   }
 }

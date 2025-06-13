@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class MacroSummary extends StatelessWidget {
+class MacroSummary extends StatefulWidget {
   final double calories;
   final double protein;
   final double carbs;
@@ -13,6 +13,8 @@ class MacroSummary extends StatelessWidget {
   final double? carbsTarget;
   final double? fatTarget;
   final double? fiberTarget;
+  final bool isCollapsible;
+  final bool initiallyExpanded;
 
   const MacroSummary({
     super.key,
@@ -26,7 +28,22 @@ class MacroSummary extends StatelessWidget {
     this.carbsTarget,
     this.fatTarget,
     this.fiberTarget,
+    this.isCollapsible = false,
+    this.initiallyExpanded = true,
   });
+
+  @override
+  State<MacroSummary> createState() => _MacroSummaryState();
+}
+
+class _MacroSummaryState extends State<MacroSummary> {
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.initiallyExpanded;
+  }
 
   Color _interpolateColor(Color start, Color end, double factor) {
     factor = factor.clamp(0.0, 1.0);
@@ -153,48 +170,47 @@ class MacroSummary extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final progressWidth = _getProgressWidth(current, target);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                '${current.toStringAsFixed(1)}${target != null ? ' / ${target.toStringAsFixed(0)}' : ''} $unit',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Container(
-            height: 8,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: progressWidth,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(4),
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
               ),
             ),
+            Text(
+              target != null
+                  ? '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit} / ${target.toStringAsFixed(target == target.toInt() ? 0 : 1)}${unit}'
+                  : '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Container(
+          height: 8,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(4),
           ),
-        ],
-      ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progressWidth,
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -204,6 +220,182 @@ class MacroSummary extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    if (widget.isCollapsible) {
+      return Card(
+        child: Column(
+          children: [
+            // Header with tap to expand/collapse
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(Icons.bar_chart, color: colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.nutritionSummary,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Quick stats when collapsed
+                    if (!_isExpanded) ...[
+                      Text(
+                        '${widget.calories.toStringAsFixed(0)} cal',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Icon(
+                      _isExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Expanded content
+            if (_isExpanded) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Calories
+                    _buildMacroBar(
+                      label: l10n.calories,
+                      current: widget.calories,
+                      target: widget.calorieTarget,
+                      unit: '',
+                      color: _getCaloriesColor(
+                        widget.calories,
+                        widget.calorieTarget,
+                      ),
+                      context: context,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Protein
+                    _buildMacroBar(
+                      label: l10n.protein,
+                      current: widget.protein,
+                      target: widget.proteinTarget,
+                      unit: 'g',
+                      color: _getProteinColor(
+                        widget.protein,
+                        widget.proteinTarget,
+                      ),
+                      context: context,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Carbs
+                    _buildMacroBar(
+                      label: l10n.carbs,
+                      current: widget.carbs,
+                      target: widget.carbsTarget,
+                      unit: 'g',
+                      color: _getCarbsColor(widget.carbs, widget.carbsTarget),
+                      context: context,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Fat
+                    _buildMacroBar(
+                      label: l10n.fat,
+                      current: widget.fat,
+                      target: widget.fatTarget,
+                      unit: 'g',
+                      color: _getFatColor(widget.fat, widget.fatTarget),
+                      context: context,
+                    ),
+
+                    // Fiber (if available)
+                    if (widget.fiber > 0 ||
+                        (widget.fiberTarget != null &&
+                            widget.fiberTarget! > 0)) ...[
+                      const SizedBox(height: 12),
+                      _buildMacroBar(
+                        label: l10n.fiber,
+                        current: widget.fiber,
+                        target: widget.fiberTarget,
+                        unit: 'g',
+                        color: _getFiberColor(widget.fiber, widget.fiberTarget),
+                        context: context,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ] else ...[
+              // Compact view - show horizontal progress bars
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildCompactMacroItem(
+                        'Cal',
+                        widget.calories,
+                        widget.calorieTarget,
+                        _getCaloriesColor(
+                          widget.calories,
+                          widget.calorieTarget,
+                        ),
+                        context,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildCompactMacroItem(
+                        'Protein',
+                        widget.protein,
+                        widget.proteinTarget,
+                        _getProteinColor(widget.protein, widget.proteinTarget),
+                        context,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildCompactMacroItem(
+                        'Carbs',
+                        widget.carbs,
+                        widget.carbsTarget,
+                        _getCarbsColor(widget.carbs, widget.carbsTarget),
+                        context,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildCompactMacroItem(
+                        'Fat',
+                        widget.fat,
+                        widget.fatTarget,
+                        _getFatColor(widget.fat, widget.fatTarget),
+                        context,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    // Non-collapsible version (original behavior)
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -255,56 +447,101 @@ class MacroSummary extends StatelessWidget {
             // Calories
             _buildMacroBar(
               label: l10n.calories,
-              current: calories,
-              target: calorieTarget,
+              current: widget.calories,
+              target: widget.calorieTarget,
               unit: 'kcal',
-              color: _getCaloriesColor(calories, calorieTarget),
+              color: _getCaloriesColor(widget.calories, widget.calorieTarget),
               context: context,
             ),
 
             // Protein
             _buildMacroBar(
               label: l10n.protein,
-              current: protein,
-              target: proteinTarget,
+              current: widget.protein,
+              target: widget.proteinTarget,
               unit: 'g',
-              color: _getProteinColor(protein, proteinTarget),
+              color: _getProteinColor(widget.protein, widget.proteinTarget),
               context: context,
             ),
 
             // Carbs
             _buildMacroBar(
               label: l10n.carbs,
-              current: carbs,
-              target: carbsTarget,
+              current: widget.carbs,
+              target: widget.carbsTarget,
               unit: 'g',
-              color: _getCarbsColor(carbs, carbsTarget),
+              color: _getCarbsColor(widget.carbs, widget.carbsTarget),
               context: context,
             ),
 
             // Fat
             _buildMacroBar(
               label: l10n.fat,
-              current: fat,
-              target: fatTarget,
+              current: widget.fat,
+              target: widget.fatTarget,
               unit: 'g',
-              color: _getFatColor(fat, fatTarget),
+              color: _getFatColor(widget.fat, widget.fatTarget),
               context: context,
             ),
 
             // Fiber (only show if has value or target)
-            if (fiber > 0 || (fiberTarget != null && fiberTarget! > 0))
+            if (widget.fiber > 0 ||
+                (widget.fiberTarget != null && widget.fiberTarget! > 0))
               _buildMacroBar(
                 label: l10n.fiber,
-                current: fiber,
-                target: fiberTarget,
+                current: widget.fiber,
+                target: widget.fiberTarget,
                 unit: 'g',
-                color: _getFiberColor(fiber, fiberTarget),
+                color: _getFiberColor(widget.fiber, widget.fiberTarget),
                 context: context,
               ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCompactMacroItem(
+    String label,
+    double current,
+    double? target,
+    Color color,
+    BuildContext context,
+  ) {
+    final theme = Theme.of(context);
+    final progressWidth = _getProgressWidth(current, target);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
+        const SizedBox(height: 2),
+        Container(
+          height: 4,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progressWidth,
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          current.toStringAsFixed(0),
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 10,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

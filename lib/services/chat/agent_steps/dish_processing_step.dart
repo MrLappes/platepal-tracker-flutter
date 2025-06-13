@@ -314,6 +314,7 @@ class DishProcessingStep extends AgentStep {
   }
 
   /// Parses ingredient data from AI response
+  /// Note: Ingredients store per-100g nutrition values, not calculated amounts
   FoodIngredient? _parseIngredient(Map<String, dynamic> ingredientData) {
     try {
       final name = ingredientData['name'] as String?;
@@ -335,20 +336,12 @@ class DishProcessingStep extends AgentStep {
         nutrition = BasicNutrition.fromJson(
           ingredientData['nutrition'] as Map<String, dynamic>,
         );
-      }
-      // Handle per-100g nutrition format from AI (this is the main format we expect)
+      } // Handle per-100g nutrition format from AI (this is the main format we expect)
       else if (ingredientData.containsKey('caloriesPer100') ||
           ingredientData.containsKey('proteinPer100') ||
           ingredientData.containsKey('carbsPer100') ||
           ingredientData.containsKey('fatPer100')) {
-        // Get the ingredient amount in grams
-        final amountInGrams = _getAmountInGrams(
-          amount ?? 1.0,
-          unit ?? 'g',
-          ingredientData['inGrams'],
-        );
-
-        // Calculate actual nutrition based on amount
+        // Store per-100g nutrition values directly without calculating for the amount
         final per100Calories =
             _parseDouble(ingredientData['caloriesPer100']) ?? 0.0;
         final per100Protein =
@@ -360,17 +353,15 @@ class DishProcessingStep extends AgentStep {
         final per100Sodium =
             _parseDouble(ingredientData['sodiumPer100']) ?? 0.0;
 
-        // Calculate actual nutrition for this ingredient's quantity
-        final multiplier = amountInGrams / 100.0;
-
+        // Store the per-100g values directly
         nutrition = BasicNutrition(
-          calories: per100Calories * multiplier,
-          protein: per100Protein * multiplier,
-          carbs: per100Carbs * multiplier,
-          fat: per100Fat * multiplier,
-          fiber: per100Fiber * multiplier,
-          sugar: per100Sugar * multiplier,
-          sodium: per100Sodium * multiplier,
+          calories: per100Calories,
+          protein: per100Protein,
+          carbs: per100Carbs,
+          fat: per100Fat,
+          fiber: per100Fiber,
+          sugar: per100Sugar,
+          sodium: per100Sodium,
         );
       }
       // Handle direct nutrition values (fallback)
@@ -429,6 +420,7 @@ class DishProcessingStep extends AgentStep {
   }
 
   /// Calculates total nutrition from all ingredients
+  /// Ingredients store per-100g nutrition values, this method calculates actual totals
   BasicNutrition _calculateNutritionFromIngredients(
     List<FoodIngredient> ingredients,
   ) {
@@ -439,21 +431,29 @@ class DishProcessingStep extends AgentStep {
     double totalFiber = 0.0;
     double totalSugar = 0.0;
     double totalSodium = 0.0;
-
     for (final ingredient in ingredients) {
       if (ingredient.nutrition != null) {
-        totalCalories += ingredient.nutrition!.calories;
-        totalProtein += ingredient.nutrition!.protein;
-        totalCarbs += ingredient.nutrition!.carbs;
-        totalFat += ingredient.nutrition!.fat;
-        totalFiber += ingredient.nutrition!.fiber;
-        totalSugar += ingredient.nutrition!.sugar;
-        totalSodium += ingredient.nutrition!.sodium;
+        // Get the ingredient amount in grams for calculation
+        final amountInGrams = _getAmountInGrams(
+          ingredient.amount,
+          ingredient.unit,
+          null, // No explicit inGrams value from ingredient object
+        );
+
+        // Calculate nutrition based on per-100g values stored in ingredient
+        final multiplier = amountInGrams / 100.0;
+
+        totalCalories += ingredient.nutrition!.calories * multiplier;
+        totalProtein += ingredient.nutrition!.protein * multiplier;
+        totalCarbs += ingredient.nutrition!.carbs * multiplier;
+        totalFat += ingredient.nutrition!.fat * multiplier;
+        totalFiber += ingredient.nutrition!.fiber * multiplier;
+        totalSugar += ingredient.nutrition!.sugar * multiplier;
+        totalSodium += ingredient.nutrition!.sodium * multiplier;
       }
     }
-
     debugPrint(
-      '📊 Calculated nutrition from ${ingredients.length} ingredients:',
+      '📊 Calculated nutrition from ${ingredients.length} ingredients (per-100g values multiplied by amounts):',
     );
     debugPrint('   Calories: ${totalCalories.toStringAsFixed(1)}');
     debugPrint('   Protein: ${totalProtein.toStringAsFixed(1)}g');
