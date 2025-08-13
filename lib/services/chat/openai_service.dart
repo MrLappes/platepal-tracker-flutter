@@ -197,15 +197,26 @@ class OpenAIService {
     return apiKey != null && apiKey.isNotEmpty;
   }
 
+  /// Helper to check if model requires alternate max_tokens key
+  bool _useCompletionTokens(String model) {
+    return model.contains('-5');
+  }
+
+  /// Helper to check if model should omit temperature
+  bool _omitTemperature(String model) {
+    return model.contains('-5');
+  }
+
   Future<ApiKeyTestResult> testApiKey(String apiKey, String model) async {
-    // Test the API key by sending a minimal chat completion request
     try {
       final url = Uri.parse('https://api.openai.com/v1/chat/completions');
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $apiKey',
       };
-      final body = jsonEncode({
+      final bool useCompletionTokens = _useCompletionTokens(model);
+      final bool omitTemperature = _omitTemperature(model);
+      final body = {
         'model': model,
         'messages': [
           {
@@ -218,13 +229,33 @@ class OpenAIService {
             'content': 'Say hello to the new user of PlatePal Tracker',
           },
         ],
-        'max_tokens': 100,
-      });
-      final response = await http.post(url, headers: headers, body: body);
+        if (useCompletionTokens) ...{
+          'max_completion_tokens': 2048,
+          'reasoning_effort': 'low',
+        } else ...{
+          'max_tokens': 2048,
+        },
+        if (!omitTemperature) 'temperature': 0.7,
+      };
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+      if (response.body == null || response.body.trim().isEmpty) {
+        return const ApiKeyTestResult(
+          success: false,
+          message:
+              'OpenAI returned an empty response. Try increasing your token limits or check your request.',
+        );
+      }
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final content = data['choices']?[0]?['message']?['content'] ?? '';
         if (content.isEmpty) {
+          debugPrint(
+            'OpenAI API returned an empty response for model $model with API key $apiKey, Response: ${response.body}',
+          );
           return const ApiKeyTestResult(
             success: false,
             message:
@@ -239,8 +270,15 @@ class OpenAIService {
         try {
           final errorData = jsonDecode(response.body);
           errorMessage = errorData['error']?['message'] ?? errorMessage;
+          debugPrint(
+            'OpenAI API error: ${errorData['error']?['message']}, '
+            'status code: ${response.statusCode}',
+          );
         } catch (_) {}
-        if (response.statusCode == 401) {
+        if (response.statusCode == 400) {
+          errorMessage =
+              'Invalid request. Please check the model and parameters used.';
+        } else if (response.statusCode == 401) {
           errorMessage =
               'Invalid API key. Please check your key and try again.';
           isAuthError = true;
@@ -267,50 +305,6 @@ class OpenAIService {
         message: 'Failed to test API key: $e',
       );
     }
-  }
-
-  Future<List<OpenAIModel>> getAvailableModels(String apiKey) async {
-    try {
-      final url = Uri.parse('https://api.openai.com/v1/models');
-      final headers = {'Authorization': 'Bearer $apiKey'};
-      final response = await http.get(url, headers: headers);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final models = (data['data'] as List<dynamic>?) ?? [];
-        final filteredModels =
-            models
-                .where(
-                  (model) =>
-                      model['id'] != null &&
-                      model['id'].toString().startsWith('gpt-') &&
-                      !model['id'].toString().contains('instruct') &&
-                      model['id'].toString() != 'gpt',
-                )
-                .map(
-                  (model) => OpenAIModel(
-                    id: model['id'],
-                    displayName: OpenAIModel._formatModelDisplayName(
-                      model['id'],
-                    ),
-                  ),
-                )
-                .toList();
-        filteredModels.sort((a, b) {
-          if (a.id.contains('gpt-4') && !b.id.contains('gpt-4')) return -1;
-          if (!a.id.contains('gpt-4') && b.id.contains('gpt-4')) return 1;
-          return a.displayName.compareTo(b.displayName);
-        });
-        return filteredModels.isEmpty ? _defaultModels : filteredModels;
-      } else {
-        return _defaultModels;
-      }
-    } catch (e) {
-      return _defaultModels;
-    }
-  }
-
-  List<OpenAIModel> getDefaultModels() {
-    return _defaultModels;
   }
 
   Future<String> sendMessage(
@@ -371,14 +365,30 @@ class OpenAIService {
         {'role': 'user', 'content': message},
       ];
     }
-    final body = jsonEncode({
+    final bool useCompletionTokens = _useCompletionTokens(model);
+    final bool omitTemperature = _omitTemperature(model);
+    final body = {
       'model': model,
       'messages': requestMessages,
-      'temperature': 0.7,
-      'max_tokens': 1000,
-    });
+      if (useCompletionTokens) ...{
+        'max_completion_tokens': 2048,
+        'reasoning_effort': 'low',
+      } else ...{
+        'max_tokens': 2048,
+      },
+      if (!omitTemperature) 'temperature': 0.7,
+    };
     try {
-      final response = await http.post(url, headers: headers, body: body);
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+      if (response.body == null || response.body.trim().isEmpty) {
+        throw Exception(
+          'OpenAI returned an empty response. Try increasing your token limits or check your request.',
+        );
+      }
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final choices = data['choices'] as List<dynamic>?;
@@ -406,6 +416,50 @@ class OpenAIService {
     }
   }
 
+  Future<List<OpenAIModel>> getAvailableModels(String apiKey) async {
+    try {
+      final url = Uri.parse('https://api.openai.com/v1/models');
+      final headers = {'Authorization': 'Bearer $apiKey'};
+      final response = await http.get(url, headers: headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final models = (data['data'] as List<dynamic>?) ?? [];
+        final filteredModels =
+            models
+                .where(
+                  (model) =>
+                      model['id'] != null &&
+                      model['id'].toString().startsWith('gpt-') &&
+                      !model['id'].toString().contains('instruct') &&
+                      model['id'].toString() != 'gpt',
+                )
+                .map(
+                  (model) => OpenAIModel(
+                    id: model['id'],
+                    displayName: OpenAIModel._formatModelDisplayName(
+                      model['id'],
+                    ),
+                  ),
+                )
+                .toList();
+        filteredModels.sort((a, b) {
+          if (a.id.contains('gpt-4') && !b.id.contains('gpt-4')) return -1;
+          if (!a.id.contains('gpt-4') && b.id.contains('gpt-4')) return 1;
+          return a.displayName.compareTo(b.displayName);
+        });
+        return filteredModels.isEmpty ? _defaultModels : filteredModels;
+      } else {
+        return _defaultModels;
+      }
+    } catch (e) {
+      return _defaultModels;
+    }
+  }
+
+  List<OpenAIModel> getDefaultModels() {
+    return _defaultModels;
+  }
+
   /// Send a structured chat request to OpenAI using manual HTTP requests
   Future<ChatCompletionResponse> sendChatRequest({
     required List<Map<String, dynamic>> messages,
@@ -424,14 +478,19 @@ class OpenAIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $apiKey',
     };
+    final bool useCompletionTokens = _useCompletionTokens(model);
+    final bool omitTemperature = _omitTemperature(model);
     final body = <String, dynamic>{
       'model': model,
       'messages': messages,
-      'temperature': temperature,
+      if (useCompletionTokens) ...{
+        'max_completion_tokens': maxTokens ?? 2048,
+        'reasoning_effort': 'low',
+      } else if (maxTokens != null) ...{
+        'max_tokens': maxTokens,
+      },
+      if (!omitTemperature) 'temperature': temperature,
     };
-    if (maxTokens != null) {
-      body['max_tokens'] = maxTokens;
-    }
     if (responseFormat != null) {
       body['response_format'] = responseFormat;
     }
@@ -441,6 +500,11 @@ class OpenAIService {
         headers: headers,
         body: jsonEncode(body),
       );
+      if (response.body == null || response.body.trim().isEmpty) {
+        throw Exception(
+          'OpenAI returned an empty response. Try increasing your token limits or check your request.',
+        );
+      }
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return ChatCompletionResponse.fromJson(data);

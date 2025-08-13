@@ -1,8 +1,8 @@
 import '../models/dish.dart';
-import '../services/storage/dish_storage_service.dart';
+import '../services/storage/dish_service.dart';
 
 class DishRepository {
-  final DishStorageService _storageService = DishStorageService();
+  final DishService _storageService = DishService();
 
   Future<List<Dish>> getAllDishes() async {
     try {
@@ -46,17 +46,7 @@ class DishRepository {
 
   Future<List<Dish>> searchDishes(String query) async {
     try {
-      final allDishes = await getAllDishes();
-      return allDishes
-          .where(
-            (dish) =>
-                dish.name.toLowerCase().contains(query.toLowerCase()) ||
-                (dish.description?.toLowerCase().contains(
-                      query.toLowerCase(),
-                    ) ??
-                    false),
-          )
-          .toList();
+      return await _storageService.searchDishes(query);
     } catch (e) {
       throw Exception('Failed to search dishes: $e');
     }
@@ -64,8 +54,7 @@ class DishRepository {
 
   Future<List<Dish>> getFavoriteDishes() async {
     try {
-      final allDishes = await getAllDishes();
-      return allDishes.where((dish) => dish.isFavorite).toList();
+      return await _storageService.getFavoriteDishes();
     } catch (e) {
       throw Exception('Failed to load favorite dishes: $e');
     }

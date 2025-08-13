@@ -10,7 +10,7 @@ import 'thinking_step.dart';
 import 'response_generation_step.dart';
 import 'dish_processing_step.dart';
 import 'error_handling_step.dart';
-import 'deep_search_verification_step.dart';
+import 'autonomous_verification_step.dart';
 
 /// Factory for creating agent steps
 class AgentStepFactory {
@@ -70,7 +70,7 @@ class AgentStepFactory {
         return ErrorHandlingStep();
 
       case 'deep_search_verification':
-        return DeepSearchVerificationStep(openaiService: _openaiService);
+        return AutonomousVerificationStep(openaiService: _openaiService);
 
       default:
         throw ArgumentError('Unknown step name: $stepName');
@@ -256,13 +256,12 @@ class AgentStepRegistry {
       'deep_search_verification',
       AgentStepMetadata(
         name: 'deep_search_verification',
-        description:
-            'Validates context sufficiency and provides pipeline control decisions',
+        description: 'Checkpoint-based autonomous verification system',
         category: 'validation',
         supportsVerification: false, // Meta-verification not supported
         supportsDeepSearch: false,
-        estimatedExecutionTime: Duration(seconds: 3),
-        dependencies: ['thinking', 'context_gathering'],
+        estimatedExecutionTime: Duration(seconds: 4),
+        dependencies: [], // Flexible dependencies based on checkpoint
       ),
     );
   }
@@ -310,7 +309,7 @@ class AgentPipelineConfig {
   final Duration timeout;
   final Map<String, dynamic>? stepConfigurations;
 
-  const AgentPipelineConfig({
+  AgentPipelineConfig({
     required this.requiredSteps,
     this.optionalSteps = const [],
     this.deepSearchEnabled = false,
@@ -321,7 +320,7 @@ class AgentPipelineConfig {
 
   /// Creates default pipeline configuration
   factory AgentPipelineConfig.defaultConfig() {
-    return const AgentPipelineConfig(
+    return AgentPipelineConfig(
       requiredSteps: ['thinking', 'context_gathering', 'response_generation'],
       optionalSteps: ['image_processing', 'dish_processing'],
       deepSearchEnabled: false,
@@ -330,18 +329,49 @@ class AgentPipelineConfig {
     );
   }
 
-  /// Creates configuration with deep search enabled
-  factory AgentPipelineConfig.withDeepSearch() {
-    return const AgentPipelineConfig(
-      requiredSteps: ['thinking', 'context_gathering', 'response_generation'],
+  /// Creates configuration with autonomous verification at strategic checkpoints
+  factory AgentPipelineConfig.withAutonomousVerification() {
+    return AgentPipelineConfig(
+      requiredSteps: [
+        'thinking',
+        'context_gathering',
+        'deep_search_verification', // Post-execution checkpoint
+        'response_generation',
+        'dish_processing',
+        'deep_search_verification', // Post-response checkpoint
+      ],
+      optionalSteps: ['image_processing'],
+      deepSearchEnabled: true,
+      maxRetries: 3,
+      timeout: Duration(minutes: 15),
+      stepConfigurations: {
+        'deep_search_verification': {'checkpointBased': true, 'maxRetries': 3},
+      },
+    );
+  }
+
+  /// Creates configuration with deep search verification after each step
+  factory AgentPipelineConfig.withComprehensiveVerification() {
+    return AgentPipelineConfig(
+      requiredSteps: [
+        'thinking',
+        'deep_search_verification',
+        'context_gathering',
+        'deep_search_verification',
+        'response_generation',
+        'deep_search_verification',
+      ],
       optionalSteps: [
         'image_processing',
         'dish_processing',
         'deep_search_verification',
       ],
       deepSearchEnabled: true,
-      maxRetries: 2,
-      timeout: Duration(minutes: 10),
+      maxRetries: 3,
+      timeout: Duration(minutes: 15),
+      stepConfigurations: {
+        'deep_search_verification': {'verifyAfterEachStep': true},
+      },
     );
   }
 

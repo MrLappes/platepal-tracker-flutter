@@ -8,6 +8,8 @@ class MacroSummary extends StatefulWidget {
   final double carbs;
   final double fat;
   final double fiber;
+  final double? caloriesBurned;
+  final bool isCaloriesBurnedEstimated;
   final double? calorieTarget;
   final double? proteinTarget;
   final double? carbsTarget;
@@ -16,6 +18,7 @@ class MacroSummary extends StatefulWidget {
   final bool isCollapsible;
   final bool initiallyExpanded;
   final VoidCallback? onAiTipPressed;
+  final DateTime? selectedDate; // Add selected date parameter
 
   const MacroSummary({
     super.key,
@@ -24,6 +27,8 @@ class MacroSummary extends StatefulWidget {
     required this.carbs,
     required this.fat,
     this.fiber = 0,
+    this.caloriesBurned,
+    this.isCaloriesBurnedEstimated = true,
     this.calorieTarget,
     this.proteinTarget,
     this.carbsTarget,
@@ -32,6 +37,7 @@ class MacroSummary extends StatefulWidget {
     this.isCollapsible = false,
     this.initiallyExpanded = true,
     this.onAiTipPressed,
+    this.selectedDate,
   });
 
   @override
@@ -186,8 +192,8 @@ class _MacroSummaryState extends State<MacroSummary> {
             ),
             Text(
               target != null
-                  ? '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit} / ${target.toStringAsFixed(target == target.toInt() ? 0 : 1)}${unit}'
-                  : '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit}',
+                  ? '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}$unit / ${target.toStringAsFixed(target == target.toInt() ? 0 : 1)}$unit'
+                  : '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}$unit',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -214,6 +220,99 @@ class _MacroSummaryState extends State<MacroSummary> {
         ),
       ],
     );
+  }
+
+  Widget _buildCaloriesBar(BuildContext context, AppLocalizations l10n) {
+    // Use calories burned as max if available, otherwise use calorie target
+    final double? maxCalories = widget.caloriesBurned ?? widget.calorieTarget;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildMacroBar(
+            label: l10n.calories,
+            current: widget.calories,
+            target: maxCalories,
+            unit: '',
+            color: _getCaloriesColor(widget.calories, maxCalories),
+            context: context,
+          ),
+        ),
+        // Show info icon only when we have real health data (not estimated)
+        if (widget.caloriesBurned != null &&
+            !widget.isCaloriesBurnedEstimated) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => _showHealthDataInfo(context),
+            child: Icon(
+              Icons.info_outline,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showHealthDataInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isToday =
+        widget.selectedDate != null &&
+        _isSameDay(widget.selectedDate!, DateTime.now());
+
+    String title;
+    String content;
+
+    if (widget.isCaloriesBurnedEstimated) {
+      if (isToday) {
+        title = l10n.estimatedCaloriesToday;
+        content = l10n.estimatedCaloriesTodayMessage;
+      } else {
+        title = l10n.estimatedCalories;
+        content = l10n.estimatedCaloriesMessage;
+      }
+    } else {
+      if (isToday) {
+        title = l10n.healthDataTodayPartial;
+        content = l10n.healthDataTodayMessage;
+      } else {
+        title = l10n.healthDataTitle;
+        content = l10n.healthDataMessage;
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  widget.isCaloriesBurnedEstimated
+                      ? Icons.calculate
+                      : Icons.health_and_safety,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(title)),
+              ],
+            ),
+            content: Text(content),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   @override
@@ -311,17 +410,8 @@ class _MacroSummaryState extends State<MacroSummary> {
                 child: Column(
                   children: [
                     // Calories
-                    _buildMacroBar(
-                      label: l10n.calories,
-                      current: widget.calories,
-                      target: widget.calorieTarget,
-                      unit: '',
-                      color: _getCaloriesColor(
-                        widget.calories,
-                        widget.calorieTarget,
-                      ),
-                      context: context,
-                    ),
+                    _buildCaloriesBar(context, l10n),
+
                     const SizedBox(height: 12),
 
                     // Protein

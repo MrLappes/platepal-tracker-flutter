@@ -1,17 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../models/dish.dart';
+import '../calorie_expenditure_service.dart';
 import 'database_service.dart';
 
 class DishService {
   final DatabaseService _databaseService = DatabaseService.instance;
+  final CalorieExpenditureService _calorieExpenditureService =
+      CalorieExpenditureService();
   // Get all dishes
   Future<List<Dish>> getAllDishes() async {
     debugPrint('🔍 DishService: Getting all dishes from database...');
     final db = await _databaseService.database;
 
-    // Get all dishes
-    final List<Map<String, dynamic>> dishMaps = await db.query('dishes');
+    // Get all dishes, newest first
+    final List<Map<String, dynamic>> dishMaps = await db.query(
+      'dishes',
+      orderBy: 'created_at DESC',
+    );
     debugPrint('🔍 DishService: Found ${dishMaps.length} dishes in database');
 
     final dishes = await Future.wait(
@@ -19,9 +25,6 @@ class DishService {
     );
 
     debugPrint('🔍 DishService: Returning ${dishes.length} dishes');
-    for (final dish in dishes) {
-      debugPrint('   - ${dish.name} (ID: ${dish.id})');
-    }
 
     return dishes;
   }
@@ -498,13 +501,24 @@ class DishService {
     );
 
     final row = result.first;
-    return DailyMacroSummary(
+    final baseSummary = DailyMacroSummary(
       calories: (row['total_calories'] as num).toDouble(),
       protein: (row['total_protein'] as num).toDouble(),
       carbs: (row['total_carbs'] as num).toDouble(),
       fat: (row['total_fat'] as num).toDouble(),
       fiber: (row['total_fiber'] as num).toDouble(),
-    );
+    ); // Try to get calories burned for this date
+    final (caloriesBurned, isEstimated) = await _calorieExpenditureService
+        .getCaloriesBurnedForDateWithStatus(date);
+
+    if (caloriesBurned != null && caloriesBurned > 0) {
+      return baseSummary.copyWithCaloriesBurned(
+        caloriesBurned,
+        isEstimated: isEstimated,
+      );
+    }
+
+    return baseSummary;
   }
 
   Future<void> deleteDishLog(String logId) async {

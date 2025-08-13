@@ -290,6 +290,8 @@ class DailyMacroSummary {
   final double carbs;
   final double fat;
   final double fiber;
+  final double? caloriesBurned;
+  final bool isCaloriesBurnedEstimated;
 
   const DailyMacroSummary({
     required this.calories,
@@ -297,7 +299,26 @@ class DailyMacroSummary {
     required this.carbs,
     required this.fat,
     required this.fiber,
+    this.caloriesBurned,
+    this.isCaloriesBurnedEstimated = true,
   });
+
+  /// Create a copy with calories burned data
+  DailyMacroSummary copyWithCaloriesBurned(
+    double caloriesBurned, {
+    bool isEstimated = true,
+  }) {
+    return DailyMacroSummary(
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      fiber: fiber,
+      caloriesBurned: caloriesBurned,
+      isCaloriesBurnedEstimated: isEstimated,
+    );
+  }
+
   factory DailyMacroSummary.fromJson(Map<String, dynamic> json) {
     return DailyMacroSummary(
       calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
@@ -305,9 +326,11 @@ class DailyMacroSummary {
       carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
       fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
       fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
+      caloriesBurned: (json['caloriesBurned'] as num?)?.toDouble(),
+      isCaloriesBurnedEstimated:
+          json['isCaloriesBurnedEstimated'] as bool? ?? true,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'calories': calories,
@@ -315,6 +338,8 @@ class DailyMacroSummary {
       'carbs': carbs,
       'fat': fat,
       'fiber': fiber,
+      'caloriesBurned': caloriesBurned,
+      'isCaloriesBurnedEstimated': isCaloriesBurnedEstimated,
     };
   }
 }

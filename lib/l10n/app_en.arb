@@ -1251,10 +1251,180 @@
   "phaseAnalysis": "Phase Analysis",
   "@phaseAnalysis": {
     "description": "Phase analysis section title"
-  },
-  "weeklyAverage": "Weekly Average",
+  },  "weeklyAverage": "Weekly Average",
   "@weeklyAverage": {
     "description": "Weekly average label"
+  },
+  "lastWeek": "Last Week",
+  "@lastWeek": {
+    "description": "Last week time range option"
+  },
+  "lastMonth": "Last Month", 
+  "@lastMonth": {
+    "description": "Last month time range option"
+  },
+  "lastThreeMonths": "Last 3 Months",
+  "@lastThreeMonths": {
+    "description": "Last three months time range option"
+  },
+  "lastSixMonths": "Last 6 Months",
+  "@lastSixMonths": {
+    "description": "Last six months time range option"
+  },
+  "lastYear": "Last Year",
+  "@lastYear": {
+    "description": "Last year time range option"
+  },
+  "generateTestData": "Generate Test Data",
+  "@generateTestData": {
+    "description": "Generate test data button"
+  },
+  "testDataDescription": "For demonstration purposes, you can generate sample data to see how the statistics look.",
+  "@testDataDescription": {
+    "description": "Test data description text"
+  },
+  "errorLoadingData": "Error loading data",
+  "@errorLoadingData": {
+    "description": "Error message when data loading fails"
+  },
+  "tryAgain": "Try Again",
+  "@tryAgain": {
+    "description": "Try again button text"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button tooltip"
+  },
+  "realData": "Real Data",
+  "@realData": {
+    "description": "Real data button text"
+  },
+  "noWeightDataAvailable": "No weight data available",
+  "@noWeightDataAvailable": {
+    "description": "Message when no weight data is available"
+  },
+  "noBmiDataAvailable": "No BMI data available",
+  "@noBmiDataAvailable": {
+    "description": "Message when no BMI data is available"
+  },
+  "cannotCalculateBmiFromData": "Cannot calculate BMI from available data",
+  "@cannotCalculateBmiFromData": {
+    "description": "Message when BMI cannot be calculated from available data"
+  },
+  "noBodyFatDataAvailable": "No body fat data available",
+  "@noBodyFatDataAvailable": {
+    "description": "Message when no body fat data is available"
+  },
+  "noCalorieDataAvailable": "No calorie data available",
+  "@noCalorieDataAvailable": {
+    "description": "Message when no calorie data is available"
+  },
+  "bmiUnderweight": "Underweight",
+  "@bmiUnderweight": {
+    "description": "BMI category: Underweight"
+  },
+  "bmiNormal": "Normal",
+  "@bmiNormal": {
+    "description": "BMI category: Normal"
+  },
+  "bmiOverweight": "Overweight",
+  "@bmiOverweight": {
+    "description": "BMI category: Overweight"
+  },
+  "bmiObese": "Obese",
+  "@bmiObese": {
+    "description": "BMI category: Obese"
+  },
+  "healthDataIntegration": "Health Data Integration",
+  "@healthDataIntegration": {
+    "description": "Health data integration title"
+  },
+  "healthDataCoverage": "Calorie expenditure data coverage: {coverage}% ({healthDataDays}/{totalDays} days)",
+  "@healthDataCoverage": {
+    "description": "Health data coverage information",
+    "placeholders": {
+      "coverage": {
+        "type": "String"
+      },
+      "healthDataDays": {
+        "type": "String"
+      },
+      "totalDays": {
+        "type": "String"
+      }
+    }
+  },
+  "healthDataActive": "Using your health app data to provide more accurate deficit/surplus analysis.",
+  "@healthDataActive": {
+    "description": "Health data active message"
+  },
+  "healthDataInactive": "Enable health data sync in Profile Settings for more accurate analysis.",
+  "@healthDataInactive": {
+    "description": "Health data inactive message"
+  },
+  "calorieBalanceTitle": "Calorie Balance (Intake vs Expenditure)",
+  "@calorieBalanceTitle": {
+    "description": "Calorie balance chart title with health data"
+  },
+  "calorieBalanceTip": "Track your actual calorie balance using health data. Green = maintenance, Blue = deficit, Orange = surplus.",
+  "@calorieBalanceTip": {
+    "description": "Calorie balance tooltip with health data"
+  },
+  "estimatedBalance": "Estimated Balance",
+  "@estimatedBalance": {
+    "description": "Estimated balance label"
+  },
+  "actualBalance": "Actual Balance",
+  "@actualBalance": {
+    "description": "Actual balance label"
+  },
+  "vsExpenditure": "vs expenditure",
+  "@vsExpenditure": {
+    "description": "vs expenditure text"
+  },
+  "healthDataAlert": "Health Data Alert: {days} day(s) with very large calorie deficits (>1000 cal) based on actual expenditure.",
+  "@healthDataAlert": {
+    "description": "Health data alert message",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "inconsistentDeficitWarning": "Warning: Your calorie deficit varies significantly day-to-day (variance: {variance} cal). Consider more consistent intake.",
+  "@inconsistentDeficitWarning": {
+    "description": "Inconsistent deficit warning message",
+    "placeholders": {
+      "variance": {
+        "type": "String"
+      }
+    }
+  },
+  "veryLowCalorieWarning": "Warning: {days} day(s) with extremely low calorie intake (<1000 cal). This may be unhealthy.",
+  "@veryLowCalorieWarning": {
+    "description": "Very low calorie warning message",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "veryHighCalorieNotice": "Notice: {days} day(s) with very high calorie intake (>1000 cal above maintenance).",
+  "@veryHighCalorieNotice": {
+    "description": "Very high calorie notice message",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "extremeDeficitWarning": "Warning: Frequent extreme calorie deficits may slow metabolism and cause muscle loss.",
+  "@extremeDeficitWarning": {
+    "description": "Extreme deficit warning message"
+  },
+  "maintenanceLabel": "Maintenance",
+  "@maintenanceLabel": {
+    "description": "Maintenance label for chart"
   },
   "profileSettings": "Profile Settings",
   "@profileSettings": {
@@ -2197,9 +2367,106 @@
   "unsavedChanges": "Unsaved Changes",
   "@unsavedChanges": {
     "description": "Title for unsaved changes dialog"
-  },
-  "unsavedChangesMessage": "You have unsaved changes. Do you want to save them before leaving?",
+  },  "unsavedChangesMessage": "You have unsaved changes. Do you want to save them before leaving?",
   "@unsavedChangesMessage": {
     "description": "Message in unsaved changes dialog"
-  }
+  },
+  "healthDataTitle": "Health Data",
+  "@healthDataTitle": {
+    "description": "Title for health data info dialog"
+  },
+  "healthDataTodayPartial": "Health Data (Today - Partial)",
+  "@healthDataTodayPartial": {
+    "description": "Title for health data info dialog when viewing today's partial data"
+  },
+  "estimatedCaloriesToday": "Estimated Calories (Today)",
+  "@estimatedCaloriesToday": {
+    "description": "Title for estimated calories info dialog for today"
+  },
+  "estimatedCalories": "Estimated Calories",
+  "@estimatedCalories": {
+    "description": "Title for estimated calories info dialog"
+  },
+  "healthDataMessage": "This data was gathered from health data on your phone, providing accurate calories burned information from your fitness activities for this complete day.",
+  "@healthDataMessage": {
+    "description": "Message explaining health data source for complete days"
+  },
+  "healthDataTodayMessage": "This data was gathered from health data on your phone. Since today isn't complete yet, this represents calories burned so far today. Your total may increase as you continue activities throughout the day.",
+  "@healthDataTodayMessage": {
+    "description": "Message explaining health data source for today's partial data"
+  },
+  "estimatedCaloriesTodayMessage": "This is your estimated calorie expenditure for today based on your activity level. Since the day isn't complete yet, this represents your base metabolic rate plus estimated activity. Your actual calories burned may be higher if you do more activities today.",
+  "@estimatedCaloriesTodayMessage": {
+    "description": "Message explaining estimated calories for today"
+  },  "estimatedCaloriesMessage": "This data is estimated based on your profile settings and activity level since health data wasn't available for this date.",
+  "@estimatedCaloriesMessage": {
+    "description": "Message explaining estimated calories for past dates"
+  },
+  "analyzeTargets": "Analyze Targets",
+  "@analyzeTargets": {
+    "description": "Button text to analyze calorie targets"
+  },
+  "debugHealthData": "Debug Health Data",
+  "@debugHealthData": {
+    "description": "Button text for debugging health data"
+  },
+  "disconnectHealth": "Disconnect Health",
+  "@disconnectHealth": {
+    "description": "Button text to disconnect from health services"
+  },
+  "calorieTargetAnalysis": "Calorie Target Analysis",
+  "@calorieTargetAnalysis": {
+    "description": "Title for calorie target analysis dialog"
+  },
+  "daysAnalyzed": "Days Analyzed",
+  "@daysAnalyzed": {
+    "description": "Label for number of days analyzed"
+  },
+  "currentTarget": "Current Target",
+  "@currentTarget": {
+    "description": "Label for current calorie target"
+  },
+  "averageExpenditure": "Average Expenditure",
+  "@averageExpenditure": {
+    "description": "Label for average calorie expenditure"
+  },
+  "suggestedTarget": "Suggested Target",
+  "@suggestedTarget": {
+    "description": "Label for suggested calorie target"
+  },
+  "applySuggestion": "Apply Suggestion",
+  "@applySuggestion": {
+    "description": "Button text to apply suggested calorie target"
+  },
+  "calorieTargetsUpdated": "Calorie targets updated successfully!",
+  "@calorieTargetsUpdated": {
+    "description": "Success message for calorie target updates"
+  },
+  "failedToUpdateTargets": "Failed to update calorie targets",
+  "@failedToUpdateTargets": {
+    "description": "Error message for failed calorie target updates"
+  },
+  "healthPermissionDenied": "Health Permission Denied",
+  "@healthPermissionDenied": {
+    "description": "Health permission denied dialog title"
+  },
+  "healthPermissionDeniedMessage": "To sync your health data, PlatePal needs access to your health information. You can grant permissions in your phone's settings.",
+  "@healthPermissionDeniedMessage": {
+    "description": "Health permission denied dialog message"
+  },
+  "healthNotAvailable": "Health Data Not Available",
+  "@healthNotAvailable": {
+    "description": "Health data not available dialog title"
+  },
+  "healthNotAvailableMessage": "Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.",
+  "@healthNotAvailableMessage": {
+    "description": "Health data not available dialog message"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
+  },
+  "loadMore": "Loard more",
+  "localDishes": "Local Dishes",
+  "localIngredients": "Local ingredients"
 }

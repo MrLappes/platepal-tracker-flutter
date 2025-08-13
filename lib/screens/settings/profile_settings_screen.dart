@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 import '../../models/user_profile.dart';
 import '../../utils/service_extensions.dart';
 import '../../services/health_service.dart';
+import '../../services/calorie_expenditure_service.dart';
 import '../../services/user_session_service.dart';
 import 'macro_customization_screen.dart';
 
@@ -39,6 +41,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   final HealthService _healthService = HealthService();
   bool _isHealthAvailable = false;
   bool _isHealthSyncing = false;
+  StreamSubscription<bool>? _healthConnectionSubscription;
+
+  // Add the calorie expenditure service
+  final CalorieExpenditureService _calorieExpenditureService =
+      CalorieExpenditureService();
 
   // Activity levels with their descriptions
   final Map<String, String> _activityLevels = {
@@ -72,6 +79,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     _weightController.dispose();
     _targetWeightController.dispose();
     _bodyFatController.dispose();
+    _healthConnectionSubscription?.cancel();
     super.dispose();
   }
 
@@ -202,6 +210,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     setState(() {
       _isHealthAvailable = available;
     });
+
+    // Subscribe to health connection status changes
+    _healthConnectionSubscription = _healthService.connectionStatusStream
+        .listen((isConnected) {
+          setState(() {
+            // Update health availability when connection status changes
+          });
+        });
   } // Connect to health data
 
   Future<void> _connectToHealth() async {
@@ -853,10 +869,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             const SizedBox(height: 24), // Preferences Section
             _buildSectionHeader(localizations?.preferences ?? 'Preferences'),
             _buildPreferencesCard(localizations),
-            const SizedBox(height: 24),
-
-            // Health Data Sync Section (if available)
-            if (_isHealthAvailable) ...[
+            const SizedBox(
+              height: 24,
+            ), // Health Data Sync Section (only show when health is available AND connected)
+            if (_isHealthAvailable && _healthService.isConnected) ...[
+              _buildSectionHeader(
+                localizations?.healthDataSync ?? 'Health Data Sync',
+              ),
+              _buildHealthSyncCard(localizations),
+              const SizedBox(height: 24),
+            ] else if (_isHealthAvailable) ...[
+              // Show connection option when available but not connected
               _buildSectionHeader(
                 localizations?.healthDataSync ?? 'Health Data Sync',
               ),
@@ -1167,65 +1190,101 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                if (!_healthService.isConnected) ...[
+            if (!_healthService.isConnected) ...[
+              // Connect to Health button for disconnected state
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isHealthSyncing ? null : _connectToHealth,
+                  icon:
+                      _isHealthSyncing
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.add_link),
+                  label: Text(
+                    localizations?.connectToHealth ?? 'Connect to Health',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ] else ...[
+              // Full-width buttons for connected state
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isHealthSyncing ? null : _syncHealthData,
+                  icon:
+                      _isHealthSyncing
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.sync),
+                  label: Text(
+                    localizations?.syncHealthData ?? 'Sync Health Data',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isHealthSyncing ? null : _analyzeCalorieTargets,
+                  icon: const Icon(Icons.analytics),
+                  label: Text(
+                    localizations?.analyzeTargets ?? 'Analyze Targets',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Icon buttons in horizontal row
+              Row(
+                children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _isHealthSyncing ? null : _connectToHealth,
-                      icon:
-                          _isHealthSyncing
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.add_link),
+                    child: OutlinedButton.icon(
+                      onPressed: _isHealthSyncing ? null : _debugHealthData,
+                      icon: const Icon(Icons.bug_report),
                       label: Text(
-                        localizations?.connectToHealth ?? 'Connect to Health',
+                        localizations?.debugHealthData ?? 'Debug Health Data',
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
                   ),
-                ] else ...[
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _isHealthSyncing ? null : _syncHealthData,
-                      icon:
+                    child: OutlinedButton.icon(
+                      onPressed:
                           _isHealthSyncing
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.sync),
+                              ? null
+                              : () async {
+                                await _healthService.disconnectFromHealth();
+                                setState(() {});
+                              },
+                      icon: const Icon(Icons.link_off),
                       label: Text(
-                        localizations?.syncHealthData ?? 'Sync Health Data',
+                        localizations?.disconnectHealth ?? 'Disconnect Health',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  OutlinedButton(
-                    onPressed:
-                        _isHealthSyncing
-                            ? null
-                            : () async {
-                              await _healthService.disconnectFromHealth();
-                              setState(() {});
-                            },
-                    child: const Icon(Icons.link_off),
                   ),
                 ],
-              ],
-            ),
+              ),
+            ],
             if (!_healthService.isConnected) ...[
               const SizedBox(height: 12),
               Container(
@@ -1760,6 +1819,265 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           ),
         );
       }
+    }
+  }
+
+  // Analyze calorie targets and show recommendations
+  Future<void> _analyzeCalorieTargets() async {
+    setState(() => _isHealthSyncing = true);
+
+    try {
+      final analysis = await _calorieExpenditureService.syncAndAnalyze();
+
+      if (mounted) {
+        await _showCalorieAnalysisDialog(analysis);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error analyzing calorie targets: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isHealthSyncing = false);
+    }
+  }
+
+  // Show calorie analysis dialog
+  Future<void> _showCalorieAnalysisDialog(
+    CalorieTargetAnalysis analysis,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    return showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  Icons.analytics,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text('Calorie Target Analysis'),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    analysis.analysisMessage,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Analysis details
+                  if (analysis.daysAnalyzed > 0) ...[
+                    _buildAnalysisRow(
+                      'Days Analyzed',
+                      '${analysis.daysAnalyzed}',
+                    ),
+                    _buildAnalysisRow(
+                      'Current Target',
+                      '${analysis.currentTarget.toStringAsFixed(0)} cal',
+                    ),
+                    _buildAnalysisRow(
+                      'Average Expenditure',
+                      '${analysis.averageExpenditure.toStringAsFixed(0)} cal',
+                    ),
+
+                    if (analysis.needsAdjustment) ...[
+                      const SizedBox(height: 8),
+                      _buildAnalysisRow(
+                        'Suggested Target',
+                        '${analysis.suggestedTarget.toStringAsFixed(0)} cal',
+                        isHighlighted: true,
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.cancel),
+              ),
+              if (analysis.needsAdjustment)
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await _applyCalorieTargetAdjustment(
+                      analysis.suggestedTarget,
+                    );
+                  },
+                  child: Text('Apply Suggestion'),
+                ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildAnalysisRow(
+    String label,
+    String value, {
+    bool isHighlighted = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color:
+                  isHighlighted ? Theme.of(context).colorScheme.primary : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Apply calorie target adjustment
+  Future<void> _applyCalorieTargetAdjustment(double newTarget) async {
+    setState(() => _isSaving = true);
+
+    try {
+      final success = await _calorieExpenditureService.updateCalorieTargets(
+        newTarget,
+      );
+
+      if (success && mounted) {
+        // Reload the profile to reflect changes
+        await _loadProfile();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Calorie targets updated successfully!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update calorie targets'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating calorie targets: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isSaving = false);
+    }
+  }
+
+  // Debug health data (temporary method for testing)
+  Future<void> _debugHealthData() async {
+    if (!_healthService.isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Health service not connected'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isHealthSyncing = true);
+
+    try {
+      final debugInfo = await _healthService.debugAvailableHealthData();
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Health Data Debug Info'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Available Data Types:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ...debugInfo['available_types'].entries.map(
+                        (e) => Text('${e.key}: ${e.value}'),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Permissions:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ...debugInfo['permissions'].entries.map(
+                        (e) => Text('${e.key}: ${e.value}'),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Recent Data:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ...debugInfo['recent_data'].entries.map(
+                        (e) => Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${e.key}:'),
+                            Text('  ${e.value}'),
+                            const SizedBox(height: 4),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Debug failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isHealthSyncing = false);
     }
   }
 }
