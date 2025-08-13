@@ -74,6 +74,7 @@ class ResponseGenerationStep extends AgentStep {
         responseIssues: responseIssues?.cast<String>(),
         isRetryAttempt: isRetryAttempt,
         thinkingResult: input.thinkingResult,
+        input: input,
       );
       debugPrint('🤖 ResponseGenerationStep: Sending request to OpenAI');
       debugPrint(
@@ -290,11 +291,43 @@ class ResponseGenerationStep extends AgentStep {
     List<String>? responseIssues,
     bool isRetryAttempt = false,
     ThinkingStepResponse? thinkingResult,
+    required ChatStepInput input,
   }) async {
     final messages = <Map<String, dynamic>>[];
 
-    // Always start with baseChatPrompt, then append any additional systemPrompt and contextSummary
-    String fullSystemPrompt = SystemPrompts.baseChatPrompt;
+    // Build the enhanced system prompt based on thinking step requirements
+    final thinkingResult = input.thinkingResult;
+    final needsExistingDishes =
+        thinkingResult?.contextRequirements.needsExistingDishes ?? false;
+    final needsInfoOnDishCreation =
+        thinkingResult?.contextRequirements.needsInfoOnDishCreation ?? false;
+
+    // Build prompt with all required sections
+    String fullSystemPrompt = SystemPrompts.buildEnhancedPrompt(
+      botPersonality: input.metadata?['botPersonality'] as String?,
+      needsExistingDishes: needsExistingDishes,
+      needsInfoOnDishCreation: needsInfoOnDishCreation,
+      contextSections: {if (contextSummary != null) 'Context': contextSummary},
+    );
+
+    // Add verification summary if available
+    final isDeepValidationEnabled = input.metadata?['deepValidation'] == true;
+    final wasVerificationSkipped = input.metadata?['skipVerification'] == true;
+
+    if (isDeepValidationEnabled && !wasVerificationSkipped) {
+      final verificationSummary =
+          input.metadata?['modificationSummary'] as String?;
+
+      if (verificationSummary != null) {
+        fullSystemPrompt += SystemPrompts.verificationSummaryTemplate
+            .replaceAll('{verificationSummary}', verificationSummary);
+        debugPrint(
+          "🤖 ResponseGenerationStep: Added verification summary to system prompt: $verificationSummary",
+        );
+      }
+    }
+
+    // Add additional system prompt
     if (systemPrompt.isNotEmpty) {
       fullSystemPrompt += '\n$systemPrompt';
     }
@@ -302,56 +335,21 @@ class ResponseGenerationStep extends AgentStep {
       fullSystemPrompt += '\n\n[Context Information]\n${contextSummary.trim()}';
     }
 
-    // Add dish creation clarity guidance ONLY if dish creation is explicitly authorized
-    if (thinkingResult != null &&
-        (thinkingResult.contextRequirements.needsInfoOnDishCreation ||
-            thinkingResult.responseRequirements.any(
-              (req) =>
-                  req.contains('dish_creation') ||
-                  req.contains('create_dish') ||
-                  req.contains('new_dish'),
-            ))) {
-      fullSystemPrompt += '''
-
-[SPECIAL GUIDANCE FOR UNCLEAR DISH REQUESTS]
-If the user's dish creation request lacks specific details (unclear ingredients, cooking method, etc.):
-- ALWAYS create a reasonable dish anyway based on your best interpretation
-- Include all required fields with accurate nutritional information
-- In your replyText, acknowledge the uncertainty politely and ask for specific clarification
-- Example: "I've created a [dish type] based on your request! However, I'd love to personalize it further. Could you tell me more about [specific aspect like preferred ingredients, cooking style, dietary preferences]? Feel free to modify the dish below to match your preferences."
-- DO NOT refuse to create a dish - always provide a helpful starting point
-''';
-    } else {
-      // If dish creation is NOT authorized, add guidance to prevent dish creation
-      fullSystemPrompt += '''
-
-[IMPORTANT - NO DISH CREATION AUTHORIZED]
-For this request, you should NOT create new dishes. Instead:
-- Focus on providing information, suggestions, or referencing existing dishes
-- If the user asks for recipes, provide general guidance or reference existing dishes
-- If the user asks for nutrition information, provide educational content
-- Only include dishes in your response if they are existing dishes with proper IDs from the context
-- Do NOT create new dish objects unless explicitly authorized by the thinking step
-''';
-    }
-
     // Add verification feedback if this is a retry attempt
     if (isRetryAttempt &&
         (missingRequirements?.isNotEmpty == true ||
             responseIssues?.isNotEmpty == true)) {
-      fullSystemPrompt += '\n\n[IMPORTANT - RETRY INSTRUCTIONS]';
-      fullSystemPrompt +=
-          '\nThis is a retry attempt. The previous response had issues that need to be corrected:';
+      fullSystemPrompt += '\n\n${SystemPrompts.retryInstructionsTemplate}';
 
       if (missingRequirements?.isNotEmpty == true) {
-        fullSystemPrompt += '\n\nMISSING REQUIREMENTS (must include):';
+        fullSystemPrompt += '\n\n${SystemPrompts.missingRequirementsTemplate}';
         for (final requirement in missingRequirements!) {
           fullSystemPrompt += '\n- $requirement';
         }
       }
 
       if (responseIssues?.isNotEmpty == true) {
-        fullSystemPrompt += '\n\nPREVIOUS RESPONSE ISSUES (avoid these):';
+        fullSystemPrompt += '\n\n${SystemPrompts.responseIssuesTemplate}';
         for (final issue in responseIssues!) {
           fullSystemPrompt += '\n- $issue';
         }

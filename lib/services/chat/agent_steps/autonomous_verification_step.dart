@@ -4,6 +4,7 @@ import '../../../models/chat_types.dart';
 import '../openai_service.dart';
 import '../verification_types.dart';
 import '../pipeline_modification_tracker.dart';
+import '../system_prompts.dart';
 
 class AutonomousVerificationStep extends AgentStep {
   final PipelineModificationTracker _modificationTracker =
@@ -270,170 +271,48 @@ $pipelineHistorySummary
 '''
             : '';
 
-    return '''
-You are an expert validator evaluating whether the gathered context is sufficient for response generation.
-
-USER REQUEST: "$userMessage"
-
-$loopWarning
-
-THINKING STEP ANALYSIS AND INSTRUCTIONS:
-$thinkingInstructions
-
-EXECUTED STEPS AND GATHERED CONTEXT:
-$stepSummary
-
-AVAILABLE DISHES FROM DATABASE:
-$availableDishesText
-
-=== PIPELINE STEP CAPABILITIES ===
-
-1. THINKING STEP (COMPLETED):
-   - Analyzes user intent and determines response strategy
-   - Identifies what context is needed (user profile, dishes, nutrition data)
-   - Sets response requirements (recipe suggestions, dish creation, nutrition advice)
-   - CANNOT gather actual data - only plans what to gather
-
-2. CONTEXT GATHERING STEP (COMPLETED):
-   - Retrieves user profile, existing dishes, nutrition data based on thinking requirements
-   - Searches existing dishes in database for matches
-   - Gathers historical meal data if needed
-   - LIMITATION: Can only find dishes that exist in database - no dish creation capability
-   - IMPORTANT: If no suitable dishes found, this is NOT a failure - it's information
-
-3. RESPONSE GENERATION STEP (NEXT):
-   - Creates conversational response text
-   - ALWAYS HAS DISH CREATION CAPABILITY - can create new dish objects from scratch
-   - Receives all gathered context and thinking requirements
-   - Decides whether to reference existing dishes or create new ones
-   - CAPABILITY: Can create entirely new dishes with ingredients, nutrition, and instructions
-   - IMPORTANT: If no existing dishes match the request, this step will create them
-
-4. DISH PROCESSING STEP (AFTER RESPONSE):
-   - Validates and processes any dishes created by response generation
-   - Calculates nutrition values and validates ingredients
-   - CANNOT create dishes - only processes what response generation created
-
-=== DECISION LOGIC ===
-
-The verification decision should prioritize helping the user with their specific request.
-
-✅ CONTINUE NORMALLY if response generation can create a meaningful, helpful answer:
-- User asks for specific dish AND (relevant dishes found OR ALWAYS - dish creation enabled) → CONTINUE
-- User asks for dish browsing AND relevant dishes available → CONTINUE  
-- User asks for nutrition advice AND nutrition context gathered → CONTINUE
-- User asks for "my dishes" AND (user dishes found OR confirmed user has none) → CONTINUE
-- User asks for specific recipe → ALWAYS CONTINUE (response generation can create from scratch)
-- ${isLikelyInLoop ? 'ESPECIALLY if loop detected - break the cycle by proceeding with available context' : 'Available context enables quality response generation'}
-
-CONTINUE examples:
-- "Schnitzel mit Pommes" + schnitzel dishes found → CONTINUE
-- "Schnitzel mit Pommes" + no dishes found → CONTINUE (response generation will create)
-- "Bananenbrot recipe" + no banana bread dishes → CONTINUE (will create new recipe)
-- "healthy pasta" + healthy pasta dishes found → CONTINUE
-- "breakfast ideas" + breakfast dishes available → CONTINUE
-- "nutrition tips" + nutrition advice context → CONTINUE
-
-❌ RETRY WITH ADDITIONS if available dishes are irrelevant but better ones likely exist:
-- User asks for specific dish type BUT found dishes are wrong cuisine/category
-- Context search was too broad/narrow and missed relevant dishes
-- ${isLikelyInLoop ? 'BUT AVOID if loop detected - prefer to continue with available context' : 'More targeted search could find relevant dishes'}
-
-RETRY examples:
-- "Schnitzel mit Pommes" + only pasta/salad dishes found (wrong type) → RETRY
-- "healthy breakfast" + only dinner/dessert dishes found → RETRY  
-- "vegetarian pasta" + only meat-based dishes found → RETRY
-- "my dishes" + search failed when user likely has dishes → RETRY
-
-❌ RESTART FRESH if thinking step fundamentally misunderstood the request:
-- User asks for dishes BUT only advice gathered → RESTART
-- User asks for advice BUT only dishes gathered → RESTART  
-- User asks for very specific non-food request (like "weather") → RESTART
-- ${isLikelyInLoop ? 'RARELY use - prefer CONTINUE to break loops' : 'Thinking step categorized request completely wrong'}
-- NOTE: Missing dishes for recipe requests is NOT a restart reason - response generation handles this
-
-RESTART examples:
-- "nutrition advice" + only dishes gathered → RESTART
-- "show my dishes" + only nutrition advice gathered → RESTART
-- "what's the weather" + food context gathered → RESTART
-- NOTE: "Bananenbrot recipe" + no dishes found → CONTINUE (not restart!)
-
-=== CONTEXT ANALYSIS FOR: "$userMessage" ===
-
-1. WHAT EXACTLY does the user want?
-   - Specific dish/recipe? General browsing? Nutrition advice?
-
-2. WHAT CONTEXT do we have?
-   - Relevant dishes that match the request?
-   - Dish creation capability if needed?
-   - Nutrition advice if requested?
-
-3. DISH RELEVANCE CHECK:
-   - Check dish names/descriptions in the gathered context
-   - For "Schnitzel": Look for "schnitzel", "cutlet", or similar
-   - For "Pizza": Look for "pizza" in names
-   - For "Pasta": Look for "pasta", "noodles", "spaghetti"
-   - For cuisine requests: Check if dishes match that cuisine
-   - For meal types: Check if dishes match breakfast/lunch/dinner
-
-4. THINKING STEP VALIDATION:
-   - Did thinking step correctly identify user intent?
-   - Were appropriate context types enabled?
-   - NOTE: If user wants specific recipe and no dishes found → This is NORMAL, continue to let response generation create the recipe
-
-5. CAN RESPONSE GENERATION SUCCEED?
-   - Will it have enough relevant information?
-   - Can it provide specific, helpful content?
-   - Better to continue with partial context than loop endlessly
-
-=== CRITICAL UNDERSTANDING ===
-
-${isLikelyInLoop ? '''
+    final loopPreventionSection =
+        isLikelyInLoop
+            ? '''
 🔄 LOOP PREVENTION PRIORITY:
 - Break the cycle by continuing with available context
 - Accept that some context may be missing rather than retrying endlessly
 - Response generation can work with imperfect context
 - Better to provide a reasonable answer than get stuck in loops
 
-''' : ''}
+'''
+            : '';
 
-KEY PRINCIPLES:
-- Missing dishes for specific requests → NORMAL - response generation will create them
-- Irrelevant dishes → Try better search terms (retry with additions)  
-- Missing context altogether → Normal, response generation will explain/create
-- Always prioritize helping the user over perfect context
-- Response generation ALWAYS has dish creation capability - no need to enable it
-
-Respond with JSON:
-{
-  "decision": "continueNormally|retryWithAdditions|restartFresh",
-  "confidence": 0.0-1.0,
-  "reasoning": "Detailed explanation focusing on whether response generation can succeed with available context${isLikelyInLoop ? ' AND considering loop prevention' : ''}",
-  "contextGaps": ["missing", "information"],
-  "summary": "Instructions for next attempt if restart needed",
-  "additionalContext": ["context", "to", "gather"]
-}
-''';
+    return SystemPrompts.autonomousVerificationTemplate
+        .replaceAll('{userMessage}', userMessage)
+        .replaceAll('{loopWarning}', loopWarning)
+        .replaceAll('{thinkingInstructions}', thinkingInstructions)
+        .replaceAll('{stepSummary}', stepSummary)
+        .replaceAll('{availableDishesText}', availableDishesText)
+        .replaceAll(
+          '{loopDetectedClause}',
+          isLikelyInLoop
+              ? 'ESPECIALLY if loop detected - break the cycle by proceeding with available context'
+              : 'Available context enables quality response generation',
+        )
+        .replaceAll(
+          '{retryLoopClause}',
+          isLikelyInLoop
+              ? 'BUT AVOID if loop detected - prefer to continue with available context'
+              : 'More targeted search could find relevant dishes',
+        )
+        .replaceAll(
+          '{restartLoopClause}',
+          isLikelyInLoop
+              ? 'RARELY use - prefer CONTINUE to break loops'
+              : 'Thinking step categorized request completely wrong',
+        )
+        .replaceAll('{loopPreventionSection}', loopPreventionSection)
+        .replaceAll(
+          '{loopReasoningClause}',
+          isLikelyInLoop ? ' AND considering loop prevention' : '',
+        );
   }
-
-  /// Build prompt for post-response verification [DEPRECATED - REMOVED]
-  /* 
-  String _buildPostResponsePrompt(...) {
-    // This method has been deprecated and removed from the pipeline
-    // Use DishValidationStep for dish-specific validation instead
-    return '';
-  }
-  */
-
-  /*
-  // COMMENTED OUT ORPHANED CODE FROM REMOVED POST-RESPONSE VERIFICATION METHOD
-  */
-
-  /*
-  // ORPHANED CODE FROM REMOVED POST-RESPONSE VERIFICATION - COMMENTED OUT
-  // This entire large block of code was part of the removed post-response verification
-  // and has been commented out as it's no longer used
-  */
 
   /// Extract thinking result from step results if not directly available
   ThinkingStepResponse? _extractThinkingResultFromStepResults(

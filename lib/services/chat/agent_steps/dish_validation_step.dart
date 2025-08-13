@@ -4,6 +4,7 @@ import '../../../models/chat_types.dart';
 import '../../../models/dish_models.dart';
 import '../openai_service.dart';
 import '../pipeline_modification_tracker.dart';
+import '../system_prompts.dart';
 
 /// Validates and edits newly created dishes with AI-powered corrections
 /// Skips validation for dishes retrieved from database by ID
@@ -266,54 +267,25 @@ class DishValidationStep extends AgentStep {
 
   /// Builds validation prompt for AI
   String _buildValidationPrompt(ProcessedDish dish, ChatStepInput input) {
-    return '''
-You are a nutrition expert validating a newly created dish. Analyze the dish and provide corrections if needed.
+    final ingredientsList = dish.ingredients
+        .map(
+          (ing) =>
+              '- ${ing.name}: ${ing.amount} ${ing.unit} (${ing.nutrition?.calories ?? 0} cal/100g)',
+        )
+        .join('\n');
 
-DISH TO VALIDATE:
-Name: ${dish.name}
-Description: ${dish.description ?? 'None'}
-Servings: ${dish.servings}
-Meal Type: ${dish.mealType?.name ?? 'Not specified'}
-
-INGREDIENTS (${dish.ingredients.length}):
-${dish.ingredients.map((ing) => '- ${ing.name}: ${ing.amount} ${ing.unit} (${ing.nutrition?.calories ?? 0} cal/100g)').join('\n')}
-
-TOTAL NUTRITION:
-- Calories: ${dish.totalNutrition.calories}
-- Protein: ${dish.totalNutrition.protein}g
-- Carbs: ${dish.totalNutrition.carbs}g  
-- Fat: ${dish.totalNutrition.fat}g
-- Fiber: ${dish.totalNutrition.fiber}g
-
-VALIDATION CRITERIA:
-1. Name should be clear and appetizing
-2. Nutrition values should be reasonable for the ingredients and serving size
-3. Ingredients should have realistic amounts and units
-4. Total calories should roughly match macronutrient breakdown: (protein*4 + carbs*4 + fat*9)
-5. Serving size should be realistic (typically 1-8 servings)
-
-INSTRUCTIONS:
-- If the dish is valid, respond with needsEdits: false
-- If edits are needed, provide specific corrections
-- Only suggest edits for actual errors, not preferences
-- Be conservative - only fix clear mistakes
-
-Respond in JSON format:
-{
-  "needsEdits": boolean,
-  "confidence": 0.0-1.0,
-  "reasoning": "explanation of validation",
-  "edits": [
-    {
-      "field": "name|description|servings|ingredients|nutrition",
-      "action": "update|fix",
-      "currentValue": "current value",
-      "newValue": "corrected value",
-      "reason": "why this edit is needed"
-    }
-  ]
-}
-''';
+    return SystemPrompts.dishValidationTemplate
+        .replaceAll('{name}', dish.name)
+        .replaceAll('{description}', dish.description ?? 'None')
+        .replaceAll('{servings}', dish.servings.toString())
+        .replaceAll('{mealType}', dish.mealType?.name ?? 'Not specified')
+        .replaceAll('{ingredientCount}', dish.ingredients.length.toString())
+        .replaceAll('{ingredients}', ingredientsList)
+        .replaceAll('{calories}', dish.totalNutrition.calories.toString())
+        .replaceAll('{protein}', dish.totalNutrition.protein.toString())
+        .replaceAll('{carbs}', dish.totalNutrition.carbs.toString())
+        .replaceAll('{fat}', dish.totalNutrition.fat.toString())
+        .replaceAll('{fiber}', dish.totalNutrition.fiber.toString());
   }
 
   /// Applies edits to create a corrected dish

@@ -8,6 +8,7 @@ import '../../repositories/dish_repository.dart';
 import '../../repositories/meal_repository.dart';
 import '../../repositories/user_profile_repository.dart';
 import 'openai_service.dart';
+import 'system_prompts.dart';
 import '../storage/dish_service.dart';
 import 'agent_steps/thinking_step.dart';
 import 'agent_steps/context_gathering_step.dart';
@@ -208,6 +209,13 @@ class ChatAgentService {
       );
     }
 
+    // Get bot personality prompt based on config
+    final botPersonality =
+        SystemPrompts.getBotPersonalityPrompt(
+          'PlatePal',
+          botConfig.type,
+        )['prefix'];
+
     // Prepare initial input for agent pipeline
     var currentInput = ChatStepInput(
       userMessage: userMessage,
@@ -218,6 +226,7 @@ class ChatAgentService {
         'startTime': startTime.toIso8601String(),
         'deepSearchEnabled': _deepSearchEnabled,
         'botConfig': botConfig.toJson(),
+        'botPersonality': botPersonality,
         'totalStepsExecuted': totalStepsExecuted,
         'restartCount': restartCount,
         'enhancedContext': enhancedContext,
@@ -356,6 +365,16 @@ class ChatAgentService {
           final additionalContext =
               verificationResult.data?['additionalContext'] as List?;
 
+          // Add verification summary to metadata for response generation
+          currentInput = currentInput.copyWith(
+            metadata: {
+              ...currentInput.metadata!,
+              'deepValidation': true,
+              'modificationSummary':
+                  verificationResult.data?['reasoning'] ??
+                  'No verification summary available.',
+            },
+          );
           debugPrint('🔍 Verification decision: $decision');
           debugPrint('🔍 Verification reasoning: $reasoning');
 

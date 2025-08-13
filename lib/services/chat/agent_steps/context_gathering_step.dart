@@ -1,3 +1,5 @@
+import 'package:platepal_tracker/services/chat/system_prompts.dart';
+
 import '../../../models/chat_types.dart';
 import '../../../repositories/dish_repository.dart';
 import '../../../repositories/meal_repository.dart';
@@ -290,13 +292,13 @@ class ContextGatheringStep extends AgentStep {
             'General nutrition advice may be relevant to this user request.';
         debugPrint('📊 Added nutrition advice placeholder to context');
       }
-      // Construct the enhanced system prompt
-      final initialPrompt = input.initialSystemPrompt ?? '';
-      final enhancedSystemPromptBuffer = StringBuffer(initialPrompt);
-      contextSections.forEach((section, content) {
-        enhancedSystemPromptBuffer.writeln('\n---\n### $section\n$content');
-      });
-      final enhancedSystemPrompt = enhancedSystemPromptBuffer.toString();
+      // Build enhanced system prompt with all context sections
+      final enhancedSystemPrompt = SystemPrompts.buildEnhancedPrompt(
+        botPersonality: input.metadata?['botPersonality'] as String?,
+        needsExistingDishes: contextRequirements.needsExistingDishes,
+        needsInfoOnDishCreation: contextRequirements.needsInfoOnDishCreation,
+        contextSections: contextSections,
+      );
       final response = ContextGatheringStepResponse(
         enhancedSystemPrompt: enhancedSystemPrompt,
         gatheredContextData: gatheredContextData,
@@ -459,44 +461,6 @@ class ContextGatheringStep extends AgentStep {
   }
 
   String _getDishCreationInfo() {
-    return '''
-When creating a new dish in response to a user query, follow these guidelines:
-
-1. Structure:
-   - Provide a complete dish name
-   - List all ingredients with quantities
-   - Include detailed nutritional information (calories, protein, carbs, fat, etc.)
-   - Include preparation steps
-   - Suggest variations when appropriate
-
-2. Response Format:
-   When creating dishes, respond with JSON that includes a "dishes" array with objects containing:
-   {
-     "name": "Dish Name",
-     "ingredients": [
-       {"name": "Ingredient 1", "quantity": "100g"},
-       {"name": "Ingredient 2", "quantity": "2 tbsp"}
-     ],
-     "nutritionFacts": {
-       "calories": 350,
-       "protein": 25,
-       "carbs": 30,
-       "fat": 15,
-       "fiber": 5
-     },
-     "preparationSteps": [
-       "Step 1: Do this",
-       "Step 2: Do that"
-     ],
-     "preparationTime": "30 minutes",
-     "servings": 4,
-     "tags": ["healthy", "high-protein", "vegetarian"]
-   }
-
-3. For recipe requests:
-   - Create complete dishes even if the user doesn't explicitly have them in their history
-   - Focus on providing dishes that match their request, preferences, and dietary needs
-   - Always include all required dish fields rather than saying "no matching dish found"
-''';
+    return SystemPrompts.dishCreationGuidelinesPrompt;
   }
 }
