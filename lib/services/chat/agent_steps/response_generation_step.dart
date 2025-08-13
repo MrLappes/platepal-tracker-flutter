@@ -21,6 +21,25 @@ class ResponseGenerationStep extends AgentStep {
     try {
       debugPrint('🤖 ResponseGenerationStep: Starting response generation');
 
+      // Check for verification feedback from retry attempts
+      final verificationFeedback =
+          input.metadata?['verificationFeedback'] as Map<String, dynamic>?;
+      final missingRequirements =
+          input.metadata?['missingRequirements'] as List<dynamic>?;
+      final responseIssues =
+          input.metadata?['responseIssues'] as List<dynamic>?;
+      final isRetryAttempt = input.metadata?['retryAttempt'] == true;
+
+      if (isRetryAttempt) {
+        debugPrint('🔄 ResponseGenerationStep: This is a retry attempt');
+        debugPrint(
+          '   Missing requirements: ${missingRequirements?.join(", ") ?? "none"}',
+        );
+        debugPrint(
+          '   Response issues: ${responseIssues?.join(", ") ?? "none"}',
+        );
+      }
+
       // Check if we should include conversation history based on thinking step analysis
       bool includeConversationHistory = true; // Default to true for safety
       if (input.thinkingResult?.contextRequirements.needsConversationHistory !=
@@ -50,6 +69,11 @@ class ResponseGenerationStep extends AgentStep {
                     ? input.metadata!['enhancedSystemPrompt'] as String
                     : null),
         includeConversationHistory: includeConversationHistory,
+        verificationFeedback: verificationFeedback,
+        missingRequirements: missingRequirements?.cast<String>(),
+        responseIssues: responseIssues?.cast<String>(),
+        isRetryAttempt: isRetryAttempt,
+        thinkingResult: input.thinkingResult,
       );
       debugPrint('🤖 ResponseGenerationStep: Sending request to OpenAI');
       debugPrint(
@@ -171,8 +195,13 @@ class ResponseGenerationStep extends AgentStep {
         debugPrint(
           '⚠️ ResponseGenerationStep: Failed to parse JSON response: $e',
         );
-        debugPrint('   Using raw response as reply text');
-        replyText = openaiResponse;
+        debugPrint(
+          '   Raw response: ${openaiResponse.substring(0, openaiResponse.length > 200 ? 200 : openaiResponse.length)}...',
+        );
+
+        // Try to extract replyText from malformed JSON
+        replyText = _extractReplyTextFromMalformedJson(openaiResponse);
+        debugPrint('   Extracted reply text: ${replyText.length} characters');
       }
 
       final chatResponse = ChatResponse(
@@ -256,6 +285,11 @@ class ResponseGenerationStep extends AgentStep {
     List<UserIngredient>? userIngredients, {
     String? contextSummary,
     bool includeConversationHistory = true,
+    Map<String, dynamic>? verificationFeedback,
+    List<String>? missingRequirements,
+    List<String>? responseIssues,
+    bool isRetryAttempt = false,
+    ThinkingStepResponse? thinkingResult,
   }) async {
     final messages = <Map<String, dynamic>>[];
 
@@ -268,6 +302,65 @@ class ResponseGenerationStep extends AgentStep {
       fullSystemPrompt += '\n\n[Context Information]\n${contextSummary.trim()}';
     }
 
+    // Add dish creation clarity guidance ONLY if dish creation is explicitly authorized
+    if (thinkingResult != null &&
+        (thinkingResult.contextRequirements.needsInfoOnDishCreation ||
+            thinkingResult.responseRequirements.any(
+              (req) =>
+                  req.contains('dish_creation') ||
+                  req.contains('create_dish') ||
+                  req.contains('new_dish'),
+            ))) {
+      fullSystemPrompt += '''
+
+[SPECIAL GUIDANCE FOR UNCLEAR DISH REQUESTS]
+If the user's dish creation request lacks specific details (unclear ingredients, cooking method, etc.):
+- ALWAYS create a reasonable dish anyway based on your best interpretation
+- Include all required fields with accurate nutritional information
+- In your replyText, acknowledge the uncertainty politely and ask for specific clarification
+- Example: "I've created a [dish type] based on your request! However, I'd love to personalize it further. Could you tell me more about [specific aspect like preferred ingredients, cooking style, dietary preferences]? Feel free to modify the dish below to match your preferences."
+- DO NOT refuse to create a dish - always provide a helpful starting point
+''';
+    } else {
+      // If dish creation is NOT authorized, add guidance to prevent dish creation
+      fullSystemPrompt += '''
+
+[IMPORTANT - NO DISH CREATION AUTHORIZED]
+For this request, you should NOT create new dishes. Instead:
+- Focus on providing information, suggestions, or referencing existing dishes
+- If the user asks for recipes, provide general guidance or reference existing dishes
+- If the user asks for nutrition information, provide educational content
+- Only include dishes in your response if they are existing dishes with proper IDs from the context
+- Do NOT create new dish objects unless explicitly authorized by the thinking step
+''';
+    }
+
+    // Add verification feedback if this is a retry attempt
+    if (isRetryAttempt &&
+        (missingRequirements?.isNotEmpty == true ||
+            responseIssues?.isNotEmpty == true)) {
+      fullSystemPrompt += '\n\n[IMPORTANT - RETRY INSTRUCTIONS]';
+      fullSystemPrompt +=
+          '\nThis is a retry attempt. The previous response had issues that need to be corrected:';
+
+      if (missingRequirements?.isNotEmpty == true) {
+        fullSystemPrompt += '\n\nMISSING REQUIREMENTS (must include):';
+        for (final requirement in missingRequirements!) {
+          fullSystemPrompt += '\n- $requirement';
+        }
+      }
+
+      if (responseIssues?.isNotEmpty == true) {
+        fullSystemPrompt += '\n\nPREVIOUS RESPONSE ISSUES (avoid these):';
+        for (final issue in responseIssues!) {
+          fullSystemPrompt += '\n- $issue';
+        }
+      }
+
+      fullSystemPrompt +=
+          '\n\nMake sure to address all missing requirements and avoid the previous issues in your response.';
+    }
+
     // Add system prompt
     messages.insert(0, {'role': 'system', 'content': fullSystemPrompt});
     debugPrint(
@@ -278,8 +371,7 @@ class ResponseGenerationStep extends AgentStep {
     if (includeConversationHistory) {
       debugPrint(
         '🤖 ResponseGenerationStep: Including full conversation history',
-      );
-      // Add conversation history (simplified)
+      ); // Add conversation history (simplified)
       for (final historyMessage in conversationHistory) {
         if (historyMessage.role == 'system' || historyMessage.isLoading) {
           continue;
@@ -404,44 +496,90 @@ class ResponseGenerationStep extends AgentStep {
         return null;
       }
 
-      // Parse nutritional information with defaults
-      final nutritionData =
-          dishData['nutrition'] as Map<String, dynamic>? ?? {};
+      // Parse ingredients list with proper nutrition data
+      final ingredientsData = dishData['ingredients'] as List<dynamic>? ?? [];
+      final ingredients = <Ingredient>[];
+
+      double totalCalories = 0.0;
+      double totalProtein = 0.0;
+      double totalCarbs = 0.0;
+      double totalFat = 0.0;
+      double totalFiber = 0.0;
+      double totalSugar = 0.0;
+      double totalSodium = 0.0;
+
+      for (final ingData in ingredientsData) {
+        if (ingData is Map<String, dynamic>) {
+          final ingredientName = ingData['name'] as String?;
+          final quantity = _parseDouble(ingData['quantity']);
+          final unit = ingData['unit'] as String? ?? 'g';
+          final inGrams =
+              _parseDouble(ingData['inGrams']) > 0
+                  ? _parseDouble(ingData['inGrams'])
+                  : quantity;
+
+          if (ingredientName != null && ingredientName.trim().isNotEmpty) {
+            // Extract per-100g nutrition values
+            final caloriesPer100 = _parseDouble(ingData['caloriesPer100']);
+            final proteinPer100 = _parseDouble(ingData['proteinPer100']);
+            final carbsPer100 = _parseDouble(ingData['carbsPer100']);
+            final fatPer100 = _parseDouble(ingData['fatPer100']);
+            final fiberPer100 = _parseDouble(ingData['fiberPer100']);
+            final sugarPer100 = _parseDouble(ingData['sugarPer100']);
+            final sodiumPer100 = _parseDouble(ingData['sodiumPer100']);
+
+            // Create nutrition info for this ingredient
+            final ingredientNutrition = NutritionInfo(
+              calories: caloriesPer100,
+              protein: proteinPer100,
+              carbs: carbsPer100,
+              fat: fatPer100,
+              fiber: fiberPer100,
+              sugar: sugarPer100,
+              sodium: sodiumPer100,
+            );
+
+            final ingredient = Ingredient(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              name: ingredientName.trim(),
+              amount: quantity,
+              unit: unit,
+              nutrition: ingredientNutrition,
+            );
+
+            ingredients.add(ingredient);
+
+            // Calculate total nutrition based on actual amount
+            final multiplier =
+                inGrams / 100.0; // Convert per-100g to actual amount
+            totalCalories += caloriesPer100 * multiplier;
+            totalProtein += proteinPer100 * multiplier;
+            totalCarbs += carbsPer100 * multiplier;
+            totalFat += fatPer100 * multiplier;
+            totalFiber += fiberPer100 * multiplier;
+            totalSugar += sugarPer100 * multiplier;
+            totalSodium += sodiumPer100 * multiplier;
+          }
+        }
+      }
+
+      // Create overall dish nutrition from calculated totals
       final nutrition = NutritionInfo(
-        calories: _parseDouble(nutritionData['calories']),
-        protein: _parseDouble(nutritionData['protein']),
-        carbs: _parseDouble(nutritionData['carbs']),
-        fat: _parseDouble(nutritionData['fat']),
-        fiber: _parseDouble(nutritionData['fiber']),
-        sugar: _parseDouble(nutritionData['sugar']),
-        sodium: _parseDouble(nutritionData['sodium']),
+        calories: totalCalories,
+        protein: totalProtein,
+        carbs: totalCarbs,
+        fat: totalFat,
+        fiber: totalFiber,
+        sugar: totalSugar,
+        sodium: totalSodium,
       );
 
-      // Parse ingredients list
-      final ingredientsData = dishData['ingredients'] as List<dynamic>? ?? [];
-      final ingredients =
-          ingredientsData
-              .map((ingData) {
-                if (ingData is Map<String, dynamic>) {
-                  final ingredientName = ingData['name'] as String?;
-                  final quantity = ingData['quantity'];
-                  final unit = ingData['unit'] as String?;
-
-                  if (ingredientName != null &&
-                      ingredientName.trim().isNotEmpty) {
-                    return Ingredient(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: ingredientName.trim(),
-                      amount: _parseDouble(quantity),
-                      unit: unit ?? 'g',
-                    );
-                  }
-                }
-                return null;
-              })
-              .where((ingredient) => ingredient != null)
-              .cast<Ingredient>()
-              .toList();
+      debugPrint(
+        '✅ Created dish: $name with ${ingredients.length} ingredients',
+      );
+      debugPrint(
+        '   Total nutrition: ${totalCalories.round()}cal, ${totalProtein.round()}g protein',
+      );
 
       return Dish(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -461,6 +599,95 @@ class ResponseGenerationStep extends AgentStep {
       debugPrint('   Dish data: $dishData');
       return null;
     }
+  }
+
+  /// Helper method to extract replyText from potentially malformed JSON
+  String _extractReplyTextFromMalformedJson(String rawResponse) {
+    try {
+      // First try to find replyText using regex pattern matching
+      final replyTextPattern = RegExp(
+        r'"replyText"\s*:\s*"([^"]*(?:\\.[^"]*)*)"',
+      );
+      final match = replyTextPattern.firstMatch(rawResponse);
+      if (match != null) {
+        final extractedText = match.group(1);
+        if (extractedText != null && extractedText.trim().isNotEmpty) {
+          // Unescape JSON string
+          return extractedText
+              .replaceAll('\\"', '"')
+              .replaceAll('\\n', '\n')
+              .replaceAll('\\\\', '\\');
+        }
+      }
+
+      // If regex fails, try to find text between replyText quotes manually
+      final startPattern = '"replyText"';
+      final startIndex = rawResponse.indexOf(startPattern);
+      if (startIndex != -1) {
+        final afterStart = rawResponse.substring(
+          startIndex + startPattern.length,
+        );
+        final colonIndex = afterStart.indexOf(':');
+        if (colonIndex != -1) {
+          final afterColon = afterStart.substring(colonIndex + 1).trim();
+          if (afterColon.startsWith('"')) {
+            final quoteEnd = _findClosingQuote(afterColon, 1);
+            if (quoteEnd != -1) {
+              final extractedText = afterColon.substring(1, quoteEnd);
+              if (extractedText.trim().isNotEmpty) {
+                return extractedText
+                    .replaceAll('\\"', '"')
+                    .replaceAll('\\n', '\n')
+                    .replaceAll('\\\\', '\\');
+              }
+            }
+          }
+        }
+      }
+
+      // Last resort: look for any reasonable text in the response
+      if (rawResponse.length > 100) {
+        // Try to find anything that looks like conversational text
+        final lines = rawResponse.split('\n');
+        for (final line in lines) {
+          final trimmed = line.trim();
+          if (trimmed.isNotEmpty &&
+              !trimmed.startsWith('{') &&
+              !trimmed.startsWith('}') &&
+              !trimmed.startsWith('"dishes"') &&
+              !trimmed.startsWith('"recommendation"') &&
+              trimmed.length > 10) {
+            return trimmed;
+          }
+        }
+      }
+
+      // If all else fails, provide a helpful error message instead of raw JSON
+      return "I apologize, but I encountered a formatting issue with my response. Could you please try your question again?";
+    } catch (e) {
+      debugPrint('⚠️ Error extracting reply text from malformed JSON: $e');
+      return "I apologize, but I encountered a formatting issue with my response. Could you please try your question again?";
+    }
+  }
+
+  /// Helper to find the closing quote in a string, accounting for escaped quotes
+  int _findClosingQuote(String text, int startIndex) {
+    for (int i = startIndex; i < text.length; i++) {
+      if (text[i] == '"') {
+        // Check if this quote is escaped
+        int backslashCount = 0;
+        int j = i - 1;
+        while (j >= 0 && text[j] == '\\') {
+          backslashCount++;
+          j--;
+        }
+        // If even number of backslashes (including 0), the quote is not escaped
+        if (backslashCount % 2 == 0) {
+          return i;
+        }
+      }
+    }
+    return -1;
   }
 
   /// Helper method to safely parse double values from JSON

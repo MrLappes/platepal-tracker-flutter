@@ -3,6 +3,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/product.dart';
 import '../../services/open_food_facts_service.dart';
+import '../../services/storage/database_service.dart';
+import '../../services/storage/dish_service.dart';
+import '../../models/dish.dart';
 
 class ProductSearchScreen extends StatefulWidget {
   final Function(Product)? onProductSelected;
@@ -17,11 +20,32 @@ class ProductSearchScreen extends StatefulWidget {
 class _ProductSearchScreenState extends State<ProductSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final OpenFoodFactsService _openFoodFactsService = OpenFoodFactsService();
-
+  // Local data services and state
+  final DatabaseService _databaseService = DatabaseService.instance;
+  final DishService _dishService = DishService();
+  List<Ingredient> _localIngredients = [];
+  List<Dish> _localDishes = [];
+  int _currentPage = 1;
+  bool _hasMoreResults = false;
   List<Product> _searchResults = [];
   bool _isSearching = false;
-  String? _errorMessage;
   bool _hasSearched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      final query = _searchController.text.trim();
+      if (query.length >= 2) {
+        _searchLocalItems(query);
+      } else {
+        setState(() {
+          _localIngredients = [];
+          _localDishes = [];
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -29,19 +53,71 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     super.dispose();
   }
 
+  /// Search for local ingredients and dishes
+  Future<void> _searchLocalItems(String query) async {
+    final db = await _databaseService.database;
+    // Search ingredients
+    final ingMaps = await db.query(
+      'ingredients',
+      where: 'name LIKE ?',
+      whereArgs: ['%$query%'],
+    );
+    final List<Ingredient> ingredients = [];
+    for (var map in ingMaps) {
+      final nutMaps = await db.query(
+        'ingredient_nutrition',
+        where: 'ingredient_id = ?',
+        whereArgs: [map['id']],
+      );
+      NutritionInfo? nut;
+      if (nutMaps.isNotEmpty) {
+        final m = nutMaps.first;
+        nut = NutritionInfo(
+          calories: m['calories'] as double,
+          protein: m['protein'] as double,
+          carbs: m['carbs'] as double,
+          fat: m['fat'] as double,
+          fiber: m['fiber'] as double,
+          sugar: 0.0,
+          sodium: 0.0,
+        );
+      }
+      ingredients.add(
+        Ingredient(
+          id: map['id'] as String,
+          name: map['name'] as String,
+          amount: 100.0,
+          unit: 'g',
+          nutrition: nut,
+          barcode: map['barcode'] as String?,
+        ),
+      );
+    }
+    // Search dishes
+    final allDishes = await _dishService.getAllDishes();
+    final dishes =
+        allDishes
+            .where((d) => d.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+    setState(() {
+      _localIngredients = ingredients;
+      _localDishes = dishes;
+    });
+  }
+
   Future<void> _searchProducts(String query) async {
     if (query.trim().isEmpty) {
       setState(() {
         _searchResults = [];
         _hasSearched = false;
-        _errorMessage = null;
+        _currentPage = 1;
+        _hasMoreResults = false;
       });
       return;
     }
 
     setState(() {
       _isSearching = true;
-      _errorMessage = null;
     });
 
     try {
@@ -49,25 +125,40 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
       final products = await _openFoodFactsService.searchProducts(
         query.trim(),
-        pageSize: 50,
+        page: _currentPage,
+        pageSize: 20,
       );
 
       setState(() {
         _searchResults = products;
         _hasSearched = true;
         _isSearching = false;
+        _hasMoreResults = products.length == 20;
       });
 
       debugPrint('✅ Found ${products.length} products');
     } catch (e) {
       debugPrint('❌ Error searching products: $e');
       setState(() {
-        _errorMessage = AppLocalizations.of(
-          context,
-        )!.errorSearchingProduct(e.toString());
         _isSearching = false;
         _hasSearched = true;
       });
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.errorSearchingProduct(e.toString()),
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Load more products for pagination
+  void _loadMore() {
+    if (!_isSearching && _hasMoreResults) {
+      setState(() => _currentPage++);
+      _searchProducts(_searchController.text.trim());
     }
   }
 
@@ -295,114 +386,125 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             ),
           ),
 
-          // Results
+          // Results and local items
           Expanded(
-            child: Builder(
-              builder: (context) {
-                if (_isSearching) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+            child:
+                _isSearching && _currentPage == 1
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView(
+                      padding: const EdgeInsets.only(bottom: 16),
                       children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Searching products...'),
-                      ],
-                    ),
-                  );
-                }
-
-                if (_errorMessage != null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed:
-                              () => _searchProducts(_searchController.text),
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (!_hasSearched) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search,
-                          size: 64,
-                          color: theme.colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          localizations.searchForProducts,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Enter a product name to start searching',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.outline,
+                        if (_localIngredients.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              localizations.localIngredients,
+                              style: theme.textTheme.titleMedium,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (_searchResults.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: theme.colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          localizations.noProductsFound,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Try adjusting your search terms',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.outline,
+                          ..._localIngredients.map(
+                            (ing) => ListTile(
+                              leading: const Icon(Icons.kitchen),
+                              title: Text(ing.name),
+                              subtitle:
+                                  ing.nutrition != null
+                                      ? Text(
+                                        '${ing.nutrition!.calories.toStringAsFixed(0)} kcal/100g',
+                                      )
+                                      : null,
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                widget.onProductSelected?.call(
+                                  Product(
+                                    barcode: ing.barcode,
+                                    name: ing.name,
+                                    brand: null,
+                                    imageUrl: null,
+                                    quantity: '100 g',
+                                    nutrition:
+                                        ing.nutrition != null
+                                            ? ProductNutrition(
+                                              energyKcal100g:
+                                                  ing.nutrition!.calories,
+                                              proteins100g:
+                                                  ing.nutrition!.protein,
+                                              carbohydrates100g:
+                                                  ing.nutrition!.carbs,
+                                              fat100g: ing.nutrition!.fat,
+                                              fiber100g: ing.nutrition!.fiber,
+                                            )
+                                            : ProductNutrition(),
+                                    rawData: {},
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                        ],
+                        if (_localDishes.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              localizations.localDishes,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                          ..._localDishes.map(
+                            (dish) => ListTile(
+                              leading:
+                                  dish.imageUrl != null
+                                      ? Image.network(
+                                        dish.imageUrl!,
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      )
+                                      : const Icon(Icons.restaurant_menu),
+                              title: Text(dish.name),
+                              subtitle: Text(
+                                '${dish.nutrition.calories.toStringAsFixed(0)} kcal',
+                              ),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                widget.onProductSelected?.call(
+                                  Product(
+                                    barcode: dish.id,
+                                    name: dish.name,
+                                    brand: null,
+                                    imageUrl: dish.imageUrl,
+                                    quantity: '1 serving',
+                                    nutrition: ProductNutrition(
+                                      energyKcal100g: dish.nutrition.calories,
+                                      proteins100g: dish.nutrition.protein,
+                                      carbohydrates100g: dish.nutrition.carbs,
+                                      fat100g: dish.nutrition.fat,
+                                      fiber100g: dish.nutrition.fiber,
+                                    ),
+                                    rawData: {},
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                        if (_hasSearched &&
+                            _searchResults.isEmpty &&
+                            !_isSearching) ...[
+                          Center(child: Text(localizations.noProductsFound)),
+                        ],
+                        ..._searchResults.map(_buildProductCard),
+                        if (_isSearching && _currentPage > 1)
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        if (_hasMoreResults && !_isSearching)
+                          TextButton(
+                            onPressed: _loadMore,
+                            child: Text(localizations.loadMore),
+                          ),
                       ],
                     ),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: _searchResults.length,
-                  itemBuilder: (context, index) {
-                    return _buildProductCard(_searchResults[index]);
-                  },
-                );
-              },
-            ),
           ),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/dish.dart';
 import 'database_service.dart';
 import 'dish_service.dart';
 import 'user_profile_service.dart';
@@ -26,6 +28,18 @@ class StorageServiceProvider extends ChangeNotifier {
       userProfileService = UserProfileService();
       dishService = DishService();
       mealLogService = MealLogService();
+
+      // Migrate dishes from SharedPreferences to database on first run
+      final prefs = await SharedPreferences.getInstance();
+      if (!(prefs.getBool('dishes_migrated') ?? false)) {
+        final dishJsonList = prefs.getStringList('dishes') ?? [];
+        for (final dishJson in dishJsonList) {
+          final Map<String, dynamic> dishMap = jsonDecode(dishJson);
+          final dish = Dish.fromJson(dishMap);
+          await dishService.saveDish(dish);
+        }
+        await prefs.setBool('dishes_migrated', true);
+      }
 
       _isInitialized = true;
       notifyListeners();

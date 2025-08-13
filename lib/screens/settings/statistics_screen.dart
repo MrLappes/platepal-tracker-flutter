@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/service_extensions.dart';
 import '../../models/user_profile.dart';
+import '../../services/user_session_service.dart';
+import '../../services/health_service.dart';
+import '../../services/calorie_expenditure_service.dart';
 import 'dart:math' as math;
 
 class StatisticsScreen extends StatefulWidget {
@@ -19,15 +23,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   List<Map<String, dynamic>> _calorieHistory = [];
   bool _isShowingTestData = false; // Track if we're showing test data
 
+  // Services
+  final HealthService _healthService = HealthService();
+  final CalorieExpenditureService _calorieExpenditureService =
+      CalorieExpenditureService();
   // Selected time range
   String _selectedTimeRange = 'month';
   final Map<String, String> _timeRanges = {
-    'week': 'Last Week',
-    'month': 'Last Month',
-    'threeMonths': 'Last 3 Months',
-    'sixMonths': 'Last 6 Months',
-    'year': 'Last Year',
-    'all': 'All Time',
+    'week': 'week',
+    'month': 'month',
+    'threeMonths': 'threeMonths',
+    'sixMonths': 'sixMonths',
+    'year': 'year',
+    'all': 'allTime',
   };
 
   // Current stats values
@@ -36,6 +44,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   double? _currentBMI;
   double? _currentBodyFat;
   double? _maintenanceCalories;
+
+  // Health data integration
+  Map<String, double> _caloriesBurnedData = {};
+  bool _isHealthConnected = false;
 
   // Graph min/max values for scaling
   double _minWeight = 0;
@@ -48,11 +60,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   double _maxBodyFat = 40;
   double _minCalories = 0;
   double _maxCalories = 3000;
-
   @override
   void initState() {
     super.initState();
+    _initializeServices();
     _loadData();
+  }
+
+  // Initialize services
+  Future<void> _initializeServices() async {
+    await _calorieExpenditureService.initialize();
+    await _healthService.loadConnectionStatus();
+    _isHealthConnected = _healthService.isConnected;
   }
 
   // Load user profile and metrics history
@@ -64,8 +83,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _isShowingTestData = false; // Clear test data flag
       });
 
+      // Get current user ID from session service
+      final prefs = await SharedPreferences.getInstance();
+      final userSessionService = UserSessionService(prefs);
+      final currentUserId = userSessionService.getCurrentUserId();
+
       // Load current user profile
-      final userProfiles = await context.userProfileService.getUserProfile("1");
+      final userProfiles = await context.userProfileService.getUserProfile(
+        currentUserId,
+      );
 
       if (userProfiles != null) {
         _userProfile =
@@ -108,10 +134,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             _isLoading = false;
           });
           return;
-        }
-
-        // Load calorie data from meal logs
+        } // Load calorie data from meal logs and health data
         final calorieData = await _loadCalorieHistory(startDate);
+
+        // Load health data if connected
+        if (_isHealthConnected) {
+          await _loadHealthData(startDate);
+        }
 
         // Process the history data
         _metricsHistory = history;
@@ -128,6 +157,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  // Load health data for calorie expenditure
+  Future<void> _loadHealthData(DateTime startDate) async {
+    try {
+      final DateTime endDate = DateTime.now();
+      final int daysDifference = endDate.difference(startDate).inDays;
+
+      _caloriesBurnedData.clear();
+
+      for (int i = 0; i <= daysDifference; i++) {
+        final currentDate = startDate.add(Duration(days: i));
+
+        // Get calories burned for this date
+        final (caloriesBurned, isEstimated) = await _calorieExpenditureService
+            .getCaloriesBurnedForDateWithStatus(currentDate);
+
+        if (caloriesBurned != null) {
+          final dateKey = currentDate.toIso8601String().split('T')[0];
+          _caloriesBurnedData[dateKey] = caloriesBurned;
+        }
+      }
+    } catch (e) {
+      // Health data loading failed, continue without it
+      print('Failed to load health data: $e');
     }
   }
 
@@ -155,14 +210,27 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           startDate: dayStart,
           endDate: dayEnd,
         );
-
         if (summary.totalCalories > 0) {
+          final dateKey = currentDate.toIso8601String().split('T')[0];
+          final caloriesBurned = _caloriesBurnedData[dateKey];
+
+          // Calculate deficit/surplus if we have expenditure data
+          double? deficit;
+          double? netCalories;
+          if (caloriesBurned != null) {
+            deficit = summary.totalCalories - caloriesBurned;
+            netCalories = summary.totalCalories - caloriesBurned;
+          }
+
           calorieData.add({
             'date': currentDate.toIso8601String(),
             'calories': summary.totalCalories,
             'protein': summary.totalProtein,
             'carbs': summary.totalCarbs,
             'fat': summary.totalFat,
+            'calories_burned': caloriesBurned,
+            'deficit': deficit,
+            'net_calories': netCalories,
           });
         }
       }
@@ -581,7 +649,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             TextButton(
               onPressed: _loadData,
               child: Text(
-                'Real Data',
+                localizations?.realData ?? 'Real Data',
                 style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
@@ -685,6 +753,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _buildCurrentStatsCard(context, localizations),
         const SizedBox(height: 16),
 
+        // Health Data Status Card
+        if (_isHealthConnected)
+          _buildHealthDataStatusCard(context, localizations),
+        if (_isHealthConnected) const SizedBox(height: 16),
+
         // Time Range Selector
         _buildTimeRangeSelector(context, localizations),
         const SizedBox(height: 24),
@@ -726,20 +799,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             chart: _buildBodyFatChart(context),
           ),
         ],
-
         if (_calorieHistory.isNotEmpty && _maintenanceCalories != null) ...[
-          const SizedBox(height: 24),
-
-          // Calorie Intake vs Maintenance Chart
+          const SizedBox(height: 24), // Calorie Intake vs Maintenance Chart
           _buildStatsSection(
             context,
             title:
-                localizations?.calorieIntakeHistory ??
-                'Calorie Intake vs Maintenance',
+                _isHealthConnected && _caloriesBurnedData.isNotEmpty
+                    ? localizations?.calorieBalanceTitle ??
+                        'Calorie Balance (Intake vs Expenditure)'
+                    : localizations?.calorieIntakeHistory ??
+                        'Calorie Intake vs Maintenance',
             icon: Icons.local_fire_department_outlined,
             tooltipText:
-                localizations?.calorieStatsTip ??
-                'Track your daily calorie intake compared to maintenance calories. Green = maintenance, Blue = cutting, Orange = bulking.',
+                _isHealthConnected && _caloriesBurnedData.isNotEmpty
+                    ? localizations?.calorieBalanceTip ??
+                        'Track your actual calorie balance using health data. Green = maintenance, Blue = deficit, Orange = surplus.'
+                    : localizations?.calorieStatsTip ??
+                        'Track your daily calorie intake compared to maintenance calories. Green = maintenance, Blue = cutting, Orange = bulking.',
             chart: _buildCalorieChart(context),
           ),
 
@@ -752,6 +828,63 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
         const SizedBox(height: 32),
       ],
+    );
+  }
+
+  Widget _buildHealthDataStatusCard(
+    BuildContext context,
+    AppLocalizations? localizations,
+  ) {
+    final healthDataDays = _caloriesBurnedData.length;
+    final totalDays = _calorieHistory.length;
+    final coverage = totalDays > 0 ? (healthDataDays / totalDays * 100) : 0;
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.health_and_safety, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  localizations?.healthDataIntegration ??
+                      'Health Data Integration',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Calorie expenditure data coverage: ${coverage.toStringAsFixed(1)}% ($healthDataDays/$totalDays days)',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            if (coverage > 0)
+              Text(
+                localizations?.healthDataActive ??
+                    'Using your health app data to provide more accurate deficit/surplus analysis.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.green.shade700),
+              )
+            else
+              Text(
+                localizations?.healthDataInactive ??
+                    'Enable health data sync in Profile Settings for more accurate analysis.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.orange.shade700),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -849,16 +982,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   String _getBMICategory(double? bmi) {
+    final localizations = AppLocalizations.of(context);
     if (bmi == null) return '';
 
     if (bmi < 18.5) {
-      return 'Underweight';
+      return localizations?.bmiUnderweight ?? 'Underweight';
     } else if (bmi < 25) {
-      return 'Normal';
+      return localizations?.bmiNormal ?? 'Normal';
     } else if (bmi < 30) {
-      return 'Overweight';
+      return localizations?.bmiOverweight ?? 'Overweight';
     } else {
-      return 'Obese';
+      return localizations?.bmiObese ?? 'Obese';
     }
   }
 
@@ -996,8 +1130,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildWeightChart(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(child: Text('No weight data available'));
+      return Center(
+        child: Text(
+          localizations?.noWeightDataAvailable ?? 'No weight data available',
+        ),
+      );
     }
 
     // Use weekly median for weight to smooth out daily fluctuations
@@ -1018,8 +1157,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildBMIChart(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(child: Text('No BMI data available'));
+      return Center(
+        child: Text(
+          localizations?.noBmiDataAvailable ?? 'No BMI data available',
+        ),
+      );
     }
 
     // Calculate BMI for each entry
@@ -1040,7 +1184,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .toList();
 
     if (bmiData.isEmpty) {
-      return Center(child: Text('Cannot calculate BMI from available data'));
+      return Center(
+        child: Text(
+          localizations?.cannotCalculateBmiFromData ??
+              'Cannot calculate BMI from available data',
+        ),
+      );
     }
 
     return CustomPaint(
@@ -1052,23 +1201,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         minValue: _minBMI,
         maxValue: _maxBMI,
         lineColor: Colors.green,
-        pointColor: Colors.green.shade800,
-        // Add reference lines for BMI categories
+        pointColor:
+            Colors.green.shade800, // Add reference lines for BMI categories
         referenceLines: [
           ReferenceLine(
             value: 18.5,
             color: Colors.orange.withValues(alpha: 0.5),
-            label: 'Underweight',
+            label: localizations?.bmiUnderweight ?? 'Underweight',
           ),
           ReferenceLine(
             value: 25.0,
             color: Colors.orange.withValues(alpha: 0.5),
-            label: 'Overweight',
+            label: localizations?.bmiOverweight ?? 'Overweight',
           ),
           ReferenceLine(
             value: 30.0,
             color: Colors.red.withValues(alpha: 0.5),
-            label: 'Obese',
+            label: localizations?.bmiObese ?? 'Obese',
           ),
         ],
       ),
@@ -1076,11 +1225,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildBodyFatChart(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final bodyFatData =
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
     if (bodyFatData.isEmpty) {
-      return Center(child: Text('No body fat data available'));
+      return Center(
+        child: Text(
+          localizations?.noBodyFatDataAvailable ?? 'No body fat data available',
+        ),
+      );
     }
 
     return CustomPaint(
@@ -1098,8 +1252,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildCalorieChart(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
-      return Center(child: Text('No calorie data available'));
+      return Center(
+        child: Text(
+          localizations?.noCalorieDataAvailable ?? 'No calorie data available',
+        ),
+      );
     }
 
     return CustomPaint(
@@ -1248,6 +1407,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final weeklyDeficit = _maintenanceCalories! - weeklyAverage;
     final isDeficit = weeklyDeficit > 0;
 
+    // Calculate actual weekly deficit if health data is available
+    double? actualWeeklyDeficit;
+    String? healthDataLabel;
+
+    if (_isHealthConnected && _caloriesBurnedData.isNotEmpty) {
+      final healthDataDays = _calorieHistory.where(
+        (entry) => entry['deficit'] != null,
+      );
+      if (healthDataDays.isNotEmpty) {
+        final totalActualDeficit = healthDataDays
+            .map((entry) => entry['deficit'] as double)
+            .reduce((a, b) => a + b);
+        actualWeeklyDeficit = totalActualDeficit / healthDataDays.length;
+        healthDataLabel = 'Actual Balance';
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1255,40 +1431,113 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Icon(
-            isDeficit ? Icons.trending_down : Icons.trending_up,
-            color: isDeficit ? Colors.blue : Colors.orange,
-            size: 20,
+          // Estimated deficit row (original calculation)
+          Row(
+            children: [
+              Icon(
+                isDeficit ? Icons.trending_down : Icons.trending_up,
+                color: isDeficit ? Colors.blue : Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      actualWeeklyDeficit != null
+                          ? localizations?.estimatedBalance ??
+                              'Estimated Balance'
+                          : (localizations?.weeklyAverage ?? 'Weekly Average'),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${isDeficit ? "-" : "+"}${weeklyDeficit.abs().round()} cal/day',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDeficit ? Colors.blue : Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${weeklyAverage.round()} cal',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+
+          // Actual deficit row (if health data available)
+          if (actualWeeklyDeficit != null) ...[
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+            Row(
               children: [
-                Text(
-                  localizations?.weeklyAverage ?? 'Weekly Average',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                Icon(
+                  actualWeeklyDeficit < 0
+                      ? Icons.trending_down
+                      : Icons.trending_up,
+                  color: actualWeeklyDeficit < 0 ? Colors.blue : Colors.orange,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            healthDataLabel!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.health_and_safety,
+                            size: 12,
+                            color: Colors.green,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${actualWeeklyDeficit < 0 ? "" : "+"}${actualWeeklyDeficit.round()} cal/day',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              actualWeeklyDeficit < 0
+                                  ? Colors.blue
+                                  : Colors.orange,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Text(
-                  '${isDeficit ? "-" : "+"}${weeklyDeficit.abs().round()} cal/day',
+                  localizations?.vsExpenditure ?? 'vs expenditure',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: isDeficit ? Colors.blue : Colors.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade600,
                   ),
                 ),
               ],
             ),
-          ),
-          Text(
-            '${weeklyAverage.round()} cal',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
+          ],
         ],
       ),
     );
@@ -1367,6 +1616,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   List<String> _getCalorieWarnings() {
+    final localizations = AppLocalizations.of(context);
     final warnings = <String>[];
 
     // Check for extremely low calorie days
@@ -1374,10 +1624,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _calorieHistory
             .where((entry) => (entry['calories'] as double) < 1000)
             .length;
-
     if (veryLowDays > 0) {
       warnings.add(
-        'Warning: $veryLowDays day(s) with extremely low calorie intake (<1000 cal). This may be unhealthy.',
+        localizations?.veryLowCalorieWarning(veryLowDays.toString()) ??
+            'Warning: $veryLowDays day(s) with extremely low calorie intake (<1000 cal). This may be unhealthy.',
       );
     }
 
@@ -1390,10 +1640,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   (_maintenanceCalories! + 1000),
             )
             .length;
-
     if (veryHighDays > 0) {
       warnings.add(
-        'Notice: $veryHighDays day(s) with very high calorie intake (>1000 cal above maintenance).',
+        localizations?.veryHighCalorieNotice(veryHighDays.toString()) ??
+            'Notice: $veryHighDays day(s) with very high calorie intake (>1000 cal above maintenance).',
       );
     }
 
@@ -1408,8 +1658,52 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     if (extremeDeficitDays > _calorieHistory.length * 0.5) {
       warnings.add(
-        'Warning: Frequent extreme calorie deficits may slow metabolism and cause muscle loss.',
+        localizations?.extremeDeficitWarning ??
+            'Warning: Frequent extreme calorie deficits may slow metabolism and cause muscle loss.',
       );
+    }
+
+    // Health data based warnings
+    if (_isHealthConnected && _caloriesBurnedData.isNotEmpty) {
+      // Check for days with very large deficits based on actual expenditure
+      final largeDeficitDays =
+          _calorieHistory.where((entry) {
+            final deficit = entry['deficit'] as double?;
+            return deficit != null &&
+                deficit < -1000; // More than 1000 cal deficit
+          }).length;
+      if (largeDeficitDays > 0) {
+        warnings.add(
+          localizations?.healthDataAlert(largeDeficitDays.toString()) ??
+              'Health Data Alert: $largeDeficitDays day(s) with very large calorie deficits (>1000 cal) based on actual expenditure.',
+        );
+      }
+
+      // Check for inconsistent deficit patterns
+      final deficits =
+          _calorieHistory
+              .where((entry) => entry['deficit'] != null)
+              .map((entry) => entry['deficit'] as double)
+              .toList();
+
+      if (deficits.length > 7) {
+        final avgDeficit = deficits.reduce((a, b) => a + b) / deficits.length;
+        final deficitVariance =
+            deficits
+                .map((d) => math.pow(d - avgDeficit, 2))
+                .reduce((a, b) => a + b) /
+            deficits.length;
+        if (deficitVariance > 250000) {
+          // High variance in deficits
+          final varianceValue = math.sqrt(deficitVariance).round();
+          warnings.add(
+            localizations?.inconsistentDeficitWarning(
+                  varianceValue.toString(),
+                ) ??
+                'Warning: Your calorie deficit varies significantly day-to-day (variance: $varianceValue cal). Consider more consistent intake.',
+          );
+        }
+      }
     }
 
     return warnings;

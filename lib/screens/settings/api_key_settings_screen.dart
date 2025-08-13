@@ -32,8 +32,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   void initState() {
     super.initState();
     _loadApiKey();
-    _loadSelectedModel();
     _loadDefaultModels();
+    _loadSelectedModel();
   }
 
   @override
@@ -53,7 +53,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         });
 
         // Load available models for existing API key
-        _fetchAvailableModels(apiKey);
+        await _fetchAvailableModels(apiKey);
+        // After models are loaded, reload selected model
+        await _loadSelectedModel();
       }
     } catch (e) {
       // ignore: use_build_context_synchronously
@@ -69,7 +71,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     setState(() {
       _selectedModel = model;
       // Ensure the selected model is in the available models list
-      if (!_availableModels.any((m) => m.id == _selectedModel)) {
+      if (!_availableModels.any((m) => m.id == _selectedModel) &&
+          _availableModels.isNotEmpty) {
         _selectedModel = _availableModels.first.id;
       }
     });
@@ -79,7 +82,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     setState(() {
       _availableModels = _openAIService.getDefaultModels();
       // Ensure the selected model is in the available models list
-      if (!_availableModels.any((m) => m.id == _selectedModel)) {
+      if (!_availableModels.any((m) => m.id == _selectedModel) &&
+          _availableModels.isNotEmpty) {
         _selectedModel = _availableModels.first.id;
       }
     });
@@ -99,10 +103,12 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         _availableModels = models;
 
         // Set to first model if current selected model is not in the list
-        if (!models.any((m) => m.id == _selectedModel)) {
+        if (!models.any((m) => m.id == _selectedModel) && models.isNotEmpty) {
           _selectedModel = models.first.id;
         }
       });
+      // After models are loaded, reload selected model
+      await _loadSelectedModel();
     } catch (e) {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
@@ -567,11 +573,15 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                             onChanged:
                                 _isLoading
                                     ? null
-                                    : (value) {
+                                    : (value) async {
                                       if (value != null) {
                                         setState(() {
                                           _selectedModel = value;
                                         });
+                                        // Save selected model immediately
+                                        await _openAIService.setSelectedModel(
+                                          value,
+                                        );
                                       }
                                     },
                           ),

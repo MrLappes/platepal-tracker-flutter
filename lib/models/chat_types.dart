@@ -590,6 +590,7 @@ class ChatStepInput {
   final String? enhancedSystemPrompt;
   final ThinkingStepResponse? thinkingResult; // Added
   final String? initialSystemPrompt; // Added
+  final String? historyContext; // Added for step feedback and loop prevention
   final Map<String, dynamic>? metadata;
 
   const ChatStepInput({
@@ -600,6 +601,7 @@ class ChatStepInput {
     this.enhancedSystemPrompt,
     this.thinkingResult, // Added
     this.initialSystemPrompt, // Added
+    this.historyContext, // Added
     this.metadata,
   });
 
@@ -611,6 +613,7 @@ class ChatStepInput {
     ValueGetter<String?>? enhancedSystemPrompt,
     ValueGetter<ThinkingStepResponse?>? thinkingResult, // Added
     ValueGetter<String?>? initialSystemPrompt, // Added
+    ValueGetter<String?>? historyContext, // Added
     Map<String, dynamic>? metadata,
   }) {
     return ChatStepInput(
@@ -631,6 +634,10 @@ class ChatStepInput {
           initialSystemPrompt != null
               ? initialSystemPrompt()
               : this.initialSystemPrompt, // Added
+      historyContext:
+          historyContext != null
+              ? historyContext()
+              : this.historyContext, // Added
       metadata: metadata ?? this.metadata,
     );
   }
@@ -650,6 +657,9 @@ class ContextRequirements {
   needsConversationHistory; // Whether full conversation history is needed for context
   final String?
   historicalMealPeriod; // e.g., "yesterday", "last_3_days", "last_week"
+  final List<String>? dishSearchTerms; // Dish names to search for in database
+  final List<String>?
+  ingredientSearchTerms; // Ingredients to search for in database
   final Map<String, dynamic>? metadata;
   const ContextRequirements({
     this.needsUserProfile = false,
@@ -662,6 +672,8 @@ class ContextRequirements {
     this.needsHistoricalMealLookup = false,
     this.needsConversationHistory = true,
     this.historicalMealPeriod,
+    this.dishSearchTerms,
+    this.ingredientSearchTerms,
     this.metadata,
   });
   factory ContextRequirements.fromJson(Map<String, dynamic> json) {
@@ -681,6 +693,14 @@ class ContextRequirements {
       needsConversationHistory:
           json['needsConversationHistory'] as bool? ?? true,
       historicalMealPeriod: json['historicalMealPeriod'] as String?,
+      dishSearchTerms:
+          json['dishSearchTerms'] != null
+              ? List<String>.from(json['dishSearchTerms'] as List)
+              : null,
+      ingredientSearchTerms:
+          json['ingredientSearchTerms'] != null
+              ? List<String>.from(json['ingredientSearchTerms'] as List)
+              : null,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
@@ -696,6 +716,8 @@ class ContextRequirements {
       'needsHistoricalMealLookup': needsHistoricalMealLookup,
       'needsConversationHistory': needsConversationHistory,
       'historicalMealPeriod': historicalMealPeriod,
+      'dishSearchTerms': dishSearchTerms,
+      'ingredientSearchTerms': ingredientSearchTerms,
       'metadata': metadata,
     };
   }
@@ -711,6 +733,8 @@ class ContextRequirements {
     bool? needsHistoricalMealLookup,
     bool? needsConversationHistory,
     String? historicalMealPeriod,
+    List<String>? dishSearchTerms,
+    List<String>? ingredientSearchTerms,
     Map<String, dynamic>? metadata,
   }) {
     return ContextRequirements(
@@ -729,6 +753,9 @@ class ContextRequirements {
       needsConversationHistory:
           needsConversationHistory ?? this.needsConversationHistory,
       historicalMealPeriod: historicalMealPeriod ?? this.historicalMealPeriod,
+      dishSearchTerms: dishSearchTerms ?? this.dishSearchTerms,
+      ingredientSearchTerms:
+          ingredientSearchTerms ?? this.ingredientSearchTerms,
       metadata: metadata ?? this.metadata,
     );
   }

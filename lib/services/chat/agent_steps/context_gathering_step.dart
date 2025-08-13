@@ -64,20 +64,105 @@ class ContextGatheringStep extends AgentStep {
           debugPrint('⚠️ Failed to get user profile: $e');
         }
       }
-      // Gather existing dishes if needed
-      if (contextRequirements.needsExistingDishes ||
-          contextRequirements.needsListOfCreatedDishes) {
+      // Gather existing dishes if needed (unless explicitly skipped)
+      final skipExistingDishesLookup =
+          input.metadata?['skipExistingDishesLookup'] == true;
+
+      if ((contextRequirements.needsExistingDishes ||
+              contextRequirements.needsListOfCreatedDishes) &&
+          !skipExistingDishesLookup) {
         try {
-          final dishes = await _dishRepository.getAllDishes();
+          List<Dish> dishes = [];
+
+          // Use search terms if available for more targeted results
+          if (contextRequirements.dishSearchTerms?.isNotEmpty == true ||
+              contextRequirements.ingredientSearchTerms?.isNotEmpty == true) {
+            final Set<String> uniqueDishIds = <String>{};
+            final List<Dish> searchResults = [];
+
+            // Search by dish names
+            if (contextRequirements.dishSearchTerms?.isNotEmpty == true) {
+              for (final searchTerm in contextRequirements.dishSearchTerms!) {
+                try {
+                  final results = await _dishRepository.searchDishes(
+                    searchTerm,
+                  );
+                  for (final dish in results) {
+                    if (!uniqueDishIds.contains(dish.id)) {
+                      uniqueDishIds.add(dish.id);
+                      searchResults.add(dish);
+                    }
+                  }
+                } catch (e) {
+                  debugPrint(
+                    '⚠️ Failed to search dishes for term "$searchTerm": $e',
+                  );
+                }
+              }
+            }
+
+            // Search by ingredients
+            if (contextRequirements.ingredientSearchTerms?.isNotEmpty == true) {
+              for (final searchTerm
+                  in contextRequirements.ingredientSearchTerms!) {
+                try {
+                  final results = await _dishRepository.searchDishes(
+                    searchTerm,
+                  );
+                  for (final dish in results) {
+                    if (!uniqueDishIds.contains(dish.id)) {
+                      uniqueDishIds.add(dish.id);
+                      searchResults.add(dish);
+                    }
+                  }
+                } catch (e) {
+                  debugPrint(
+                    '⚠️ Failed to search ingredients for term "$searchTerm": $e',
+                  );
+                }
+              }
+            }
+
+            // Limit to 10 dishes maximum for performance
+            dishes = searchResults.take(10).toList();
+
+            debugPrint(
+              '📊 Found ${dishes.length} dishes using search terms: '
+              'dishes=${contextRequirements.dishSearchTerms}, '
+              'ingredients=${contextRequirements.ingredientSearchTerms}',
+            );
+          } else {
+            // Fallback to all dishes if no search terms provided
+            final allDishes = await _dishRepository.getAllDishes();
+            dishes = allDishes.take(10).toList(); // Limit to 10 for performance
+            debugPrint(
+              '📊 Using fallback: found ${dishes.length} dishes (limited to 10)',
+            );
+          }
+
           if (dishes.isNotEmpty) {
             contextSections['existingDishes'] = _formatDishes(dishes);
             gatheredContextData['existingDishes'] =
                 dishes.map((d) => d.toJson()).toList();
             debugPrint('📊 Added ${dishes.length} existing dishes to context');
+
+            // Log first few dish names for debugging
+            final dishNames = dishes.take(3).map((d) => d.name).join(', ');
+            debugPrint(
+              '📊 Sample dish names: $dishNames${dishes.length > 3 ? ' and ${dishes.length - 3} more...' : ''}',
+            );
+          } else {
+            debugPrint('⚠️ No existing dishes found matching search criteria');
+            // Log the search terms that were used
+            debugPrint(
+              '⚠️ Search terms used - dishes: ${contextRequirements.dishSearchTerms}, ingredients: ${contextRequirements.ingredientSearchTerms}',
+            );
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get dishes: $e');
         }
+      } else if (skipExistingDishesLookup) {
+        debugPrint('⏩ Skipping existing dishes lookup as requested');
       }
       // Gather today's nutrition if needed
       if (contextRequirements.needsTodaysNutrition) {
@@ -143,10 +228,61 @@ class ContextGatheringStep extends AgentStep {
           debugPrint('⚠️ Failed to get historical meals: $e');
         }
       }
+
+      // Check if we need dish creation info - either from original requirements or from metadata
+      var needsDishCreationInfo = contextRequirements.needsInfoOnDishCreation;
+
+      // Check for metadata from pipeline control that explicitly requests dish creation
+      final showHowToCreateDishes =
+          input.metadata?['showHowToCreateDishes'] == true;
+      final createDishesFromScratch =
+          input.metadata?['createDishesFromScratch'] == true;
+      final retryWithDishCreation =
+          input.metadata?['retryWithDishCreation'] == true;
+
+      // Check if we need to enable dish creation due to missing data
+      final noExistingDishesFound =
+          gatheredContextData['existingDishes'] == null &&
+          contextRequirements.needsExistingDishes;
+      final noHistoricalMealsFound =
+          gatheredContextData['historicalMeals'] == null &&
+          contextRequirements.needsHistoricalMealLookup;
+
+      // If requested or needed, set dish creation to true
+      if (showHowToCreateDishes ||
+          createDishesFromScratch ||
+          retryWithDishCreation ||
+          (noExistingDishesFound || noHistoricalMealsFound)) {
+        needsDishCreationInfo = true;
+        debugPrint(
+          '📝 Setting needsInfoOnDishCreation to true because: ' +
+              (showHowToCreateDishes
+                  ? 'showHowToCreateDishes requested, '
+                  : '') +
+              (createDishesFromScratch
+                  ? 'createDishesFromScratch requested, '
+                  : '') +
+              (retryWithDishCreation
+                  ? 'retryWithDishCreation requested, '
+                  : '') +
+              (noExistingDishesFound ? 'no existing dishes found, ' : '') +
+              (noHistoricalMealsFound ? 'no historical meals found' : ''),
+        );
+      }
+
       // Add dish creation info if needed
-      if (contextRequirements.needsInfoOnDishCreation) {
+      if (needsDishCreationInfo) {
         contextSections['dishCreationInfo'] = _getDishCreationInfo();
         debugPrint('📊 Added dish creation info to context');
+
+        // If we're specifically creating dishes from scratch, make it clear in the context
+        if (createDishesFromScratch || retryWithDishCreation) {
+          contextSections['createDishesFromScratch'] =
+              "The user's request should be handled by creating new dishes from scratch, " +
+              "rather than only looking up existing dishes. Focus on generating complete " +
+              "dish information including ingredients, nutrition facts, and preparation steps.";
+          debugPrint('📊 Added instruction to create dishes from scratch');
+        }
       }
       // Add nutrition advice placeholder if needed
       if (contextRequirements.needsNutritionAdvice) {
@@ -218,39 +354,34 @@ class ContextGatheringStep extends AgentStep {
 
   // --- Formatting and helper methods ---
   String _formatUserProfile(UserProfile userProfile) {
-    final buffer = StringBuffer();
-    buffer.writeln('**Age:** ${userProfile.age}');
-    buffer.writeln('**Gender:** ${userProfile.gender}');
-    buffer.writeln('**Height:** ${userProfile.height} cm');
-    buffer.writeln('**Weight:** ${userProfile.weight} kg');
-    buffer.writeln(
-      '**Activity Level:** ${_formatActivityLevelString(userProfile.activityLevel)}',
-    );
-    buffer.writeln(
-      '**Fitness Goal:** ${_formatFitnessGoalString(userProfile.goals.goal)}',
-    );
+    var profile = '''
+**Age:** ${userProfile.age}
+**Gender:** ${userProfile.gender}
+**Height:** ${userProfile.height} cm
+**Weight:** ${userProfile.weight} kg
+**Activity Level:** ${_formatActivityLevelString(userProfile.activityLevel)}
+**Fitness Goal:** ${_formatFitnessGoalString(userProfile.goals.goal)}
+''';
 
     if (userProfile.preferences != null) {
-      buffer.writeln(
-        '**Dietary Preferences:** ${userProfile.preferences!.dietType}',
-      );
+      profile += '''
+**Dietary Preferences:** ${userProfile.preferences!.dietType}
+''';
       if (userProfile.preferences!.allergies.isNotEmpty) {
-        buffer.writeln(
-          '**Allergies:** ${userProfile.preferences!.allergies.join(", ")}',
-        );
+        profile +=
+            '**Allergies:** ${userProfile.preferences!.allergies.join(", ")}\n';
       }
       if (userProfile.preferences!.dislikes.isNotEmpty) {
-        buffer.writeln(
-          '**Dislikes:** ${userProfile.preferences!.dislikes.join(", ")}',
-        );
+        profile +=
+            '**Dislikes:** ${userProfile.preferences!.dislikes.join(", ")}\n';
       }
       if (userProfile.preferences!.cuisinePreferences.isNotEmpty) {
-        buffer.writeln(
-          '**Cuisine Preferences:** ${userProfile.preferences!.cuisinePreferences.join(", ")}',
-        );
+        profile +=
+            '**Cuisine Preferences:** ${userProfile.preferences!.cuisinePreferences.join(", ")}\n';
       }
     }
-    return buffer.toString();
+
+    return profile;
   }
 
   String _formatActivityLevelString(String activityLevel) {
@@ -328,6 +459,44 @@ class ContextGatheringStep extends AgentStep {
   }
 
   String _getDishCreationInfo() {
-    return 'To create a new dish, provide a name, list of ingredients, and nutrition info. You can also add a photo.';
+    return '''
+When creating a new dish in response to a user query, follow these guidelines:
+
+1. Structure:
+   - Provide a complete dish name
+   - List all ingredients with quantities
+   - Include detailed nutritional information (calories, protein, carbs, fat, etc.)
+   - Include preparation steps
+   - Suggest variations when appropriate
+
+2. Response Format:
+   When creating dishes, respond with JSON that includes a "dishes" array with objects containing:
+   {
+     "name": "Dish Name",
+     "ingredients": [
+       {"name": "Ingredient 1", "quantity": "100g"},
+       {"name": "Ingredient 2", "quantity": "2 tbsp"}
+     ],
+     "nutritionFacts": {
+       "calories": 350,
+       "protein": 25,
+       "carbs": 30,
+       "fat": 15,
+       "fiber": 5
+     },
+     "preparationSteps": [
+       "Step 1: Do this",
+       "Step 2: Do that"
+     ],
+     "preparationTime": "30 minutes",
+     "servings": 4,
+     "tags": ["healthy", "high-protein", "vegetarian"]
+   }
+
+3. For recipe requests:
+   - Create complete dishes even if the user doesn't explicitly have them in their history
+   - Focus on providing dishes that match their request, preferences, and dietary needs
+   - Always include all required dish fields rather than saying "no matching dish found"
+''';
   }
 }

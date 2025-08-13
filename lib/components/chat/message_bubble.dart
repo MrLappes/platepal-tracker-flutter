@@ -110,6 +110,10 @@ class MessageBubble extends StatelessWidget {
               const SizedBox(height: 12),
               _buildUserIngredientsDisplay(context, theme),
             ],
+            if (!isUser && _hasModifications()) ...[
+              const SizedBox(height: 8),
+              _buildModificationHint(context, theme),
+            ],
             if (message.isSending || message.hasFailed) ...[
               const SizedBox(height: 8),
               Row(
@@ -422,7 +426,8 @@ class MessageBubble extends StatelessWidget {
   /// Check if this message has agent processing metadata
   bool _hasAgentMetadata() {
     return message.metadata != null &&
-        message.metadata!['mode'] == 'full_agent_pipeline';
+        (message.metadata!['mode'] == 'full_agent_pipeline' ||
+            message.metadata!['mode'] == 'autonomous_verification_pipeline');
   }
 
   /// Check if this message has processed dishes
@@ -834,6 +839,67 @@ class MessageBubble extends StatelessWidget {
                     ),
                   );
                 }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Check if this message has pipeline modifications
+  bool _hasModifications() {
+    if (!_hasAgentMetadata()) return false;
+    final modifications =
+        message.metadata?['pipelineModifications'] as Map<String, dynamic>?;
+    final summary = modifications?['summary'] as Map<String, dynamic>?;
+    final totalMods = summary?['totalModifications'] as int? ?? 0;
+    return totalMods > 0;
+  }
+
+  /// Build subtle modification hint
+  Widget _buildModificationHint(BuildContext context, ThemeData theme) {
+    final modifications =
+        message.metadata?['pipelineModifications'] as Map<String, dynamic>?;
+    final summary = modifications?['summary'] as Map<String, dynamic>?;
+    final totalMods = summary?['totalModifications'] as int? ?? 0;
+
+    if (totalMods == 0) return const SizedBox.shrink();
+
+    final hasEmergency = summary?['hasEmergencyOverrides'] as bool? ?? false;
+    final hasAi = summary?['hasAiValidations'] as bool? ?? false;
+
+    String emoji = '🔧';
+    String text = '$totalMods automatic improvements applied';
+    Color color = Colors.green;
+
+    if (hasEmergency) {
+      emoji = '🚨';
+      text = '$totalMods emergency fixes applied';
+      color = Colors.red;
+    } else if (hasAi) {
+      emoji = '🤖';
+      text = '$totalMods AI enhancements applied';
+      color = Colors.purple;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 11,
+            ),
           ),
         ],
       ),

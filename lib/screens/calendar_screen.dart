@@ -27,8 +27,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DailyMacroSummary? _selectedDaySummary;
   List<DishLog> _selectedDayLogs = [];
   UserProfile? _userProfile;
-  bool _isLoadingAiTip = false;
   bool _isMacroSummaryExpanded = true;
+  bool _isGeneratingTip = false;
 
   // Calendar navigation state
   late DateTime _weekStartDate;
@@ -211,7 +211,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       return;
     }
 
-    setState(() => _isLoadingAiTip = true);
+    setState(() => _isGeneratingTip = true);
 
     try {
       // Build context for AI recommendation
@@ -278,7 +278,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         );
       }
     } finally {
-      setState(() => _isLoadingAiTip = false);
+      setState(() => _isGeneratingTip = false);
     }
   }
 
@@ -687,27 +687,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               children: [
-                                // Collapsible Macro Summary
-                                if (_selectedDaySummary != null)
-                                  MacroSummary(
-                                    calories: _selectedDaySummary!.calories,
-                                    protein: _selectedDaySummary!.protein,
-                                    carbs: _selectedDaySummary!.carbs,
-                                    fat: _selectedDaySummary!.fat,
-                                    fiber: _selectedDaySummary!.fiber,
-                                    calorieTarget:
-                                        _userProfile?.goals.targetCalories,
-                                    proteinTarget:
-                                        _userProfile?.goals.targetProtein,
-                                    carbsTarget:
-                                        _userProfile?.goals.targetCarbs,
-                                    fatTarget: _userProfile?.goals.targetFat,
-                                    fiberTarget:
-                                        _userProfile?.goals.targetFiber,
-                                    isCollapsible: true,
-                                    initiallyExpanded: _isMacroSummaryExpanded,
-                                    onAiTipPressed: _getAiTip,
-                                  ),
+                                // Collapsible Macro Summary                                if (_selectedDaySummary != null)
+                                MacroSummary(
+                                  calories: _selectedDaySummary!.calories,
+                                  protein: _selectedDaySummary!.protein,
+                                  carbs: _selectedDaySummary!.carbs,
+                                  fat: _selectedDaySummary!.fat,
+                                  fiber: _selectedDaySummary!.fiber,
+                                  caloriesBurned:
+                                      _selectedDaySummary!.caloriesBurned,
+                                  isCaloriesBurnedEstimated:
+                                      _selectedDaySummary!
+                                          .isCaloriesBurnedEstimated,
+                                  calorieTarget:
+                                      _userProfile?.goals.targetCalories,
+                                  proteinTarget:
+                                      _userProfile?.goals.targetProtein,
+                                  carbsTarget: _userProfile?.goals.targetCarbs,
+                                  fatTarget: _userProfile?.goals.targetFat,
+                                  fiberTarget: _userProfile?.goals.targetFiber,
+                                  isCollapsible: true,
+                                  initiallyExpanded: _isMacroSummaryExpanded,
+                                  onAiTipPressed: _getAiTip,
+                                  selectedDate: _selectedDate,
+                                ),
 
                                 // Calendar Day Detail
                                 CalendarDayDetail(
@@ -728,219 +731,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
       ),
     );
-  }
-
-  Widget _buildMacroBar({
-    required String label,
-    required double current,
-    double? target,
-    required String unit,
-    required Color color,
-    required BuildContext context,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final progressWidth = _getProgressWidth(current, target);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Text(
-              target != null
-                  ? '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit} / ${target.toStringAsFixed(target == target.toInt() ? 0 : 1)}${unit}'
-                  : '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}${unit}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Container(
-          height: 8,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progressWidth,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCompactMacroItem(
-    String label,
-    double current,
-    double? target,
-    Color color,
-  ) {
-    final theme = Theme.of(context);
-    final progressWidth = _getProgressWidth(current, target);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
-        const SizedBox(height: 2),
-        Container(
-          height: 4,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progressWidth,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          current.toStringAsFixed(0),
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 10,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Color _getFiberColorWithTarget(double current, double? target) {
-    if (target == null || target == 0) return Colors.grey;
-
-    const yellow = Color(0xFFfacc15);
-    const green = Color(0xFF4ade80);
-
-    final ratio = current / target;
-
-    if (ratio < 1) {
-      return _interpolateColor(yellow, green, ratio);
-    }
-    return green;
-  }
-
-  // Helper methods for progress bar colors and calculations
-  double _getProgressWidth(double current, double? target) {
-    if (target == null) return 0.2;
-
-    if (current > target * 1.5) {
-      return 1.0;
-    }
-
-    return min(1.0, current / target);
-  }
-
-  Color _getCaloriesColor(double current, double? target) {
-    if (target == null) return Colors.grey;
-
-    const yellow = Color(0xFFfacc15);
-    const green = Color(0xFF4ade80);
-    const red = Color(0xFFef4444);
-
-    final ratio = current / target;
-
-    if (ratio < 0.9) {
-      final factor = min(1.0, ratio / 0.9);
-      return _interpolateColor(yellow, green, factor);
-    } else if (ratio >= 0.9 && ratio <= 1.1) {
-      return green;
-    } else if (ratio > 1.1 && ratio <= 1.2) {
-      final factor = (ratio - 1.1) / 0.1;
-      return _interpolateColor(green, yellow, factor);
-    } else {
-      final factor = min(1.0, (ratio - 1.2) / 0.3);
-      return _interpolateColor(yellow, red, factor);
-    }
-  }
-
-  Color _getProteinColor(double current, double? target) {
-    if (target == null) return Colors.grey;
-
-    const lightGreen = Color(0xFFa3e635);
-    const green = Color(0xFF4ade80);
-    const darkGreen = Color(0xFF16a34a);
-
-    final ratio = current / target;
-
-    if (ratio < 0.7) {
-      final factor = min(1.0, ratio / 0.7);
-      return _interpolateColor(const Color(0xFFd1d5db), lightGreen, factor);
-    } else if (ratio >= 0.7 && ratio < 0.9) {
-      final factor = (ratio - 0.7) / 0.2;
-      return _interpolateColor(lightGreen, green, factor);
-    } else {
-      return darkGreen;
-    }
-  }
-
-  Color _getCarbsColor(double current, double? target) {
-    if (target == null) return Colors.grey;
-
-    const yellow = Color(0xFFfacc15);
-    const green = Color(0xFF4ade80);
-    const red = Color(0xFFef4444);
-
-    final optimalTarget = target;
-    final distance = (current - optimalTarget).abs() / optimalTarget;
-
-    if (distance <= 0.2) {
-      return green;
-    } else if (distance <= 0.5) {
-      final factor = (distance - 0.2) / 0.3;
-      return _interpolateColor(green, yellow, factor);
-    } else {
-      final factor = min(1.0, (distance - 0.5) / 0.5);
-      return _interpolateColor(yellow, red, factor);
-    }
-  }
-
-  Color _getFatColor(double current, double? target) {
-    if (target == null) return Colors.grey;
-
-    const green = Color(0xFF4ade80);
-    const yellow = Color(0xFFfacc15);
-    const red = Color(0xFFef4444);
-
-    final ratio = current / target;
-
-    if (ratio < 0.8) {
-      return green;
-    } else if (ratio >= 0.8 && ratio <= 1) {
-      final factor = (ratio - 0.8) / 0.2;
-      return _interpolateColor(green, yellow, factor);
-    } else {
-      final factor = min(1.0, (ratio - 1) / 0.2);
-      return _interpolateColor(yellow, red, factor);
-    }
-  }
-
-  Color _interpolateColor(Color start, Color end, double t) {
-    t = t.clamp(0.0, 1.0);
-    return Color.lerp(start, end, t) ?? start;
   }
 }
 
