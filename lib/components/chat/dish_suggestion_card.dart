@@ -807,7 +807,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'Similar dish exists - tap to edit',
+                              'Similar dish exists',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.w500,

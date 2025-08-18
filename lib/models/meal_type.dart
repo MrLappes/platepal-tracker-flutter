@@ -21,17 +21,41 @@ enum MealType {
 
   /// Convert from string to enum
   static MealType fromString(String value) {
-    switch (value.toLowerCase()) {
+    final v = value.trim().toLowerCase();
+    // Accept several common synonyms and fuzzy matches
+    if (v.isEmpty) return MealType.snack;
+    if (v.contains('break')) return MealType.breakfast;
+    if (v.contains('lunch') || v.contains('noon')) return MealType.lunch;
+    if (v.contains('dinner') || v.contains('supper') || v.contains('evening'))
+      return MealType.dinner;
+    if (v.contains('snack') ||
+        v.contains('between') ||
+        v.contains('small') ||
+        v.contains('snk'))
+      return MealType.snack;
+
+    // Handle short codes
+    switch (v) {
+      case 'bf':
+      case 'bfast':
       case 'breakfast':
         return MealType.breakfast;
+      case 'l':
+      case 'ln':
       case 'lunch':
         return MealType.lunch;
+      case 'd':
+      case 'din':
       case 'dinner':
+      case 'supper':
         return MealType.dinner;
+      case 's':
+      case 'sn':
       case 'snack':
         return MealType.snack;
       default:
-        throw ArgumentError('Invalid meal type: $value');
+        // As a safe fallback, return snack to ensure UI shows something consistent
+        return MealType.snack;
     }
   }
 

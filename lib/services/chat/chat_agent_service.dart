@@ -235,6 +235,9 @@ class ChatAgentService {
           previousThinkingSteps,
           restartCount,
         ),
+        // Ensure image and ingredient data are explicitly available via metadata
+        'uploadedImageUri': imageUri,
+        'userIngredients': userIngredients?.map((i) => i.toJson()).toList(),
       },
     );
 
@@ -514,6 +517,13 @@ class ChatAgentService {
           metadata: {
             ...currentInput.metadata!,
             'dishes': chatResponse['dishes'],
+            // Pass through uploaded image and user-supplied ingredients so dish processing can use them
+            'uploadedImageUri':
+                currentInput.imageUri ??
+                currentInput.metadata?['uploadedImageUri'],
+            'userIngredients':
+                currentInput.userIngredients?.map((i) => i.toJson()).toList() ??
+                currentInput.metadata?['userIngredients'],
           },
         );
 
@@ -602,6 +612,9 @@ class ChatAgentService {
         'startTime': startTime.toIso8601String(),
         'deepSearchEnabled': _deepSearchEnabled,
         'botConfig': botConfig.toJson(),
+        // Propagate image and ingredients to metadata so all steps can access them
+        'uploadedImageUri': imageUri,
+        'userIngredients': userIngredients?.map((i) => i.toJson()).toList(),
       },
     );
 
@@ -675,6 +688,13 @@ class ChatAgentService {
             // Include previous step's results if available
             '${previousStep}Result':
                 _findStepResult(stepResults, previousStep)?.data,
+            // Keep image and ingredient references available for verification logic
+            'uploadedImageUri':
+                currentInput.imageUri ??
+                currentInput.metadata?['uploadedImageUri'],
+            'userIngredients':
+                currentInput.userIngredients?.map((i) => i.toJson()).toList() ??
+                currentInput.metadata?['userIngredients'],
           },
         );
 
@@ -1036,6 +1056,8 @@ class ChatAgentService {
             metadata: <String, dynamic>{
               'dishes': aiResponse['dishes'],
               'uploadedImageUri': imageUri,
+              'userIngredients':
+                  userIngredients?.map((i) => i.toJson()).toList(),
             },
           );
           dishResult = await _dishProcessingStep.execute(dishInput);
@@ -1357,6 +1379,23 @@ class ChatAgentService {
         return null;
       }
 
+      // Ensure uploaded image and user-supplied ingredients are explicitly present
+      // in currentInput.metadata so any pipeline-control actions and downstream
+      // steps can rely on those keys regardless of where they read metadata.
+      final mergedUploadedImage =
+          currentInput.imageUri ?? currentInput.metadata?['uploadedImageUri'];
+      final mergedUserIngredients =
+          currentInput.userIngredients?.map((i) => i.toJson()).toList() ??
+          currentInput.metadata?['userIngredients'];
+
+      currentInput = currentInput.copyWith(
+        metadata: {
+          ...currentInput.metadata ?? {},
+          'uploadedImageUri': mergedUploadedImage,
+          'userIngredients': mergedUserIngredients,
+        },
+      );
+
       // Patch missing keys and normalize broken OpenAI output
       List<dynamic> rawActions =
           pipelineControlData['recommendedActions'] ?? [];
@@ -1415,15 +1454,9 @@ class ChatAgentService {
 
       final normalized = <String, dynamic>{
         'hasEnoughContext': pipelineControlData['hasEnoughContext'] ?? false,
-        'confidence': pipelineControlData['confidence'] ?? 0.0,
-        'recommendedActions': mappedActions,
-        'reasoning': pipelineControlData['reasoning'] ?? '',
-        'stepsToRetry': pipelineControlData['stepsToRetry'] ?? [],
-        'contextModifications': contextMods,
-        'identifiedGaps': pipelineControlData['identifiedGaps'] ?? [],
-        'suggestions': pipelineControlData['suggestions'] ?? [],
-        'stepsToSkip': pipelineControlData['stepsToSkip'] ?? [],
-        'searchParameters': pipelineControlData['searchParameters'],
+        // Expose image + ingredients in normalized control data to aid decisions
+        'uploadedImageUri': mergedUploadedImage,
+        'userIngredients': mergedUserIngredients,
       };
 
       PipelineControlResult pipelineControl;

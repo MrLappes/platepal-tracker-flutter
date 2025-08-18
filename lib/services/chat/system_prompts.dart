@@ -111,6 +111,7 @@ When creating a new dish in response to a user query, follow these guidelines:
 2. Response Format:
    When creating dishes, respond with JSON that includes a "dishes" array with objects containing:
    {
+     "id": "string (use the literal string \"random\" for new dishes - do NOT generate predictable or stable IDs)",
      "name": "Dish Name",
      "ingredients": [
        {"name": "Ingredient 1", "quantity": "100g"},
@@ -136,6 +137,10 @@ When creating a new dish in response to a user query, follow these guidelines:
    - Create complete dishes even if the user doesn't explicitly have them in their history
    - Focus on providing dishes that match their request, preferences, and dietary needs
    - Always include all required dish fields rather than saying "no matching dish found"
+
+IMPORTANT NOTE ABOUT IDS:
+- For newly created dishes, ALWAYS set the "id" field to the literal string "random". The application will replace this placeholder with a secure, unpredictable id server-side.
+- If referencing an existing dish, include its exact database id in the "id" field. The application will verify and load the referenced dish; if the id is not found, the application will treat it as new and generate a server id.
 ''';
 
   /// Template for autonomous verification prompt
@@ -744,6 +749,13 @@ Use this profile information to provide personalized nutrition advice, meal sugg
 
 No user profile information available.
 ''';
+
+  /// System instructions for dish validation step
+  static const String dishValidationSystemInstructions =
+      'You are PlatePal assistant specialized in validating and correcting dish data.\n'
+      'Given a ProcessedDish and optional user-provided ingredients or an attached image,\n'
+      'verify ingredient names, amounts, and nutrition values, suggest precise edits in JSON format.\n'
+      'Respond only with a JSON object containing keys: needsEdits (bool), edits (array), confidence (0.0-1.0).';
 
   // Context reduction helpers
   static Map<String, String> getContextReductionMarkers() {

@@ -26,11 +26,49 @@ class DishProcessingStep extends AgentStep {
       debugPrint('🍽️ DishProcessingStep: Starting dish processing');
 
       // Handle both analyzed dishes and raw dish data
-      final dishesData =
-          input.metadata?['dishes'] as List<dynamic>? ??
-          input.metadata?['analyzedDishes'] as List<dynamic>? ??
-          [];
+      final dishesData = input.metadata?['dishes'] as List<dynamic>? ?? [];
       final uploadedImageUri = input.metadata?['uploadedImageUri'] as String?;
+
+      // Extract user-provided ingredients (may be passed as typed objects or maps)
+      List<UserIngredient>? userIngredients;
+      try {
+        if (input.userIngredients != null &&
+            input.userIngredients!.isNotEmpty) {
+          userIngredients = input.userIngredients;
+        } else {
+          final raw = input.metadata?['userIngredients'] as List<dynamic>?;
+          if (raw != null) {
+            userIngredients = [];
+            for (final item in raw) {
+              try {
+                if (item is UserIngredient) {
+                  userIngredients.add(item);
+                } else if (item is Map<String, dynamic>) {
+                  userIngredients.add(
+                    UserIngredient.fromJson(Map<String, dynamic>.from(item)),
+                  );
+                } else if (item is String) {
+                  // Create a minimal UserIngredient when only name string is provided
+                  userIngredients.add(
+                    UserIngredient(
+                      id: _generateIngredientId(),
+                      name: item,
+                      quantity: 0.0,
+                      unit: 'g',
+                    ),
+                  );
+                }
+              } catch (e) {
+                debugPrint('⚠️ Could not parse user ingredient: $e');
+              }
+            }
+            if (userIngredients.isEmpty) userIngredients = null;
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error extracting user ingredients: $e');
+        userIngredients = null;
+      }
 
       if (dishesData.isEmpty) {
         debugPrint('ℹ️ DishProcessingStep: No dishes to process');
@@ -54,11 +92,27 @@ class DishProcessingStep extends AgentStep {
             '   Processing dish ${i + 1}: ${dishData['name'] ?? dishData['dishName']}',
           );
 
-          final processedDish = await _processSingleDish(
-            dishData,
-            uploadedImageUri,
-            input.userIngredients,
-          );
+          // If the AI referenced an existing DB dish by id (or minimal record),
+          // attempt to load the full dish from the local DishService so we can
+          // present complete details (ingredients, nutrition, image, etc.).
+          ProcessedDish? processedDish;
+          try {
+            processedDish = await _tryLoadDishFromDatabaseReference(
+              dishData,
+              uploadedImageUri,
+              userIngredients,
+            );
+          } catch (e) {
+            debugPrint('⚠️ Error loading referenced DB dish: $e');
+          }
+
+          if (processedDish == null) {
+            processedDish = await _processSingleDish(
+              dishData,
+              uploadedImageUri,
+              userIngredients,
+            );
+          }
 
           if (processedDish != null) {
             validatedDishes.add(processedDish);
@@ -189,11 +243,17 @@ class DishProcessingStep extends AgentStep {
     try {
       // Handle both AnalyzedDishData format and raw dish data
       if (dishData.containsKey('dishName')) {
-        // This is AnalyzedDishData format
-        return _processAnalyzedDishData(dishData, uploadedImageUri);
+        return await _processAnalyzedDishData(
+          dishData,
+          uploadedImageUri,
+          userIngredients,
+        );
       } else {
-        // This is raw dish data format
-        return _processRawDishData(dishData, uploadedImageUri, userIngredients);
+        return await _processRawDishData(
+          dishData,
+          uploadedImageUri,
+          userIngredients,
+        );
       }
     } catch (error) {
       debugPrint('❌ Error processing single dish: $error');
@@ -202,24 +262,45 @@ class DishProcessingStep extends AgentStep {
   }
 
   /// Processes AnalyzedDishData format
-  ProcessedDish? _processAnalyzedDishData(
+  Future<ProcessedDish?> _processAnalyzedDishData(
     Map<String, dynamic> dishData,
     String? uploadedImageUri,
-  ) {
+    List<UserIngredient>? userIngredients,
+  ) async {
     try {
       final analyzedData = AnalyzedDishData.fromJson(dishData);
 
       // Calculate nutrition from ingredients instead of using estimated nutrition
+      // Build ingredient list from analyzed data
+      final ingredients = <FoodIngredient>[];
+      for (final ing in analyzedData.ingredients) {
+        final parsed = _parseIngredient(ing.toJson());
+        if (parsed != null) ingredients.add(parsed);
+      }
+
+      // If user provided ingredients, merge them to ensure user input takes precedence
+      final mergedIngredients =
+          userIngredients != null && userIngredients.isNotEmpty
+              ? _mergeUserIngredientsIntoIngredients(
+                ingredients,
+                userIngredients,
+              )
+              : ingredients;
+
       final calculatedNutrition = _calculateNutritionFromIngredients(
-        analyzedData.ingredients,
+        mergedIngredients,
       );
 
       final now = DateTime.now();
+
+      // Determine final dish id: accept only DB-backed ids, otherwise generate new
+      final resolvedId = await _resolveDishId(dishData);
+
       return ProcessedDish(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: resolvedId,
         name: analyzedData.dishName,
         description: analyzedData.description,
-        ingredients: analyzedData.ingredients,
+        ingredients: mergedIngredients,
         totalNutrition: calculatedNutrition, // Use calculated nutrition
         servings: analyzedData.estimatedServings,
         imageUrl: uploadedImageUri,
@@ -237,11 +318,11 @@ class DishProcessingStep extends AgentStep {
   }
 
   /// Processes raw dish data format
-  ProcessedDish? _processRawDishData(
+  Future<ProcessedDish?> _processRawDishData(
     Map<String, dynamic> dishData,
     String? uploadedImageUri,
     List<UserIngredient>? userIngredients,
-  ) {
+  ) async {
     try {
       final dishName = dishData['name'] as String?;
       if (dishName == null || dishName.trim().isEmpty) {
@@ -260,8 +341,19 @@ class DishProcessingStep extends AgentStep {
         if (ingredient != null) {
           ingredients.add(ingredient);
         }
-      } // Calculate nutrition from ingredients instead of using AI provided values
-      final nutrition = _calculateNutritionFromIngredients(ingredients);
+      }
+
+      // Calculate nutrition from ingredients instead of using AI provided values
+      // Merge/replace with user-provided ingredients if present
+      final mergedIngredients =
+          userIngredients != null && userIngredients.isNotEmpty
+              ? _mergeUserIngredientsIntoIngredients(
+                ingredients,
+                userIngredients,
+              )
+              : ingredients;
+
+      final nutrition = _calculateNutritionFromIngredients(mergedIngredients);
 
       // Parse meal type
       MealType? mealType;
@@ -283,11 +375,15 @@ class DishProcessingStep extends AgentStep {
 
       // Create the dish
       final now = DateTime.now();
+
+      // Determine final dish id: accept only DB-backed ids, otherwise generate new
+      final resolvedId = await _resolveDishId(dishData);
+
       final dish = ProcessedDish(
-        id: _generateDishId(),
+        id: resolvedId,
         name: dishName.trim(),
         description: dishData['description'] as String?,
-        ingredients: ingredients,
+        ingredients: mergedIngredients,
         totalNutrition: nutrition,
         servings: _parseDouble(dishData['servings']) ?? 1.0,
         imageUrl: uploadedImageUri,
@@ -313,15 +409,117 @@ class DishProcessingStep extends AgentStep {
     }
   }
 
+  /// Resolve dish id policy: accept DB ids only; if AI requested 'random' or
+  /// provided an unknown id, generate a new unpredictable id on the system side.
+  Future<String> _resolveDishId(Map<String, dynamic> dishData) async {
+    try {
+      final rawId = dishData['id']?.toString();
+      // If AI explicitly asked for a random/new id or didn't provide one, generate
+      if (rawId == null || rawId.toLowerCase() == 'random') {
+        return _generateDishId();
+      }
+
+      // If an id was provided, only accept it if it maps to an existing DB dish
+      final ds = _dishService;
+      if (ds != null) {
+        try {
+          final storageDish = await ds.getDishById(rawId);
+          if (storageDish != null) {
+            return storageDish.id;
+          }
+        } catch (_) {
+          // ignore and fall back to generated id
+        }
+      }
+
+      // Fallback: don't trust AI-created ids — generate a new one
+      return _generateDishId();
+    } catch (e) {
+      debugPrint('⚠️ _resolveDishId failed: $e');
+      return _generateDishId();
+    }
+  }
+
+  /// Merge user-provided ingredients into parsed ingredients list.
+  /// User ingredients take precedence: existing AI-derived ingredients with the same
+  /// name (case-insensitive) are replaced, and any additional user ingredients are appended.
+  List<FoodIngredient> _mergeUserIngredientsIntoIngredients(
+    List<FoodIngredient> parsedIngredients,
+    List<UserIngredient> userIngredients,
+  ) {
+    final merged = <FoodIngredient>[];
+
+    // Map existing ingredients by lowercased name for quick lookup
+    final existingByName = <String, FoodIngredient>{};
+    for (final ing in parsedIngredients) {
+      existingByName[ing.name.toLowerCase()] = ing;
+    }
+
+    // First, add/replace with user ingredients
+    for (final ui in userIngredients) {
+      final name = ui.name.trim();
+      final key = name.toLowerCase();
+
+      // Build a FoodIngredient from UserIngredient (preserve exact name and any provided quantity/unit)
+      BasicNutrition? nutritionFromMetadata;
+      try {
+        final meta = ui.metadata;
+        if (meta != null && meta['nutrition'] is Map<String, dynamic>) {
+          nutritionFromMetadata = BasicNutrition.fromJson(
+            Map<String, dynamic>.from(meta['nutrition'] as Map),
+          );
+        }
+      } catch (_) {
+        nutritionFromMetadata = null;
+      }
+
+      final userFood = FoodIngredient(
+        id: ui.id,
+        name: ui.name,
+        amount: ui.quantity,
+        unit: ui.unit,
+        nutrition: nutritionFromMetadata,
+      );
+
+      merged.add(userFood);
+      // Remove from existing map so we don't duplicate
+      existingByName.remove(key);
+    }
+
+    // Then add any remaining AI-derived ingredients that the user didn't override
+    for (final remaining in existingByName.values) {
+      merged.add(remaining);
+    }
+
+    return merged;
+  }
+
   /// Parses ingredient data from AI response
   /// Note: Ingredients store per-100g nutrition values, not calculated amounts
   FoodIngredient? _parseIngredient(Map<String, dynamic> ingredientData) {
     try {
       final name = ingredientData['name'] as String?;
-      final amount =
+      // Accept multiple possible keys for the amount (quantity, amount, qty, count, servingSize, weight)
+      double? amount =
+          _parseDouble(ingredientData['quantity']) ??
           _parseDouble(ingredientData['amount']) ??
-          _parseDouble(ingredientData['quantity']);
-      final unit = ingredientData['unit'] as String?;
+          _parseDouble(ingredientData['qty']) ??
+          _parseDouble(ingredientData['count']) ??
+          _parseDouble(ingredientData['servingSize']) ??
+          _parseDouble(ingredientData['weight']);
+      String? unit = (ingredientData['unit'] as String?)?.trim();
+
+      // If unit is missing but quantity is a string like '2 cups', try to extract unit
+      if ((unit == null || unit.isEmpty) &&
+          ingredientData['quantity'] is String) {
+        final qStr = (ingredientData['quantity'] as String).trim();
+        final unitMatch = RegExp(
+          r'[-+]?\d*[\.,]?\d+\s*([a-zA-Z%]+)',
+        ).firstMatch(qStr);
+        if (unitMatch != null) {
+          unit = unitMatch.group(1)!.toLowerCase();
+        }
+      }
 
       if (name == null || name.trim().isEmpty) {
         debugPrint('❌ Ingredient missing name');
@@ -377,10 +575,17 @@ class DishProcessingStep extends AgentStep {
         );
       }
 
+      // If amount is missing but an explicit inGrams value is provided, use that as grams
+      final inGramsExplicit =
+          ingredientData['inGrams'] ??
+          ingredientData['in_grams'] ??
+          ingredientData['grams'];
+      final amountFinal = amount ?? (_parseDouble(inGramsExplicit) ?? 1.0);
+
       return FoodIngredient(
         id: _generateIngredientId(),
         name: name.trim(),
-        amount: amount ?? 1.0,
+        amount: amountFinal,
         unit: unit ?? 'item',
         nutrition: nutrition,
         brand: ingredientData['brand'] as String?,
@@ -399,11 +604,37 @@ class DishProcessingStep extends AgentStep {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) {
-      try {
-        return double.parse(value);
-      } catch (e) {
-        return null;
+      final s = value.trim();
+      if (s.isEmpty) return null;
+
+      // Handle simple fractions like '1/2'
+      final fracMatch = RegExp(r'^(\d+)\s*/\s*(\d+) ?').firstMatch(s);
+      if (fracMatch != null) {
+        try {
+          final n = double.parse(fracMatch.group(1)!);
+          final d = double.parse(fracMatch.group(2)!);
+          if (d != 0) return n / d;
+        } catch (_) {}
       }
+
+      // Find the first numeric substring (handles '2', '2.5', '1,000.5', '100g')
+      final numMatch = RegExp(
+        r'[-+]?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?|[-+]?\d*\.?\d+',
+      ).firstMatch(s);
+      if (numMatch != null) {
+        var numStr = numMatch.group(0)!.replaceAll(',', '.');
+        try {
+          return double.parse(numStr);
+        } catch (_) {
+          try {
+            // Last resort: remove non-digit chars and parse
+            final cleaned = numStr.replaceAll(RegExp(r'[^0-9\.]'), '');
+            return double.parse(cleaned);
+          } catch (_) {}
+        }
+      }
+
+      return null;
     }
 
     return null;
@@ -531,5 +762,206 @@ class DishProcessingStep extends AgentStep {
         debugPrint('⚠️ Unknown unit "$unit", assuming grams');
         return amount;
     }
+  }
+
+  /// Attempts to load a dish from the database if the AI response includes a reference
+  /// (e.g., dish ID or minimal dish data). If successful, returns the dish as a ProcessedDish.
+  /// Returns null if no valid reference is found or if loading fails.
+  Future<ProcessedDish?> _tryLoadDishFromDatabaseReference(
+    Map<String, dynamic> dishData,
+    String? uploadedImageUri,
+    List<UserIngredient>? userIngredients,
+  ) async {
+    try {
+      // Look for common ID fields the AI may include
+      var referenceId =
+          dishData['id'] ??
+          dishData['dishId'] ??
+          dishData['dbId'] ??
+          dishData['db_id'];
+
+      // Use injected DishService if provided, otherwise create a local instance
+      final ds = _dishService ?? DishService();
+      debugPrint(
+        '🔍 _tryLoadDishFromDatabaseReference: Using DishService instance',
+      );
+
+      // If AI explicitly requested a random/new id placeholder, don't treat as a reference
+      if (referenceId is String && referenceId.toLowerCase() == 'random') {
+        debugPrint(
+          '🔍 _tryLoadDishFromDatabaseReference: AI requested random id',
+        );
+        return null;
+      }
+
+      // If no id present, try to match by name in the database (user expects DB match sometimes)
+      if (referenceId == null) {
+        final nameRaw = (dishData['name'] ?? dishData['dishName'])?.toString();
+        if (nameRaw != null && nameRaw.trim().isNotEmpty) {
+          final queryName = _normalizeString(nameRaw);
+          debugPrint(
+            '🔍 _tryLoadDishFromDatabaseReference: No id provided, trying name match: "$nameRaw"',
+          );
+
+          try {
+            final all = await ds.getAllDishes();
+            for (final d in all) {
+              final dbNameNorm = _normalizeString(d.name);
+              // Exact normalized match
+              if (dbNameNorm == queryName) {
+                referenceId = d.id;
+                debugPrint(
+                  '🔍 _tryLoadDishFromDatabaseReference: Found DB dish by exact name: ${d.name} (ID: ${d.id})',
+                );
+                break;
+              }
+              // Loose matches: contains or startsWith
+              if (dbNameNorm.contains(queryName) ||
+                  queryName.contains(dbNameNorm) ||
+                  dbNameNorm.startsWith(queryName) ||
+                  queryName.startsWith(dbNameNorm)) {
+                referenceId = d.id;
+                debugPrint(
+                  '🔍 _tryLoadDishFromDatabaseReference: Found DB dish by loose name match: ${d.name} (ID: ${d.id})',
+                );
+                break;
+              }
+            }
+          } catch (e) {
+            debugPrint('⚠️ Error searching dishes by name: $e');
+          }
+        }
+      }
+
+      if (referenceId == null) return null;
+
+      var storageDish = await ds.getDishById(referenceId.toString());
+      if (storageDish == null) {
+        debugPrint(
+          '🔍 _tryLoadDishFromDatabaseReference: No storage dish found for id: $referenceId - attempting name fallback',
+        );
+
+        // Fallback: try matching by name if direct id lookup failed
+        final nameRaw = (dishData['name'] ?? dishData['dishName'])?.toString();
+        if (nameRaw != null && nameRaw.trim().isNotEmpty) {
+          try {
+            final all = await ds.getAllDishes();
+            final queryName = _normalizeString(nameRaw);
+            for (final d in all) {
+              final dbNameNorm = _normalizeString(d.name);
+              if (dbNameNorm == queryName ||
+                  dbNameNorm.contains(queryName) ||
+                  queryName.contains(dbNameNorm)) {
+                storageDish = d;
+                debugPrint(
+                  '🔍 _tryLoadDishFromDatabaseReference: Fallback found DB dish by name: ${d.name} (ID: ${d.id})',
+                );
+                break;
+              }
+            }
+          } catch (e) {
+            debugPrint('⚠️ Error during fallback name search: $e');
+          }
+        }
+      }
+      if (storageDish == null) {
+        debugPrint(
+          '🔍 _tryLoadDishFromDatabaseReference: Still no storage dish found after fallback',
+        );
+        return null;
+      }
+
+      // Convert storage Ingredient -> FoodIngredient
+      final convertedIngredients = <FoodIngredient>[];
+      for (final ing in storageDish.ingredients) {
+        final nut = ing.nutrition;
+        BasicNutrition? convertedNut;
+        if (nut != null) {
+          convertedNut = BasicNutrition(
+            calories: nut.calories,
+            protein: nut.protein,
+            carbs: nut.carbs,
+            fat: nut.fat,
+            fiber: nut.fiber,
+            sugar: nut.sugar,
+            sodium: nut.sodium,
+          );
+        }
+
+        convertedIngredients.add(
+          FoodIngredient(
+            id: ing.id,
+            name: ing.name,
+            amount: ing.amount,
+            unit: ing.unit,
+            nutrition: convertedNut,
+            brand: null,
+            barcode: ing.barcode,
+          ),
+        );
+      }
+
+      // If user provided ingredients, merge them so the user's input takes precedence
+      final finalIngredients =
+          userIngredients != null && userIngredients.isNotEmpty
+              ? _mergeUserIngredientsIntoIngredients(
+                convertedIngredients,
+                userIngredients,
+              )
+              : convertedIngredients;
+
+      // Recalculate nutrition from the possibly merged ingredient list
+      final recalculatedNutrition = _calculateNutritionFromIngredients(
+        finalIngredients,
+      );
+
+      // If no ingredients available but storage dish has nutrition, prefer storage nutrition
+      BasicNutrition convertedDishNut;
+      if (finalIngredients.isEmpty && storageDish.nutrition.calories > 0) {
+        debugPrint(
+          '🔁 _tryLoadDishFromDatabaseReference: No ingredients after merge, using storage-level nutrition',
+        );
+        final sn = storageDish.nutrition;
+        convertedDishNut = BasicNutrition(
+          calories: sn.calories,
+          protein: sn.protein,
+          carbs: sn.carbs,
+          fat: sn.fat,
+          fiber: sn.fiber,
+          sugar: sn.sugar,
+          sodium: sn.sodium,
+        );
+      } else {
+        convertedDishNut = recalculatedNutrition;
+      }
+
+      debugPrint(
+        '🔁 _tryLoadDishFromDatabaseReference: Returning DB dish ${storageDish.name} with ${finalIngredients.length} ingredients (nutrition source: ${finalIngredients.isEmpty ? 'storage' : 'recalculated'})',
+      );
+      return ProcessedDish(
+        id: storageDish.id,
+        name: storageDish.name,
+        description: storageDish.description,
+        ingredients: finalIngredients,
+        totalNutrition: convertedDishNut,
+        servings: 1.0,
+        imageUrl: storageDish.imageUrl ?? uploadedImageUri,
+        tags: <String>[],
+        mealType: null,
+        createdAt: storageDish.createdAt,
+        updatedAt: storageDish.updatedAt,
+        isFavorite: storageDish.isFavorite,
+      );
+    } catch (e) {
+      debugPrint('⚠️ _tryLoadDishFromDatabaseReference failed: $e');
+      return null;
+    } finally {
+      // debug context
+    }
+  }
+
+  // Normalize a string for loose matching: lowercase, remove non-alphanumerics
+  String _normalizeString(String s) {
+    return s.toLowerCase().trim().replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 }
