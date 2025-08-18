@@ -242,7 +242,7 @@ class OpenAIService {
         headers: headers,
         body: jsonEncode(body),
       );
-      if (response.body == null || response.body.trim().isEmpty) {
+      if (response.body.trim().isEmpty) {
         return const ApiKeyTestResult(
           success: false,
           message:
@@ -384,7 +384,7 @@ class OpenAIService {
         headers: headers,
         body: jsonEncode(body),
       );
-      if (response.body == null || response.body.trim().isEmpty) {
+      if (response.body.trim().isEmpty) {
         throw Exception(
           'OpenAI returned an empty response. Try increasing your token limits or check your request.',
         );
@@ -480,6 +480,56 @@ class OpenAIService {
     };
     final bool useCompletionTokens = _useCompletionTokens(model);
     final bool omitTemperature = _omitTemperature(model);
+    // If an image URI was provided but the messages don't already include an image,
+    // load and embed the image as a data URL into the messages so vision-capable
+    // models will actually receive the pixels (not just a string URI).
+    if (imageUri != null) {
+      try {
+        bool hasImageAlready = false;
+        for (final m in messages) {
+          final content = m['content'];
+          if (content is List) {
+            for (final item in content) {
+              if (item is Map && item['type'] == 'image_url') {
+                hasImageAlready = true;
+                break;
+              }
+            }
+            if (hasImageAlready) break;
+          } else if (content is String && content.contains('data:image')) {
+            hasImageAlready = true;
+            break;
+          }
+        }
+
+        if (!hasImageAlready) {
+          // Resize/encode the image and create a data URL
+          final base64String = await ImageUtils.resizeAndEncodeImage(
+            imageUri,
+            isHighDetail: false,
+          );
+          final imageDataUrl = ImageUtils.createImageDataUrl(
+            base64String,
+            imagePath: imageUri,
+          );
+
+          // Append as a user message with structured content (text + image)
+          messages.add({
+            'role': 'user',
+            'content': [
+              {'type': 'text', 'text': 'User uploaded an image'},
+              {
+                'type': 'image_url',
+                'image_url': {'url': imageDataUrl},
+              },
+            ],
+          });
+        }
+      } catch (e) {
+        // If image processing fails, continue without blocking the request.
+        debugPrint('OpenAIService: Failed to attach image to messages: $e');
+      }
+    }
     final body = <String, dynamic>{
       'model': model,
       'messages': messages,
@@ -500,7 +550,7 @@ class OpenAIService {
         headers: headers,
         body: jsonEncode(body),
       );
-      if (response.body == null || response.body.trim().isEmpty) {
+      if (response.body.trim().isEmpty) {
         throw Exception(
           'OpenAI returned an empty response. Try increasing your token limits or check your request.',
         );

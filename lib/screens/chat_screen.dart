@@ -19,16 +19,28 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   late ChatProvider _chatProvider;
+  bool _isUserAtBottom =
+      true; // track whether user is currently at the bottom (or near it)
 
   @override
   void initState() {
     super.initState();
     _chatProvider = ChatProvider();
+
+    // Listen to user scroll to detect if they scrolled up (so we don't force-scroll)
+    _scrollController.addListener(_onScroll);
+
+    // Listen to chat provider changes so we can auto-scroll when new messages arrive
+    _chatProvider.addListener(_onMessagesUpdated);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _chatProvider.removeListener(_onMessagesUpdated);
     _scrollController.dispose();
+    // Dispose provider instance we created locally
+    _chatProvider.dispose();
     super.dispose();
   }
 
@@ -38,6 +50,13 @@ class _ChatScreenState extends State<ChatScreen> {
     // Refresh API key configuration when screen is shown
     _chatProvider.refreshApiKeyConfiguration();
     // Don't add welcome message automatically to show the welcome screen
+
+    // Ensure we scroll to bottom when the screen is opened (post frame so list is built)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Mark as at bottom on open so we behave like a real chat initially
+      _isUserAtBottom = true;
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -496,15 +515,72 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
+  void _onScroll() {
+    if (!_scrollController.hasClients ||
+        !_scrollController.position.hasContentDimensions)
+      return;
+    final max = _scrollController.position.maxScrollExtent;
+    final current = _scrollController.position.pixels;
+    // Consider "near bottom" within 120 pixels as still at bottom (slightly larger tolerance)
+    final atBottom = (max - current) <= 120;
+    if (atBottom != _isUserAtBottom) {
+      setState(() {
+        _isUserAtBottom = atBottom;
+      });
+    }
+  }
+
+  void _onMessagesUpdated() {
+    if (!mounted) return;
+    // If user is at/near bottom, attempt to scroll to bottom. Use multiple attempts to
+    // handle layout changes (e.g. thinking indicator or images that change the extent after build).
+    if (_isUserAtBottom) {
+      _scrollToBottom(retryAttempts: 3);
+    }
+  }
+
+  void _scrollToBottom({int retryAttempts = 1}) {
+    // Schedule scrolling on next frame, and optionally retry after short delays to
+    // account for async layout changes (images, indicator appearing etc.).
+    Future<void> tryScroll(int remaining) async {
+      if (!mounted) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!_scrollController.hasClients) return;
+
+        try {
+          final target = _scrollController.position.maxScrollExtent;
+          final current = _scrollController.position.pixels;
+
+          // If we're already close to the bottom just jump to avoid long animations
+          if ((target - current).abs() < 8) {
+            _scrollController.jumpTo(target);
+            return;
+          }
+
+          // Clamp target to valid range
+          final clamped = target.clamp(
+            _scrollController.position.minScrollExtent,
+            _scrollController.position.maxScrollExtent,
+          );
+
+          await _scrollController.animateTo(
+            clamped,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        } catch (e) {
+          // ignore errors if controller not ready
+        }
+
+        if (remaining > 0) {
+          // Small delay before retrying to let any late layout changes settle
+          await Future.delayed(const Duration(milliseconds: 120));
+          await tryScroll(remaining - 1);
+        }
+      });
+    }
+
+    tryScroll(retryAttempts - 1);
   }
 }

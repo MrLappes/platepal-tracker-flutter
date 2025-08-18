@@ -50,7 +50,9 @@ class DishService {
   Future<Dish> _getDishWithRelations(Map<String, dynamic> dishMap) async {
     final db = await _databaseService.database;
     final String dishId = dishMap['id'] as String;
-
+    debugPrint(
+      '🔍 _getDishWithRelations: Building dish with id: $dishId, name: ${dishMap['name']}',
+    );
     // Get nutrition info
     final List<Map<String, dynamic>> nutritionMaps = await db.query(
       'dish_nutrition',
@@ -68,11 +70,19 @@ class DishService {
     ''',
       [dishId],
     );
+    debugPrint(
+      '🔍 _getDishWithRelations: Found ${dishIngredientsMaps.length} ingredient rows for dish $dishId',
+    );
+    if (dishIngredientsMaps.isNotEmpty)
+      debugPrint(
+        '🔍 _getDishWithRelations: ingredient row example: ${dishIngredientsMaps.first}',
+      );
 
     // Construct ingredients list
     final List<Ingredient> ingredients = [];
 
     for (final diMap in dishIngredientsMaps) {
+      debugPrint('🔍 _getDishWithRelations: processing ingredient row: $diMap');
       final String ingredientId = diMap['ingredient_id'] as String;
 
       // Get ingredient nutrition if available
@@ -83,16 +93,16 @@ class DishService {
       );
       NutritionInfo? ingredientNutrition;
       if (ingNutritionMaps.isNotEmpty) {
+        final nm = ingNutritionMaps.first;
         ingredientNutrition = NutritionInfo(
-          calories: ingNutritionMaps.first['calories'] as double,
-          protein: ingNutritionMaps.first['protein'] as double,
-          carbs: ingNutritionMaps.first['carbs'] as double,
-          fat: ingNutritionMaps.first['fat'] as double,
-          fiber: ingNutritionMaps.first['fiber'] as double,
+          calories: (nm['calories'] as num?)?.toDouble() ?? 0.0,
+          protein: (nm['protein'] as num?)?.toDouble() ?? 0.0,
+          carbs: (nm['carbs'] as num?)?.toDouble() ?? 0.0,
+          fat: (nm['fat'] as num?)?.toDouble() ?? 0.0,
+          fiber: (nm['fiber'] as num?)?.toDouble() ?? 0.0,
           // Note: sugar and sodium default to 0.0 since they're not in current database schema
           sugar: 0.0,
           sodium: 0.0,
-          // No micronutrients as per requirement
         );
       }
 
@@ -100,8 +110,8 @@ class DishService {
         Ingredient(
           id: ingredientId,
           name: diMap['name'] as String,
-          amount: diMap['amount'] as double,
-          unit: diMap['unit'] as String,
+          amount: (diMap['amount'] as num?)?.toDouble() ?? 0.0,
+          unit: (diMap['unit'] as String?) ?? 'g',
           barcode: diMap['barcode'] as String?,
           nutrition: ingredientNutrition,
         ),
@@ -109,16 +119,15 @@ class DishService {
     } // Construct dish nutrition info
     final NutritionInfo dishNutrition;
     if (nutritionMaps.isNotEmpty) {
+      final nm = nutritionMaps.first;
       dishNutrition = NutritionInfo(
-        calories: nutritionMaps.first['calories'] as double,
-        protein: nutritionMaps.first['protein'] as double,
-        carbs: nutritionMaps.first['carbs'] as double,
-        fat: nutritionMaps.first['fat'] as double,
-        fiber: nutritionMaps.first['fiber'] as double,
-        // Note: sugar and sodium default to 0.0 since they're not in current database schema
+        calories: (nm['calories'] as num?)?.toDouble() ?? 0.0,
+        protein: (nm['protein'] as num?)?.toDouble() ?? 0.0,
+        carbs: (nm['carbs'] as num?)?.toDouble() ?? 0.0,
+        fat: (nm['fat'] as num?)?.toDouble() ?? 0.0,
+        fiber: (nm['fiber'] as num?)?.toDouble() ?? 0.0,
         sugar: 0.0,
         sodium: 0.0,
-        // No micronutrients as per requirement
       );
     } else {
       // Default empty nutrition if not found
@@ -130,8 +139,11 @@ class DishService {
       );
     }
 
+    debugPrint(
+      '🔍 _getDishWithRelations: Constructed ${ingredients.length} ingredients for dish $dishId',
+    );
     // Return the complete dish
-    return Dish(
+    final result = Dish(
       id: dishId,
       name: dishMap['name'] as String,
       description: dishMap['description'] as String?,
@@ -143,6 +155,10 @@ class DishService {
       isFavorite: (dishMap['is_favorite'] as int) == 1,
       category: dishMap['category'] as String?,
     );
+    debugPrint(
+      '🔍 _getDishWithRelations: Returning dish ${result.name} with ${result.ingredients.length} ingredients',
+    );
+    return result;
   }
 
   // Save a new dish

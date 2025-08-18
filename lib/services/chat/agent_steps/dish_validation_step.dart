@@ -5,6 +5,8 @@ import '../../../models/dish_models.dart';
 import '../openai_service.dart';
 import '../pipeline_modification_tracker.dart';
 import '../system_prompts.dart';
+import '../../../utils/image_utils.dart';
+import '../../../services/storage/dish_service.dart';
 
 /// Validates and edits newly created dishes with AI-powered corrections
 /// Skips validation for dishes retrieved from database by ID
@@ -77,21 +79,82 @@ class DishValidationStep extends AgentStep {
           continue;
         }
 
-        // Skip validation for dishes retrieved from database (they have established IDs)
-        if (_isExistingDish(dish)) {
-          debugPrint(
-            '⏭️ Skipping validation for existing dish: ${dish.name} (ID: ${dish.id})',
-          );
-          finalDishes.add(dish);
-          validationResults.add({
-            'index': i,
-            'dishName': dish.name,
-            'status': 'skipped',
-            'reason': 'Existing dish from database',
-            'dishId': dish.id,
-          });
-          skippedCount++;
-          continue;
+        // Check the database for an exact dish match by ID. Only skip validation if the dish exists in DB.
+        try {
+          final ds = DishService();
+          final storageDish = await ds.getDishById(dish.id);
+          if (storageDish != null) {
+            debugPrint(
+              '⏭️ DB-backed dish found, skipping validation and using DB data: ${storageDish.name} (ID: ${storageDish.id})',
+            );
+
+            // Convert storage Dish -> ProcessedDish
+            final convertedIngredients = <FoodIngredient>[];
+            for (final ing in storageDish.ingredients) {
+              BasicNutrition? convertedNut;
+              if (ing.nutrition != null) {
+                convertedNut = BasicNutrition(
+                  calories: ing.nutrition!.calories,
+                  protein: ing.nutrition!.protein,
+                  carbs: ing.nutrition!.carbs,
+                  fat: ing.nutrition!.fat,
+                  fiber: ing.nutrition!.fiber,
+                  sugar: ing.nutrition!.sugar,
+                  sodium: ing.nutrition!.sodium,
+                );
+              }
+
+              convertedIngredients.add(
+                FoodIngredient(
+                  id: ing.id,
+                  name: ing.name,
+                  amount: ing.amount,
+                  unit: ing.unit,
+                  nutrition: convertedNut,
+                  brand: null,
+                  barcode: ing.barcode,
+                ),
+              );
+            }
+
+            final convertedDishNut = BasicNutrition(
+              calories: storageDish.nutrition.calories,
+              protein: storageDish.nutrition.protein,
+              carbs: storageDish.nutrition.carbs,
+              fat: storageDish.nutrition.fat,
+              fiber: storageDish.nutrition.fiber,
+              sugar: storageDish.nutrition.sugar,
+              sodium: storageDish.nutrition.sodium,
+            );
+
+            final dbProcessed = ProcessedDish(
+              id: storageDish.id,
+              name: storageDish.name,
+              description: storageDish.description,
+              ingredients: convertedIngredients,
+              totalNutrition: convertedDishNut,
+              servings: 1.0,
+              imageUrl: storageDish.imageUrl,
+              tags: <String>[],
+              mealType: null,
+              createdAt: storageDish.createdAt,
+              updatedAt: storageDish.updatedAt,
+              isFavorite: storageDish.isFavorite,
+            );
+
+            finalDishes.add(dbProcessed);
+            validationResults.add({
+              'index': i,
+              'dishName': dbProcessed.name,
+              'status': 'skipped',
+              'reason': 'Existing dish from database',
+              'dishId': dbProcessed.id,
+            });
+            skippedCount++;
+            continue;
+          }
+        } catch (e) {
+          debugPrint('⚠️ DishValidationStep: DB existence check failed: $e');
         }
 
         // Validate and potentially edit newly created dish
@@ -173,29 +236,6 @@ class DishValidationStep extends AgentStep {
     }
   }
 
-  /// Checks if a dish is from the database (has established ID pattern)
-  bool _isExistingDish(ProcessedDish dish) {
-    // Assume dishes from database have UUIDs or specific ID patterns
-    // New dishes typically have generated IDs that are shorter or different format
-    final id = dish.id;
-
-    // Skip validation if:
-    // 1. ID looks like a UUID (36 chars with dashes)
-    // 2. ID starts with 'db_' (database prefix)
-    // 3. ID is numeric (database auto-increment)
-    if (id.length == 36 && id.contains('-')) {
-      return true; // UUID from database
-    }
-    if (id.startsWith('db_') || id.startsWith('dish_')) {
-      return true; // Database prefix
-    }
-    if (int.tryParse(id) != null) {
-      return true; // Numeric database ID
-    }
-
-    return false; // Likely a newly generated dish
-  }
-
   /// Validates and edits a newly created dish using AI
   Future<Map<String, dynamic>> _validateAndEditDish(
     ProcessedDish dish,
@@ -204,19 +244,82 @@ class DishValidationStep extends AgentStep {
     try {
       final prompt = _buildValidationPrompt(dish, input);
 
-      final messages = [
-        {
-          'role': 'system',
-          'content':
-              'You are a nutrition expert validating dish data. Respond only in JSON format.',
-        },
-        {'role': 'user', 'content': prompt},
-      ];
+      // Make image and user ingredients explicitly available to the validation prompt
+      final uploadedImageUri =
+          input.metadata?['uploadedImageUri'] as String? ?? input.imageUri;
+      final userIngredientsRaw =
+          input.metadata?['userIngredients'] as List<dynamic>?;
+      final List<String> userIngredientsList = [];
+      if (userIngredientsRaw != null) {
+        for (final i in userIngredientsRaw) {
+          if (i is Map<String, dynamic>) {
+            final name = i['name'];
+            if (name != null) userIngredientsList.add(name.toString());
+          } else {
+            userIngredientsList.add(i.toString());
+          }
+        }
+      } else if (input.userIngredients != null) {
+        userIngredientsList.addAll(input.userIngredients!.map((u) => u.name));
+      }
 
+      // Build messages and always embed the uploaded image as a base64 data URL
+      // when available. This ensures the model receives pixels (not just a URI).
+      String? imageDataUrl;
+      if (uploadedImageUri != null) {
+        try {
+          final base64Image = await ImageUtils.resizeAndEncodeImage(
+            uploadedImageUri,
+            isHighDetail: false,
+          );
+          imageDataUrl = ImageUtils.createImageDataUrl(
+            base64Image,
+            imagePath: uploadedImageUri,
+          );
+        } catch (e) {
+          debugPrint(
+            '❌ DishValidationStep: Failed to convert image to base64: $e',
+          );
+          imageDataUrl = null;
+        }
+      }
+
+      final messages = <Map<String, dynamic>>[];
+      messages.add({
+        'role': 'system',
+        'content': SystemPrompts.dishValidationSystemInstructions,
+      });
+
+      final baseUserText =
+          prompt +
+          (userIngredientsList.isNotEmpty
+              ? '\n\nUser-provided ingredients: ${userIngredientsList.join(', ')}'
+              : '');
+
+      if (imageDataUrl != null) {
+        messages.add({
+          'role': 'user',
+          'content': [
+            {'type': 'text', 'text': baseUserText},
+            {
+              'type': 'image_url',
+              'image_url': {'url': imageDataUrl},
+            },
+          ],
+        });
+      } else {
+        // If we couldn't embed the image, still send the text prompt and note absence
+        final userContent =
+            uploadedImageUri != null
+                ? baseUserText + '\n\n[Note: Image present but failed to embed]'
+                : baseUserText;
+        messages.add({'role': 'user', 'content': userContent});
+      }
+
+      // Use sendChatRequest and attach imageUri if available so vision-capable models receive pixels
       final response = await _openaiService.sendChatRequest(
         messages: messages,
-        temperature: 0.1, // Low temperature for consistent validation
-        responseFormat: {'type': 'json_object'},
+        maxTokens: 800,
       );
 
       final content = response.choices.first.message.content?.trim() ?? '{}';

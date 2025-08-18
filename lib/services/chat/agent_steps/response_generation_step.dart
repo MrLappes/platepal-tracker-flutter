@@ -137,11 +137,16 @@ class ResponseGenerationStep extends AgentStep {
         '🤖 ResponseGenerationStep: Sending ${messages.length} messages to OpenAI',
       );
 
-      // Use the properly constructed messages array with ingredients and context
+      // Ensure we pass the uploaded image URI down to the transport so it can
+      // attach image bytes when available. Also pass along a response format
+      // hint to request structured JSON.
+      final uploadedImageUri =
+          input.imageUri ?? input.metadata?['uploadedImageUri'] as String?;
       final chatCompletionResponse = await _openaiService.sendChatRequest(
         messages: messages,
         temperature: 0.7,
         maxTokens: 2000,
+        imageUri: uploadedImageUri,
       );
       final openaiResponse =
           chatCompletionResponse.choices.first.message.content ?? '';
@@ -169,15 +174,25 @@ class ResponseGenerationStep extends AgentStep {
           // Parse dishes if present
           final dishesJson = jsonResponse['dishes'] as List<dynamic>?;
           if (dishesJson != null) {
-            dishes =
-                dishesJson
-                    .map(
-                      (dishData) =>
-                          _createDishFromJson(dishData as Map<String, dynamic>),
-                    )
-                    .where((dish) => dish != null)
-                    .cast<Dish>()
-                    .toList();
+            final uploadedImageForDishes =
+                input.imageUri ??
+                input.metadata?['uploadedImageUri'] as String?;
+            final parsed = <Dish>[];
+            for (final dishData in dishesJson) {
+              final dishMap = dishData as Map<String, dynamic>;
+              final parsedDish = _createDishFromJson(dishMap);
+              if (parsedDish == null) continue;
+              if (uploadedImageForDishes != null &&
+                  (dishMap['imageUrl'] == null &&
+                      parsedDish.imageUrl == null)) {
+                parsed.add(
+                  parsedDish.copyWith(imageUrl: uploadedImageForDishes),
+                );
+              } else {
+                parsed.add(parsedDish);
+              }
+            }
+            dishes = parsed;
           }
 
           debugPrint(
@@ -589,6 +604,7 @@ class ResponseGenerationStep extends AgentStep {
         updatedAt: DateTime.now(),
         isFavorite: false,
         category: dishData['category'] as String?,
+        imageUrl: dishData['imageUrl'] as String?,
       );
     } catch (e) {
       debugPrint(
