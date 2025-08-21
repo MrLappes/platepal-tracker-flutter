@@ -3,7 +3,7 @@ name: Flutter CI
 on:
   push:
     branches: [ "main" ]
-    tags:     [ "v*" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
 
       - name: Flutter doctor
@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate l10n
+        run: flutter gen-l10n
+
       - name: Analyze
         run: flutter analyze
 
@@ -68,15 +71,12 @@ jobs:
           path: coverage/lcov.info
           if-no-files-found: error
 
-      # ---------- Build only for tag pushes ----------
+      # ---------- Build and Release only for tag pushes ----------
       - name: Accept Android SDK licenses
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
-          echo "Accepting Android SDK licenses (best effort)..."
-          if [[ -n "${ANDROID_SDK_ROOT}" && -x "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" ]]; then
-            yes | "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" --licenses || true
-          elif [[ -x "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager" ]]; then
+          if [[ -x "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager" ]]; then
             yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
           else
             echo "sdkmanager not found; skipping."
@@ -98,7 +98,6 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
-            # web-release.zip
           if-no-files-found: error
 
       - name: Create GitHub Release
@@ -113,5 +112,3 @@ jobs:
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
-            # web-release.zip
-            coverage/lcov.info
