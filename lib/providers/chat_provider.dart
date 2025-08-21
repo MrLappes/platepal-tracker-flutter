@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import '../models/chat_types.dart' as agent_types;
 import '../models/chat_types.dart' show ChatMessageRole;
