@@ -15,7 +15,7 @@ class NutritionAnalysisCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Card(
       margin: const EdgeInsets.all(16),

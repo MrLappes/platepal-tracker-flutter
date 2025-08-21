@@ -48,38 +48,91 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       final prefs = await SharedPreferences.getInstance();
       final userSessionService = UserSessionService(prefs);
       final currentUserId = userSessionService.getCurrentUserId();
+      try {
+        if (!mounted) throw Exception('Widget not mounted');
+        final userProfileService = context.userProfileService;
+        var userProfile = await userProfileService.getUserProfile(
+          currentUserId,
+        );
 
-      // Load user profile
-      final userProfile = await context.userProfileService.getUserProfile(
-        currentUserId,
-      );
+        if (userProfile != null) {
+          _userProfile = userProfile;
 
-      if (userProfile != null && mounted) {
-        _userProfile = userProfile;
-        _dailyCalories = userProfile.goals.targetCalories;
+          if (mounted) {
+            _dailyCalories = userProfile.goals.targetCalories;
 
-        // Calculate current ratios from existing targets
-        final totalMacroCals =
-            (userProfile.goals.targetProtein * 4) +
-            (userProfile.goals.targetCarbs * 4) +
-            (userProfile.goals.targetFat * 9);
+            // Calculate current ratios from existing targets
+            final totalMacroCals =
+                (userProfile.goals.targetProtein * 4) +
+                (userProfile.goals.targetCarbs * 4) +
+                (userProfile.goals.targetFat * 9);
 
-        if (totalMacroCals > 0) {
-          _proteinRatio =
-              ((userProfile.goals.targetProtein * 4) / totalMacroCals) * 100;
-          _carbsRatio =
-              ((userProfile.goals.targetCarbs * 4) / totalMacroCals) * 100;
-          _fatRatio =
-              ((userProfile.goals.targetFat * 9) / totalMacroCals) * 100;
-        } // Calculate fiber per 1000 calories with validation
-        final calculatedFiber =
-            userProfile.goals.targetFiber / (_dailyCalories / 1000);
-        _fiberPer1000Cal = calculatedFiber.clamp(5.0, 35.0);
+            if (totalMacroCals > 0) {
+              _proteinRatio =
+                  ((userProfile.goals.targetProtein * 4) / totalMacroCals) *
+                  100;
+              _carbsRatio =
+                  ((userProfile.goals.targetCarbs * 4) / totalMacroCals) * 100;
+              _fatRatio =
+                  ((userProfile.goals.targetFat * 9) / totalMacroCals) * 100;
+            }
+
+            // Calculate fiber per 1000 calories with validation
+            final calculatedFiber =
+                userProfile.goals.targetFiber / (_dailyCalories / 1000);
+            _fiberPer1000Cal = calculatedFiber.clamp(5.0, 35.0);
+          }
+        } else {
+          // Handle case where user profile does not exist
+          _showErrorSnackBar(
+            'User profile not found. Please set up your profile.',
+          );
+          setState(() {
+            _userProfile = UserProfile(
+              id: currentUserId,
+              name: 'New User',
+              email: '',
+              age: 0,
+              gender: 'Not Specified',
+              height: 0,
+              weight: 0,
+              activityLevel: 'Sedentary',
+              goals: FitnessGoals(
+                goal: 'Maintain Weight',
+                targetWeight: 0,
+                targetCalories: 2000,
+                targetProtein: 50,
+                targetCarbs: 250,
+                targetFat: 70,
+                targetFiber: 28,
+              ),
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+
+            _dailyCalories = 2000.0;
+            _proteinRatio = 40.0;
+            _carbsRatio = 30.0;
+            _fatRatio = 30.0;
+            _fiberPer1000Cal = 14.0;
+          });
+        }
+      } catch (e) {
+        _showErrorSnackBar('Failed to load profile: ${e.toString()}');
+      } finally {
+        setState(() => _isLoading = false);
       }
-    } catch (e) {
-      _showErrorSnackBar('Failed to load profile: ${e.toString()}');
-    } finally {
+    } catch (error) {
       setState(() => _isLoading = false);
+      _showErrorSnackBar('Error loading user profile: ${error.toString()}');
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -301,10 +354,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              localizations?.macroTargetsUpdated ??
-                  'Macro targets updated successfully',
-            ),
+            content: Text(localizations.macroTargetsUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -365,14 +415,6 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     });
   }
 
-  void _showErrorSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
@@ -391,9 +433,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            localizations?.macroCustomization ?? 'Macro Customization',
-          ),
+          title: Text(localizations.macroCustomization),
           backgroundColor: colorScheme.surface,
           foregroundColor: colorScheme.onSurface,
           actions: [
@@ -401,7 +441,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               IconButton(
                 icon: const Icon(Icons.save),
                 onPressed: _isSaving ? null : _saveChanges,
-                tooltip: localizations?.save ?? 'Save',
+                tooltip: localizations.save,
               ),
           ],
         ),
@@ -431,9 +471,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                               _isSaving
                                   ? null
                                   : () => Navigator.of(context).pop(),
-                          child: Text(
-                            localizations?.discardChanges ?? 'Discard',
-                          ),
+                          child: Text(localizations.discardChanges),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -449,7 +487,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : Text(localizations?.saveChanges ?? 'Save'),
+                                  : Text(localizations.saveChanges),
                         ),
                       ),
                     ],
@@ -995,19 +1033,16 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(localizations?.unsavedChanges ?? 'Unsaved Changes'),
-            content: Text(
-              localizations?.unsavedChangesMessage ??
-                  'You have unsaved changes. Do you want to save them before leaving?',
-            ),
+            title: Text(localizations.unsavedChanges),
+            content: Text(localizations.unsavedChangesMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(localizations?.discardChanges ?? 'Discard'),
+                child: Text(localizations.discardChanges),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(localizations?.saveChanges ?? 'Save'),
+                child: Text(localizations.saveChanges),
               ),
             ],
           ),

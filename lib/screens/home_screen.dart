@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.appTitle),
+        title: Text(AppLocalizations.of(context).appTitle),
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Icon(Icons.restaurant_menu, size: 80, color: Colors.green),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.welcomeToPlatePalTracker,
+              AppLocalizations.of(context).welcomeToPlatePalTracker,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),

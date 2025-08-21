@@ -11,7 +11,7 @@ class AgentStepsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final steps = metadata['stepResults'] as List? ?? [];
     final thinkingSteps = metadata['thinkingSteps'] as List? ?? [];
     final processingTime = metadata['processingTime'] as int? ?? 0;
@@ -684,7 +684,7 @@ class AgentStepsModal extends StatelessWidget {
                     onPressed:
                         () => _showFullDataDialog(context, title, jsonString),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: Text(AppLocalizations.of(context)!.viewFullData),
+                    label: Text(AppLocalizations.of(context).viewFullData),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -740,9 +740,6 @@ class AgentStepsModal extends StatelessWidget {
           highestSeverity = 'medium';
         }
       }
-
-      // Get border color based on highest severity
-      final borderColor = _getModificationSeverityColor(highestSeverity);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -830,12 +827,12 @@ class AgentStepsModal extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: _getModificationSeverityColor(
                                     severity,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
                                     color: _getModificationSeverityColor(
                                       severity,
-                                    ).withOpacity(0.3),
+                                    ).withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: Text(
@@ -856,8 +853,8 @@ class AgentStepsModal extends StatelessWidget {
                             Text(
                               details,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.7,
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.7,
                                 ),
                                 fontSize: 11,
                               ),
@@ -867,7 +864,7 @@ class AgentStepsModal extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -953,7 +950,7 @@ class AgentStepsModal extends StatelessWidget {
                           enhancedSystemPrompt,
                         ),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: Text(AppLocalizations.of(context)!.viewFullPrompt),
+                    label: Text(AppLocalizations.of(context).viewFullPrompt),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -1062,7 +1059,7 @@ class AgentStepsModal extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context)!.copiedToClipboard),
+        content: Text(AppLocalizations.of(context).copiedToClipboard),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

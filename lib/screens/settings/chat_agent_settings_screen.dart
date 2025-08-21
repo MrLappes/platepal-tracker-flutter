@@ -49,7 +49,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.chatSettingsSaved),
+          content: Text(AppLocalizations.of(context).chatSettingsSaved),
         ),
       );
     }
@@ -58,7 +58,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(

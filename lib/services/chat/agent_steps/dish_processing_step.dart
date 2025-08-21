@@ -106,13 +106,11 @@ class DishProcessingStep extends AgentStep {
             debugPrint('⚠️ Error loading referenced DB dish: $e');
           }
 
-          if (processedDish == null) {
-            processedDish = await _processSingleDish(
+          processedDish ??= await _processSingleDish(
               dishData,
               uploadedImageUri,
               userIngredients,
             );
-          }
 
           if (processedDish != null) {
             validatedDishes.add(processedDish);

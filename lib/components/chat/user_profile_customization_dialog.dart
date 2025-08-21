@@ -43,7 +43,7 @@ class _UserProfileCustomizationDialogState
   }
 
   Future<void> _pickImage() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -82,7 +82,7 @@ class _UserProfileCustomizationDialogState
   }
 
   Future<void> _saveProfile() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     if (_usernameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
@@ -131,7 +131,7 @@ class _UserProfileCustomizationDialogState
   }
 
   Widget _buildAvatarSection() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -208,7 +208,7 @@ class _UserProfileCustomizationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return AlertDialog(

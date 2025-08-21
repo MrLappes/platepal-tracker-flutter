@@ -29,7 +29,7 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final isUser = message.isFromUser;
     final isDark =
         theme.brightness ==
@@ -399,14 +399,14 @@ class MessageBubble extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context)!.messageCopied),
+        content: Text(AppLocalizations.of(context).messageCopied),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
   String _formatTime(BuildContext context, DateTime dateTime) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
@@ -579,7 +579,7 @@ class MessageBubble extends StatelessWidget {
     BuildContext context,
     ProcessedDish dish,
   ) async {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     return await showDialog<ProcessedDish?>(
       context: context,
       builder:
@@ -778,7 +778,7 @@ class MessageBubble extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Container(
       padding: const EdgeInsets.all(12),

@@ -311,7 +311,7 @@ class DishValidationStep extends AgentStep {
         // If we couldn't embed the image, still send the text prompt and note absence
         final userContent =
             uploadedImageUri != null
-                ? baseUserText + '\n\n[Note: Image present but failed to embed]'
+                ? '$baseUserText\n\n[Note: Image present but failed to embed]'
                 : baseUserText;
         messages.add({'role': 'user', 'content': userContent});
       }
@@ -439,7 +439,7 @@ class DishValidationStep extends AgentStep {
         case 'servings':
           if (newValue is num && newValue > 0) {
             editedDish = editedDish.copyWith(servings: newValue.toDouble());
-            debugPrint('✏️ Edited servings: ${dish.servings} → ${newValue}');
+            debugPrint('✏️ Edited servings: ${dish.servings} → $newValue');
 
             _modificationTracker.recordAiValidation(
               stepName: stepName,

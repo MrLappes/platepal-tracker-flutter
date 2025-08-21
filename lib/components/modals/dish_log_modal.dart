@@ -49,7 +49,7 @@ class _DishLogModalState extends State<DishLogModal> {
   }
 
   String _getMealTypeDisplayName(String mealType) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     switch (mealType) {
       case 'breakfast':
         return localizations.breakfast;
@@ -81,7 +81,7 @@ class _DishLogModalState extends State<DishLogModal> {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.dishLoggedSuccessfully),
+            content: Text(AppLocalizations.of(context).dishLoggedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -90,7 +90,7 @@ class _DishLogModalState extends State<DishLogModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorLoggingDish),
+            content: Text(AppLocalizations.of(context).errorLoggingDish),
             backgroundColor: Colors.red,
           ),
         );
@@ -107,7 +107,7 @@ class _DishLogModalState extends State<DishLogModal> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     // Calculate nutrition based on portion size
     final calculatedCalories = widget.dish.nutrition.calories * _portionSize;

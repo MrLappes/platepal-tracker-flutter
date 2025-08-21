@@ -61,7 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return ChangeNotifierProvider.value(
       value: _chatProvider,
@@ -201,7 +201,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildNoApiKeyState(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -468,7 +468,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showClearChatDialog(BuildContext context, ChatProvider chatProvider) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     showDialog(
       context: context,
@@ -517,8 +517,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onScroll() {
     if (!_scrollController.hasClients ||
-        !_scrollController.position.hasContentDimensions)
+        !_scrollController.position.hasContentDimensions) {
       return;
+    }
     final max = _scrollController.position.maxScrollExtent;
     final current = _scrollController.position.pixels;
     // Consider "near bottom" within 120 pixels as still at bottom (slightly larger tolerance)

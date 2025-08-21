@@ -143,11 +143,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         _isSearching = false;
         _hasSearched = true;
       });
-      // Show error message
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context)!.errorSearchingProduct(e.toString()),
+            AppLocalizations.of(context).errorSearchingProduct(e.toString()),
           ),
         ),
       );
@@ -320,7 +320,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Scaffold(

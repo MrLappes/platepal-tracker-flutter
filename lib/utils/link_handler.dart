@@ -21,9 +21,7 @@ class LinkHandler {
     if (showLoadingMessage) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            loadingMessage ?? localizations?.openingLink ?? 'Opening link...',
-          ),
+          content: Text(loadingMessage ?? localizations.openingLink),
           duration: const Duration(milliseconds: 500),
         ),
       );
@@ -38,13 +36,9 @@ class LinkHandler {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              localizations?.linkError ?? 'An error occurred opening the link',
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(localizations.linkError)));
       }
     }
   }
@@ -90,11 +84,11 @@ class LinkHandler {
       }
 
       if (context.mounted) {
-        _showErrorMessage(context, url, localizations?.couldNotOpenUrl);
+        _showErrorMessage(context, url, localizations.couldNotOpenUrl);
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage(context, url, null, localizations?.linkError);
+        _showErrorMessage(context, url, null, localizations.linkError);
       }
     }
   }
@@ -120,11 +114,11 @@ class LinkHandler {
       }
 
       if (context.mounted) {
-        _showErrorMessage(context, url, localizations?.couldNotOpenUrl);
+        _showErrorMessage(context, url, localizations.couldNotOpenUrl);
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage(context, url, null, localizations?.linkError);
+        _showErrorMessage(context, url, null, localizations.linkError);
       }
     }
   }
@@ -189,8 +183,7 @@ class LinkHandler {
       context,
       'https://www.buymeacoffee.com/mrlappes',
       showLoadingMessage: true,
-      loadingMessage:
-          localizations?.openingLink ?? 'Opening Buy Me Creatine page...',
+      loadingMessage: localizations.openingLink,
     );
   }
 
@@ -201,7 +194,7 @@ class LinkHandler {
 
   /// Test method to verify URL launching capabilities
   static Future<void> testUrlLaunching(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final urls = [
       'https://flutter.dev',
       'https://github.com/MrLappes/platepal-tracker',
@@ -219,7 +212,9 @@ class LinkHandler {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$url: ${canLaunch ? l10n.available : l10n.notAvailable}'),
+            content: Text(
+              '$url: ${canLaunch ? l10n.available : l10n.notAvailable}',
+            ),
             duration: const Duration(seconds: 1),
           ),
         );

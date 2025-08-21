@@ -154,7 +154,7 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> addWelcomeMessage(BuildContext context) async {
     if (_messages.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
+      final localizations = AppLocalizations.of(context);
       final welcomeContent =
           _isApiKeyConfigured
               ? localizations.welcomeToChat
@@ -230,12 +230,12 @@ class ChatProvider extends ChangeNotifier {
     if (content.trim().isEmpty && imageUrl == null) return;
 
     // Debug: Print what we received
-    print(
+    debugPrint(
       '🔍 DEBUG: ChatProvider received ${userIngredients?.length ?? 0} ingredients',
     );
     if (userIngredients != null) {
       for (final ingredient in userIngredients) {
-        print(
+        debugPrint(
           '   - ${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
         );
       }
@@ -278,7 +278,7 @@ class ChatProvider extends ChangeNotifier {
       _currentTypingMessage =
           context != null
               // ignore: use_build_context_synchronously
-              ? AppLocalizations.of(context)!.aiThinking
+              ? AppLocalizations.of(context).aiThinking
               : 'AI is thinking...';
       notifyListeners();
       String response;
@@ -323,7 +323,7 @@ class ChatProvider extends ChangeNotifier {
         response =
             context != null
                 // ignore: use_build_context_synchronously
-                ? AppLocalizations.of(context)!.testChatResponse
+                ? AppLocalizations.of(context).testChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
         await Future.delayed(const Duration(milliseconds: 1500));
         responseMetadata = null;
@@ -370,7 +370,7 @@ class ChatProvider extends ChangeNotifier {
       _isLoading = true;
       _currentTypingMessage =
           context != null
-              ? AppLocalizations.of(context)!.aiThinking
+              ? AppLocalizations.of(context).aiThinking
               : 'AI is thinking...';
       notifyListeners();
 
@@ -385,7 +385,7 @@ class ChatProvider extends ChangeNotifier {
         // Generate test response
         response =
             context != null
-                ? AppLocalizations.of(context)!.testChatResponse
+                ? AppLocalizations.of(context).testChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
 
         // Add a small delay to simulate AI thinking

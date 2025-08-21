@@ -240,10 +240,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                localizations?.healthConnected ??
-                    'Health data connected successfully!',
-              ),
+              content: Text(localizations.healthConnected),
               backgroundColor: Colors.green,
             ),
           );
@@ -312,10 +309,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              localizations?.healthSyncSuccess ??
-                  'Health data synced successfully',
-            ),
+            content: Text(localizations.healthSyncSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -325,9 +319,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              localizations?.healthSyncFailed ?? 'Failed to sync health data',
-            ),
+            content: Text(localizations.healthSyncFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -345,7 +337,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       final prefs = await SharedPreferences.getInstance();
       final userSessionService = UserSessionService(prefs);
       final currentUserId = userSessionService.getCurrentUserId();
-
+      if (!mounted) return;
       // Load from SQLite database
       final userProfile = await context.userProfileService.getUserProfile(
         currentUserId,
@@ -522,7 +514,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         createdAt: _originalProfile?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
-
+      if (!mounted) return;
       // Save profile to SQLite database
       await context.userProfileService.saveUserProfile(updatedProfile);
 
@@ -555,9 +547,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              localizations?.profileUpdated ?? 'Profile updated successfully',
-            ),
+            content: Text(localizations.profileUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -584,22 +574,19 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(localizations?.unsavedChanges ?? 'Unsaved Changes'),
-            content: Text(
-              localizations?.unsavedChangesMessage ??
-                  'You have unsaved changes. Do you want to save them before leaving?',
-            ),
+            title: Text(localizations.unsavedChanges),
+            content: Text(localizations.unsavedChangesMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(localizations?.discardChanges ?? 'Discard Changes'),
+                child: Text(localizations.discardChanges),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(true);
                   _saveProfile();
                 },
-                child: Text(localizations?.saveChanges ?? 'Save Changes'),
+                child: Text(localizations.saveChanges),
               ),
             ],
           ),
@@ -673,7 +660,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   String? _validateRequired(String? value, String fieldName) {
     final localizations = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations?.requiredField ?? 'This field is required';
+      return localizations.requiredField;
     }
     return null;
   }
@@ -681,11 +668,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   String? _validateAge(String? value) {
     final localizations = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations?.requiredField ?? 'This field is required';
+      return localizations.requiredField;
     }
     final age = int.tryParse(value.trim());
     if (age == null || age < 13 || age > 120) {
-      return localizations?.ageRange ?? 'Age must be between 13 and 120';
+      return localizations.ageRange;
     }
     return null;
   }
@@ -693,17 +680,16 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   String? _validateHeight(String? value) {
     final localizations = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations?.requiredField ?? 'This field is required';
+      return localizations.requiredField;
     }
     final height = double.tryParse(value.trim());
     if (height == null) {
-      return localizations?.requiredField ?? 'This field is required';
+      return localizations.requiredField;
     }
 
     if (_selectedUnitSystem == 'metric') {
       if (height < 100 || height > 250) {
-        return localizations?.heightRange ??
-            'Height must be between 100-250 cm';
+        return localizations.heightRange;
       }
     } else {
       if (height < 39 || height > 98) {
@@ -716,16 +702,16 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   String? _validateWeight(String? value) {
     final localizations = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations?.requiredField ?? 'This field is required';
+      return localizations.requiredField;
     }
     final weight = double.tryParse(value.trim());
     if (weight == null) {
-      return localizations?.requiredField ?? 'This field is required';
+      return localizations.requiredField;
     }
 
     if (_selectedUnitSystem == 'metric') {
       if (weight < 30 || weight > 300) {
-        return localizations?.weightRange ?? 'Weight must be between 30-300 kg';
+        return localizations.weightRange;
       }
     } else {
       if (weight < 66 || weight > 660) {
@@ -761,7 +747,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(localizations?.profileSettings ?? 'Profile Settings'),
+          title: Text(localizations.profileSettings),
           backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: Theme.of(context).colorScheme.onSurface,
           actions: [
@@ -769,7 +755,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               IconButton(
                 icon: const Icon(Icons.save),
                 onPressed: _isSaving ? null : _saveProfile,
-                tooltip: localizations?.save ?? 'Save',
+                tooltip: localizations.save,
               ),
           ],
         ),
@@ -781,7 +767,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
-                      Text(localizations?.loading ?? 'Loading...'),
+                      Text(localizations.loading),
                     ],
                   ),
                 )
@@ -808,9 +794,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                               _isSaving
                                   ? null
                                   : () => _showUnsavedChangesDialog(),
-                          child: Text(
-                            localizations?.discardChanges ?? 'Discard Changes',
-                          ),
+                          child: Text(localizations.discardChanges),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -826,10 +810,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : Text(
-                                    localizations?.saveChanges ??
-                                        'Save Changes',
-                                  ),
+                                  : Text(localizations.saveChanges),
                         ),
                       ),
                     ],
@@ -1720,22 +1701,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            localizations?.healthPermissionDenied ?? 'Health Permission Denied',
-          ),
-          content: Text(
-            localizations?.healthPermissionDeniedMessage ??
-                'To sync your health data, PlatePal needs access to your health information. You can grant permissions in your phone\'s settings.',
-          ),
+          title: Text(localizations.healthPermissionDenied),
+          content: Text(localizations.healthPermissionDeniedMessage),
           actions: <Widget>[
             TextButton(
-              child: Text(localizations?.cancel ?? 'Cancel'),
+              child: Text(localizations.cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text(localizations?.openSettings ?? 'Open Settings'),
+              child: Text(localizations.openSettings),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _openHealthSettings();
@@ -1756,22 +1732,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            localizations?.healthNotAvailable ?? 'Health Data Not Available',
-          ),
-          content: Text(
-            localizations?.healthNotAvailableMessage ??
-                'Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.',
-          ),
+          title: Text(localizations.healthNotAvailable),
+          content: Text(localizations.healthNotAvailableMessage),
           actions: <Widget>[
             TextButton(
-              child: Text(localizations?.cancel ?? 'Cancel'),
+              child: Text(localizations.cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text(localizations?.openSettings ?? 'Open Settings'),
+              child: Text(localizations.openSettings),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _openHealthSettings();
@@ -1850,7 +1821,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   Future<void> _showCalorieAnalysisDialog(
     CalorieTargetAnalysis analysis,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return showDialog(
       context: context,
@@ -1966,9 +1937,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         // Reload the profile to reflect changes
         await _loadProfile();
 
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Calorie targets updated successfully!'),
+            // ignore: use_build_context_synchronously
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );

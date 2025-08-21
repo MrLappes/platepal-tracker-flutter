@@ -114,7 +114,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
   Future<void> _saveDish() async {
     if (_nameController.text.trim().isEmpty) {
-      _showErrorSnackBar(AppLocalizations.of(context)!.pleaseEnterDishName);
+      _showErrorSnackBar(AppLocalizations.of(context).pleaseEnterDishName);
       return;
     }
 
@@ -156,7 +156,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         await _dishService.updateDish(dishData);
         if (mounted) {
           _showSuccessSnackBar(
-            AppLocalizations.of(context)!.dishUpdatedSuccessfully,
+            AppLocalizations.of(context).dishUpdatedSuccessfully,
           );
         }
       } else {
@@ -164,7 +164,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         await _dishService.saveDish(dishData);
         if (mounted) {
           _showSuccessSnackBar(
-            AppLocalizations.of(context)!.dishCreatedSuccessfully,
+            AppLocalizations.of(context).dishCreatedSuccessfully,
           );
         }
       }
@@ -180,7 +180,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     } catch (e) {
       debugPrint('❌ Error saving dish: $e');
       if (mounted) {
-        _showErrorSnackBar(AppLocalizations.of(context)!.errorSavingDish);
+        _showErrorSnackBar(AppLocalizations.of(context).errorSavingDish);
       }
     } finally {
       setState(() => _isLoading = false);
@@ -223,7 +223,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     } catch (e) {
       if (mounted) {
         _showErrorSnackBar(
-          AppLocalizations.of(context)!.errorPickingImage(e.toString()),
+          AppLocalizations.of(context).errorPickingImage(e.toString()),
         );
       }
       debugPrint('❌ Error picking image: $e');
@@ -243,7 +243,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               children: [
                 ListTile(
                   leading: const Icon(Icons.camera_alt),
-                  title: Text(AppLocalizations.of(context)!.camera),
+                  title: Text(AppLocalizations.of(context).camera),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -251,7 +251,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library),
-                  title: Text(AppLocalizations.of(context)!.gallery),
+                  title: Text(AppLocalizations.of(context).gallery),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);
@@ -261,7 +261,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   ListTile(
                     leading: const Icon(Icons.delete, color: Colors.red),
                     title: Text(
-                      AppLocalizations.of(context)!.removeImage,
+                      AppLocalizations.of(context).removeImage,
                       style: const TextStyle(color: Colors.red),
                     ),
                     onTap: () {
@@ -287,7 +287,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           _recalculateNutrition();
         });
         _showSuccessSnackBar(
-          AppLocalizations.of(context)!.productAddedSuccessfully,
+          AppLocalizations.of(context).productAddedSuccessfully,
         );
       },
       onProductScanned: (product) {
@@ -307,7 +307,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           _recalculateNutrition();
         });
         _showSuccessSnackBar(
-          AppLocalizations.of(context)!.productAddedSuccessfully,
+          AppLocalizations.of(context).productAddedSuccessfully,
         );
       },
       onProductScanned: (product) {
@@ -406,7 +406,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       });
     });
 
-    _showSuccessSnackBar(AppLocalizations.of(context)!.nutritionRecalculated);
+    _showSuccessSnackBar(AppLocalizations.of(context).nutritionRecalculated);
   }
 
   void _addIngredient() {
@@ -439,14 +439,14 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.deleteIngredient),
+            title: Text(AppLocalizations.of(context).deleteIngredient),
             content: Text(
-              AppLocalizations.of(context)!.confirmDeleteIngredient,
+              AppLocalizations.of(context).confirmDeleteIngredient,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(AppLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -455,11 +455,11 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   });
                   Navigator.pop(context);
                   _showSuccessSnackBar(
-                    AppLocalizations.of(context)!.ingredientDeleted,
+                    AppLocalizations.of(context).ingredientDeleted,
                   );
                 },
                 child: Text(
-                  AppLocalizations.of(context)!.delete,
+                  AppLocalizations.of(context).delete,
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
@@ -571,7 +571,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   child: ElevatedButton.icon(
                     onPressed: _openBarcodeScanner,
                     icon: const Icon(Icons.qr_code_scanner),
-                    label: Text(AppLocalizations.of(context)!.scanBarcode),
+                    label: Text(AppLocalizations.of(context).scanBarcode),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
@@ -583,7 +583,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   child: ElevatedButton.icon(
                     onPressed: _openProductSearch,
                     icon: const Icon(Icons.search),
-                    label: Text(AppLocalizations.of(context)!.searchProduct),
+                    label: Text(AppLocalizations.of(context).searchProduct),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.indigo,
                       foregroundColor: Colors.white,
@@ -606,7 +606,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context)!.basicInfo,
+              AppLocalizations.of(context).basicInfo,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -615,8 +615,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context)!.dishName} *',
-                hintText: AppLocalizations.of(context)!.dishNamePlaceholder,
+                labelText: '${AppLocalizations.of(context).dishName} *',
+                hintText: AppLocalizations.of(context).dishNamePlaceholder,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.restaurant),
               ),
@@ -626,8 +626,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               controller: _descriptionController,
               maxLines: 3,
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.description,
-                hintText: AppLocalizations.of(context)!.descriptionPlaceholder,
+                labelText: AppLocalizations.of(context).description,
+                hintText: AppLocalizations.of(context).descriptionPlaceholder,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.description),
               ),
@@ -636,26 +636,26 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.category,
+                labelText: AppLocalizations.of(context).category,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category),
               ),
               items: [
                 DropdownMenuItem(
                   value: 'breakfast',
-                  child: Text(AppLocalizations.of(context)!.breakfast),
+                  child: Text(AppLocalizations.of(context).breakfast),
                 ),
                 DropdownMenuItem(
                   value: 'lunch',
-                  child: Text(AppLocalizations.of(context)!.lunch),
+                  child: Text(AppLocalizations.of(context).lunch),
                 ),
                 DropdownMenuItem(
                   value: 'dinner',
-                  child: Text(AppLocalizations.of(context)!.dinner),
+                  child: Text(AppLocalizations.of(context).dinner),
                 ),
                 DropdownMenuItem(
                   value: 'snack',
-                  child: Text(AppLocalizations.of(context)!.snack),
+                  child: Text(AppLocalizations.of(context).snack),
                 ),
               ],
               onChanged: (value) {
@@ -694,7 +694,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.ingredients,
+                  AppLocalizations.of(context).ingredients,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -702,7 +702,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 ElevatedButton.icon(
                   onPressed: _addIngredient,
                   icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context)!.addIngredient),
+                  label: Text(AppLocalizations.of(context).addIngredient),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
@@ -728,7 +728,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context)!.noIngredientsAdded,
+                      AppLocalizations.of(context).noIngredientsAdded,
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   ],
@@ -759,15 +759,15 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context)!.options,
+              AppLocalizations.of(context).options,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             SwitchListTile(
-              title: Text(AppLocalizations.of(context)!.favorite),
-              subtitle: Text(AppLocalizations.of(context)!.markAsFavorite),
+              title: Text(AppLocalizations.of(context).favorite),
+              subtitle: Text(AppLocalizations.of(context).markAsFavorite),
               value: _isFavorite,
               onChanged: (value) => setState(() => _isFavorite = value),
               secondary: Icon(
@@ -863,7 +863,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                               color: colorScheme.primary,
                             ),
                             const SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.edit),
+                            Text(AppLocalizations.of(context).edit),
                           ],
                         ),
                       ),
@@ -878,7 +878,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              AppLocalizations.of(context)!.delete,
+                              AppLocalizations.of(context).delete,
                               style: TextStyle(color: colorScheme.error),
                             ),
                           ],
@@ -983,8 +983,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       appBar: AppBar(
         title: Text(
           widget.dish != null
-              ? AppLocalizations.of(context)!.editDish
-              : AppLocalizations.of(context)!.createDish,
+              ? AppLocalizations.of(context).editDish
+              : AppLocalizations.of(context).createDish,
         ),
         actions: [
           if (_isLoading)
@@ -1000,7 +1000,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
             TextButton(
               onPressed: _saveDish,
               child: Text(
-                AppLocalizations.of(context)!.save,
+                AppLocalizations.of(context).save,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.bold,
@@ -1040,8 +1040,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 icon: const Icon(Icons.save),
                 label: Text(
                   widget.dish != null
-                      ? AppLocalizations.of(context)!.saveDish
-                      : AppLocalizations.of(context)!.createDish,
+                      ? AppLocalizations.of(context).saveDish
+                      : AppLocalizations.of(context).createDish,
                 ),
               ),
     );

@@ -12,7 +12,7 @@ class MenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.menu),
+        title: Text(AppLocalizations.of(context).menu),
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
@@ -26,27 +26,27 @@ class MenuScreen extends StatelessWidget {
           // Settings Sections
           _buildSettingsSection(
             context,
-            title: AppLocalizations.of(context)!.profile,
+            title: AppLocalizations.of(context).profile,
             icon: Icons.person,
             children: [
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.userProfile,
-                subtitle: AppLocalizations.of(context)!.editPersonalInfo,
+                title: AppLocalizations.of(context).userProfile,
+                subtitle: AppLocalizations.of(context).editPersonalInfo,
                 icon: Icons.account_circle,
                 onTap: () => context.push('/settings/profile'),
               ),
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.nutritionGoals,
-                subtitle: AppLocalizations.of(context)!.setNutritionTargets,
+                title: AppLocalizations.of(context).nutritionGoals,
+                subtitle: AppLocalizations.of(context).setNutritionTargets,
                 icon: Icons.track_changes,
                 onTap: () => context.push('/settings/nutrition-goals'),
               ),
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.viewStatistics,
-                subtitle: AppLocalizations.of(context)!.currentStats,
+                title: AppLocalizations.of(context).viewStatistics,
+                subtitle: AppLocalizations.of(context).currentStats,
                 icon: Icons.analytics,
                 onTap: () => context.push('/settings/statistics'),
               ),
@@ -55,7 +55,7 @@ class MenuScreen extends StatelessWidget {
 
           _buildSettingsSection(
             context,
-            title: AppLocalizations.of(context)!.appearance,
+            title: AppLocalizations.of(context).appearance,
             icon: Icons.palette,
             children: [
               _buildThemeSelector(context),
@@ -66,21 +66,21 @@ class MenuScreen extends StatelessWidget {
           // AI & Features Section
           _buildSettingsSection(
             context,
-            title: AppLocalizations.of(context)!.aiFeatures,
+            title: AppLocalizations.of(context).aiFeatures,
             icon: Icons.smart_toy,
             children: [
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.apiKeySettings,
-                subtitle: AppLocalizations.of(context)!.configureApiKey,
+                title: AppLocalizations.of(context).apiKeySettings,
+                subtitle: AppLocalizations.of(context).configureApiKey,
                 icon: Icons.key,
                 onTap: () => context.push('/settings/api-key'),
               ),
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.chatAgentOptions,
+                title: AppLocalizations.of(context).chatAgentOptions,
                 subtitle:
-                    AppLocalizations.of(context)!.enableAgentModeDeepSearch,
+                    AppLocalizations.of(context).enableAgentModeDeepSearch,
                 icon: Icons.psychology,
                 onTap: () => context.push('/settings/chat-agent'),
               ),
@@ -89,20 +89,20 @@ class MenuScreen extends StatelessWidget {
 
           _buildSettingsSection(
             context,
-            title: AppLocalizations.of(context)!.dataManagement,
+            title: AppLocalizations.of(context).dataManagement,
             icon: Icons.storage,
             children: [
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.exportData,
-                subtitle: AppLocalizations.of(context)!.exportMealData,
+                title: AppLocalizations.of(context).exportData,
+                subtitle: AppLocalizations.of(context).exportMealData,
                 icon: Icons.file_download,
                 onTap: () => context.push('/settings/export-data'),
               ),
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.importData,
-                subtitle: AppLocalizations.of(context)!.importMealDataBackup,
+                title: AppLocalizations.of(context).importData,
+                subtitle: AppLocalizations.of(context).importMealDataBackup,
                 icon: Icons.file_upload,
                 onTap: () => context.push('/settings/import-data'),
               ),
@@ -110,20 +110,20 @@ class MenuScreen extends StatelessWidget {
           ),
           _buildSettingsSection(
             context,
-            title: AppLocalizations.of(context)!.information,
+            title: AppLocalizations.of(context).information,
             icon: Icons.info,
             children: [
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.about,
-                subtitle: AppLocalizations.of(context)!.learnMorePlatePal,
+                title: AppLocalizations.of(context).about,
+                subtitle: AppLocalizations.of(context).learnMorePlatePal,
                 icon: Icons.info_outline,
                 onTap: () => context.push('/settings/about'),
               ),
               _buildSettingsTile(
                 context,
-                title: AppLocalizations.of(context)!.contributors,
-                subtitle: AppLocalizations.of(context)!.viewContributors,
+                title: AppLocalizations.of(context).contributors,
+                subtitle: AppLocalizations.of(context).viewContributors,
                 icon: Icons.people,
                 onTap: () => context.push('/settings/contributions'),
               ),
@@ -193,7 +193,7 @@ class MenuScreen extends StatelessWidget {
             ),
           ),
           Text(
-            AppLocalizations.of(context)!.madeBy,
+            AppLocalizations.of(context).madeBy,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.outline,
             ),
@@ -271,7 +271,7 @@ class MenuScreen extends StatelessWidget {
             Icons.palette,
             color: Theme.of(context).colorScheme.onSurface,
           ),
-          title: Text(AppLocalizations.of(context)!.theme),
+          title: Text(AppLocalizations.of(context).theme),
           subtitle: Text(themeProvider.currentThemeName),
           children: [
             Padding(
@@ -284,7 +284,7 @@ class MenuScreen extends StatelessWidget {
                       Expanded(
                         child: _buildThemeModeButton(
                           context,
-                          AppLocalizations.of(context)!.light,
+                          AppLocalizations.of(context).light,
                           Icons.light_mode,
                           ThemePreference.light,
                           themeProvider,
@@ -294,7 +294,7 @@ class MenuScreen extends StatelessWidget {
                       Expanded(
                         child: _buildThemeModeButton(
                           context,
-                          AppLocalizations.of(context)!.dark,
+                          AppLocalizations.of(context).dark,
                           Icons.dark_mode,
                           ThemePreference.dark,
                           themeProvider,
@@ -304,7 +304,7 @@ class MenuScreen extends StatelessWidget {
                       Expanded(
                         child: _buildThemeModeButton(
                           context,
-                          AppLocalizations.of(context)!.system,
+                          AppLocalizations.of(context).system,
                           Icons.brightness_auto,
                           ThemePreference.system,
                           themeProvider,
@@ -438,7 +438,7 @@ class MenuScreen extends StatelessWidget {
             Icons.language,
             color: Theme.of(context).colorScheme.onSurface,
           ),
-          title: Text(AppLocalizations.of(context)!.language),
+          title: Text(AppLocalizations.of(context).language),
           subtitle: Text(_getLanguageName(localeProvider.locale.languageCode)),
           trailing: DropdownButton<String>(
             value: localeProvider.locale.languageCode,

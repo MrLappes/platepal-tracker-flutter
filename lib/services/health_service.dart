@@ -280,8 +280,9 @@ class HealthService {
     for (HealthDataPoint point in healthData) {
       // Extract numeric value from HealthValue
       double? numericValue = _extractNumericValue(point.value);
-      if (numericValue == null)
+      if (numericValue == null) {
         continue; // Skip if we can't extract a numeric value
+      }
 
       switch (point.type) {
         case HealthDataType.WEIGHT:
@@ -634,7 +635,7 @@ class HealthService {
       debugInfo['available_types'] = {};
       for (final type in energyTypes) {
         try {
-          final available = await Health().isDataTypeAvailable(type);
+          final available = Health().isDataTypeAvailable(type);
           debugInfo['available_types'][type.toString()] = available;
           developer.log(
             'Data type $type available: $available',

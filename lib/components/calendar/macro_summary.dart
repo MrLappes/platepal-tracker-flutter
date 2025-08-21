@@ -256,7 +256,7 @@ class _MacroSummaryState extends State<MacroSummary> {
   }
 
   void _showHealthDataInfo(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final isToday =
         widget.selectedDate != null &&
         _isSameDay(widget.selectedDate!, DateTime.now());
@@ -317,7 +317,7 @@ class _MacroSummaryState extends State<MacroSummary> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 

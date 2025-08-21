@@ -187,7 +187,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
               title: FadeTransition(
                 opacity: _headerOpacity,
                 child: Text(
-                  localizations?.contributors ?? 'Contributors',
+                  localizations.contributors,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${contributors.length} ${contributors.length == 1 ? (localizations?.contributorSingular ?? 'Contributor') : (localizations?.contributorPlural ?? 'Contributors')}',
+                          '${contributors.length} ${contributors.length == 1 ? (localizations.contributorSingular) : (localizations.contributorPlural)}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -332,8 +332,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 24),
                         child: Text(
-                          localizations?.contributorsThankYou ??
-                              'Thanks to everyone who has contributed to making PlatePal Tracker possible!',
+                          localizations.contributorsThankYou,
                           style: Theme.of(
                             context,
                           ).textTheme.bodyLarge?.copyWith(
@@ -529,7 +528,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                 child: Column(
                   children: [
                     Text(
-                      localizations?.wantToContribute ?? 'Want to Contribute?',
+                      localizations.wantToContribute,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -537,8 +536,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      localizations?.openSourceMessage ??
-                          'PlatePal Tracker is open source - join us on GitHub!',
+                      localizations.openSourceMessage,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -558,8 +556,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                           ),
                         ),
                         child: Text(
-                          localizations?.checkGitHub ??
-                              'Check Out Our GitHub Repository',
+                          localizations.checkGitHub,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -614,8 +611,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                     child: Column(
                       children: [
                         Text(
-                          localizations?.supportDevelopment ??
-                              'Support Development',
+                          localizations.supportDevelopment,
                           style: Theme.of(
                             context,
                           ).textTheme.titleLarge?.copyWith(
@@ -626,8 +622,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          localizations?.supportMessage ??
-                              'You want to buy me my creatine? Your support is greatly appreciated but not at all mandatory.',
+                          localizations.supportMessage,
                           style: Theme.of(
                             context,
                           ).textTheme.bodyMedium?.copyWith(
@@ -650,7 +645,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                             ),
                             icon: const Icon(Icons.local_cafe),
                             label: Text(
-                              localizations?.buyMeCreatine ?? 'Buy Me Creatine',
+                              localizations.buyMeCreatine,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),

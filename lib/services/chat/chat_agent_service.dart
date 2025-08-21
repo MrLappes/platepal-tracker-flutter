@@ -875,7 +875,7 @@ class ChatAgentService {
                 currentInput.initialSystemPrompt ??
                 '';
             inputForThinking = currentInput.copyWith(
-              enhancedSystemPrompt: () => stepSummary + '\n' + basePrompt,
+              enhancedSystemPrompt: () => '$stepSummary\n$basePrompt',
             );
           } else {
             inputForThinking = currentInput;
@@ -1396,62 +1396,6 @@ class ChatAgentService {
         },
       );
 
-      // Patch missing keys and normalize broken OpenAI output
-      List<dynamic> rawActions =
-          pipelineControlData['recommendedActions'] ?? [];
-      // Map string actions to enum values, ignore unknowns
-      List<PipelineControlAction> mappedActions =
-          rawActions
-              .map((action) {
-                if (action is PipelineControlAction) return action;
-                if (action is String) {
-                  switch (action.trim().toLowerCase()) {
-                    case 'retrywithmodifications':
-                    case 'pipelinecontrolaction.retrywithmodifications':
-                    case 'retry_with_modifications':
-                    case 'retry':
-                      return PipelineControlAction.retryWithModifications;
-                    case 'continue':
-                    case 'continue_normally':
-                    case 'pipelinecontrolaction.continuenormally':
-                      return PipelineControlAction.continueNormally;
-                    case 'skipoptionalsteps':
-                    case 'skip_optional_steps':
-                    case 'pipelinecontrolaction.skipoptionalsteps':
-                      return PipelineControlAction.skipOptionalSteps;
-                    case 'gatheradditionalcontext':
-                    case 'gather_additional_context':
-                    case 'pipelinecontrolaction.gatheradditionalcontext':
-                      return PipelineControlAction.gatherAdditionalContext;
-                    case 'modifysearchparameters':
-                    case 'modify_search_parameters':
-                    case 'pipelinecontrolaction.modifysearchparameters':
-                      return PipelineControlAction.modifySearchParameters;
-                    case 'discardandretry':
-                    case 'discard_and_retry':
-                    case 'pipelinecontrolaction.discardandretry':
-                      return PipelineControlAction.discardAndRetry;
-                    default:
-                      return null;
-                  }
-                }
-                return null;
-              })
-              .whereType<PipelineControlAction>()
-              .toList();
-
-      // Ensure contextModifications is a Map<String, dynamic>
-      dynamic rawContextMods =
-          pipelineControlData['contextModifications'] ?? {};
-      Map<String, dynamic> contextMods;
-      if (rawContextMods is Map<String, dynamic>) {
-        contextMods = rawContextMods;
-      } else if (rawContextMods is Map) {
-        contextMods = Map<String, dynamic>.from(rawContextMods);
-      } else {
-        contextMods = {};
-      }
-
       final normalized = <String, dynamic>{
         'hasEnoughContext': pipelineControlData['hasEnoughContext'] ?? false,
         // Expose image + ingredients in normalized control data to aid decisions
@@ -1517,7 +1461,7 @@ class ChatAgentService {
                 debugPrint(
                   '🍳 Detected dish creation request in pipeline control',
                 );
-                debugPrint('   Context modifications: ${modifications}');
+                debugPrint('   Context modifications: $modifications');
                 debugPrint('   Reasoning: ${pipelineControl.reasoning}');
 
                 final thinkingResultObj = ThinkingStepResponse.safeFromDynamic(

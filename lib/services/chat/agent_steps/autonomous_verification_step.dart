@@ -354,12 +354,15 @@ $pipelineHistorySummary
     final requirements = <String>[];
 
     if (context.needsUserProfile) requirements.add('User profile data');
-    if (context.needsTodaysNutrition)
+    if (context.needsTodaysNutrition) {
       requirements.add('Today\'s nutrition summary');
-    if (context.needsWeeklyNutritionSummary)
+    }
+    if (context.needsWeeklyNutritionSummary) {
       requirements.add('Weekly nutrition summary');
-    if (context.needsListOfCreatedDishes)
+    }
+    if (context.needsListOfCreatedDishes) {
       requirements.add('User\'s created dishes');
+    }
     if (context.needsExistingDishes) {
       requirements.add('Database of existing dishes');
       // Add search terms information
@@ -374,13 +377,16 @@ $pipelineHistorySummary
         );
       }
     }
-    if (context.needsInfoOnDishCreation)
+    if (context.needsInfoOnDishCreation) {
       requirements.add('Dish creation capabilities');
+    }
     if (context.needsNutritionAdvice) requirements.add('Nutrition advice');
-    if (context.needsHistoricalMealLookup)
+    if (context.needsHistoricalMealLookup) {
       requirements.add('Historical meal data');
-    if (context.needsConversationHistory)
+    }
+    if (context.needsConversationHistory) {
       requirements.add('Conversation history');
+    }
 
     if (requirements.isNotEmpty) {
       buffer.writeln('  - ${requirements.join("\n  - ")}');
@@ -668,7 +674,7 @@ $pipelineHistorySummary
     }
 
     debugPrint(
-      '🔍 Filtering ${availableDishes.length} dishes for relevance to: \"$userMessage\"',
+      '🔍 Filtering ${availableDishes.length} dishes for relevance to: "$userMessage"',
     );
 
     // If thinking result indicates specific dish search terms, use those for filtering

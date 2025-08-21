@@ -318,7 +318,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
             content: Text(
               AppLocalizations.of(
                 context,
-              )!.errorOpeningDishScreen(error.toString()),
+              ).errorOpeningDishScreen(error.toString()),
             ),
             backgroundColor: Colors.red,
           ),
@@ -550,7 +550,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     // Get profile colors and animation state
