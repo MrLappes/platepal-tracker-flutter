@@ -118,6 +118,7 @@ For full functionality, you'll need to configure API keys:
 2. **Open Food Facts API** (for barcode scanning)
    - Free API for food product information
    - No API key required for basic usage
+   - Website: [Open Food Facts](https://de.openfoodfacts.org/)
 
 ### Environment Setup
 Create a `.env` file in the project root (not included in version control):
