@@ -147,8 +147,9 @@ class PipelineHistoryTracker {
 
   /// Check if we're in a potential loop scenario
   bool isLikelyInLoop() {
-    if (_attempts.length < 6)
+    if (_attempts.length < 6) {
       return false; // Need at least 6 steps to detect loops
+    }
 
     // Check for repeated step patterns
     final recentSteps =

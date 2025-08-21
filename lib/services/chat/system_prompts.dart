@@ -111,7 +111,7 @@ When creating a new dish in response to a user query, follow these guidelines:
 2. Response Format:
    When creating dishes, respond with JSON that includes a "dishes" array with objects containing:
    {
-     "id": "string (use the literal string \"random\" for new dishes - do NOT generate predictable or stable IDs)",
+     "id": "string (use the literal string "random" for new dishes - do NOT generate predictable or stable IDs)",
      "name": "Dish Name",
      "ingredients": [
        {"name": "Ingredient 1", "quantity": "100g"},

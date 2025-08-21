@@ -19,7 +19,7 @@ class DishCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return CustomCard(
       onTap: onTap,
       child: Column(
@@ -60,7 +60,7 @@ class DishCard extends StatelessWidget {
                     }
                   },
                   itemBuilder: (context) {
-                    final l10n = AppLocalizations.of(context)!;
+                    final l10n = AppLocalizations.of(context);
                     return [
                       if (onEdit != null)
                         PopupMenuItem(

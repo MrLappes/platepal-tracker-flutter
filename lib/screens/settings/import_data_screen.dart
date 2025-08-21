@@ -51,7 +51,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.importData),
+        title: Text(AppLocalizations.of(context).importData),
         elevation: 2,
       ),
       body:
@@ -94,7 +94,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           Text(
             _isRestoring
                 ? 'Restoring from backup...'
-                : AppLocalizations.of(context)!.importProgress,
+                : AppLocalizations.of(context).importProgress,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -226,7 +226,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 label: Text(
                   _selectedFilePath != null
                       ? 'Change File'
-                      : AppLocalizations.of(context)!.selectFile,
+                      : AppLocalizations.of(context).selectFile,
                 ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -259,7 +259,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 Icon(Icons.checklist, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context)!.selectDataToImport,
+                  AppLocalizations.of(context).selectDataToImport,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -305,23 +305,23 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
 
     switch (dataType) {
       case DataType.dishes:
-        title = AppLocalizations.of(context)!.dishes;
+        title = AppLocalizations.of(context).dishes;
         subtitle = 'Your saved recipes and dishes';
         break;
       case DataType.mealLogs:
-        title = AppLocalizations.of(context)!.mealLogs;
+        title = AppLocalizations.of(context).mealLogs;
         subtitle = 'Your meal history and nutrition logs';
         break;
       case DataType.userProfiles:
-        title = AppLocalizations.of(context)!.userProfiles;
+        title = AppLocalizations.of(context).userProfiles;
         subtitle = 'User profile and preferences';
         break;
       case DataType.ingredients:
-        title = AppLocalizations.of(context)!.ingredients;
+        title = AppLocalizations.of(context).ingredients;
         subtitle = 'Ingredient database';
         break;
       case DataType.allData:
-        title = AppLocalizations.of(context)!.allData;
+        title = AppLocalizations.of(context).allData;
         subtitle = 'Import everything from the file';
         break;
       default:
@@ -372,7 +372,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 Icon(Icons.merge_type, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context)!.howToHandleDuplicates,
+                  AppLocalizations.of(context).howToHandleDuplicates,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -381,7 +381,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             ),
             const SizedBox(height: 16),
             RadioListTile<DuplicateHandling>(
-              title: Text(AppLocalizations.of(context)!.skipDuplicates),
+              title: Text(AppLocalizations.of(context).skipDuplicates),
               subtitle: const Text(
                 'Keep existing data, skip imported duplicates',
               ),
@@ -395,7 +395,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               secondary: const Icon(Icons.skip_next, color: Colors.blue),
             ),
             RadioListTile<DuplicateHandling>(
-              title: Text(AppLocalizations.of(context)!.overwriteDuplicates),
+              title: Text(AppLocalizations.of(context).overwriteDuplicates),
               subtitle: const Text('Replace existing data with imported data'),
               value: DuplicateHandling.overwrite,
               groupValue: _duplicateHandling,
@@ -407,7 +407,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               secondary: const Icon(Icons.update, color: Colors.orange),
             ),
             RadioListTile<DuplicateHandling>(
-              title: Text(AppLocalizations.of(context)!.mergeDuplicates),
+              title: Text(AppLocalizations.of(context).mergeDuplicates),
               subtitle: const Text('Merge data intelligently'),
               value: DuplicateHandling.merge,
               groupValue: _duplicateHandling,
@@ -645,7 +645,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
         onPressed: canImport ? _performImport : null,
         icon: const Icon(Icons.file_download),
         label: Text(
-          AppLocalizations.of(context)!.importFromFile,
+          AppLocalizations.of(context).importFromFile,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         style: ElevatedButton.styleFrom(
@@ -736,7 +736,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 content: Text(
                   AppLocalizations.of(
                     context,
-                  )!.importedItemsCount(result.itemsProcessed),
+                  ).importedItemsCount(result.itemsProcessed),
                 ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
@@ -754,7 +754,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             _lastError =
                 result.errors.isNotEmpty
                     ? 'Import completed with ${result.errors.length} errors'
-                    : AppLocalizations.of(context)!.importFailed;
+                    : AppLocalizations.of(context).importFailed;
           });
         }
       }

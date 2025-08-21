@@ -117,7 +117,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -247,7 +247,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildDishesList() {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     if (_isLoading) {
       return CustomScrollView(
@@ -358,7 +358,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
   Widget _buildDishCard(Dish dish) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Card(
       elevation: 2,
@@ -676,8 +676,8 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           SnackBar(
             content: Text(
               dish.isFavorite
-                  ? AppLocalizations.of(context)!.removedFromFavorites
-                  : AppLocalizations.of(context)!.addedToFavorites,
+                  ? AppLocalizations.of(context).removedFromFavorites
+                  : AppLocalizations.of(context).addedToFavorites,
             ),
           ),
         );
@@ -686,7 +686,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorUpdatingDish),
+            content: Text(AppLocalizations.of(context).errorUpdatingDish),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -699,21 +699,21 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.deleteDish),
+            title: Text(AppLocalizations.of(context).deleteDish),
             content: Text(
-              AppLocalizations.of(context)!.deleteDishConfirmation(dish.name),
+              AppLocalizations.of(context).deleteDishConfirmation(dish.name),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(AppLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text(AppLocalizations.of(context).delete),
               ),
             ],
           ),
@@ -728,7 +728,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(context)!.dishDeletedSuccessfully,
+                AppLocalizations.of(context).dishDeletedSuccessfully,
               ),
             ),
           );
@@ -737,7 +737,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.failedToDeleteDish),
+              content: Text(AppLocalizations.of(context).failedToDeleteDish),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

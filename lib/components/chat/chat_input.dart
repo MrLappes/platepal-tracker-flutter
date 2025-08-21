@@ -33,7 +33,7 @@ class _ChatInputState extends State<ChatInput>
   final TextEditingController _controller = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   File? _selectedImage;
-  List<UserIngredient> _selectedIngredients = [];
+  final List<UserIngredient> _selectedIngredients = [];
   bool _hasText = false;
   bool _showMenu = false;
   late AnimationController _animationController;
@@ -80,7 +80,7 @@ class _ChatInputState extends State<ChatInput>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Stack(
       children: [
@@ -382,7 +382,7 @@ class _ChatInputState extends State<ChatInput>
 
   Widget _buildImagePreview(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -464,7 +464,7 @@ class _ChatInputState extends State<ChatInput>
 
   Widget _buildIngredientsPreview(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -551,7 +551,7 @@ class _ChatInputState extends State<ChatInput>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.imageAttached),
+              content: Text(AppLocalizations.of(context).imageAttached),
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(
@@ -567,7 +567,7 @@ class _ChatInputState extends State<ChatInput>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!.errorPickingImage(e.toString()),
+              AppLocalizations.of(context).errorPickingImage(e.toString()),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
@@ -585,15 +585,16 @@ class _ChatInputState extends State<ChatInput>
     final message = _controller.text.trim();
     if (message.isEmpty &&
         _selectedImage == null &&
-        _selectedIngredients.isEmpty)
+        _selectedIngredients.isEmpty) {
       return;
+    }
 
     // Debug: Print what we're about to send
-    print(
+    debugPrint(
       '🔍 DEBUG: Sending message with ${_selectedIngredients.length} ingredients',
     );
     for (final ingredient in _selectedIngredients) {
-      print(
+      debugPrint(
         '   - ${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
       );
     }

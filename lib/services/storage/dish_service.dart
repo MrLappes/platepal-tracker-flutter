@@ -73,10 +73,11 @@ class DishService {
     debugPrint(
       '🔍 _getDishWithRelations: Found ${dishIngredientsMaps.length} ingredient rows for dish $dishId',
     );
-    if (dishIngredientsMaps.isNotEmpty)
+    if (dishIngredientsMaps.isNotEmpty) {
       debugPrint(
         '🔍 _getDishWithRelations: ingredient row example: ${dishIngredientsMaps.first}',
       );
+    }
 
     // Construct ingredients list
     final List<Ingredient> ingredients = [];

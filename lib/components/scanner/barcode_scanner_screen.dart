@@ -101,7 +101,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         debugPrint('❌ Product not found for barcode: $code');
         if (mounted) {
           setState(() {
-            _errorMessage = AppLocalizations.of(context)!.productNotFound;
+            _errorMessage = AppLocalizations.of(context).productNotFound;
           });
 
           // Clear error after 3 seconds
@@ -120,7 +120,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         setState(() {
           _errorMessage = AppLocalizations.of(
             context,
-          )!.errorScanningBarcode(e.toString());
+          ).errorScanningBarcode(e.toString());
         });
 
         // Clear error after 5 seconds
@@ -152,7 +152,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Scaffold(

@@ -27,7 +27,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.exportData),
+        title: Text(AppLocalizations.of(context).exportData),
         elevation: 2,
       ),
       body: _isExporting ? _buildLoadingView() : _buildExportForm(),
@@ -42,7 +42,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           const CircularProgressIndicator(strokeWidth: 3),
           const SizedBox(height: 24),
           Text(
-            AppLocalizations.of(context)!.exportProgress,
+            AppLocalizations.of(context).exportProgress,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -190,7 +190,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 Icon(Icons.checklist, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context)!.selectDataToExport,
+                  AppLocalizations.of(context).selectDataToExport,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -246,31 +246,31 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
 
     switch (dataType) {
       case DataType.dishes:
-        title = AppLocalizations.of(context)!.dishes;
+        title = AppLocalizations.of(context).dishes;
         subtitle = 'Your saved recipes and dishes';
         break;
       case DataType.mealLogs:
-        title = AppLocalizations.of(context)!.mealLogs;
+        title = AppLocalizations.of(context).mealLogs;
         subtitle = 'Your meal history and nutrition logs';
         break;
       case DataType.userProfiles:
-        title = AppLocalizations.of(context)!.userProfiles;
+        title = AppLocalizations.of(context).userProfiles;
         subtitle = 'User profile and preferences';
         break;
       case DataType.ingredients:
-        title = AppLocalizations.of(context)!.ingredients;
+        title = AppLocalizations.of(context).ingredients;
         subtitle = 'Ingredient database';
         break;
       case DataType.supplements:
-        title = AppLocalizations.of(context)!.supplements;
+        title = AppLocalizations.of(context).supplements;
         subtitle = 'Supplement tracking data';
         break;
       case DataType.fitnessGoals:
-        title = AppLocalizations.of(context)!.nutritionGoalsData;
+        title = AppLocalizations.of(context).nutritionGoalsData;
         subtitle = 'Fitness and nutrition goals';
         break;
       case DataType.allData:
-        title = AppLocalizations.of(context)!.allData;
+        title = AppLocalizations.of(context).allData;
         subtitle = 'Export everything from your account';
         break;
     }
@@ -326,7 +326,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
             ),
             const SizedBox(height: 16),
             RadioListTile<ExportFormat>(
-              title: Text(AppLocalizations.of(context)!.exportAsJson),
+              title: Text(AppLocalizations.of(context).exportAsJson),
               subtitle: const Text('Structured data format, best for backup'),
               value: ExportFormat.json,
               groupValue: _selectedFormat,
@@ -338,7 +338,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               secondary: const Icon(Icons.code, color: Colors.blue),
             ),
             RadioListTile<ExportFormat>(
-              title: Text(AppLocalizations.of(context)!.exportAsCsv),
+              title: Text(AppLocalizations.of(context).exportAsCsv),
               subtitle: const Text('Spreadsheet format, good for analysis'),
               value: ExportFormat.csv,
               groupValue: _selectedFormat,
@@ -593,7 +593,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
         onPressed: canExport ? _exportData : null,
         icon: const Icon(Icons.file_upload),
         label: Text(
-          AppLocalizations.of(context)!.exportData,
+          AppLocalizations.of(context).exportData,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         style: ElevatedButton.styleFrom(
@@ -724,7 +724,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 content: Text(
                   AppLocalizations.of(
                     context,
-                  )!.exportedItemsCount(result.itemsProcessed),
+                  ).exportedItemsCount(result.itemsProcessed),
                 ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,

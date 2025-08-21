@@ -45,7 +45,7 @@ class _BotProfileCustomizationDialogState
   }
 
   Future<void> _pickImage() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -84,7 +84,7 @@ class _BotProfileCustomizationDialogState
   }
 
   Future<void> _saveProfile() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
@@ -134,7 +134,7 @@ class _BotProfileCustomizationDialogState
   }
 
   Widget _buildAvatarSection() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -210,7 +210,7 @@ class _BotProfileCustomizationDialogState
   }
 
   String _getPersonalityDisplayName(BotPersonalityType personality) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     switch (personality) {
       case BotPersonalityType.nutritionist:
@@ -230,7 +230,7 @@ class _BotProfileCustomizationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return AlertDialog(

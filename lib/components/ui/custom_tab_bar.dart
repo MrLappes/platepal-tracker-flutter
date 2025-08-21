@@ -22,19 +22,19 @@ class CustomTabBar extends StatelessWidget {
       items: [
         BottomNavigationBarItem(
           icon: const Icon(Icons.restaurant),
-          label: AppLocalizations.of(context)!.meals,
+          label: AppLocalizations.of(context).meals,
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.calendar_today),
-          label: AppLocalizations.of(context)!.calendar,
+          label: AppLocalizations.of(context).calendar,
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.chat),
-          label: AppLocalizations.of(context)!.chat,
+          label: AppLocalizations.of(context).chat,
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.menu),
-          label: AppLocalizations.of(context)!.menu,
+          label: AppLocalizations.of(context).menu,
         ),
       ],
     );

@@ -69,7 +69,7 @@ class AppTheme {
         selectedItemColor: colors.primary,
         unselectedItemColor: colors.text.withValues(alpha: 0.6),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colors.card,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

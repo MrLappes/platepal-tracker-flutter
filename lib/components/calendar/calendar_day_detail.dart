@@ -62,7 +62,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
   Widget _defaultRenderItem(BuildContext context, DishLog log) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -95,7 +95,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 

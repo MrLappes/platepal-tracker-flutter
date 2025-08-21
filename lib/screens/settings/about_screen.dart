@@ -130,7 +130,7 @@ class _AboutScreenState extends State<AboutScreen>
               title: FadeTransition(
                 opacity: _headerOpacity,
                 child: Text(
-                  localizations?.aboutAppTitle ?? 'About the App',
+                  localizations.aboutAppTitle,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class _AboutScreenState extends State<AboutScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              localizations?.madeBy ?? 'Made by MrLappes',
+                              localizations.madeBy,
                               style: Theme.of(
                                 context,
                               ).textTheme.bodyLarge?.copyWith(
@@ -251,7 +251,7 @@ class _AboutScreenState extends State<AboutScreen>
                             _buildLinkButton(
                               context,
                               icon: Icons.public,
-                              title: localizations?.website ?? 'plate-pal.de',
+                              title: localizations.website,
                               onTap:
                                   () =>
                                       LinkHandler.openPlatePalWebsite(context),
@@ -262,9 +262,7 @@ class _AboutScreenState extends State<AboutScreen>
                             _buildLinkButton(
                               context,
                               icon: Icons.code,
-                              title:
-                                  localizations?.githubRepository ??
-                                  'github.com/MrLappes/platepal-tracker',
+                              title: localizations.githubRepository,
                               onTap:
                                   () => LinkHandler.openGitHubRepo(
                                     context,
@@ -275,16 +273,14 @@ class _AboutScreenState extends State<AboutScreen>
                             const SizedBox(height: 24),
 
                             Text(
-                              localizations?.appMotto ??
-                                  'Made by gym guys for gym guys that hate paid apps',
+                              localizations.appMotto,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w600),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              localizations?.codersMessage ??
-                                  'Coders shouldn\'t have to pay',
+                              localizations.codersMessage,
                               style: Theme.of(
                                 context,
                               ).textTheme.bodyMedium?.copyWith(
@@ -339,32 +335,28 @@ class _AboutScreenState extends State<AboutScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              localizations?.whyPlatePal ?? 'Why PlatePal?',
+                              localizations.whyPlatePal,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              localizations?.aboutDescription ??
-                                  'PlatePal Tracker was created to provide a privacy-focused, open-source alternative to expensive nutrition tracking apps. We believe in putting control in your hands with no subscriptions, no ads, and no data collection.',
+                              localizations.aboutDescription,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             const SizedBox(height: 20),
 
                             _buildFeatureItem(
                               context,
-                              localizations?.dataStaysOnDevice ??
-                                  'Your data stays on your device',
+                              localizations.dataStaysOnDevice,
                             ),
                             _buildFeatureItem(
                               context,
-                              localizations?.useOwnAiKey ??
-                                  'Use your own AI key for full control',
+                              localizations.useOwnAiKey,
                             ),
                             _buildFeatureItem(
                               context,
-                              localizations?.freeOpenSource ??
-                                  '100% free and open source',
+                              localizations.freeOpenSource,
                             ),
                           ],
                         ),

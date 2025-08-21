@@ -46,7 +46,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   double? _maintenanceCalories;
 
   // Health data integration
-  Map<String, double> _caloriesBurnedData = {};
+  final Map<String, double> _caloriesBurnedData = {};
   bool _isHealthConnected = false;
 
   // Graph min/max values for scaling
@@ -87,7 +87,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       final prefs = await SharedPreferences.getInstance();
       final userSessionService = UserSessionService(prefs);
       final currentUserId = userSessionService.getCurrentUserId();
-
+      if (!mounted) return;
       // Load current user profile
       final userProfiles = await context.userProfileService.getUserProfile(
         currentUserId,
@@ -182,7 +182,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       }
     } catch (e) {
       // Health data loading failed, continue without it
-      print('Failed to load health data: $e');
+      debugPrint('Failed to load health data: $e');
     }
   }
 
@@ -607,14 +607,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(localizations?.statistics ?? 'Statistics')),
+        appBar: AppBar(title: Text(localizations.statistics)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: Text(localizations?.statistics ?? 'Statistics')),
+        appBar: AppBar(title: Text(localizations.statistics)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -622,7 +622,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                localizations?.errorLoadingData ?? 'Error loading data',
+                localizations.errorLoadingData,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -630,7 +630,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _loadData,
-                child: Text(localizations?.tryAgain ?? 'Try Again'),
+                child: Text(localizations.tryAgain),
               ),
             ],
           ),
@@ -642,21 +642,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations?.statistics ?? 'Statistics'),
+        title: Text(localizations.statistics),
         actions: [
           // Show "Back to Real Data" button when showing test data
           if (_isShowingTestData)
             TextButton(
               onPressed: _loadData,
               child: Text(
-                localizations?.realData ?? 'Real Data',
+                localizations.realData,
                 style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: _loadData,
-            tooltip: localizations?.refresh ?? 'Refresh',
+            tooltip: localizations.refresh,
           ),
         ],
       ),
@@ -986,13 +986,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     if (bmi == null) return '';
 
     if (bmi < 18.5) {
-      return localizations?.bmiUnderweight ?? 'Underweight';
+      return localizations.bmiUnderweight;
     } else if (bmi < 25) {
-      return localizations?.bmiNormal ?? 'Normal';
+      return localizations.bmiNormal;
     } else if (bmi < 30) {
-      return localizations?.bmiOverweight ?? 'Overweight';
+      return localizations.bmiOverweight;
     } else {
-      return localizations?.bmiObese ?? 'Obese';
+      return localizations.bmiObese;
     }
   }
 
@@ -1132,11 +1132,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildWeightChart(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(
-        child: Text(
-          localizations?.noWeightDataAvailable ?? 'No weight data available',
-        ),
-      );
+      return Center(child: Text(localizations.noWeightDataAvailable));
     }
 
     // Use weekly median for weight to smooth out daily fluctuations
@@ -1159,11 +1155,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildBMIChart(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(
-        child: Text(
-          localizations?.noBmiDataAvailable ?? 'No BMI data available',
-        ),
-      );
+      return Center(child: Text(localizations.noBmiDataAvailable));
     }
 
     // Calculate BMI for each entry
@@ -1184,12 +1176,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .toList();
 
     if (bmiData.isEmpty) {
-      return Center(
-        child: Text(
-          localizations?.cannotCalculateBmiFromData ??
-              'Cannot calculate BMI from available data',
-        ),
-      );
+      return Center(child: Text(localizations.cannotCalculateBmiFromData));
     }
 
     return CustomPaint(
@@ -1207,17 +1194,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ReferenceLine(
             value: 18.5,
             color: Colors.orange.withValues(alpha: 0.5),
-            label: localizations?.bmiUnderweight ?? 'Underweight',
+            label: localizations.bmiUnderweight,
           ),
           ReferenceLine(
             value: 25.0,
             color: Colors.orange.withValues(alpha: 0.5),
-            label: localizations?.bmiOverweight ?? 'Overweight',
+            label: localizations.bmiOverweight,
           ),
           ReferenceLine(
             value: 30.0,
             color: Colors.red.withValues(alpha: 0.5),
-            label: localizations?.bmiObese ?? 'Obese',
+            label: localizations.bmiObese,
           ),
         ],
       ),
@@ -1230,11 +1217,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
     if (bodyFatData.isEmpty) {
-      return Center(
-        child: Text(
-          localizations?.noBodyFatDataAvailable ?? 'No body fat data available',
-        ),
-      );
+      return Center(child: Text(localizations.noBodyFatDataAvailable));
     }
 
     return CustomPaint(
@@ -1254,11 +1237,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildCalorieChart(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
-      return Center(
-        child: Text(
-          localizations?.noCalorieDataAvailable ?? 'No calorie data available',
-        ),
-      );
+      return Center(child: Text(localizations.noCalorieDataAvailable));
     }
 
     return CustomPaint(
@@ -1625,10 +1604,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .where((entry) => (entry['calories'] as double) < 1000)
             .length;
     if (veryLowDays > 0) {
-      warnings.add(
-        localizations?.veryLowCalorieWarning(veryLowDays.toString()) ??
-            'Warning: $veryLowDays day(s) with extremely low calorie intake (<1000 cal). This may be unhealthy.',
-      );
+      warnings.add(localizations.veryLowCalorieWarning(veryLowDays.toString()));
     }
 
     // Check for extremely high calorie days
@@ -1642,8 +1618,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .length;
     if (veryHighDays > 0) {
       warnings.add(
-        localizations?.veryHighCalorieNotice(veryHighDays.toString()) ??
-            'Notice: $veryHighDays day(s) with very high calorie intake (>1000 cal above maintenance).',
+        localizations.veryHighCalorieNotice(veryHighDays.toString()),
       );
     }
 
@@ -1657,10 +1632,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .length;
 
     if (extremeDeficitDays > _calorieHistory.length * 0.5) {
-      warnings.add(
-        localizations?.extremeDeficitWarning ??
-            'Warning: Frequent extreme calorie deficits may slow metabolism and cause muscle loss.',
-      );
+      warnings.add(localizations.extremeDeficitWarning);
     }
 
     // Health data based warnings
@@ -1674,8 +1646,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           }).length;
       if (largeDeficitDays > 0) {
         warnings.add(
-          localizations?.healthDataAlert(largeDeficitDays.toString()) ??
-              'Health Data Alert: $largeDeficitDays day(s) with very large calorie deficits (>1000 cal) based on actual expenditure.',
+          localizations.healthDataAlert(largeDeficitDays.toString()),
         );
       }
 
@@ -1697,10 +1668,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           // High variance in deficits
           final varianceValue = math.sqrt(deficitVariance).round();
           warnings.add(
-            localizations?.inconsistentDeficitWarning(
-                  varianceValue.toString(),
-                ) ??
-                'Warning: Your calorie deficit varies significantly day-to-day (variance: $varianceValue cal). Consider more consistent intake.',
+            localizations.inconsistentDeficitWarning(varianceValue.toString()),
           );
         }
       }

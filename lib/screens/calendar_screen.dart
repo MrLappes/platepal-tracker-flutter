@@ -27,7 +27,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DailyMacroSummary? _selectedDaySummary;
   List<DishLog> _selectedDayLogs = [];
   UserProfile? _userProfile;
-  bool _isMacroSummaryExpanded = true;
+  final bool _isMacroSummaryExpanded = true;
+  // ignore: unused_field
   bool _isGeneratingTip = false;
 
   // Calendar navigation state
@@ -142,7 +143,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _handleDeleteLog(DishLog log) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -196,7 +197,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _getAiTip() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     // Check if OpenAI service is configured
     final isConfigured = await _openAIService.isConfigured();
     if (!isConfigured) {
@@ -283,7 +284,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _showAiTipDialog(String tip) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     showDialog(
       context: context,
@@ -519,7 +520,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildLogItem(BuildContext context, DishLog log) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

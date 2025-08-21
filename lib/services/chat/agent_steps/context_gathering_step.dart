@@ -257,18 +257,13 @@ class ContextGatheringStep extends AgentStep {
           (noExistingDishesFound || noHistoricalMealsFound)) {
         needsDishCreationInfo = true;
         debugPrint(
-          '📝 Setting needsInfoOnDishCreation to true because: ' +
-              (showHowToCreateDishes
+          '📝 Setting needsInfoOnDishCreation to true because: ${showHowToCreateDishes
                   ? 'showHowToCreateDishes requested, '
-                  : '') +
-              (createDishesFromScratch
+                  : ''}${createDishesFromScratch
                   ? 'createDishesFromScratch requested, '
-                  : '') +
-              (retryWithDishCreation
+                  : ''}${retryWithDishCreation
                   ? 'retryWithDishCreation requested, '
-                  : '') +
-              (noExistingDishesFound ? 'no existing dishes found, ' : '') +
-              (noHistoricalMealsFound ? 'no historical meals found' : ''),
+                  : ''}${noExistingDishesFound ? 'no existing dishes found, ' : ''}${noHistoricalMealsFound ? 'no historical meals found' : ''}',
         );
       }
 
@@ -280,9 +275,7 @@ class ContextGatheringStep extends AgentStep {
         // If we're specifically creating dishes from scratch, make it clear in the context
         if (createDishesFromScratch || retryWithDishCreation) {
           contextSections['createDishesFromScratch'] =
-              "The user's request should be handled by creating new dishes from scratch, " +
-              "rather than only looking up existing dishes. Focus on generating complete " +
-              "dish information including ingredients, nutrition facts, and preparation steps.";
+              "The user's request should be handled by creating new dishes from scratch, " "rather than only looking up existing dishes. Focus on generating complete " "dish information including ingredients, nutrition facts, and preparation steps.";
           debugPrint('📊 Added instruction to create dishes from scratch');
         }
       }
