@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/chat_message.dart';
 import '../../models/chat_profile.dart';

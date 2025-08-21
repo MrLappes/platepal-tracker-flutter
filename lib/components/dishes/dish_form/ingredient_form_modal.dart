@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../../models/dish.dart';
 import '../../../models/product.dart';
 import '../../scanner/barcode_scanner_screen.dart';

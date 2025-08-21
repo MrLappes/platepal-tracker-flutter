@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../models/product.dart';
 import '../../services/open_food_facts_service.dart';

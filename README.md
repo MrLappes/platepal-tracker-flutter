@@ -2,7 +2,7 @@
 
 A comprehensive Flutter nutrition tracking application that helps users log meals, track nutrition intake, and achieve their fitness goals through AI-powered insights and personalized recommendations.
 
-## 🌟 Features
+## Features
 
 ### Core Functionality
 - **Meal Logging**: Easy-to-use interface for logging breakfast, lunch, dinner, and snacks
@@ -19,7 +19,7 @@ A comprehensive Flutter nutrition tracking application that helps users log meal
 - **Data Export/Import**: Backup and restore your nutrition data
 - **Profile Management**: Customize your dietary preferences and restrictions
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [Flutter SDK](https://flutter.dev/docs/get-started/install) (version 3.7.0 or higher)
@@ -50,36 +50,36 @@ A comprehensive Flutter nutrition tracking application that helps users log meal
    flutter run
    ```
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 lib/
 ├── components/          # Reusable UI components
 │   ├── animations/      # Custom animations and transitions
 │   ├── calendar/        # Calendar-specific components
-│   ├── chat/           # Chat interface components
-│   ├── dishes/         # Meal and dish related components
-│   ├── onboarding/     # User onboarding components
-│   ├── scanner/        # Barcode scanning components
-│   └── ui/             # Generic UI components
-├── constants/          # App-wide constants and configuration
-├── models/             # Data models and classes
-├── providers/          # State management (Provider pattern)
-├── repositories/       # Data access layer
-├── screens/            # Application screens
-│   ├── onboarding/     # Initial user setup screens
-│   └── tabs/           # Main tab navigation screens
-├── services/           # Business logic and external services
-│   ├── api/            # API integration (GPT, nutrition databases)
-│   ├── auth/           # Authentication services
-│   ├── chat/           # AI chat functionality
-│   └── storage/        # Local data storage
-├── themes/             # App theming and styling
-├── types/              # Type definitions and interfaces
-└── utils/              # Helper functions and utilities
+│   ├── chat/            # Chat interface components
+│   ├── dishes/          # Meal and dish related components
+│   ├── onboarding/      # User onboarding components
+│   ├── scanner/         # Barcode scanning components
+│   └── ui/              # Generic UI components
+├── constants/           # App-wide constants and configuration
+├── models/              # Data models and classes
+├── providers/           # State management (Provider pattern)
+├── repositories/        # Data access layer
+├── screens/             # Application screens
+│   ├── onboarding/      # Initial user setup screens
+│   └── tabs/            # Main tab navigation screens
+├── services/            # Business logic and external services
+│   ├── api/             # API integration (GPT, nutrition databases)
+│   ├── auth/            # Authentication services
+│   ├── chat/            # AI chat functionality
+│   └── storage/         # Local data storage
+├── themes/              # App theming and styling
+├── types/               # Type definitions and interfaces
+└── utils/               # Helper functions and utilities
 ```
 
-## 🔧 Development
+## Development
 
 ### Code Organization
 - **Models**: Define data structures using Dart classes with JSON serialization
@@ -106,7 +106,7 @@ Uses **GoRouter** for declarative routing:
 - Deep linking support
 - Nested routing for complex navigation structures
 
-## 🔐 Configuration
+## Configuration
 
 ### API Keys
 For full functionality, you'll need to configure API keys:
@@ -125,7 +125,7 @@ Create a `.env` file in the project root (not included in version control):
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 ```bash
@@ -144,15 +144,15 @@ flutter test test/models/dish_test.dart
 - **Widget Tests**: Test UI components in isolation
 - **Integration Tests**: Test complete user workflows
 
-## 📱 Platform Support
+## Platform Support
 
 | Platform | Status | Notes |
-|----------|---------|--------|
-| Android | ✅ Full Support | Minimum SDK: API 21 (Android 5.0) |
-| iOS | ✅ Full Support | Minimum Version: iOS 12.0 |
-| Web | ⚠️ Limited | Basic functionality, some features may be limited |
+|----------|--------|-------|
+| Android  | Full Support | Minimum SDK: API 21 (Android 5.0) |
+| iOS      | Full Support | Minimum Version: iOS 12.0 |
+| Web      | Limited | Basic functionality, some features may be limited |
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -167,25 +167,25 @@ flutter test test/models/dish_test.dart
 - Ensure all tests pass before submitting PR
 - Use meaningful commit messages
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- Flutter team for the excellent framework
+- Flutter team for the framework
 - OpenAI for AI-powered features
 - Open Food Facts for nutrition database
 - Material Design for UI/UX guidelines
 - Community contributors and testers
 
-## 📞 Support
+## Support
 
 If you encounter any issues or have questions:
 - Open an issue on GitHub
 - Check the documentation
-- Join our community discussions
+- Join community discussions
 
 ---
 
-**Happy tracking! 🥗📊**
+Happy tracking.

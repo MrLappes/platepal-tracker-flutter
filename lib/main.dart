@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
 import 'screens/menu_screen.dart';
