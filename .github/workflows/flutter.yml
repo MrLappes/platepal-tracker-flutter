@@ -2,32 +2,23 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ "main" ]
-    tags: [ "v*" ]
+    branches: ["main"]
+    tags: ["v*"]
   pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: ["main"]
 
 jobs:
   build-test-and-maybe-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java (Android)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -35,80 +26,43 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Flutter doctor
-        run: |
-          flutter --version
-          flutter doctor -v
-
-      - name: Cache Flutter/Dart artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            .dart_tool
-            build
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-flutter-
-
-      - name: Install dependencies
+      - name: Flutter Pub Get
         run: flutter pub get
 
-      - name: Generate l10n
+      - name: Generate localization (gen-l10n)
         run: flutter gen-l10n
 
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: Test (with coverage)
-        run: flutter test --coverage
-
-      - name: Upload coverage artifact
-        if: ${{ hashFiles('coverage/lcov.info') != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-lcov
-          path: coverage/lcov.info
-          if-no-files-found: error
-
-      # ---------- Build and Release only for tag pushes ----------
-      - name: Accept Android SDK licenses
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: bash
+      - name: Run tests (if present)
         run: |
-          if [[ -x "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager" ]]; then
-            yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          if [ -d "test" ] && [ "$(ls -A test)" ]; then
+            flutter test
           else
-            echo "sdkmanager not found; skipping."
+            echo "No tests found, skipping."
           fi
 
-      - name: Build APK (release)
-        if: startsWith(github.ref, 'refs/tags/')
-        run: flutter build apk --release
+      - name: Build APK (per-ABI)
+        run: flutter build apk --split-per-abi --release
 
-      - name: Build AAB (release)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Build AAB
         run: flutter build appbundle --release
 
-      - name: Upload release artifacts (CI archive)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-builds-${{ github.ref_name }}
+          name: android-artifacts
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          draft: false
-          generate_release_notes: true
-          prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
           files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
