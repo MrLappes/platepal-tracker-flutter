@@ -147,7 +147,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).errorSearchingProduct(e.toString()),
+            AppLocalizations.of(context).componentsScannerProductSearchErrorSearchingProduct(e.toString()),
           ),
         ),
       );
@@ -325,7 +325,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.productSearch),
+        title: Text(localizations.componentsScannerProductSearchProductSearch),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -352,7 +352,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: localizations.searchProducts,
+                hintText: localizations.componentsScannerProductSearchSearchProducts,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon:
                     _searchController.text.isNotEmpty
@@ -398,7 +398,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              localizations.localIngredients,
+                              localizations.componentsScannerProductSearchLocalIngredients,
                               style: theme.textTheme.titleMedium,
                             ),
                           ),
@@ -445,7 +445,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              localizations.localDishes,
+                              localizations.componentsScannerProductSearchLocalDishes,
                               style: theme.textTheme.titleMedium,
                             ),
                           ),
@@ -490,7 +490,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                         if (_hasSearched &&
                             _searchResults.isEmpty &&
                             !_isSearching) ...[
-                          Center(child: Text(localizations.noProductsFound)),
+                          Center(child: Text(localizations.componentsScannerProductSearchNoProductsFound)),
                         ],
                         ..._searchResults.map(_buildProductCard),
                         if (_isSearching && _currentPage > 1)
@@ -501,7 +501,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                         if (_hasMoreResults && !_isSearching)
                           TextButton(
                             onPressed: _loadMore,
-                            child: Text(localizations.loadMore),
+                            child: Text(localizations.componentsScannerProductSearchLoadMore),
                           ),
                       ],
                     ),

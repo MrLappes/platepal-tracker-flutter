@@ -351,10 +351,10 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       setState(() => _hasUnsavedChanges = false);
 
       if (mounted) {
-        final localizations = AppLocalizations.of(context);
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizations.macroTargetsUpdated),
+            content: Text(l10n.screensSettingsMacroCustomizationMacroTargetsUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -417,7 +417,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -433,7 +433,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(localizations.macroCustomization),
+          title: Text(l10n.screensSettingsMacroCustomizationMacroCustomization),
           backgroundColor: colorScheme.surface,
           foregroundColor: colorScheme.onSurface,
           actions: [
@@ -441,14 +441,14 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               IconButton(
                 icon: const Icon(Icons.save),
                 onPressed: _isSaving ? null : _saveChanges,
-                tooltip: localizations.save,
+                tooltip: l10n.componentsChatBotProfileCustomizationDialogSave,
               ),
           ],
         ),
         body:
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _buildContent(localizations, theme, colorScheme),
+                : _buildContent(l10n, theme, colorScheme),
         bottomNavigationBar:
             _hasUnsavedChanges
                 ? Container(
@@ -471,7 +471,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                               _isSaving
                                   ? null
                                   : () => Navigator.of(context).pop(),
-                          child: Text(localizations.discardChanges),
+                          child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -487,7 +487,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : Text(localizations.saveChanges),
+                                  : Text(l10n.screensSettingsMacroCustomizationSaveChanges),
                         ),
                       ),
                     ],
@@ -499,7 +499,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
   }
 
   Widget _buildContent(
-    AppLocalizations? localizations,
+    AppLocalizations l10n,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
@@ -527,8 +527,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          localizations?.macroCustomizationInfo ??
-                              'Customize your macro targets. All percentages must add up to 100%.',
+                          l10n.screensSettingsMacroCustomizationMacroCustomizationInfo,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onPrimaryContainer,
                           ),
@@ -553,23 +552,23 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
 
           // Macro ratio sliders
           _buildSectionHeader('Macro Ratios', theme),
-          _buildMacroSliderCard(localizations, theme, colorScheme, macros),
+          _buildMacroSliderCard(l10n, theme, colorScheme, macros),
 
           const SizedBox(height: 24),
 
           // Fiber settings
           _buildSectionHeader('Fiber Target', theme),
-          _buildFiberCard(localizations, theme, colorScheme, macros),
+          _buildFiberCard(l10n, theme, colorScheme, macros),
 
           const SizedBox(height: 24),
 
           // Preview card
           _buildSectionHeader('Target Preview', theme),
-          _buildPreviewCard(localizations, theme, colorScheme, macros),
+          _buildPreviewCard(l10n, theme, colorScheme, macros),
 
           const SizedBox(height: 24), // Preset buttons
           _buildSectionHeader('Quick Presets', theme),
-          _buildPresetButtons(localizations, theme),
+          _buildPresetButtons(l10n, theme),
 
           const SizedBox(height: 80), // Extra space for bottom bar
         ],
@@ -591,7 +590,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
   }
 
   Widget _buildMacroSliderCard(
-    AppLocalizations? localizations,
+    AppLocalizations l10n,
     ThemeData theme,
     ColorScheme colorScheme,
     Map<String, double> macros,
@@ -603,7 +602,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
           children: [
             // Protein slider
             _buildMacroSlider(
-              label: localizations?.protein ?? 'Protein',
+              label: l10n.componentsCalendarMacroSummaryProtein,
               value: _proteinRatio,
               color: const Color(0xFF4ade80), // Green
               onChanged: (value) => _adjustRatios('protein', value),
@@ -618,7 +617,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
 
             // Carbs slider
             _buildMacroSlider(
-              label: localizations?.carbs ?? 'Carbs',
+              label: l10n.componentsCalendarMacroSummaryCarbs,
               value: _carbsRatio,
               color: const Color(0xFF3b82f6), // Blue
               onChanged: (value) => _adjustRatios('carbs', value),
@@ -633,7 +632,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
 
             // Fat slider
             _buildMacroSlider(
-              label: localizations?.fat ?? 'Fat',
+              label: l10n.componentsCalendarMacroSummaryFat,
               value: _fatRatio,
               color: const Color(0xFFf59e0b), // Amber
               onChanged: (value) => _adjustRatios('fat', value),
@@ -787,7 +786,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
   }
 
   Widget _buildFiberCard(
-    AppLocalizations? localizations,
+    AppLocalizations l10n,
     ThemeData theme,
     ColorScheme colorScheme,
     Map<String, double> macros,
@@ -802,7 +801,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  localizations?.fiber ?? 'Fiber',
+                  l10n.componentsCalendarMacroSummaryFiber,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -861,7 +860,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
   }
 
   Widget _buildPreviewCard(
-    AppLocalizations? localizations,
+    AppLocalizations l10n,
     ThemeData theme,
     ColorScheme colorScheme,
     Map<String, double> macros,
@@ -968,7 +967,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     );
   }
 
-  Widget _buildPresetButtons(AppLocalizations? localizations, ThemeData theme) {
+  Widget _buildPresetButtons(AppLocalizations l10n, ThemeData theme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1016,9 +1015,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               child: TextButton.icon(
                 onPressed: _resetToDefaults,
                 icon: const Icon(Icons.refresh),
-                label: Text(
-                  localizations?.resetToDefaults ?? 'Reset to Defaults',
-                ),
+                label: Text(l10n.screensSettingsMacroCustomizationResetToDefaults),
               ),
             ),
           ],
@@ -1028,21 +1025,21 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
   }
 
   Future<bool> _showUnsavedChangesDialog() async {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final result = await showDialog<bool>(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(localizations.unsavedChanges),
-            content: Text(localizations.unsavedChangesMessage),
+            title: Text(l10n.screensSettingsMacroCustomizationUnsavedChanges),
+            content: Text(l10n.screensSettingsMacroCustomizationUnsavedChangesMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(localizations.discardChanges),
+                child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(localizations.saveChanges),
+                child: Text(l10n.screensSettingsMacroCustomizationSaveChanges),
               ),
             ],
           ),

@@ -187,7 +187,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
               title: FadeTransition(
                 opacity: _headerOpacity,
                 child: Text(
-                  localizations.contributors,
+                  localizations.screensMenuContributors,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${contributors.length} ${contributors.length == 1 ? (localizations.contributorSingular) : (localizations.contributorPlural)}',
+                          '${contributors.length} ${contributors.length == 1 ? (localizations.screensSettingsContributorsContributorSingular) : (localizations.screensSettingsContributorsContributorPlural)}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -332,7 +332,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 24),
                         child: Text(
-                          localizations.contributorsThankYou,
+                          localizations.screensSettingsContributorsContributorsThankYou,
                           style: Theme.of(
                             context,
                           ).textTheme.bodyLarge?.copyWith(
@@ -528,7 +528,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                 child: Column(
                   children: [
                     Text(
-                      localizations.wantToContribute,
+                      localizations.screensSettingsContributorsWantToContribute,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -536,7 +536,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      localizations.openSourceMessage,
+                      localizations.screensSettingsContributorsOpenSourceMessage,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -556,7 +556,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                           ),
                         ),
                         child: Text(
-                          localizations.checkGitHub,
+                          localizations.screensSettingsContributorsCheckGitHub,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -611,7 +611,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                     child: Column(
                       children: [
                         Text(
-                          localizations.supportDevelopment,
+                          localizations.screensSettingsContributorsSupportDevelopment,
                           style: Theme.of(
                             context,
                           ).textTheme.titleLarge?.copyWith(
@@ -622,7 +622,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          localizations.supportMessage,
+                          localizations.screensSettingsContributorsSupportMessage,
                           style: Theme.of(
                             context,
                           ).textTheme.bodyMedium?.copyWith(
@@ -645,7 +645,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                             ),
                             icon: const Icon(Icons.local_cafe),
                             label: Text(
-                              localizations.buyMeCreatine,
+                              localizations.screensSettingsContributorsBuyMeCreatine,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),

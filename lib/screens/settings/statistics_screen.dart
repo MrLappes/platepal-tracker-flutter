@@ -603,18 +603,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(localizations.statistics)),
+        appBar: AppBar(title: Text(l10n.screensSettingsStatisticsStatistics)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: Text(localizations.statistics)),
+        appBar: AppBar(title: Text(l10n.screensSettingsStatisticsStatistics)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -622,16 +622,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                localizations.errorLoadingData,
+                l10n.screensSettingsStatisticsErrorLoadingData,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               Text(_error!),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loadData,
-                child: Text(localizations.tryAgain),
-              ),
+              ElevatedButton(onPressed: _loadData, child: Text(l10n.screensSettingsStatisticsTryAgain)),
             ],
           ),
         ),
@@ -642,21 +639,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.statistics),
+        title: Text(l10n.screensSettingsStatisticsStatistics),
         actions: [
           // Show "Back to Real Data" button when showing test data
           if (_isShowingTestData)
             TextButton(
               onPressed: _loadData,
               child: Text(
-                localizations.realData,
+                l10n.screensSettingsStatisticsRealData,
                 style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: _loadData,
-            tooltip: localizations.refresh,
+            tooltip: l10n.screensSettingsStatisticsRefresh,
           ),
         ],
       ),
@@ -664,16 +661,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         onRefresh: _loadData,
         child:
             hasEnoughData || _isShowingTestData
-                ? _buildStatisticsContent(context, localizations)
-                : _buildEmptyState(context, localizations),
+                ? _buildStatisticsContent(context, l10n)
+                : _buildEmptyState(context, l10n),
       ),
     );
   }
 
-  Widget _buildEmptyState(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: SizedBox(
@@ -691,7 +685,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                localizations?.notEnoughDataTitle ?? 'Not Enough Data',
+                l10n.screensSettingsStatisticsNotEnoughDataTitle,
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
@@ -699,9 +693,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: Text(
-                  localizations?.statisticsEmptyDescription ??
-                      'We need at least a week of data to show meaningful statistics. '
-                          'Keep tracking your metrics to see trends over time.',
+                  l10n.screensSettingsStatisticsStatisticsEmptyDescription,
                   style: Theme.of(context).textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
@@ -709,9 +701,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: Text(
-                  localizations?.updateMetricsNow ?? 'Update Metrics Now',
-                ),
+                label: Text(l10n.screensSettingsStatisticsUpdateMetricsNow),
                 onPressed: () {
                   // Navigate to profile settings to update metrics
                   Navigator.pushReplacementNamed(context, '/settings/profile');
@@ -721,15 +711,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               // Test data generation button
               OutlinedButton.icon(
                 icon: const Icon(Icons.science),
-                label: Text(
-                  localizations?.generateTestData ?? 'Generate Test Data',
-                ),
+                label: Text(l10n.screensSettingsStatisticsGenerateTestData),
                 onPressed: _generateTestData,
               ),
               const SizedBox(height: 8),
               Text(
-                localizations?.testDataDescription ??
-                    'For demonstration purposes, you can generate sample data to see how the statistics look.',
+                l10n.screensSettingsStatisticsTestDataDescription,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
@@ -742,34 +729,28 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildStatisticsContent(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildStatisticsContent(BuildContext context, AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         // Current Stats Summary Card
-        _buildCurrentStatsCard(context, localizations),
+        _buildCurrentStatsCard(context, l10n),
         const SizedBox(height: 16),
 
         // Health Data Status Card
-        if (_isHealthConnected)
-          _buildHealthDataStatusCard(context, localizations),
+        if (_isHealthConnected) _buildHealthDataStatusCard(context, l10n),
         if (_isHealthConnected) const SizedBox(height: 16),
 
         // Time Range Selector
-        _buildTimeRangeSelector(context, localizations),
+        _buildTimeRangeSelector(context, l10n),
         const SizedBox(height: 24),
 
         // Weight Chart
         _buildStatsSection(
           context,
-          title: localizations?.weightHistory ?? 'Weight History',
+          title: l10n.screensSettingsStatisticsWeightHistory,
           icon: Icons.monitor_weight_outlined,
-          tooltipText:
-              localizations?.weightStatsTip ??
-              'The graph shows median weekly weight to account for daily fluctuations due to water weight.',
+          tooltipText: l10n.screensSettingsStatisticsWeightStatsTip,
           chart: _buildWeightChart(context),
         ),
 
@@ -778,11 +759,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         // BMI Chart
         _buildStatsSection(
           context,
-          title: localizations?.bmiHistory ?? 'BMI History',
+          title: l10n.screensSettingsStatisticsBmiHistory,
           icon: Icons.insights_outlined,
-          tooltipText:
-              localizations?.bmiStatsTip ??
-              'Body Mass Index (BMI) is calculated from your weight and height measurements.',
+          tooltipText: l10n.screensSettingsStatisticsBmiStatsTip,
           chart: _buildBMIChart(context),
         ),
         if (_metricsHistory.any((entry) => entry['body_fat'] != null)) ...[
@@ -791,11 +770,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           // Body Fat Chart
           _buildStatsSection(
             context,
-            title: localizations?.bodyFatHistory ?? 'Body Fat History',
+            title: l10n.screensSettingsStatisticsBodyFatHistory,
             icon: Icons.pie_chart_outline,
-            tooltipText:
-                localizations?.bodyFatStatsTip ??
-                'Body fat percentage helps track your body composition beyond just weight.',
+            tooltipText: l10n.screensSettingsStatisticsBodyFatStatsTip,
             chart: _buildBodyFatChart(context),
           ),
         ],
@@ -805,24 +782,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             context,
             title:
                 _isHealthConnected && _caloriesBurnedData.isNotEmpty
-                    ? localizations?.calorieBalanceTitle ??
-                        'Calorie Balance (Intake vs Expenditure)'
-                    : localizations?.calorieIntakeHistory ??
-                        'Calorie Intake vs Maintenance',
+                    ? l10n.screensSettingsStatisticsCalorieBalanceTitle
+                    : l10n.screensSettingsStatisticsCalorieIntakeHistory,
             icon: Icons.local_fire_department_outlined,
             tooltipText:
                 _isHealthConnected && _caloriesBurnedData.isNotEmpty
-                    ? localizations?.calorieBalanceTip ??
-                        'Track your actual calorie balance using health data. Green = maintenance, Blue = deficit, Orange = surplus.'
-                    : localizations?.calorieStatsTip ??
-                        'Track your daily calorie intake compared to maintenance calories. Green = maintenance, Blue = cutting, Orange = bulking.',
+                    ? l10n.screensSettingsStatisticsCalorieBalanceTip
+                    : l10n.screensSettingsStatisticsCalorieStatsTip,
             chart: _buildCalorieChart(context),
           ),
 
           // Phase and warning indicators
           if (_calorieHistory.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildPhaseIndicators(context, localizations),
+            _buildPhaseIndicators(context, l10n),
           ],
         ],
 
@@ -833,7 +806,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildHealthDataStatusCard(
     BuildContext context,
-    AppLocalizations? localizations,
+    AppLocalizations l10n,
   ) {
     final healthDataDays = _caloriesBurnedData.length;
     final totalDays = _calorieHistory.length;
@@ -852,8 +825,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Icon(Icons.health_and_safety, color: Colors.green, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  localizations?.healthDataIntegration ??
-                      'Health Data Integration',
+                  l10n.screensSettingsStatisticsHealthDataIntegration,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -868,16 +840,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             const SizedBox(height: 8),
             if (coverage > 0)
               Text(
-                localizations?.healthDataActive ??
-                    'Using your health app data to provide more accurate deficit/surplus analysis.',
+                l10n.screensSettingsStatisticsHealthDataActive,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: Colors.green.shade700),
               )
             else
               Text(
-                localizations?.healthDataInactive ??
-                    'Enable health data sync in Profile Settings for more accurate analysis.',
+                l10n.screensSettingsStatisticsHealthDataInactive,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: Colors.orange.shade700),
@@ -888,10 +858,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildCurrentStatsCard(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildCurrentStatsCard(BuildContext context, AppLocalizations l10n) {
     final String weightUnit =
         _userProfile?.preferredUnit == 'imperial' ? 'lbs' : 'kg';
     final String heightUnit =
@@ -917,7 +884,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              localizations?.currentStats ?? 'Current Stats',
+              l10n.screensMenuCurrentStats,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
@@ -927,7 +894,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   child: _buildStatItem(
                     context,
                     icon: Icons.monitor_weight,
-                    label: localizations?.weight ?? 'Weight',
+                    label: l10n.screensSettingsImportProfileCompletionWeight,
                     value:
                         displayWeight != null
                             ? '${displayWeight.toStringAsFixed(1)} $weightUnit'
@@ -938,7 +905,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   child: _buildStatItem(
                     context,
                     icon: Icons.height,
-                    label: localizations?.height ?? 'Height',
+                    label: l10n.screensSettingsImportProfileCompletionHeight,
                     value:
                         displayHeight != null
                             ? '${displayHeight.toStringAsFixed(1)} $heightUnit'
@@ -966,7 +933,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   child: _buildStatItem(
                     context,
                     icon: Icons.pie_chart,
-                    label: localizations?.bodyFat ?? 'Body Fat',
+                    label: l10n.screensSettingsStatisticsBodyFat,
                     value:
                         _currentBodyFat != null
                             ? '${_currentBodyFat!.toStringAsFixed(1)}%'
@@ -982,17 +949,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   String _getBMICategory(double? bmi) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (bmi == null) return '';
 
     if (bmi < 18.5) {
-      return localizations.bmiUnderweight;
+      return l10n.screensSettingsStatisticsBmiUnderweight;
     } else if (bmi < 25) {
-      return localizations.bmiNormal;
+      return l10n.screensSettingsStatisticsBmiNormal;
     } else if (bmi < 30) {
-      return localizations.bmiOverweight;
+      return l10n.screensSettingsStatisticsBmiOverweight;
     } else {
-      return localizations.bmiObese;
+      return l10n.screensSettingsStatisticsBmiObese;
     }
   }
 
@@ -1023,10 +990,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildTimeRangeSelector(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildTimeRangeSelector(BuildContext context, AppLocalizations l10n) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -1035,7 +999,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              localizations?.timeRange ?? 'Time Range',
+              l10n.screensSettingsStatisticsTimeRange,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -1055,8 +1019,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     return DropdownMenuItem<String>(
                       value: entry.key,
                       child: Text(
-                        _getLocalizedTimeRange(localizations, entry.key) ??
-                            entry.value,
+                        _getLocalizedTimeRange(l10n, entry.key) ?? entry.value,
                       ),
                     );
                   }).toList(),
@@ -1075,20 +1038,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  String? _getLocalizedTimeRange(AppLocalizations? localizations, String key) {
+  String? _getLocalizedTimeRange(AppLocalizations l10n, String key) {
     switch (key) {
       case 'week':
-        return localizations?.lastWeek;
+        return l10n.screensSettingsStatisticsLastWeek;
       case 'month':
-        return localizations?.lastMonth;
+        return l10n.screensSettingsStatisticsLastMonth;
       case 'threeMonths':
-        return localizations?.lastThreeMonths;
+        return l10n.screensSettingsStatisticsLastThreeMonths;
       case 'sixMonths':
-        return localizations?.lastSixMonths;
+        return l10n.screensSettingsStatisticsLastSixMonths;
       case 'year':
-        return localizations?.lastYear;
+        return l10n.screensSettingsStatisticsLastYear;
       case 'all':
-        return localizations?.allTime;
+        return l10n.screensSettingsStatisticsAllTime;
       default:
         return null;
     }
@@ -1130,9 +1093,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildWeightChart(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(child: Text(localizations.noWeightDataAvailable));
+      return Center(child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable));
     }
 
     // Use weekly median for weight to smooth out daily fluctuations
@@ -1153,9 +1116,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildBMIChart(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(child: Text(localizations.noBmiDataAvailable));
+      return Center(child: Text(l10n.screensSettingsStatisticsNoBmiDataAvailable));
     }
 
     // Calculate BMI for each entry
@@ -1176,7 +1139,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .toList();
 
     if (bmiData.isEmpty) {
-      return Center(child: Text(localizations.cannotCalculateBmiFromData));
+      return Center(child: Text(l10n.screensSettingsStatisticsCannotCalculateBmiFromData));
     }
 
     return CustomPaint(
@@ -1194,17 +1157,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ReferenceLine(
             value: 18.5,
             color: Colors.orange.withValues(alpha: 0.5),
-            label: localizations.bmiUnderweight,
+            label: l10n.screensSettingsStatisticsBmiUnderweight,
           ),
           ReferenceLine(
             value: 25.0,
             color: Colors.orange.withValues(alpha: 0.5),
-            label: localizations.bmiOverweight,
+            label: l10n.screensSettingsStatisticsBmiOverweight,
           ),
           ReferenceLine(
             value: 30.0,
             color: Colors.red.withValues(alpha: 0.5),
-            label: localizations.bmiObese,
+            label: l10n.screensSettingsStatisticsBmiObese,
           ),
         ],
       ),
@@ -1212,12 +1175,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildBodyFatChart(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final bodyFatData =
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
     if (bodyFatData.isEmpty) {
-      return Center(child: Text(localizations.noBodyFatDataAvailable));
+      return Center(child: Text(l10n.screensSettingsStatisticsNoBodyFatDataAvailable));
     }
 
     return CustomPaint(
@@ -1235,9 +1198,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildCalorieChart(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
-      return Center(child: Text(localizations.noCalorieDataAvailable));
+      return Center(child: Text(l10n.screensSettingsStatisticsNoCalorieDataAvailable));
     }
 
     return CustomPaint(
@@ -1251,10 +1214,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildPhaseIndicators(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildPhaseIndicators(BuildContext context, AppLocalizations l10n) {
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
       return const SizedBox.shrink();
     }
@@ -1272,7 +1232,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              localizations?.phaseAnalysis ?? 'Phase Analysis',
+              l10n.screensSettingsStatisticsPhaseAnalysis,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -1285,7 +1245,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   child: _buildPhaseIndicator(
                     context,
-                    localizations?.maintenance ?? 'Maintenance',
+                    l10n.screensSettingsStatisticsMaintenance,
                     phaseStats['maintenance']!,
                     Colors.green,
                     Icons.balance,
@@ -1295,7 +1255,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   child: _buildPhaseIndicator(
                     context,
-                    localizations?.cutting ?? 'Cutting',
+                    l10n.screensSettingsStatisticsCutting,
                     phaseStats['cutting']!,
                     Colors.blue,
                     Icons.trending_down,
@@ -1305,7 +1265,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   child: _buildPhaseIndicator(
                     context,
-                    localizations?.bulking ?? 'Bulking',
+                    l10n.screensSettingsStatisticsBulking,
                     phaseStats['bulking']!,
                     Colors.orange,
                     Icons.trending_up,
@@ -1316,7 +1276,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
             // Weekly surplus/deficit
             const SizedBox(height: 16),
-            _buildWeeklySummary(context, localizations),
+            _buildWeeklySummary(context, l10n),
 
             // Warnings
             if (warnings.isNotEmpty) ...[
@@ -1378,10 +1338,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildWeeklySummary(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildWeeklySummary(BuildContext context, AppLocalizations l10n) {
     final weeklyAverage = _calculateWeeklyCalorieAverage();
     final weeklyDeficit = _maintenanceCalories! - weeklyAverage;
     final isDeficit = weeklyDeficit > 0;
@@ -1427,9 +1384,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   children: [
                     Text(
                       actualWeeklyDeficit != null
-                          ? localizations?.estimatedBalance ??
-                              'Estimated Balance'
-                          : (localizations?.weeklyAverage ?? 'Weekly Average'),
+                          ? l10n.screensSettingsStatisticsEstimatedBalance
+                          : (l10n.screensSettingsStatisticsWeeklyAverage),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -1507,7 +1463,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                 ),
                 Text(
-                  localizations?.vsExpenditure ?? 'vs expenditure',
+                  l10n.screensSettingsStatisticsVsExpenditure,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -1595,7 +1551,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   List<String> _getCalorieWarnings() {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final warnings = <String>[];
 
     // Check for extremely low calorie days
@@ -1604,7 +1560,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .where((entry) => (entry['calories'] as double) < 1000)
             .length;
     if (veryLowDays > 0) {
-      warnings.add(localizations.veryLowCalorieWarning(veryLowDays.toString()));
+      warnings.add(l10n.screensSettingsStatisticsVeryLowCalorieWarning(veryLowDays.toString()));
     }
 
     // Check for extremely high calorie days
@@ -1617,9 +1573,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             )
             .length;
     if (veryHighDays > 0) {
-      warnings.add(
-        localizations.veryHighCalorieNotice(veryHighDays.toString()),
-      );
+      warnings.add(l10n.screensSettingsStatisticsVeryHighCalorieNotice(veryHighDays.toString()));
     }
 
     // Check for consistent extreme deficit
@@ -1632,7 +1586,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .length;
 
     if (extremeDeficitDays > _calorieHistory.length * 0.5) {
-      warnings.add(localizations.extremeDeficitWarning);
+      warnings.add(l10n.screensSettingsStatisticsExtremeDeficitWarning);
     }
 
     // Health data based warnings
@@ -1645,9 +1599,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 deficit < -1000; // More than 1000 cal deficit
           }).length;
       if (largeDeficitDays > 0) {
-        warnings.add(
-          localizations.healthDataAlert(largeDeficitDays.toString()),
-        );
+        warnings.add(l10n.screensSettingsStatisticsHealthDataAlert(largeDeficitDays.toString()));
       }
 
       // Check for inconsistent deficit patterns
@@ -1668,7 +1620,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           // High variance in deficits
           final varianceValue = math.sqrt(deficitVariance).round();
           warnings.add(
-            localizations.inconsistentDeficitWarning(varianceValue.toString()),
+            l10n.screensSettingsStatisticsInconsistentDeficitWarning(varianceValue.toString()),
           );
         }
       }

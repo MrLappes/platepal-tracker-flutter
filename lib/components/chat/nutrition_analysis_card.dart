@@ -29,7 +29,7 @@ class NutritionAnalysisCard extends StatelessWidget {
                 Icon(Icons.analytics, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  localizations.nutritionAnalysis,
+                  localizations.componentsChatNutritionAnalysisCardNutritionAnalysis,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -39,14 +39,14 @@ class NutritionAnalysisCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Dish Name
-            _buildInfoRow(context, localizations.dishName, analysis.dishName),
+            _buildInfoRow(context, localizations.componentsChatNutritionAnalysisCardDishName, analysis.dishName),
 
             // Serving Size
             if (analysis.servingSize != null) ...[
               const SizedBox(height: 8),
               _buildInfoRow(
                 context,
-                localizations.servingSize,
+                localizations.componentsChatNutritionAnalysisCardServingSize,
                 analysis.servingSize!,
               ),
             ],
@@ -56,7 +56,7 @@ class NutritionAnalysisCard extends StatelessWidget {
               const SizedBox(height: 8),
               _buildInfoRow(
                 context,
-                localizations.mealType,
+                localizations.componentsChatNutritionAnalysisCardMealType,
                 analysis.mealType!,
               ),
             ],
@@ -79,13 +79,13 @@ class NutritionAnalysisCard extends StatelessWidget {
                     children: [
                       _buildNutritionItem(
                         context,
-                        localizations.calories,
+                        localizations.componentsCalendarMacroSummaryCalories,
                         '${analysis.nutritionInfo.calories.toInt()}',
                         'kcal',
                       ),
                       _buildNutritionItem(
                         context,
-                        localizations.protein,
+                        localizations.componentsCalendarMacroSummaryProtein,
                         '${analysis.nutritionInfo.protein.toInt()}',
                         'g',
                       ),
@@ -97,13 +97,13 @@ class NutritionAnalysisCard extends StatelessWidget {
                     children: [
                       _buildNutritionItem(
                         context,
-                        localizations.carbs,
+                        localizations.componentsCalendarMacroSummaryCarbs,
                         '${analysis.nutritionInfo.carbs.toInt()}',
                         'g',
                       ),
                       _buildNutritionItem(
                         context,
-                        localizations.fat,
+                        localizations.componentsCalendarMacroSummaryFat,
                         '${analysis.nutritionInfo.fat.toInt()}',
                         'g',
                       ),
@@ -118,7 +118,7 @@ class NutritionAnalysisCard extends StatelessWidget {
             // Ingredients
             if (analysis.ingredients.isNotEmpty) ...[
               Text(
-                localizations.ingredients,
+                localizations.componentsChatMessageBubbleIngredients,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -145,7 +145,7 @@ class NutritionAnalysisCard extends StatelessWidget {
             // Cooking Instructions
             if (analysis.cookingInstructions != null) ...[
               Text(
-                localizations.cookingInstructions,
+                localizations.componentsChatNutritionAnalysisCardCookingInstructions,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -165,7 +165,7 @@ class NutritionAnalysisCard extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onAddToMeals,
                   icon: const Icon(Icons.add),
-                  label: Text(localizations.addToMeals),
+                  label: Text(localizations.componentsChatNutritionAnalysisCardAddToMeals),
                 ),
               ),
           ],
