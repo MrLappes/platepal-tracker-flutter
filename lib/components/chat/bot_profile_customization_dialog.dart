@@ -55,12 +55,12 @@ class _BotProfileCustomizationDialogState
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: Text(l10n.takePhoto),
+                title: Text(l10n.componentsChatBotProfileCustomizationDialogTakePhoto),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: Text(l10n.chooseFromGallery),
+                title: Text(l10n.componentsChatBotProfileCustomizationDialogChooseFromGallery),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
             ],
@@ -89,7 +89,7 @@ class _BotProfileCustomizationDialogState
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.requiredField)));
+      ).showSnackBar(SnackBar(content: Text(l10n.componentsChatBotProfileCustomizationDialogRequiredField)));
       return;
     }
 
@@ -111,18 +111,18 @@ class _BotProfileCustomizationDialogState
         widget.onProfileUpdated(updatedProfile);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.profileSaved)));
+        ).showSnackBar(SnackBar(content: Text(l10n.componentsChatBotProfileCustomizationDialogProfileSaved)));
         Navigator.of(context).pop();
       } else if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.profileSaveFailed)));
+        ).showSnackBar(SnackBar(content: Text(l10n.componentsChatBotProfileCustomizationDialogProfileSaveFailed)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.profileSaveFailed)));
+        ).showSnackBar(SnackBar(content: Text(l10n.componentsChatBotProfileCustomizationDialogProfileSaveFailed)));
       }
     } finally {
       if (mounted) {
@@ -182,14 +182,14 @@ class _BotProfileCustomizationDialogState
             TextButton.icon(
               onPressed: _pickImage,
               icon: const Icon(Icons.camera_alt, size: 18),
-              label: Text(l10n.changeAvatar),
+              label: Text(l10n.componentsChatBotProfileCustomizationDialogChangeAvatar),
             ),
             if (_avatarUrl != null) ...[
               const SizedBox(width: 8),
               TextButton.icon(
                 onPressed: _removeAvatar,
                 icon: const Icon(Icons.delete, size: 18),
-                label: Text(l10n.removeAvatar),
+                label: Text(l10n.componentsChatBotProfileCustomizationDialogRemoveAvatar),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
@@ -214,17 +214,17 @@ class _BotProfileCustomizationDialogState
 
     switch (personality) {
       case BotPersonalityType.nutritionist:
-        return l10n.professionalNutritionist;
+        return l10n.componentsChatBotProfileCustomizationDialogProfessionalNutritionist;
       case BotPersonalityType.casualGymbro:
-        return l10n.casualGymBro;
+        return l10n.componentsChatBotProfileCustomizationDialogCasualGymBro;
       case BotPersonalityType.angryGreg:
-        return l10n.angryGreg;
+        return l10n.componentsChatBotProfileCustomizationDialogAngryGreg;
       case BotPersonalityType.veryAngryBro:
-        return l10n.veryAngryBro;
+        return l10n.componentsChatBotProfileCustomizationDialogVeryAngryBro;
       case BotPersonalityType.fitnessCoach:
-        return l10n.fitnessCoach;
+        return l10n.componentsChatBotProfileCustomizationDialogFitnessCoach;
       case BotPersonalityType.nice:
-        return l10n.niceAndFriendly;
+        return l10n.componentsChatBotProfileCustomizationDialogNiceAndFriendly;
     }
   }
 
@@ -234,7 +234,7 @@ class _BotProfileCustomizationDialogState
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Text(l10n.editBotProfile),
+      title: Text(l10n.componentsChatBotProfileCustomizationDialogEditBotProfile),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -244,7 +244,7 @@ class _BotProfileCustomizationDialogState
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: l10n.botName,
+                labelText: l10n.componentsChatBotProfileCustomizationDialogBotName,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.smart_toy),
               ),
@@ -254,7 +254,7 @@ class _BotProfileCustomizationDialogState
             DropdownButtonFormField<BotPersonalityType>(
               value: _selectedPersonality,
               decoration: InputDecoration(
-                labelText: l10n.personality,
+                labelText: l10n.componentsChatBotProfileCustomizationDialogPersonality,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.psychology),
               ),
@@ -279,7 +279,7 @@ class _BotProfileCustomizationDialogState
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
+          child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _saveProfile,
@@ -295,7 +295,7 @@ class _BotProfileCustomizationDialogState
                       ),
                     ),
                   )
-                  : Text(l10n.save),
+                  : Text(l10n.componentsChatBotProfileCustomizationDialogSave),
         ),
       ],
     );

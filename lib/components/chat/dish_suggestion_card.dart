@@ -302,8 +302,12 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
             SnackBar(
               content: Text(
                 wasExisting
-                    ? 'Dish "${widget.dish.name}" updated successfully!'
-                    : 'Dish "${widget.dish.name}" created successfully!',
+                    ? AppLocalizations.of(
+                      context,
+                    ).screensDishCreateDishUpdatedSuccessfully
+                    : AppLocalizations.of(
+                      context,
+                    ).screensDishCreateDishCreatedSuccessfully,
               ),
               backgroundColor: Colors.green,
             ),
@@ -318,7 +322,9 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
             content: Text(
               AppLocalizations.of(
                 context,
-              ).errorOpeningDishScreen(error.toString()),
+              ).componentsChatDishSuggestionCardErrorOpeningDishScreen(
+                error.toString(),
+              ),
             ),
             backgroundColor: Colors.red,
           ),
@@ -479,19 +485,19 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       // For referenced dishes
       if (_dishExists) {
         return isSpecialProfile
-            ? '${l10n.details} ${_nutritionProfile.emoji}'
-            : 'Edit Dish';
+            ? '${l10n.componentsChatDishSuggestionCardDetails} ${_nutritionProfile.emoji}'
+            : l10n.screensDishCreateEditDish;
       } else {
-        return 'Create Missing Dish';
+        return l10n.screensDishCreateCreateDish;
       }
     } else {
       // For new dishes
       if (_dishExists) {
         return isSpecialProfile
-            ? '${l10n.details} ${_nutritionProfile.emoji}'
-            : 'Edit Dish';
+            ? '${l10n.componentsChatDishSuggestionCardDetails} ${_nutritionProfile.emoji}'
+            : l10n.screensDishCreateEditDish;
       } else {
-        return 'Create Dish';
+        return l10n.screensDishCreateCreateDish;
       }
     }
   }
@@ -523,15 +529,15 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
   String _getButtonTooltip(AppLocalizations l10n) {
     if (widget.isReferenced) {
       if (_dishExists) {
-        return 'Edit this existing dish';
+        return l10n.screensDishCreateEditDish;
       } else {
-        return 'This dish is referenced but not found in your database. Tap to create it.';
+        return l10n.screensMealsNoDishesFound;
       }
     } else {
       if (_dishExists) {
-        return 'A dish with this name already exists. Tap to edit it.';
+        return l10n.screensMealsNoDishesCreated;
       } else {
-        return 'Create this new dish and add it to your collection';
+        return l10n.screensDishCreateCreateDish;
       }
     }
   }
@@ -788,7 +794,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'Referenced dish not found',
+                              l10n.screensMealsNoDishesFound,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.orange,
                                 fontWeight: FontWeight.w500,
@@ -807,7 +813,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'Similar dish exists',
+                              l10n.screensMealsNoDishesCreated,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.w500,
@@ -831,17 +837,18 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
 
   /// Gets the appropriate title for the current nutrition profile
   String _getProfileTitle() {
+    final l10n = AppLocalizations.of(context);
     switch (_nutritionProfile) {
       case NutritionProfile.highProtein:
-        return 'High Protein';
+        return l10n.componentsChatDishSuggestionCardHighProtein;
       case NutritionProfile.highCarb:
-        return 'High Carb';
+        return l10n.componentsChatDishSuggestionCardHighCarb;
       case NutritionProfile.highFat:
-        return 'High Fat';
+        return l10n.componentsChatDishSuggestionCardHighFat;
       case NutritionProfile.balanced:
-        return 'Balanced';
+        return l10n.componentsChatDishSuggestionCardBalanced;
       case NutritionProfile.unbalanced:
-        return 'Analyze';
+        return l10n.componentsChatDishSuggestionCardUnbalanced;
     }
   }
 
@@ -940,8 +947,8 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
               const SizedBox(width: 6),
               Text(
                 isSpecialProfile
-                    ? '${l10n.logDish} ${_nutritionProfile.emoji}'
-                    : l10n.logDish,
+                    ? '${l10n.componentsChatDishSuggestionCardLogDish} ${_nutritionProfile.emoji}'
+                    : l10n.componentsChatDishSuggestionCardLogDish,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onPrimary,

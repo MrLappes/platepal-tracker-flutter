@@ -77,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       chatProvider.updateBotProfile(updatedProfile);
                     },
                   )
-                  : Text(localizations.chatAssistant);
+                  : Text(localizations.screensChatChatAssistant);
             },
           ),
           backgroundColor: Theme.of(context).colorScheme.surface,
@@ -119,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 color: Theme.of(context).colorScheme.error,
                               ),
                               const SizedBox(width: 8),
-                              Text(localizations.clearChat),
+                              Text(localizations.screensChatClearChat),
                             ],
                           ),
                         ),
@@ -242,7 +242,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 32),
               Text(
-                localizations.noApiKeyConfigured,
+                localizations.screensChatNoApiKeyConfigured,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -250,7 +250,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.configureApiKeyToUseChat,
+                localizations.screensChatConfigureApiKeyToUseChat,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -262,7 +262,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   context.push('/settings/api-key');
                 },
                 icon: const Icon(Icons.settings),
-                label: Text(localizations.configureApiKeyButton),
+                label: Text(localizations.screensChatConfigureApiKeyButton),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
@@ -280,13 +280,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   // Show loading indicator
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(localizations.loading),
+                      content: Text(localizations.screensChatLoading),
                       duration: const Duration(seconds: 1),
                     ),
                   );
                 },
                 icon: const Icon(Icons.refresh),
-                label: Text(localizations.reloadApiKeyButton),
+                label: Text(localizations.screensChatReloadApiKeyButton),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
@@ -474,25 +474,25 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(localizations.clearChat),
-            content: Text(localizations.clearChatConfirmation),
+            title: Text(localizations.screensChatClearChat),
+            content: Text(localizations.screensChatClearChatConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(localizations.cancel),
+                child: Text(localizations.componentsChatBotProfileCustomizationDialogCancel),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   chatProvider.clearChat(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(localizations.chatCleared)),
+                    SnackBar(content: Text(localizations.screensChatChatCleared)),
                   );
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(localizations.clearChat),
+                child: Text(localizations.screensChatClearChat),
               ),
             ],
           ),

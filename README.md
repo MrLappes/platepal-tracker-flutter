@@ -57,18 +57,59 @@ lib/
 ├── components/          # Reusable UI components
 │   ├── animations/      # Custom animations and transitions
 │   ├── calendar/        # Calendar-specific components
+│   │   ├── calendar_day_detail.dart
+│   │   └── macro_summary.dart
 │   ├── chat/            # Chat interface components
+│   │   ├── agent_steps_modal.dart
+│   │   ├── bot_profile_customization_dialog.dart
+│   │   ├── chat_input.dart
+│   │   ├── chat_welcome.dart
+│   │   ├── dish_suggestion_card.dart
+│   │   ├── message_bubble.dart
+│   │   ├── nutrition_analysis_card.dart
+│   │   ├── quick_actions.dart
+│   │   └── user_profile_customization_dialog.dart
 │   ├── dishes/          # Meal and dish related components
-│   ├── onboarding/      # User onboarding components
+│   │   ├── dish_card.dart
+│   │   └── dish_form/
+│   │       ├── ingredient_form_modal.dart
+│   │       └── smart_nutrition_card.dart
+│   ├── meals/           # Meal-related components
+│   │   └── meal_card.dart
+│   ├── modals/          # Shared modal dialogs
+│   │   └── dish_log_modal.dart
 │   ├── scanner/         # Barcode scanning components
+│   │   ├── barcode_scanner_screen.dart
+│   │   └── product_search_screen.dart
+│   ├── shared/          # Shared small components
+│   │   └── error_display.dart
 │   └── ui/              # Generic UI components
+│       └── custom_tab_bar.dart
 ├── constants/           # App-wide constants and configuration
 ├── models/              # Data models and classes
 ├── providers/           # State management (Provider pattern)
+│   └── chat_provider.dart
 ├── repositories/        # Data access layer
 ├── screens/             # Application screens
 │   ├── onboarding/      # Initial user setup screens
-│   └── tabs/            # Main tab navigation screens
+│   ├── tabs/            # Main tab navigation screens
+│   ├── calendar_screen.dart
+│   ├── chat_screen.dart
+│   ├── dish_create_screen.dart
+│   ├── home_screen.dart
+│   ├── meals_screen.dart
+│   ├── menu_screen.dart
+│   └── settings/
+│       ├── about_screen.dart
+│       ├── api_key_settings_screen.dart
+│       ├── chat_agent_settings_screen.dart
+│       ├── contributors_screen.dart
+│       ├── export_data_screen.dart
+│       ├── import_data_screen.dart
+│       ├── import_profile_completion_screen.dart
+│       ├── macro_customization_screen.dart
+│       ├── profile_settings_screen.dart
+│       └── statistics_screen.dart
 ├── services/            # Business logic and external services
 │   ├── api/             # API integration (GPT, nutrition databases)
 │   ├── auth/            # Authentication services

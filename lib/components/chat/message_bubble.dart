@@ -40,8 +40,10 @@ class MessageBubble extends StatelessWidget {
         children: [
           Text(
             isUser
-                ? (userProfile?.username ?? 'You')
-                : (botProfile?.name ?? 'PlatePal Assistant'),
+                ? (userProfile?.username ??
+                    localizations.componentsChatMessageBubbleYou)
+                : (botProfile?.name ??
+                    localizations.componentsChatMessageBubbleAssistant),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurface,
@@ -50,7 +52,7 @@ class MessageBubble extends StatelessWidget {
           if (!isUser) ...[
             const SizedBox(width: 4),
             Text(
-              '(bot)',
+              localizations.componentsChatMessageBubbleBotTag,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 fontStyle: FontStyle.italic,
@@ -130,7 +132,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Sending...',
+                      localizations.componentsChatMessageBubbleSending,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withValues(
                           alpha: 0.6,
@@ -159,7 +161,8 @@ class MessageBubble extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              localizations.retryMessage,
+                              localizations
+                                  .componentsChatMessageBubbleRetryMessage,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onError,
                                 fontWeight: FontWeight.w500,
@@ -197,7 +200,8 @@ class MessageBubble extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      localizations.tapToViewAgentSteps,
+                      localizations
+                          .componentsChatMessageBubbleTapToViewAgentSteps,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w500,
@@ -233,7 +237,8 @@ class MessageBubble extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Suggested Dishes',
+                          localizations
+                              .componentsChatMessageBubbleSuggestedDishes,
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -275,7 +280,8 @@ class MessageBubble extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Recommendation',
+                          localizations
+                              .componentsChatMessageBubbleRecommendation,
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: theme.colorScheme.secondary,
                             fontWeight: FontWeight.w600,
@@ -285,7 +291,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _getRecommendationText(),
+                      _getRecommendationText(context),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSecondaryContainer,
                         height: 1.4,
@@ -399,7 +405,9 @@ class MessageBubble extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context).messageCopied),
+        content: Text(
+          AppLocalizations.of(context).componentsChatMessageBubbleMessageCopied,
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -417,7 +425,7 @@ class MessageBubble extends StatelessWidget {
       final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
       return '$displayHour:$minute $period';
     } else if (difference.inDays == 1) {
-      return localizations.yesterday;
+      return localizations.componentsChatMessageBubbleYesterday;
     } else {
       return '${dateTime.day}/${dateTime.month}';
     }
@@ -499,14 +507,16 @@ class MessageBubble extends StatelessWidget {
     }).toList();
   }
 
-  String _getRecommendationText() {
+  String _getRecommendationText(BuildContext context) {
     final recommendation = message.metadata?['recommendation'];
     if (recommendation is String) {
       return recommendation;
     } else if (recommendation is List<String>) {
       return recommendation.join(', ');
     } else {
-      return 'No recommendations available.';
+      return AppLocalizations.of(
+        context,
+      ).componentsChatMessageBubbleNoRecommendationsAvailable;
     }
   }
 
@@ -594,21 +604,21 @@ class MessageBubble extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 Text(
-                  '${localizations.calories}: ${dish.totalNutrition.calories.toStringAsFixed(0)}',
+                  '${localizations.componentsCalendarMacroSummaryCalories}: ${dish.totalNutrition.calories.toStringAsFixed(0)}',
                 ),
                 Text(
-                  '${localizations.protein}: ${dish.totalNutrition.protein.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryProtein}: ${dish.totalNutrition.protein.toStringAsFixed(1)}g',
                 ),
                 Text(
-                  '${localizations.carbs}: ${dish.totalNutrition.carbs.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryCarbs}: ${dish.totalNutrition.carbs.toStringAsFixed(1)}g',
                 ),
                 Text(
-                  '${localizations.fat}: ${dish.totalNutrition.fat.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryFat}: ${dish.totalNutrition.fat.toStringAsFixed(1)}g',
                 ),
                 if (dish.ingredients.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
-                    '${localizations.ingredients}:',
+                    '${localizations.componentsChatMessageBubbleIngredients}:',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   ...dish.ingredients.map((ing) => Text('• ${ing.name}')),
@@ -618,11 +628,11 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(localizations.close),
+                child: Text(localizations.componentsChatMessageBubbleClose),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(dish),
-                child: Text(localizations.select),
+                child: Text(localizations.componentsChatMessageBubbleSelect),
               ),
             ],
           ),
@@ -801,7 +811,7 @@ class MessageBubble extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                localizations.ingredientsAdded,
+                localizations.componentsChatChatInputIngredientsAdded,
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -857,6 +867,7 @@ class MessageBubble extends StatelessWidget {
 
   /// Build subtle modification hint
   Widget _buildModificationHint(BuildContext context, ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
     final modifications =
         message.metadata?['pipelineModifications'] as Map<String, dynamic>?;
     final summary = modifications?['summary'] as Map<String, dynamic>?;
@@ -868,17 +879,23 @@ class MessageBubble extends StatelessWidget {
     final hasAi = summary?['hasAiValidations'] as bool? ?? false;
 
     String emoji = '🔧';
-    String text = '$totalMods automatic improvements applied';
+    String text;
     Color color = Colors.green;
 
     if (hasEmergency) {
       emoji = '🚨';
-      text = '$totalMods emergency fixes applied';
+      text = localizations.componentsChatMessageBubbleModificationEmergency(
+        totalMods,
+      );
       color = Colors.red;
     } else if (hasAi) {
       emoji = '🤖';
-      text = '$totalMods AI enhancements applied';
+      text = localizations.componentsChatMessageBubbleModificationAi(totalMods);
       color = Colors.purple;
+    } else {
+      text = localizations.componentsChatMessageBubbleModificationAutomatic(
+        totalMods,
+      );
     }
 
     return Container(

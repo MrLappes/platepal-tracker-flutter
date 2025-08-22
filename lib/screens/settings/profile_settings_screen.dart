@@ -225,7 +225,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
     try {
       // Show info about permission request
-      final localizations = AppLocalizations.of(context);
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Requesting health permissions...'),
@@ -240,7 +240,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(localizations.healthConnected),
+              content: Text(l10n.screensSettingsProfileSettingsHealthConnected),
               backgroundColor: Colors.green,
             ),
           );
@@ -306,20 +306,20 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
         _onFieldChanged();
 
-        final localizations = AppLocalizations.of(context);
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizations.healthSyncSuccess),
+            content: Text(l10n.screensSettingsProfileSettingsHealthSyncSuccess),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        final localizations = AppLocalizations.of(context);
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizations.healthSyncFailed),
+            content: Text(l10n.screensSettingsProfileSettingsHealthSyncFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -544,10 +544,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       setState(() => _hasUnsavedChanges = false);
 
       if (mounted) {
-        final localizations = AppLocalizations.of(context);
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizations.profileUpdated),
+            content: Text(l10n.screensSettingsProfileSettingsProfileUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -569,24 +569,24 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   Future<bool> _showUnsavedChangesDialog() async {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final result = await showDialog<bool>(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(localizations.unsavedChanges),
-            content: Text(localizations.unsavedChangesMessage),
+            title: Text(l10n.screensSettingsMacroCustomizationUnsavedChanges),
+            content: Text(l10n.screensSettingsMacroCustomizationUnsavedChangesMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(localizations.discardChanges),
+                child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(true);
                   _saveProfile();
                 },
-                child: Text(localizations.saveChanges),
+                child: Text(l10n.screensSettingsMacroCustomizationSaveChanges),
               ),
             ],
           ),
@@ -658,38 +658,38 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   String? _validateRequired(String? value, String fieldName) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations.requiredField;
+      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
     return null;
   }
 
   String? _validateAge(String? value) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations.requiredField;
+      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
     final age = int.tryParse(value.trim());
     if (age == null || age < 13 || age > 120) {
-      return localizations.ageRange;
+      return l10n.screensSettingsImportProfileCompletionAgeRange;
     }
     return null;
   }
 
   String? _validateHeight(String? value) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations.requiredField;
+      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
     final height = double.tryParse(value.trim());
     if (height == null) {
-      return localizations.requiredField;
+      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
 
     if (_selectedUnitSystem == 'metric') {
       if (height < 100 || height > 250) {
-        return localizations.heightRange;
+        return l10n.screensSettingsImportProfileCompletionHeightRange;
       }
     } else {
       if (height < 39 || height > 98) {
@@ -700,18 +700,18 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   String? _validateWeight(String? value) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
-      return localizations.requiredField;
+      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
     final weight = double.tryParse(value.trim());
     if (weight == null) {
-      return localizations.requiredField;
+      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
 
     if (_selectedUnitSystem == 'metric') {
       if (weight < 30 || weight > 300) {
-        return localizations.weightRange;
+        return l10n.screensSettingsImportProfileCompletionWeightRange;
       }
     } else {
       if (weight < 66 || weight > 660) {
@@ -737,7 +737,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: !_hasUnsavedChanges,
       onPopInvokedWithResult: (didPop, result) async {
@@ -747,7 +747,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(localizations.profileSettings),
+          title: Text(l10n.screensSettingsProfileSettingsProfileSettings),
           backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: Theme.of(context).colorScheme.onSurface,
           actions: [
@@ -755,7 +755,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               IconButton(
                 icon: const Icon(Icons.save),
                 onPressed: _isSaving ? null : _saveProfile,
-                tooltip: localizations.save,
+                tooltip: l10n.componentsChatBotProfileCustomizationDialogSave,
               ),
           ],
         ),
@@ -767,11 +767,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
-                      Text(localizations.loading),
+                      Text(l10n.screensChatLoading),
                     ],
                   ),
                 )
-                : _buildProfileForm(context, localizations),
+                : _buildProfileForm(context, l10n),
         bottomNavigationBar:
             _hasUnsavedChanges
                 ? Container(
@@ -794,7 +794,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                               _isSaving
                                   ? null
                                   : () => _showUnsavedChangesDialog(),
-                          child: Text(localizations.discardChanges),
+                          child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -810,7 +810,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : Text(localizations.saveChanges),
+                                  : Text(l10n.screensSettingsMacroCustomizationSaveChanges),
                         ),
                       ),
                     ],
@@ -821,10 +821,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildProfileForm(
-    BuildContext context,
-    AppLocalizations? localizations,
-  ) {
+  Widget _buildProfileForm(BuildContext context, AppLocalizations l10n) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -833,53 +830,45 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Personal Information Section
-            _buildSectionHeader(
-              localizations?.personalInformation ?? 'Personal Information',
-            ),
-            _buildPersonalInfoCard(localizations),
+            _buildSectionHeader(l10n.screensSettingsImportProfileCompletionPersonalInformation),
+            _buildPersonalInfoCard(l10n),
             const SizedBox(height: 24),
 
             // Physical Stats Section
             _buildSectionHeader('Physical Stats'),
-            _buildPhysicalStatsCard(localizations),
+            _buildPhysicalStatsCard(l10n),
             const SizedBox(height: 24),
 
             // Fitness Goals Section
-            _buildSectionHeader(localizations?.fitnessGoals ?? 'Fitness Goals'),
-            _buildFitnessGoalsCard(localizations),
+            _buildSectionHeader(l10n.screensSettingsProfileSettingsFitnessGoals),
+            _buildFitnessGoalsCard(l10n),
             const SizedBox(height: 24), // Preferences Section
-            _buildSectionHeader(localizations?.preferences ?? 'Preferences'),
-            _buildPreferencesCard(localizations),
+            _buildSectionHeader(l10n.screensSettingsImportProfileCompletionPreferences),
+            _buildPreferencesCard(l10n),
             const SizedBox(
               height: 24,
             ), // Health Data Sync Section (only show when health is available AND connected)
             if (_isHealthAvailable && _healthService.isConnected) ...[
-              _buildSectionHeader(
-                localizations?.healthDataSync ?? 'Health Data Sync',
-              ),
-              _buildHealthSyncCard(localizations),
+              _buildSectionHeader(l10n.screensSettingsProfileSettingsHealthDataSync),
+              _buildHealthSyncCard(l10n),
               const SizedBox(height: 24),
             ] else if (_isHealthAvailable) ...[
               // Show connection option when available but not connected
-              _buildSectionHeader(
-                localizations?.healthDataSync ?? 'Health Data Sync',
-              ),
-              _buildHealthSyncCard(localizations),
+              _buildSectionHeader(l10n.screensSettingsProfileSettingsHealthDataSync),
+              _buildHealthSyncCard(l10n),
               const SizedBox(height: 24),
             ],
 
             // Current Stats Section (Read-only)
             if (_originalProfile != null) ...[
-              _buildSectionHeader(
-                localizations?.currentStats ?? 'Current Stats',
-              ),
-              _buildCurrentStatsCard(localizations),
+              _buildSectionHeader(l10n.screensMenuCurrentStats),
+              _buildCurrentStatsCard(l10n),
               const SizedBox(height: 24),
             ],
 
             // Danger Zone Section
-            _buildSectionHeader(localizations?.dangerZone ?? 'Danger Zone'),
-            _buildDangerZoneCard(localizations),
+            _buildSectionHeader(l10n.screensSettingsProfileSettingsDangerZone),
+            _buildDangerZoneCard(l10n),
 
             const SizedBox(height: 80), // Extra space for bottom bar
           ],
@@ -901,7 +890,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildPersonalInfoCard(AppLocalizations? localizations) {
+  Widget _buildPersonalInfoCard(AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -909,7 +898,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           children: [
             _buildTextField(
               controller: _nameController,
-              label: localizations?.name ?? 'Name',
+              label: l10n.screensSettingsImportProfileCompletionName,
               icon: Icons.person,
               validator: (value) => _validateRequired(value, 'Name'),
             ),
@@ -920,7 +909,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   flex: 2,
                   child: _buildTextField(
                     controller: _ageController,
-                    label: localizations?.age ?? 'Age',
+                    label: l10n.screensSettingsImportProfileCompletionAge,
                     icon: Icons.cake,
                     keyboardType: TextInputType.number,
                     validator: _validateAge,
@@ -931,16 +920,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   flex: 3,
                   child: _buildDropdown<String>(
                     value: _selectedGender,
-                    label: localizations?.gender ?? 'Gender',
+                    label: l10n.screensSettingsImportProfileCompletionGender,
                     icon: Icons.person_outline,
                     items: [
-                      DropdownMenuItem(
-                        value: 'male',
-                        child: Text(localizations?.male ?? 'Male'),
-                      ),
+                      DropdownMenuItem(value: 'male', child: Text(l10n.screensSettingsImportProfileCompletionMale)),
                       DropdownMenuItem(
                         value: 'female',
-                        child: Text(localizations?.female ?? 'Female'),
+                        child: Text(l10n.screensSettingsImportProfileCompletionFemale),
                       ),
                     ],
                     onChanged: (value) {
@@ -959,7 +945,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildPhysicalStatsCard(AppLocalizations? localizations) {
+  Widget _buildPhysicalStatsCard(AppLocalizations l10n) {
     final isMetric = _selectedUnitSystem == 'metric';
     return Card(
       child: Padding(
@@ -971,8 +957,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildTextField(
                     controller: _heightController,
-                    label:
-                        '${localizations?.height ?? 'Height'} (${isMetric ? 'cm' : 'in'})',
+                    label: '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
                     icon: Icons.height,
                     keyboardType: TextInputType.number,
                     validator: _validateHeight,
@@ -982,8 +967,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildTextField(
                     controller: _weightController,
-                    label:
-                        '${localizations?.weight ?? 'Weight'} (${isMetric ? 'kg' : 'lbs'})',
+                    label: '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
                     icon: Icons.monitor_weight,
                     keyboardType: TextInputType.number,
                     validator: _validateWeight,
@@ -1007,15 +991,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildDropdown<String>(
                     value: _selectedActivityLevel,
-                    label: localizations?.activityLevel ?? 'Activity Level',
+                    label: l10n.screensSettingsImportProfileCompletionActivityLevel,
                     icon: Icons.directions_run,
                     items:
                         _activityLevels.keys.map((level) {
                           return DropdownMenuItem(
                             value: level,
-                            child: Text(
-                              _getActivityLevelText(level, localizations),
-                            ),
+                            child: Text(_getActivityLevelText(level, l10n)),
                           );
                         }).toList(),
                     onChanged: (value) {
@@ -1034,7 +1016,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildFitnessGoalsCard(AppLocalizations? localizations) {
+  Widget _buildFitnessGoalsCard(AppLocalizations l10n) {
     final isMetric = _selectedUnitSystem == 'metric';
     return Card(
       child: Padding(
@@ -1043,13 +1025,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           children: [
             _buildDropdown<String>(
               value: _selectedFitnessGoal,
-              label: localizations?.fitnessGoal ?? 'Fitness Goal',
+              label: l10n.screensSettingsImportProfileCompletionFitnessGoal,
               icon: Icons.flag,
               items:
                   _fitnessGoals.keys.map((goal) {
                     return DropdownMenuItem(
                       value: goal,
-                      child: Text(_getFitnessGoalText(goal, localizations)),
+                      child: Text(_getFitnessGoalText(goal, l10n)),
                     );
                   }).toList(),
               onChanged: (value) {
@@ -1063,8 +1045,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             const SizedBox(height: 16),
             _buildTextField(
               controller: _targetWeightController,
-              label:
-                  '${localizations?.targetWeight ?? 'Target Weight'} (${isMetric ? 'kg' : 'lbs'})',
+              label: '${l10n.screensSettingsProfileSettingsTargetWeight} (${isMetric ? 'kg' : 'lbs'})',
               icon: Icons.track_changes,
               keyboardType: TextInputType.number,
               validator: _validateWeight,
@@ -1088,7 +1069,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildPreferencesCard(AppLocalizations? localizations) {
+  Widget _buildPreferencesCard(AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1096,17 +1077,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           children: [
             _buildDropdown<String>(
               value: _selectedUnitSystem,
-              label: localizations?.unitSystem ?? 'Unit System',
+              label: l10n.screensSettingsImportProfileCompletionUnitSystem,
               icon: Icons.straighten,
               items: [
-                DropdownMenuItem(
-                  value: 'metric',
-                  child: Text(localizations?.metric ?? 'Metric (kg, cm)'),
-                ),
-                DropdownMenuItem(
-                  value: 'imperial',
-                  child: Text(localizations?.imperial ?? 'Imperial (lb, ft)'),
-                ),
+                DropdownMenuItem(value: 'metric', child: Text(l10n.screensSettingsImportProfileCompletionMetric)),
+                DropdownMenuItem(value: 'imperial', child: Text(l10n.screensSettingsImportProfileCompletionImperial)),
               ],
               onChanged: (value) {
                 setState(() {
@@ -1122,7 +1097,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildHealthSyncCard(AppLocalizations? localizations) {
+  Widget _buildHealthSyncCard(AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1145,10 +1120,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     children: [
                       Text(
                         _healthService.isConnected
-                            ? (localizations?.healthConnected ??
-                                'Health data connected')
-                            : (localizations?.healthDisconnected ??
-                                'Health data not connected'),
+                            ? (l10n.screensSettingsProfileSettingsHealthConnected)
+                            : (l10n.screensSettingsProfileSettingsHealthDisconnected),
                         style: Theme.of(
                           context,
                         ).textTheme.titleMedium?.copyWith(
@@ -1185,9 +1158,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                           : const Icon(Icons.add_link),
-                  label: Text(
-                    localizations?.connectToHealth ?? 'Connect to Health',
-                  ),
+                  label: Text(l10n.screensSettingsProfileSettingsConnectToHealth),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -1208,9 +1179,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                           : const Icon(Icons.sync),
-                  label: Text(
-                    localizations?.syncHealthData ?? 'Sync Health Data',
-                  ),
+                  label: Text(l10n.screensSettingsProfileSettingsSyncHealthData),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1219,9 +1188,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isHealthSyncing ? null : _analyzeCalorieTargets,
                   icon: const Icon(Icons.analytics),
-                  label: Text(
-                    localizations?.analyzeTargets ?? 'Analyze Targets',
-                  ),
+                  label: Text(l10n.screensSettingsProfileSettingsAnalyzeTargets),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     foregroundColor: Theme.of(context).colorScheme.onSecondary,
@@ -1236,9 +1203,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _isHealthSyncing ? null : _debugHealthData,
                       icon: const Icon(Icons.bug_report),
-                      label: Text(
-                        localizations?.debugHealthData ?? 'Debug Health Data',
-                      ),
+                      label: Text(l10n.screensSettingsProfileSettingsDebugHealthData),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
@@ -1255,9 +1220,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                 setState(() {});
                               },
                       icon: const Icon(Icons.link_off),
-                      label: Text(
-                        localizations?.disconnectHealth ?? 'Disconnect Health',
-                      ),
+                      label: Text(l10n.screensSettingsProfileSettingsDisconnectHealth),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
@@ -1331,7 +1294,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
   }
 
-  Widget _buildCurrentStatsCard(AppLocalizations? localizations) {
+  Widget _buildCurrentStatsCard(AppLocalizations l10n) {
     if (_originalProfile == null) return const SizedBox.shrink();
 
     // Calculate current values for display
@@ -1362,7 +1325,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatColumn(
-                  localizations?.bmi ?? 'BMI',
+                  l10n.screensSettingsProfileSettingsBmi,
                   bmi.toStringAsFixed(1),
                   _getBMICategory(bmi),
                 ),
@@ -1446,33 +1409,33 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  String _getActivityLevelText(String level, AppLocalizations? localizations) {
+  String _getActivityLevelText(String level, AppLocalizations l10n) {
     switch (level) {
       case 'sedentary':
-        return localizations?.sedentary ?? 'Sedentary';
+        return l10n.screensSettingsImportProfileCompletionSedentary;
       case 'lightly_active':
-        return localizations?.lightlyActive ?? 'Lightly Active';
+        return l10n.screensSettingsImportProfileCompletionLightlyActive;
       case 'moderately_active':
-        return localizations?.moderatelyActive ?? 'Moderately Active';
+        return l10n.screensSettingsImportProfileCompletionModeratelyActive;
       case 'very_active':
-        return localizations?.veryActive ?? 'Very Active';
+        return l10n.screensSettingsImportProfileCompletionVeryActive;
       case 'extra_active':
-        return localizations?.extraActive ?? 'Extra Active';
+        return l10n.screensSettingsImportProfileCompletionExtraActive;
       default:
         return level;
     }
   }
 
-  String _getFitnessGoalText(String goal, AppLocalizations? localizations) {
+  String _getFitnessGoalText(String goal, AppLocalizations l10n) {
     switch (goal) {
       case 'lose_weight':
-        return localizations?.loseWeight ?? 'Lose Weight';
+        return l10n.screensSettingsImportProfileCompletionLoseWeight;
       case 'maintain_weight':
-        return localizations?.maintainWeight ?? 'Maintain Weight';
+        return l10n.screensSettingsImportProfileCompletionMaintainWeight;
       case 'gain_weight':
-        return localizations?.gainWeight ?? 'Gain Weight';
+        return l10n.screensSettingsImportProfileCompletionGainWeight;
       case 'build_muscle':
-        return localizations?.buildMuscle ?? 'Build Muscle';
+        return l10n.screensSettingsImportProfileCompletionBuildMuscle;
       default:
         return goal;
     }
@@ -1524,7 +1487,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
   }
 
-  Widget _buildDangerZoneCard(AppLocalizations? localizations) {
+  Widget _buildDangerZoneCard(AppLocalizations l10n) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -1541,7 +1504,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    localizations?.dangerZone ?? 'Danger Zone',
+                    l10n.screensSettingsProfileSettingsDangerZone,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.error,
@@ -1554,7 +1517,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => _showResetConfirmationDialog(localizations),
+                onPressed: () => _showResetConfirmationDialog(l10n),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.error,
                   foregroundColor: colorScheme.onError,
@@ -1562,7 +1525,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 ),
                 icon: const Icon(Icons.delete_forever),
                 label: Text(
-                  localizations?.resetApp ?? 'Reset App',
+                  l10n.screensSettingsProfileSettingsResetApp,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -1573,9 +1536,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Future<void> _showResetConfirmationDialog(
-    AppLocalizations? localizations,
-  ) async {
+  Future<void> _showResetConfirmationDialog(AppLocalizations l10n) async {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -1590,7 +1551,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    localizations?.resetAppTitle ?? 'Reset Application Data',
+                    l10n.screensSettingsProfileSettingsResetAppTitle,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: colorScheme.error,
                     ),
@@ -1600,8 +1561,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             ),
             content: SingleChildScrollView(
               child: Text(
-                localizations?.resetAppDescription ??
-                    'This will permanently delete ALL your data including:\n\n• Your profile information\n• All meal logs and nutrition data\n• All preferences and settings\n• All stored information\n\nThis action cannot be undone. Are you sure you want to continue?',
+                l10n.screensSettingsProfileSettingsResetAppDescription,
                 style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
               ),
             ),
@@ -1609,7 +1569,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(
-                  localizations?.resetAppCancel ?? 'Cancel',
+                  l10n.screensSettingsProfileSettingsResetAppCancel,
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
               ),
@@ -1620,7 +1580,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   foregroundColor: colorScheme.onError,
                 ),
                 child: Text(
-                  localizations?.resetAppConfirm ?? 'Yes, Delete Everything',
+                  l10n.screensSettingsProfileSettingsResetAppConfirm,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -1629,11 +1589,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
 
     if (confirmed == true) {
-      await _performAppReset(localizations);
+      await _performAppReset(l10n);
     }
   }
 
-  Future<void> _performAppReset(AppLocalizations? localizations) async {
+  Future<void> _performAppReset(AppLocalizations l10n) async {
     try {
       // Show loading dialog
       showDialog(
@@ -1661,10 +1621,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              localizations?.resetAppSuccess ??
-                  'Application data has been reset successfully',
-            ),
+            content: Text(l10n.screensSettingsProfileSettingsResetAppSuccess),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -1681,9 +1638,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${localizations?.resetAppError ?? 'Failed to reset application data'}: $e',
-            ),
+            content: Text('${l10n.screensSettingsProfileSettingsResetAppError}: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -1694,24 +1649,24 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   // Show health permission denied dialog
   Future<void> _showHealthPermissionDeniedDialog() async {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(localizations.healthPermissionDenied),
-          content: Text(localizations.healthPermissionDeniedMessage),
+          title: Text(l10n.screensSettingsProfileSettingsHealthPermissionDenied),
+          content: Text(l10n.screensSettingsProfileSettingsHealthPermissionDeniedMessage),
           actions: <Widget>[
             TextButton(
-              child: Text(localizations.cancel),
+              child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text(localizations.openSettings),
+              child: Text(l10n.componentsScannerBarcodeScannerOpenSettings),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _openHealthSettings();
@@ -1725,24 +1680,24 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   // Show health error dialog
   Future<void> _showHealthErrorDialog(String error) async {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(localizations.healthNotAvailable),
-          content: Text(localizations.healthNotAvailableMessage),
+          title: Text(l10n.screensSettingsProfileSettingsHealthNotAvailable),
+          content: Text(l10n.screensSettingsProfileSettingsHealthNotAvailableMessage),
           actions: <Widget>[
             TextButton(
-              child: Text(localizations.cancel),
+              child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text(localizations.openSettings),
+              child: Text(l10n.componentsScannerBarcodeScannerOpenSettings),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _openHealthSettings();
@@ -1878,7 +1833,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.cancel),
+                child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
               ),
               if (analysis.needsAdjustment)
                 ElevatedButton(

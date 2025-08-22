@@ -69,7 +69,7 @@ class DishCard extends StatelessWidget {
                             children: [
                               const Icon(Icons.edit),
                               const SizedBox(width: 8),
-                              Text(l10n.edit),
+                              Text(l10n.componentsDishesDishCardEdit),
                             ],
                           ),
                         ),
@@ -80,7 +80,7 @@ class DishCard extends StatelessWidget {
                             children: [
                               const Icon(Icons.delete),
                               const SizedBox(width: 8),
-                              Text(l10n.delete),
+                              Text(l10n.componentsDishesDishCardDelete),
                             ],
                           ),
                         ),
@@ -93,19 +93,19 @@ class DishCard extends StatelessWidget {
           Row(
             children: [
               _NutrientChip(
-                label: l10n.protein,
+                label: l10n.componentsCalendarMacroSummaryProtein,
                 value: '${dish.nutrition.protein.toStringAsFixed(1)}g',
                 color: Colors.blue,
               ),
               const SizedBox(width: 8),
               _NutrientChip(
-                label: l10n.carbs,
+                label: l10n.componentsCalendarMacroSummaryCarbs,
                 value: '${dish.nutrition.carbs.toStringAsFixed(1)}g',
                 color: Colors.orange,
               ),
               const SizedBox(width: 8),
               _NutrientChip(
-                label: l10n.fat,
+                label: l10n.componentsCalendarMacroSummaryFat,
                 value: '${dish.nutrition.fat.toStringAsFixed(1)}g',
                 color: Colors.green,
               ),

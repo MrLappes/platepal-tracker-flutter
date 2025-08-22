@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../../models/chat_profile.dart';
 import 'bot_profile_customization_dialog.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 
 class ChatHeader extends StatelessWidget {
   final ChatBotProfile botProfile;
@@ -25,38 +26,38 @@ class ChatHeader extends StatelessWidget {
   }
 
   Widget _buildBotAvatar(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ),
+    final theme = Theme.of(context);
+    // Use transparent Material, let parent control color
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      elevation: 0,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(shape: BoxShape.circle),
+        child:
+            botProfile.avatarUrl != null
+                ? ClipOval(
+                  child:
+                      botProfile.avatarUrl!.startsWith('http')
+                          ? Image.network(
+                            botProfile.avatarUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    _buildDefaultBotAvatar(context),
+                          )
+                          : Image.file(
+                            File(botProfile.avatarUrl!),
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    _buildDefaultBotAvatar(context),
+                          ),
+                )
+                : _buildDefaultBotAvatar(context),
       ),
-      child:
-          botProfile.avatarUrl != null
-              ? ClipOval(
-                child:
-                    botProfile.avatarUrl!.startsWith('http')
-                        ? Image.network(
-                          botProfile.avatarUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  _buildDefaultBotAvatar(context),
-                        )
-                        : Image.file(
-                          File(botProfile.avatarUrl!),
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  _buildDefaultBotAvatar(context),
-                        ),
-              )
-              : _buildDefaultBotAvatar(context),
     );
   }
 
@@ -68,74 +69,83 @@ class ChatHeader extends StatelessWidget {
     );
   }
 
-  String _getPersonalityDescription(String personalityType) {
+  String _getPersonalityDescription(
+    BuildContext context,
+    String personalityType,
+  ) {
+    final l10n = AppLocalizations.of(context);
     switch (personalityType) {
       case 'nutritionist':
-        return 'Professional & Evidence-based';
+        return l10n.componentsChatBotPersonalityDescriptionNutritionist;
       case 'casualGymbro':
-        return 'Casual & Motivational';
+        return l10n.componentsChatBotPersonalityDescriptionCasualGymbro;
       case 'angryGreg':
-        return 'Intense & Supplement-focused';
+        return l10n.componentsChatBotPersonalityDescriptionAngryGreg;
       case 'veryAngryBro':
-        return 'Extremely Intense';
+        return l10n.componentsChatBotPersonalityDescriptionVeryAngryBro;
       case 'fitnessCoach':
-        return 'Encouraging & Supportive';
+        return l10n.componentsChatBotPersonalityDescriptionFitnessCoach;
       case 'nice':
       default:
-        return 'Friendly & Helpful';
+        return l10n.componentsChatBotPersonalityDescriptionNice;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Use Material to match AppBar elevation and color
+    return Material(
+      elevation: theme.appBarTheme.scrolledUnderElevation ?? 1,
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () => _editBotProfile(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
-            width: 1,
+          child: Row(
+            children: [
+              _buildBotAvatar(context),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      botProfile.name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      _getPersonalityDescription(
+                        context,
+                        botProfile.personalityType,
+                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () => _editBotProfile(context),
+                icon: Icon(
+                  Icons.edit,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                tooltip:
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatEditBotProfileTooltip,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                padding: EdgeInsets.zero,
+              ),
+            ],
           ),
         ),
-      ),
-      child: Row(
-        children: [
-          _buildBotAvatar(context),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  botProfile.name,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  _getPersonalityDescription(botProfile.personalityType),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => _editBotProfile(context),
-            icon: Icon(
-              Icons.edit,
-              size: 20,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            tooltip: 'Edit Bot Profile',
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            padding: EdgeInsets.zero,
-          ),
-        ],
       ),
     );
   }
