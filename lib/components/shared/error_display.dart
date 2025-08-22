@@ -49,7 +49,7 @@ class ErrorDisplay extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: Text(l10n.retry),
+                label: Text(l10n.componentsSharedErrorDisplayRetry),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: theme.colorScheme.onErrorContainer,
                   backgroundColor: theme.colorScheme.errorContainer,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 
 class DaySelector extends StatelessWidget {
   final DateTime selectedDate;
@@ -20,34 +22,12 @@ class DaySelector extends StatelessWidget {
     required this.onToday,
   });
 
-  List<String> get _daysOfWeek => [
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-  ];
-
-  List<String> get _months => [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  List<WeekDay> _generateWeekDays() {
+  // Use intl + AppLocalizations to format localized weekday and month names.
+  List<WeekDay> _generateWeekDays(BuildContext context) {
     final result = <WeekDay>[];
     final today = DateTime.now();
+
+    final locale = AppLocalizations.of(context).localeName;
 
     for (int i = 0; i < 7; i++) {
       final date = weekStartDate.add(Duration(days: i));
@@ -56,12 +36,15 @@ class DaySelector extends StatelessWidget {
           date.month == weekStartDate.month &&
           date.year == weekStartDate.year;
 
+      // Short weekday name localized (e.g. Mon, Tue)
+      final dayName = DateFormat.E(locale).format(date);
+
       result.add(
         WeekDay(
           date: date.day,
           month: date.month,
           year: date.year,
-          day: _daysOfWeek[date.weekday % 7],
+          day: dayName,
           isToday:
               date.year == today.year &&
               date.month == today.month &&
@@ -75,11 +58,12 @@ class DaySelector extends StatelessWidget {
     return result;
   }
 
-  String _getWeekRangeText() {
+  String _getWeekRangeText(BuildContext context) {
     final weekEndDate = weekStartDate.add(const Duration(days: 6));
+    final locale = AppLocalizations.of(context).localeName;
 
-    final startMonth = _months[weekStartDate.month - 1].substring(0, 3);
-    final endMonth = _months[weekEndDate.month - 1].substring(0, 3);
+    final startMonth = DateFormat.MMM(locale).format(weekStartDate);
+    final endMonth = DateFormat.MMM(locale).format(weekEndDate);
 
     if (weekStartDate.month == weekEndDate.month) {
       return '$startMonth ${weekStartDate.day}-${weekEndDate.day}, ${weekStartDate.year}';
@@ -92,7 +76,7 @@ class DaySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final weekDays = _generateWeekDays();
+    final weekDays = _generateWeekDays(context);
 
     return Column(
       children: [
@@ -131,7 +115,7 @@ class DaySelector extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _getWeekRangeText(),
+                        _getWeekRangeText(context),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: colorScheme.onSurfaceVariant,

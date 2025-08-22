@@ -116,7 +116,7 @@ class ChatWelcome extends StatelessWidget {
 
           // Welcome Title
           Text(
-            localizations.chatWelcomeTitle,
+            localizations.componentsChatChatWelcomeChatWelcomeTitle,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface,
@@ -127,7 +127,7 @@ class ChatWelcome extends StatelessWidget {
 
           // Welcome Subtitle
           Text(
-            localizations.chatWelcomeSubtitle,
+            localizations.componentsChatChatWelcomeChatWelcomeSubtitle,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             ),
@@ -146,7 +146,7 @@ class ChatWelcome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          localizations.getStartedToday,
+          localizations.componentsChatChatWelcomeGetStartedToday,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: theme.colorScheme.onSurface,
@@ -156,7 +156,7 @@ class ChatWelcome extends StatelessWidget {
         const SizedBox(height: 16),
 
         Text(
-          localizations.whatCanIHelpWith,
+          localizations.componentsChatChatWelcomeWhatCanIHelpWith,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
@@ -174,9 +174,9 @@ class ChatWelcome extends StatelessWidget {
     final quickActions = [
       _QuickActionOption(
         icon: Icons.restaurant_menu,
-        title: localizations.suggestMeal,
-        subtitle: "Get personalized meal recommendations",
-        message: "Suggest a healthy meal for me based on my fitness goals",
+        title: localizations.componentsChatChatWelcomeSuggestMeal,
+        subtitle: localizations.componentsChatChatWelcomeSuggestMealSubtitle,
+        message: localizations.componentsChatChatWelcomeSuggestMealMessage,
         gradient: LinearGradient(
           colors:
               isDark
@@ -188,9 +188,10 @@ class ChatWelcome extends StatelessWidget {
       ),
       _QuickActionOption(
         icon: Icons.analytics,
-        title: localizations.analyzeNutrition,
-        subtitle: "Analyze the nutrition in your meals",
-        message: "Help me analyze the nutrition in my meal",
+        title: localizations.componentsChatChatWelcomeAnalyzeNutrition,
+        subtitle:
+            localizations.componentsChatChatWelcomeAnalyzeNutritionSubtitle,
+        message: localizations.componentsChatChatWelcomeAnalyzeNutritionMessage,
         gradient: LinearGradient(
           colors:
               isDark
@@ -202,9 +203,10 @@ class ChatWelcome extends StatelessWidget {
       ),
       _QuickActionOption(
         icon: Icons.swap_horiz,
-        title: localizations.findAlternatives,
-        subtitle: "Discover healthier food alternatives",
-        message: "Find healthier alternatives to my current meal",
+        title: localizations.componentsChatChatWelcomeFindAlternatives,
+        subtitle:
+            localizations.componentsChatChatWelcomeFindAlternativesSubtitle,
+        message: localizations.componentsChatChatWelcomeFindAlternativesMessage,
         gradient: LinearGradient(
           colors:
               isDark
@@ -216,9 +218,10 @@ class ChatWelcome extends StatelessWidget {
       ),
       _QuickActionOption(
         icon: Icons.calculate,
-        title: localizations.calculateMacros,
-        subtitle: "Calculate macros for your meals",
-        message: "Help me calculate macros for my meals",
+        title: localizations.componentsChatChatWelcomeCalculateMacros,
+        subtitle:
+            localizations.componentsChatChatWelcomeCalculateMacrosSubtitle,
+        message: localizations.componentsChatChatWelcomeCalculateMacrosMessage,
         gradient: LinearGradient(
           colors:
               isDark
@@ -230,9 +233,9 @@ class ChatWelcome extends StatelessWidget {
       ),
       _QuickActionOption(
         icon: Icons.calendar_today,
-        title: localizations.mealPlan,
-        subtitle: "Create weekly meal plans",
-        message: "Help me create a weekly meal plan",
+        title: localizations.componentsChatChatWelcomeMealPlan,
+        subtitle: localizations.componentsChatChatWelcomeMealPlanSubtitle,
+        message: localizations.componentsChatChatWelcomeMealPlanMessage,
         gradient: LinearGradient(
           colors:
               isDark
@@ -244,9 +247,9 @@ class ChatWelcome extends StatelessWidget {
       ),
       _QuickActionOption(
         icon: Icons.info_outline,
-        title: localizations.ingredientInfo,
-        subtitle: "Learn about ingredient benefits",
-        message: "Tell me about the nutritional benefits of ingredients",
+        title: localizations.componentsChatChatWelcomeIngredientInfo,
+        subtitle: localizations.componentsChatChatWelcomeIngredientInfoSubtitle,
+        message: localizations.componentsChatChatWelcomeIngredientInfoMessage,
         gradient: LinearGradient(
           colors:
               isDark

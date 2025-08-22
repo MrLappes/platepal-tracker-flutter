@@ -130,7 +130,7 @@ class _AboutScreenState extends State<AboutScreen>
               title: FadeTransition(
                 opacity: _headerOpacity,
                 child: Text(
-                  localizations.aboutAppTitle,
+                  localizations.screensSettingsAboutAboutAppTitle,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class _AboutScreenState extends State<AboutScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              localizations.madeBy,
+                              localizations.screensMenuMadeBy,
                               style: Theme.of(
                                 context,
                               ).textTheme.bodyLarge?.copyWith(
@@ -251,7 +251,7 @@ class _AboutScreenState extends State<AboutScreen>
                             _buildLinkButton(
                               context,
                               icon: Icons.public,
-                              title: localizations.website,
+                              title: localizations.screensSettingsAboutWebsite,
                               onTap:
                                   () =>
                                       LinkHandler.openPlatePalWebsite(context),
@@ -262,7 +262,7 @@ class _AboutScreenState extends State<AboutScreen>
                             _buildLinkButton(
                               context,
                               icon: Icons.code,
-                              title: localizations.githubRepository,
+                              title: localizations.screensSettingsAboutGithubRepository,
                               onTap:
                                   () => LinkHandler.openGitHubRepo(
                                     context,
@@ -273,14 +273,14 @@ class _AboutScreenState extends State<AboutScreen>
                             const SizedBox(height: 24),
 
                             Text(
-                              localizations.appMotto,
+                              localizations.screensSettingsAboutAppMotto,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w600),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              localizations.codersMessage,
+                              localizations.screensSettingsAboutCodersMessage,
                               style: Theme.of(
                                 context,
                               ).textTheme.bodyMedium?.copyWith(
@@ -335,28 +335,28 @@ class _AboutScreenState extends State<AboutScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              localizations.whyPlatePal,
+                              localizations.screensSettingsAboutWhyPlatePal,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              localizations.aboutDescription,
+                              localizations.screensSettingsAboutAboutDescription,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             const SizedBox(height: 20),
 
                             _buildFeatureItem(
                               context,
-                              localizations.dataStaysOnDevice,
+                              localizations.screensSettingsAboutDataStaysOnDevice,
                             ),
                             _buildFeatureItem(
                               context,
-                              localizations.useOwnAiKey,
+                              localizations.screensSettingsAboutUseOwnAiKey,
                             ),
                             _buildFeatureItem(
                               context,
-                              localizations.freeOpenSource,
+                              localizations.screensSettingsAboutFreeOpenSource,
                             ),
                           ],
                         ),

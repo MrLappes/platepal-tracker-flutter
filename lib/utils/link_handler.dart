@@ -21,7 +21,7 @@ class LinkHandler {
     if (showLoadingMessage) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(loadingMessage ?? localizations.openingLink),
+          content: Text(loadingMessage ?? localizations.utilsLinkHandlerOpeningLink),
           duration: const Duration(milliseconds: 500),
         ),
       );
@@ -38,7 +38,7 @@ class LinkHandler {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(localizations.linkError)));
+        ).showSnackBar(SnackBar(content: Text(localizations.screensSettingsApiKeySettingsLinkError)));
       }
     }
   }
@@ -84,11 +84,11 @@ class LinkHandler {
       }
 
       if (context.mounted) {
-        _showErrorMessage(context, url, localizations.couldNotOpenUrl);
+        _showErrorMessage(context, url, localizations.utilsLinkHandlerCouldNotOpenUrl);
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage(context, url, null, localizations.linkError);
+        _showErrorMessage(context, url, null, localizations.screensSettingsApiKeySettingsLinkError);
       }
     }
   }
@@ -114,11 +114,11 @@ class LinkHandler {
       }
 
       if (context.mounted) {
-        _showErrorMessage(context, url, localizations.couldNotOpenUrl);
+        _showErrorMessage(context, url, localizations.utilsLinkHandlerCouldNotOpenUrl);
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage(context, url, null, localizations.linkError);
+        _showErrorMessage(context, url, null, localizations.screensSettingsApiKeySettingsLinkError);
       }
     }
   }
@@ -183,7 +183,7 @@ class LinkHandler {
       context,
       'https://www.buymeacoffee.com/mrlappes',
       showLoadingMessage: true,
-      loadingMessage: localizations.openingLink,
+      loadingMessage: localizations.utilsLinkHandlerOpeningLink,
     );
   }
 
@@ -213,7 +213,7 @@ class LinkHandler {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '$url: ${canLaunch ? l10n.available : l10n.notAvailable}',
+              '$url: ${canLaunch ? l10n.utilsLinkHandlerAvailable : l10n.utilsLinkHandlerNotAvailable}',
             ),
             duration: const Duration(seconds: 1),
           ),

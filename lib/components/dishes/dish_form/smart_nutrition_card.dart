@@ -234,7 +234,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  l10n.nutritionalInformation,
+                                  l10n.componentsDishesDishFormSmartNutritionCardNutritionalInformation,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -274,8 +274,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                           Expanded(
                             child: _buildNutritionField(
                               controller: widget.caloriesController,
-                              label: l10n.calories,
-                              suffix: l10n.kcal,
+                              label: l10n.componentsCalendarMacroSummaryCalories,
+                              suffix: l10n.componentsDishesDishFormIngredientFormModalKcal,
                               icon: Icons.local_fire_department_outlined,
                               color: Colors.orange,
                             ),
@@ -284,8 +284,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                           Expanded(
                             child: _buildNutritionField(
                               controller: widget.fiberController,
-                              label: l10n.fiber,
-                              suffix: l10n.grams,
+                              label: l10n.componentsCalendarMacroSummaryFiber,
+                              suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                               icon: Icons.grass_outlined,
                               color: Colors.green,
                             ),
@@ -308,8 +308,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                     Expanded(
                                       child: _buildNutritionField(
                                         controller: widget.proteinController,
-                                        label: l10n.protein,
-                                        suffix: l10n.grams,
+                                        label: l10n.componentsCalendarMacroSummaryProtein,
+                                        suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                         icon: Icons.fitness_center_outlined,
                                         color: Colors.blue,
                                       ),
@@ -318,8 +318,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                     Expanded(
                                       child: _buildNutritionField(
                                         controller: widget.carbsController,
-                                        label: l10n.carbs,
-                                        suffix: l10n.grams,
+                                        label: l10n.componentsCalendarMacroSummaryCarbs,
+                                        suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                         icon: Icons.grain_outlined,
                                         color: Colors.amber,
                                       ),
@@ -332,8 +332,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                     Expanded(
                                       child: _buildNutritionField(
                                         controller: widget.fatController,
-                                        label: l10n.fat,
-                                        suffix: l10n.grams,
+                                        label: l10n.componentsCalendarMacroSummaryFat,
+                                        suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                         icon: Icons.water_drop_outlined,
                                         color: Colors.teal,
                                       ),
@@ -352,8 +352,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                 Expanded(
                                   child: _buildNutritionField(
                                     controller: widget.proteinController,
-                                    label: l10n.protein,
-                                    suffix: l10n.grams,
+                                    label: l10n.componentsCalendarMacroSummaryProtein,
+                                    suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                     icon: Icons.fitness_center_outlined,
                                     color: Colors.blue,
                                   ),
@@ -362,8 +362,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                 Expanded(
                                   child: _buildNutritionField(
                                     controller: widget.carbsController,
-                                    label: l10n.carbs,
-                                    suffix: l10n.grams,
+                                    label: l10n.componentsCalendarMacroSummaryCarbs,
+                                    suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                     icon: Icons.grain_outlined,
                                     color: Colors.amber,
                                   ),
@@ -372,8 +372,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                 Expanded(
                                   child: _buildNutritionField(
                                     controller: widget.fatController,
-                                    label: l10n.fat,
-                                    suffix: l10n.grams,
+                                    label: l10n.componentsCalendarMacroSummaryFat,
+                                    suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                     icon: Icons.water_drop_outlined,
                                     color: Colors.teal,
                                   ),

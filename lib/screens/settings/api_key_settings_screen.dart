@@ -60,7 +60,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     } catch (e) {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
-      _showErrorSnackBar(localizations.failedToLoadApiKey);
+      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsFailedToLoadApiKey);
     }
   }
 
@@ -111,7 +111,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
       setState(() {
-        _modelError = localizations.couldNotLoadModels;
+        _modelError = localizations.screensSettingsApiKeySettingsCouldNotLoadModels;
         _availableModels = _openAIService.getDefaultModels();
       });
     } finally {
@@ -128,7 +128,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     if (apiKey.isEmpty) {
       final localizations = AppLocalizations.of(context);
       setState(() {
-        _errorMessage = localizations.apiKeyMustStartWith;
+        _errorMessage = localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
       });
       return;
     }
@@ -164,7 +164,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       if (mounted) {
         final localizations = AppLocalizations.of(context);
         _showSuccessDialog(
-          localizations.apiKeySavedSuccessfully,
+          localizations.screensSettingsApiKeySettingsApiKeySavedSuccessfully,
           testResult.message,
         );
       }
@@ -182,8 +182,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   Future<void> _removeApiKey() async {
     final localizations = AppLocalizations.of(context);
     final confirm = await _showConfirmDialog(
-      localizations.removeApiKey,
-      localizations.removeApiKeyConfirmation,
+      localizations.screensSettingsApiKeySettingsRemoveApiKey,
+      localizations.screensSettingsApiKeySettingsRemoveApiKeyConfirmation,
     );
 
     if (!confirm) return;
@@ -201,10 +201,10 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       });
 
       if (mounted) {
-        _showSuccessSnackBar(localizations.apiKeyRemovedSuccessfully);
+        _showSuccessSnackBar(localizations.screensSettingsApiKeySettingsApiKeyRemovedSuccessfully);
       }
     } catch (e) {
-      _showErrorSnackBar(localizations.failedToRemoveApiKey);
+      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsFailedToRemoveApiKey);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -222,7 +222,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     } catch (e) {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
-      _showErrorSnackBar(localizations.linkError);
+      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsLinkError);
     }
   }
 
@@ -251,16 +251,16 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
         // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
-        _showSuccessSnackBar(localizations.pastedFromClipboard);
+        _showSuccessSnackBar(localizations.screensSettingsApiKeySettingsPastedFromClipboard);
       } else {
         // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
-        _showErrorSnackBar(localizations.clipboardEmpty);
+        _showErrorSnackBar(localizations.screensSettingsApiKeySettingsClipboardEmpty);
       }
     } catch (e) {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
-      _showErrorSnackBar(localizations.failedToAccessClipboard);
+      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsFailedToAccessClipboard);
     }
   }
 
@@ -294,7 +294,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop(); // Go back to settings
                 },
-                child: Text(localizations.ok),
+                child: Text(localizations.screensCalendarOk),
               ),
             ],
           ),
@@ -312,11 +312,11 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(localizations.cancel),
+                child: Text(localizations.componentsChatBotProfileCustomizationDialogCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(localizations.remove),
+                child: Text(localizations.screensSettingsApiKeySettingsRemove),
               ),
             ],
           ),
@@ -332,11 +332,11 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
     final trimmedValue = value.trim();
     if (!trimmedValue.startsWith('sk-')) {
-      return localizations.apiKeyMustStartWith;
+      return localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
     }
 
     if (trimmedValue.length < 40) {
-      return localizations.apiKeyTooShort;
+      return localizations.screensSettingsApiKeySettingsApiKeyTooShort;
     }
 
     return null;
@@ -345,9 +345,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   String _getModelInfoText() {
     final localizations = AppLocalizations.of(context);
     if (_selectedModel.contains('gpt-4')) {
-      return localizations.gpt4ModelsInfo;
+      return localizations.screensSettingsApiKeySettingsGpt4ModelsInfo;
     } else {
-      return localizations.gpt35ModelsInfo;
+      return localizations.screensSettingsApiKeySettingsGpt35ModelsInfo;
     }
   }
 
@@ -356,7 +356,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     final localizations = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.apiKeySettings),
+        title: Text(localizations.screensMenuApiKeySettings),
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
@@ -382,7 +382,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            localizations.aboutOpenAiApiKey,
+                            localizations.screensSettingsApiKeySettingsAboutOpenAiApiKey,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
@@ -390,12 +390,12 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        localizations.apiKeyDescription,
+                        localizations.screensSettingsApiKeySettingsApiKeyDescription,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        localizations.apiKeyBulletPoints,
+                        localizations.screensSettingsApiKeySettingsApiKeyBulletPoints,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -419,7 +419,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                localizations.apiKeyConfigured,
+                                localizations.screensSettingsApiKeySettingsApiKeyConfigured,
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleSmall?.copyWith(
@@ -428,7 +428,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                                 ),
                               ),
                               Text(
-                                localizations.aiFeaturesEnabled,
+                                localizations.screensSettingsApiKeySettingsAiFeaturesEnabled,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.green.shade600),
                               ),
@@ -444,7 +444,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
               // API Key Input
               Text(
-                localizations.openAiApiKey,
+                localizations.screensSettingsApiKeySettingsOpenAiApiKey,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -461,8 +461,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   }
                 },
                 decoration: InputDecoration(
-                  hintText: localizations.apiKeyPlaceholder,
-                  helperText: localizations.apiKeyHelperText,
+                  hintText: localizations.screensSettingsApiKeySettingsApiKeyPlaceholder,
+                  helperText: localizations.screensSettingsApiKeySettingsApiKeyHelperText,
                   prefixIcon: const Icon(Icons.key),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -473,7 +473,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                           color: _pasteSuccess ? Colors.green : null,
                         ),
                         onPressed: _isLoading ? null : _pasteFromClipboard,
-                        tooltip: localizations.pasteFromClipboard,
+                        tooltip: localizations.screensSettingsApiKeySettingsPasteFromClipboard,
                       ),
                       IconButton(
                         icon: Icon(
@@ -498,7 +498,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
               // Model Selection
               Text(
-                localizations.selectModel,
+                localizations.screensSettingsApiKeySettingsSelectModel,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -616,7 +616,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  localizations.apiKeyTestWarning,
+                  localizations.screensSettingsApiKeySettingsApiKeyTestWarning,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -649,15 +649,15 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                localizations.testingApiKey,
+                                localizations.screensSettingsApiKeySettingsTestingApiKey,
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ],
                           )
                           : Text(
                             _hasApiKey
-                                ? (localizations.updateApiKey)
-                                : (localizations.testAndSaveApiKey),
+                                ? (localizations.screensSettingsApiKeySettingsUpdateApiKey)
+                                : (localizations.screensSettingsApiKeySettingsTestAndSaveApiKey),
                             style: const TextStyle(fontSize: 16),
                           ),
                 ),
@@ -679,7 +679,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                     children: [
                       const Icon(Icons.open_in_new),
                       const SizedBox(width: 8),
-                      Text(localizations.getApiKeyFromOpenAi),
+                      Text(localizations.screensSettingsApiKeySettingsGetApiKeyFromOpenAi),
                     ],
                   ),
                 ),
