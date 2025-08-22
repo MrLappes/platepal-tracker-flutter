@@ -9,1783 +9,1578 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'PlatePal Tracker';
+  String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay => 'No hay comidas registradas para este día';
 
   @override
-  String get welcome => 'Bienvenido a PlatePal';
+  String get componentsCalendarCalendarDayDetailUnknownDish => 'Plato Desconocido';
 
   @override
-  String get meals => 'Comidas';
+  String get componentsCalendarMacroSummaryCalories => 'Calorías';
 
   @override
-  String get nutrition => 'Nutrición';
+  String get componentsCalendarMacroSummaryCarbs => 'Carbohidratos';
 
   @override
-  String get profile => 'Perfil';
+  String get componentsCalendarMacroSummaryEstimatedCalories => 'Calorías Estimadas';
 
   @override
-  String get settings => 'Configuración';
+  String get componentsCalendarMacroSummaryEstimatedCaloriesMessage => 'Estos datos están estimados basándose en la configuración de tu perfil y nivel de actividad ya que los datos de salud no estaban disponibles para esta fecha.';
 
   @override
-  String get addMeal => 'Agregar Comida';
+  String get componentsCalendarMacroSummaryEstimatedCaloriesToday => 'Calorías Estimadas (Hoy)';
 
   @override
-  String get breakfast => 'Desayuno';
+  String get componentsCalendarMacroSummaryEstimatedCaloriesTodayMessage => 'Este es tu gasto calórico estimado para hoy basado en tu nivel de actividad. Como el día aún no está completo, esto representa tu tasa metabólica basal más actividad estimada. Tus calorías realmente quemadas pueden ser mayores si realizas más actividades hoy.';
 
   @override
-  String get lunch => 'Almuerzo';
+  String get componentsCalendarMacroSummaryFat => 'Grasa';
 
   @override
-  String get dinner => 'Cena';
+  String get componentsCalendarMacroSummaryFiber => 'Fibra';
 
   @override
-  String get snack => 'Merienda';
+  String get componentsCalendarMacroSummaryGetAiTip => 'Obtener Consejo IA';
 
   @override
-  String get noMealsLogged => 'Aún no hay comidas registradas';
+  String get componentsCalendarMacroSummaryHealthDataMessage => 'Estos datos fueron recopilados de los datos de salud en tu teléfono, proporcionando información precisa sobre las calorías quemadas de tus actividades de fitness para este día completo.';
 
   @override
-  String get startTrackingMeals => 'Comienza a registrar tus comidas para verlas aquí';
+  String get componentsCalendarMacroSummaryHealthDataTitle => 'Datos de Salud';
 
   @override
-  String get todaysMeals => 'Comidas de Hoy';
+  String get componentsCalendarMacroSummaryHealthDataTodayMessage => 'Estos datos fueron recopilados de los datos de salud en tu teléfono. Como el día de hoy aún no está completo, esto representa las calorías quemadas hasta ahora. Tu total puede aumentar mientras continúes con actividades durante el día.';
 
   @override
-  String get allMeals => 'Todas las Comidas';
+  String get componentsCalendarMacroSummaryHealthDataTodayPartial => 'Datos de Salud (Hoy - Parcial)';
 
   @override
-  String get mealHistory => 'Historial de Comidas';
+  String get componentsCalendarMacroSummaryNutritionSummary => 'Resumen Nutricional';
 
   @override
-  String get filterByMealType => 'Filtrar por tipo de comida';
+  String get componentsCalendarMacroSummaryProtein => 'Proteína';
 
   @override
-  String get logMeal => 'Registrar Comida';
+  String get componentsCalendarMacroSummaryCompactCalories => 'Cal';
 
   @override
-  String mealLoggedAt(String time) {
-    return 'Registrado a las $time';
+  String get componentsCalendarMacroSummaryCompactProtein => 'Protein';
+
+  @override
+  String get componentsCalendarMacroSummaryCompactCarbs => 'Carbs';
+
+  @override
+  String get componentsCalendarMacroSummaryCompactFat => 'Fat';
+
+  @override
+  String get componentsCommonOk => 'Aceptar';
+
+  @override
+  String get componentsChatAgentStepsModalAgentProcessingSteps => 'Pasos de procesamiento del agente';
+
+  @override
+  String get componentsChatAgentStepsModalCopiedToClipboard => 'Copiado al portapapeles';
+
+  @override
+  String get componentsChatAgentStepsModalCopyAll => 'Copiar todo';
+
+  @override
+  String get componentsChatAgentStepsModalViewFullData => 'Ver datos completos';
+
+  @override
+  String get componentsChatAgentStepsModalViewFullPrompt => 'Ver prompt completo';
+
+  @override
+  String get componentsChatAgentStepsModalThinkingProcessTitle => '🧠 Proceso de Pensamiento';
+
+  @override
+  String get componentsChatAgentStepsModalThinkingProcessSubtitle => 'Pasos de pensamiento del agente en tiempo real';
+
+  @override
+  String get componentsChatAgentStepsModalProcessingStepsTitle => '⚙️ Pasos de Procesamiento';
+
+  @override
+  String get componentsChatAgentStepsModalProcessingStepsSubtitle => 'Ejecución detallada paso a paso';
+
+  @override
+  String get componentsChatAgentStepsModalProcessingSummary => 'Resumen de Procesamiento';
+
+  @override
+  String get componentsChatAgentStepsModalCopySummaryTooltip => 'Copiar datos de resumen';
+
+  @override
+  String get componentsChatAgentStepsModalProcessingTime => 'Tiempo de Procesamiento';
+
+  @override
+  String get componentsChatAgentStepsModalBotType => 'Tipo de Bot';
+
+  @override
+  String get componentsChatAgentStepsModalTotalSteps => 'Pasos Totales';
+
+  @override
+  String get componentsChatAgentStepsModalSkippedSteps => 'Pasos Omitidos';
+
+  @override
+  String get componentsChatAgentStepsModalFailedSteps => 'Pasos Fallidos';
+
+  @override
+  String get componentsChatAgentStepsModalErrorRecovery => 'Recuperación de Errores';
+
+  @override
+  String get componentsChatAgentStepsModalCompletedSteps => 'Pasos Completados';
+
+  @override
+  String get componentsChatAgentStepsModalDeepSearch => 'Búsqueda Profunda';
+
+  @override
+  String get componentsChatAgentStepsModalEnabled => 'Habilitado';
+
+  @override
+  String get componentsChatAgentStepsModalDisabled => 'Deshabilitado';
+
+  @override
+  String get componentsChatAgentStepsModalModifications => 'Modificaciones';
+
+  @override
+  String get componentsChatAgentStepsModalNoModifications => 'Ninguna necesaria ✨';
+
+  @override
+  String get componentsChatAgentStepsModalPerfectProcessing => '¡Procesamiento perfecto! No se necesitaron correcciones ni modificaciones.';
+
+  @override
+  String get componentsChatAgentStepsModalPipelineModificationsTitle => '✨ Modificaciones del Pipeline';
+
+  @override
+  String get componentsChatAgentStepsModalPipelineModificationsSubtitle => 'No se necesitaron modificaciones - ¡tu solicitud se procesó sin problemas!';
+
+  @override
+  String get componentsChatAgentStepsModalStepModifications => '🔧 Modificaciones de Paso';
+
+  @override
+  String get componentsChatAgentStepsModalCopyModifications => 'Copiar modificaciones';
+
+  @override
+  String componentsChatAgentStepsModalSummaryLabel(String summary) {
+    return 'Resumen: $summary';
   }
 
   @override
-  String get calories => 'Calorías';
+  String get componentsChatAgentStepsModalEnhancedSystemPrompt => '🤖 Prompt de Sistema Mejorado';
 
   @override
-  String get protein => 'Proteína';
+  String get componentsChatAgentStepsModalCopyEnhancedPrompt => 'Copiar prompt de sistema mejorado';
 
   @override
-  String get carbs => 'Carbohidratos';
+  String get componentsChatDishSuggestionCardHighProtein => 'Plato alto en proteína';
 
   @override
-  String get fat => 'Grasa';
+  String get componentsChatDishSuggestionCardHighCarb => 'Plato alto en carbohidratos';
 
   @override
-  String get calendar => 'Calendario';
+  String get componentsChatDishSuggestionCardHighFat => 'Plato alto en grasa';
 
   @override
-  String get unknownDish => 'Plato Desconocido';
+  String get componentsChatDishSuggestionCardBalanced => 'Plato equilibrado';
 
   @override
-  String get noMealsLoggedForDay => 'No hay comidas registradas para este día';
+  String get componentsChatDishSuggestionCardUnbalanced => 'Plato desequilibrado';
 
   @override
-  String get nutritionSummary => 'Resumen Nutricional';
+  String get componentsChatDishSuggestionCardProtein => 'Proteína';
 
   @override
-  String get getAiTip => 'Obtener Consejo IA';
+  String get componentsChatDishSuggestionCardCarbs => 'Carbohidratos';
 
   @override
-  String get deleteLog => 'Eliminar Registro';
+  String get componentsChatDishSuggestionCardFat => 'Grasa';
 
   @override
-  String get deleteLogConfirmation => '¿Está seguro de que desea eliminar esta comida registrada?';
+  String get componentsChatDishSuggestionCardCalories => 'Calorías';
 
   @override
-  String get delete => 'Eliminar';
+  String get componentsChatDishSuggestionCardInspect => 'Detalles';
 
   @override
-  String get mealLogDeletedSuccessfully => 'Registro de comida eliminado exitosamente';
+  String get componentsChatMessageBubbleYou => 'Tú';
 
   @override
-  String get failedToDeleteMealLog => 'Error al eliminar el registro de comida';
+  String get componentsChatMessageBubbleAssistant => 'Asistente';
 
   @override
-  String get chat => 'Chat';
+  String get componentsChatMessageBubbleBotTag => 'Bot';
 
   @override
-  String get menu => 'Menú';
+  String get componentsChatMessageBubbleSending => 'Enviando...';
 
   @override
-  String get userProfile => 'Perfil de Usuario';
+  String get componentsChatMessageBubbleSuggestedDishes => 'Platos sugeridos';
 
   @override
-  String get nutritionGoals => 'Objetivos Nutricionales';
+  String get componentsChatMessageBubbleRecommendation => 'Recomendación';
 
   @override
-  String get appearance => 'Apariencia';
+  String get componentsChatMessageBubbleNoRecommendationsAvailable => 'No hay recomendaciones disponibles.';
 
   @override
-  String get aiFeatures => 'IA y Características';
-
-  @override
-  String get dataManagement => 'Gestión de Datos';
-
-  @override
-  String get information => 'Información';
-
-  @override
-  String get apiKeySettings => 'Configuración de Clave API';
-
-  @override
-  String get exportData => 'Exportar Datos';
-
-  @override
-  String get importData => 'Importar Datos';
-
-  @override
-  String get selectFile => 'Seleccionar Archivo';
-
-  @override
-  String get selectFilesToImport => 'Seleccionar archivos para importar';
-
-  @override
-  String get importFromFile => 'Importar desde Archivo';
-
-  @override
-  String get importJson => 'Importar JSON';
-
-  @override
-  String get importCsv => 'Importar CSV';
-
-  @override
-  String get exportAsJson => 'Exportar como JSON';
-
-  @override
-  String get exportAsCsv => 'Exportar como CSV';
-
-  @override
-  String get selectDataToExport => 'Seleccionar datos para exportar';
-
-  @override
-  String get selectDataToImport => 'Seleccionar datos para importar';
-
-  @override
-  String get userProfiles => 'Perfiles de Usuario';
-
-  @override
-  String get mealLogs => 'Registros de Comidas';
-
-  @override
-  String get dishes => 'Platos';
-
-  @override
-  String get ingredients => 'Ingredientes';
-
-  @override
-  String get supplements => 'Suplementos';
-
-  @override
-  String get nutritionGoalsData => 'Objetivos Nutricionales';
-
-  @override
-  String get allData => 'Todos los Datos';
-
-  @override
-  String get importProgress => 'Importando datos...';
-
-  @override
-  String get exportProgress => 'Exportando datos...';
-
-  @override
-  String get importSuccessful => 'Datos importados exitosamente';
-
-  @override
-  String get exportSuccessful => 'Datos exportados exitosamente';
-
-  @override
-  String get importFailed => 'Error en la importación';
-
-  @override
-  String get exportFailed => 'Error en la exportación';
-
-  @override
-  String get noFileSelected => 'Ningún archivo seleccionado';
-
-  @override
-  String get invalidFileFormat => 'Formato de archivo inválido';
-
-  @override
-  String get fileNotFound => 'Archivo no encontrado';
-
-  @override
-  String get dataValidationFailed => 'Error en la validación de datos';
-
-  @override
-  String importedItemsCount(int count) {
-    return 'Se importaron $count elementos';
+  String componentsChatAgentStepsModalLengthLabel(int count) {
+    return 'Longitud: $count caracteres';
   }
 
   @override
-  String exportedItemsCount(int count) {
-    return 'Se exportaron $count elementos';
+  String get componentsChatAgentStepsModalTechnicalDetails => 'Detalles Técnicos';
+
+  @override
+  String get componentsChatAgentStepsModalDataChanges => 'Cambios de Datos';
+
+  @override
+  String get componentsChatAgentStepsModalBefore => 'Antes';
+
+  @override
+  String get componentsChatAgentStepsModalAfter => 'Después';
+
+  @override
+  String get componentsChatAgentStepsModalStatusSkipped => 'Omitido';
+
+  @override
+  String get componentsChatAgentStepsModalStatusErrorRecovered => 'Error recuperado';
+
+  @override
+  String get componentsChatAgentStepsModalStatusErrorHandlingFailed => 'Fallo en manejo de error';
+
+  @override
+  String get componentsChatAgentStepsModalStatusCompletedSuccessfully => 'Completado con éxito';
+
+  @override
+  String get componentsChatAgentStepsModalFailed => 'Fallido';
+
+  @override
+  String get componentsChatAgentStepsModalBadgeEmergencyOverrides => 'Sobrescrituras de emergencia';
+
+  @override
+  String get componentsChatAgentStepsModalBadgeAiValidations => 'Validaciones IA';
+
+  @override
+  String get componentsChatAgentStepsModalBadgeAutomaticFixes => 'Correcciones automáticas';
+
+  @override
+  String componentsChatAgentStepsModalTotalModifications(int count) {
+    return 'Total de modificaciones: $count';
   }
 
   @override
-  String get backupAndRestore => 'Respaldo y Restauración';
+  String get componentsChatAgentStepsModalSkipDetails => '⏭️ Omitir Detalles';
 
   @override
-  String get createBackup => 'Crear Respaldo';
+  String get componentsChatAgentStepsModalMetadata => '📊 Metadatos';
 
   @override
-  String get restoreFromBackup => 'Restaurar desde Respaldo';
+  String get componentsChatAgentStepsModalDataOutput => '📤 Salida de Datos';
 
   @override
-  String get backupCreatedSuccessfully => 'Respaldo creado exitosamente';
+  String get componentsChatAgentStepsModalErrorDetails => '❌ Detalles del Error';
 
   @override
-  String get restoreSuccessful => 'Restauración completada exitosamente';
+  String get componentsChatAgentStepsModalRawStepData => '🔍 Datos Brutos del Paso';
 
   @override
-  String get warningDataWillBeReplaced => 'Advertencia: Los datos existentes serán reemplazados';
-
-  @override
-  String get confirmRestore => '¿Está seguro de que desea restaurar? Esto reemplazará todos los datos existentes.';
-
-  @override
-  String fileSize(String size) {
-    return 'Tamaño del archivo: $size';
+  String componentsChatAgentStepsModalIdLabel(String id) {
+    return 'ID: $id';
   }
 
   @override
-  String duplicateItemsFound(int count) {
-    return 'Elementos duplicados encontrados: $count';
+  String componentsChatAgentStepsModalTimeLabel(String time) {
+    return 'Tiempo: $time';
   }
 
   @override
-  String get howToHandleDuplicates => '¿Cómo manejar duplicados?';
+  String get componentsCommonCopyToClipboard => 'Copiar al portapapeles';
 
   @override
-  String get skipDuplicates => 'Omitir Duplicados';
+  String get componentsChatBotProfileCustomizationDialogAngryGreg => 'Greg Enojado';
 
   @override
-  String get overwriteDuplicates => 'Sobrescribir Duplicados';
+  String get componentsChatBotProfileCustomizationDialogBotName => 'Nombre del Bot';
 
   @override
-  String get mergeDuplicates => 'Fusionar Duplicados';
+  String get componentsChatBotProfileCustomizationDialogCancel => 'Cancelar';
 
   @override
-  String formatNotSupported(String format) {
-    return 'Formato no soportado: $format';
-  }
+  String get componentsChatBotProfileCustomizationDialogCasualGymBro => 'Gym Bro Casual';
 
   @override
-  String get about => 'Acerca de';
+  String get componentsChatBotProfileCustomizationDialogChangeAvatar => 'Cambiar Avatar';
 
   @override
-  String get aboutAppTitle => 'Acerca de la Aplicación';
+  String get componentsChatBotProfileCustomizationDialogChooseFromGallery => 'Elegir de Galería';
 
   @override
-  String get madeBy => 'Hecho por MrLappes';
+  String get componentsChatBotProfileCustomizationDialogEditBotProfile => 'Editar Perfil del Bot';
 
   @override
-  String get website => 'plate-pal.de';
+  String get componentsChatBotProfileCustomizationDialogFitnessCoach => 'Entrenador de Fitness';
 
   @override
-  String get githubRepository => 'github.com/MrLappes/platepal-tracker';
+  String get componentsChatBotProfileCustomizationDialogNiceAndFriendly => 'Amable y Amigable';
 
   @override
-  String get appMotto => 'Hecho por deportistas para deportistas que odian las aplicaciones de pago';
+  String get componentsChatBotProfileCustomizationDialogPersonality => 'Personalidad';
 
   @override
-  String get codersMessage => 'Los programadores no deberían tener que pagar';
+  String get componentsChatBotProfileCustomizationDialogProfessionalNutritionist => 'Nutricionista Profesional';
 
   @override
-  String get whyPlatePal => '¿Por qué PlatePal?';
+  String get componentsChatBotProfileCustomizationDialogProfileSaved => 'Perfil guardado exitosamente';
 
   @override
-  String get aboutDescription => 'PlatePal Tracker fue creado para proporcionar una alternativa de código abierto y centrada en la privacidad a las costosas aplicaciones de seguimiento nutricional. Creemos en poner el control en tus manos sin suscripciones, sin anuncios y sin recopilación de datos.';
+  String get componentsChatBotProfileCustomizationDialogProfileSaveFailed => 'Error al guardar perfil';
 
   @override
-  String get dataStaysOnDevice => 'Tus datos permanecen en tu dispositivo';
+  String get componentsChatBotProfileCustomizationDialogRemoveAvatar => 'Eliminar Avatar';
 
   @override
-  String get useOwnAiKey => 'Usa tu propia clave de IA para control total';
+  String get componentsChatBotProfileCustomizationDialogRequiredField => 'Este campo es requerido';
 
   @override
-  String get freeOpenSource => '100% gratuito y de código abierto';
+  String get componentsChatBotProfileCustomizationDialogSave => 'Guardar';
 
   @override
-  String couldNotOpenUrl(String url) {
-    return 'No se pudo abrir $url';
-  }
+  String get componentsChatBotProfileCustomizationDialogTakePhoto => 'Tomar Foto';
 
   @override
-  String get linkError => 'Ocurrió un error al abrir el enlace';
+  String get componentsChatBotProfileCustomizationDialogVeryAngryBro => 'Bro Muy Enojado';
 
   @override
-  String get contributors => 'Contribuidores';
+  String get componentsChatBotPersonalityDescriptionNutritionist => 'Profesional y Basado en Evidencia';
 
   @override
-  String get editPersonalInfo => 'Edita tu información personal';
+  String get componentsChatBotPersonalityDescriptionCasualGymbro => 'Casual y Motivador';
 
   @override
-  String get setNutritionTargets => 'Establece tus objetivos nutricionales diarios';
+  String get componentsChatBotPersonalityDescriptionAngryGreg => 'Intenso y Enfocado en Suplementos';
 
   @override
-  String get configureApiKey => 'Configura tu clave API de OpenAI';
+  String get componentsChatBotPersonalityDescriptionVeryAngryBro => 'Extremadamente Intenso';
 
   @override
-  String get exportMealData => 'Exporta tus datos de comidas';
+  String get componentsChatBotPersonalityDescriptionFitnessCoach => 'Alentador y Solidario';
 
   @override
-  String get importMealDataBackup => 'Importa datos de comidas desde respaldo';
+  String get componentsChatBotPersonalityDescriptionNice => 'Amable y Servicial';
 
   @override
-  String get learnMorePlatePal => 'Aprende más sobre PlatePal';
+  String get componentsChatEditBotProfileTooltip => 'Editar perfil del bot';
 
   @override
-  String get viewContributors => 'Ver contribuidores del proyecto';
-
-  @override
-  String get theme => 'Tema';
-
-  @override
-  String get light => 'Claro';
-
-  @override
-  String get dark => 'Oscuro';
-
-  @override
-  String get system => 'Sistema';
-
-  @override
-  String get language => 'Idioma';
-
-  @override
-  String get english => 'Inglés';
-
-  @override
-  String get spanish => 'Español';
-
-  @override
-  String get german => 'Alemán';
-
-  @override
-  String get contributorSingular => 'Contribuidor';
-
-  @override
-  String get contributorPlural => 'Contribuidores';
-
-  @override
-  String get contributorsThankYou => '¡Gracias a todos los que han contribuido a hacer posible PlatePal Tracker!';
-
-  @override
-  String get wantToContribute => '¿Quieres contribuir?';
-
-  @override
-  String get openSourceMessage => 'PlatePal Tracker es de código abierto: ¡únete a nosotros en GitHub!';
-
-  @override
-  String get checkGitHub => 'Echa un vistazo a nuestro repositorio de GitHub';
-
-  @override
-  String get supportDevelopment => 'Apoyar el desarrollo';
-
-  @override
-  String get supportMessage => '¿Quieres comprarme mi creatina? Tu apoyo es muy apreciado pero no es para nada obligatorio.';
-
-  @override
-  String get buyMeCreatine => 'Cómprame creatina';
-
-  @override
-  String get openingLink => 'Abriendo página de Buy Me Creatine...';
-
-  @override
-  String get aboutOpenAiApiKey => 'Acerca de la clave API de OpenAI';
-
-  @override
-  String get apiKeyDescription => 'Para usar funciones de IA como análisis de comidas y sugerencias, necesitas proporcionar tu propia clave API de OpenAI. Esto asegura que tus datos permanezcan privados y tengas control total.';
-
-  @override
-  String get apiKeyBulletPoints => '• Obtén tu clave API desde platform.openai.com\n• Tu clave se almacena localmente en tu dispositivo\n• Los cargos por uso se aplican directamente a tu cuenta de OpenAI';
-
-  @override
-  String get apiKeyConfigured => 'Clave API configurada';
-
-  @override
-  String get aiFeaturesEnabled => 'Las funciones de IA están habilitadas';
-
-  @override
-  String get openAiApiKey => 'Clave API de OpenAI';
-
-  @override
-  String get apiKeyPlaceholder => 'sk-...';
-
-  @override
-  String get apiKeyHelperText => 'Ingresa tu clave API de OpenAI o déjalo vacío para desactivar las funciones de IA';
-
-  @override
-  String get updateApiKey => 'Actualizar clave API';
-
-  @override
-  String get saveApiKey => 'Guardar clave API';
-
-  @override
-  String get getApiKeyFromOpenAi => 'Obtener clave API de OpenAI';
-
-  @override
-  String get removeApiKey => 'Eliminar clave API';
-
-  @override
-  String get removeApiKeyConfirmation => '¿Estás seguro de que quieres eliminar tu clave API? Esto desactivará las funciones de IA.';
-
-  @override
-  String get cancel => 'Cancelar';
-
-  @override
-  String get remove => 'Eliminar';
-
-  @override
-  String get apiKeyMustStartWith => 'La clave API debe comenzar con \"sk-\"';
-
-  @override
-  String get apiKeyTooShort => 'La clave API parece ser demasiado corta';
-
-  @override
-  String get apiKeyRemovedSuccessfully => 'Clave API eliminada exitosamente';
-
-  @override
-  String get apiKeySavedSuccessfully => 'Clave API guardada exitosamente';
-
-  @override
-  String get failedToLoadApiKey => 'Error al cargar la clave API';
-
-  @override
-  String get failedToSaveApiKey => 'Error al guardar la clave API';
-
-  @override
-  String get failedToRemoveApiKey => 'Error al eliminar la clave API';
-
-  @override
-  String get visitOpenAiPlatform => 'Visita platform.openai.com para obtener tu clave API';
-
-  @override
-  String get pasteFromClipboard => 'Pegar desde portapapeles';
-
-  @override
-  String get clipboardEmpty => 'El portapapeles está vacío';
-
-  @override
-  String get pastedFromClipboard => 'Pegado desde portapapeles';
-
-  @override
-  String get failedToAccessClipboard => 'Error al acceder al portapapeles';
-
-  @override
-  String get selectModel => 'Seleccionar Modelo';
-
-  @override
-  String get testAndSaveApiKey => 'Probar y Guardar Clave API';
-
-  @override
-  String get testingApiKey => 'Probando clave API...';
-
-  @override
-  String get gpt4ModelsInfo => 'Los modelos GPT-4 proporcionan el mejor análisis pero cuestan más';
-
-  @override
-  String get gpt35ModelsInfo => 'Los modelos GPT-3.5 son más rentables para análisis básicos';
-
-  @override
-  String get loadingModels => 'Cargando modelos disponibles...';
-
-  @override
-  String get couldNotLoadModels => 'No se pudieron cargar los modelos disponibles. Usando lista de modelos predeterminada';
-
-  @override
-  String get apiKeyTestWarning => 'Su clave API será probada con una pequeña solicitud para verificar que funcione. La clave solo se almacena en su dispositivo y nunca se envía a nuestros servidores';
-
-  @override
-  String get ok => 'OK';
-
-  @override
-  String get welcomeToPlatePalTracker => 'Bienvenido a PlatePal Tracker';
-
-  @override
-  String get profileSettings => 'Configuración de Perfil';
-
-  @override
-  String get personalInformation => 'Información Personal';
-
-  @override
-  String get name => 'Nombre';
-
-  @override
-  String get email => 'Correo Electrónico';
-
-  @override
-  String get age => 'Edad';
-
-  @override
-  String get gender => 'Género';
-
-  @override
-  String get male => 'Masculino';
-
-  @override
-  String get female => 'Femenino';
-
-  @override
-  String get other => 'Otro';
-
-  @override
-  String get height => 'Altura';
-
-  @override
-  String get weight => 'Peso';
-
-  @override
-  String get targetWeight => 'Peso Objetivo';
-
-  @override
-  String get activityLevel => 'Nivel de Actividad';
-
-  @override
-  String get sedentary => 'Sedentario';
-
-  @override
-  String get lightlyActive => 'Ligeramente Activo';
-
-  @override
-  String get moderatelyActive => 'Moderadamente Activo';
-
-  @override
-  String get veryActive => 'Muy Activo';
-
-  @override
-  String get extraActive => 'Extremadamente Activo';
-
-  @override
-  String get fitnessGoals => 'Objetivos de Fitness';
-
-  @override
-  String get fitnessGoal => 'Objetivo de Fitness';
-
-  @override
-  String get loseWeight => 'Perder Peso';
-
-  @override
-  String get maintainWeight => 'Mantener Peso';
-
-  @override
-  String get gainWeight => 'Ganar Peso';
-
-  @override
-  String get buildMuscle => 'Construir Músculo';
-
-  @override
-  String get preferences => 'Preferencias';
-
-  @override
-  String get unitSystem => 'Sistema de Unidades';
-
-  @override
-  String get metric => 'Métrico (kg, cm)';
-
-  @override
-  String get imperial => 'Imperial (lb, ft)';
-
-  @override
-  String get save => 'Guardar';
-
-  @override
-  String get saveChanges => 'Guardar Cambios';
-
-  @override
-  String get discardChanges => 'Descartar Cambios';
-
-  @override
-  String get profileUpdated => 'Perfil actualizado exitosamente';
-
-  @override
-  String get profileUpdateFailed => 'Error al actualizar el perfil';
-
-  @override
-  String get unsavedChanges => 'Cambios No Guardados';
-
-  @override
-  String get unsavedChangesMessage => 'Tienes cambios no guardados. ¿Quieres guardarlos antes de salir?';
-
-  @override
-  String get deleteProfile => 'Eliminar Perfil';
-
-  @override
-  String get deleteProfileConfirmation => '¿Estás seguro de que quieres eliminar tu perfil? Esta acción no se puede deshacer.';
-
-  @override
-  String get loading => 'Cargando...';
-
-  @override
-  String get requiredField => 'Este campo es requerido';
-
-  @override
-  String get invalidEmail => 'Por favor ingresa una dirección de correo válida';
-
-  @override
-  String get ageRange => 'La edad debe estar entre 13 y 120';
-
-  @override
-  String get heightRange => 'La altura debe estar entre 100-250 cm';
-
-  @override
-  String get weightRange => 'El peso debe estar entre 30-300 kg';
-
-  @override
-  String get currentStats => 'Estadísticas Actuales';
-
-  @override
-  String get bmi => 'IMC';
-
-  @override
-  String get bmr => 'TMB';
-
-  @override
-  String get tdee => 'TDEE';
-
-  @override
-  String get years => 'años';
-
-  @override
-  String get cm => 'cm';
-
-  @override
-  String get kg => 'kg';
-
-  @override
-  String get lb => 'lb';
-
-  @override
-  String get ft => 'ft';
-
-  @override
-  String get inches => 'in';
-
-  @override
-  String get chatAssistant => 'Asistente de Chat IA';
-
-  @override
-  String get chatSubtitle => 'Obtén sugerencias personalizadas de comidas y consejos nutricionales';
-
-  @override
-  String get typeMessage => 'Escribe un mensaje...';
-
-  @override
-  String get sendMessage => 'Enviar mensaje';
-
-  @override
-  String get analyzeDish => 'Analizar Plato';
-
-  @override
-  String get scanBarcode => 'Escanear Código de Barras';
-
-  @override
-  String get searchProduct => 'Buscar Producto';
-
-  @override
-  String get quickActions => 'Acciones Rápidas';
-
-  @override
-  String get suggestMeal => 'Sugerir comida';
-
-  @override
-  String get analyzeNutrition => 'Analizar nutrición';
-
-  @override
-  String get findAlternatives => 'Encontrar alternativas';
-
-  @override
-  String get calculateMacros => 'Calcular macros';
-
-  @override
-  String get mealPlan => 'Ayuda con plan de comidas';
-
-  @override
-  String get ingredientInfo => 'Info de ingredientes';
-
-  @override
-  String get clearChat => 'Limpiar Chat';
-
-  @override
-  String get clearChatConfirmation => '¿Estás seguro de que quieres limpiar el historial del chat? Esta acción no se puede deshacer.';
-
-  @override
-  String get chatCleared => 'Historial del chat eliminado';
-
-  @override
-  String get messageFailedToSend => 'Error al enviar mensaje';
-
-  @override
-  String get retryMessage => 'Reintentar';
-
-  @override
-  String get copyMessage => 'Copiar mensaje';
-
-  @override
-  String get messageCopied => 'Mensaje copiado al portapapeles';
-
-  @override
-  String get aiThinking => 'La IA está pensando...';
-
-  @override
-  String get noApiKeyConfigured => 'No hay clave API configurada';
-
-  @override
-  String get configureApiKeyToUseChat => 'Por favor configura tu clave API de OpenAI en ajustes para usar el asistente de chat IA.';
-
-  @override
-  String get configureApiKeyButton => 'Configurar Clave API';
-
-  @override
-  String get reloadApiKeyButton => 'Recargar Clave API';
-
-  @override
-  String get welcomeToChat => '¡Bienvenido a tu asistente nutricional IA! Pregúntame cualquier cosa sobre comidas, nutrición o tus objetivos de fitness.';
-
-  @override
-  String get attachImage => 'Adjuntar imagen';
-
-  @override
-  String get imageAttached => 'Imagen adjuntada';
-
-  @override
-  String get removeImage => 'Quitar imagen';
-
-  @override
-  String get takePhoto => 'Tomar Foto';
-
-  @override
-  String get chooseFromGallery => 'Elegir de Galería';
-
-  @override
-  String get imageSourceSelection => 'Seleccionar Fuente de Imagen';
-
-  @override
-  String get nutritionAnalysis => 'Análisis Nutricional';
-
-  @override
-  String get addToMeals => 'Agregar a Comidas';
-
-  @override
-  String get details => 'Detalles';
-
-  @override
-  String get tapToViewAgentSteps => 'Toca para ver los pasos del agente';
-
-  @override
-  String addedToMealsSuccess(String dishName) {
-    return 'Se agregó $dishName a las comidas';
-  }
-
-  @override
-  String get close => 'Cerrar';
-
-  @override
-  String get servingSize => 'Tamaño de Porción';
-
-  @override
-  String get perServing => 'por porción';
-
-  @override
-  String get dishName => 'Nombre del Plato';
-
-  @override
-  String get cookingInstructions => 'Instrucciones de Cocina';
-
-  @override
-  String get mealType => 'Tipo de Comida';
-
-  @override
-  String get addedToMeals => 'Agregado a comidas exitosamente';
-
-  @override
-  String get failedToAddMeal => 'Error al agregar comida';
-
-  @override
-  String get testChatWelcome => '¡Este es el modo de prueba! Puedo ayudarte a explorar las características de PlatePal. Intenta preguntarme sobre nutrición, planificación de comidas o recomendaciones de alimentos.';
-
-  @override
-  String get testChatResponse => '¡Gracias por probar PlatePal! Esta es una respuesta de prueba para mostrarte cómo funciona nuestro asistente IA. Para obtener consejos nutricionales reales y sugerencias de comidas, por favor configura tu clave API de OpenAI en ajustes.';
-
-  @override
-  String get chatWelcomeTitle => 'Bienvenido a PlatePal';
-
-  @override
-  String get chatWelcomeSubtitle => 'Tu asistente de nutrición IA está aquí para ayudar';
-
-  @override
-  String get getStartedToday => 'Comienza hoy';
-
-  @override
-  String get whatCanIHelpWith => '¿En qué puedo ayudarte?';
-
-  @override
-  String get featureComingSoon => '¡Esta función estará disponible pronto!';
-
-  @override
-  String get statistics => 'Estadísticas';
-
-  @override
-  String get viewStatistics => 'Ver Estadísticas';
-
-  @override
-  String get weightHistory => 'Historial de Peso';
-
-  @override
-  String get bmiHistory => 'Historial de IMC';
-
-  @override
-  String get bodyFatHistory => 'Historial de Grasa Corporal';
-
-  @override
-  String get calorieIntakeHistory => 'Ingesta de Calorías vs Mantenimiento';
-
-  @override
-  String get weightStatsTip => 'El gráfico muestra el peso promedio semanal para tener en cuenta las fluctuaciones diarias debido al peso del agua.';
-
-  @override
-  String get bmiStatsTip => 'El Índice de Masa Corporal (IMC) se calcula a partir de tus medidas de peso y altura.';
-
-  @override
-  String get bodyFatStatsTip => 'El porcentaje de grasa corporal ayuda a rastrear tu composición corporal más allá del peso.';
-
-  @override
-  String get calorieStatsTip => 'Compara tu ingesta diaria de calorías con tus calorías de mantenimiento. Verde indica mantenimiento, azul es fase de corte, naranja es fase de volumen.';
-
-  @override
-  String get notEnoughDataTitle => 'No Hay Suficientes Datos';
-
-  @override
-  String get statisticsEmptyDescription => 'Necesitamos al menos una semana de datos para mostrar estadísticas significativas. Sigue rastreando tus métricas para ver tendencias con el tiempo.';
-
-  @override
-  String get updateMetricsNow => 'Actualizar Métricas Ahora';
-
-  @override
-  String get timeRange => 'Rango de Tiempo';
-
-  @override
-  String get week => 'Semana';
-
-  @override
-  String get month => 'Mes';
-
-  @override
-  String get threeMonths => '3 Meses';
-
-  @override
-  String get sixMonths => '6 Meses';
-
-  @override
-  String get year => 'Año';
-
-  @override
-  String get allTime => 'Todo el Tiempo';
-
-  @override
-  String get bulking => 'Volumen';
-
-  @override
-  String get cutting => 'Corte';
-
-  @override
-  String get maintenance => 'Mantenimiento';
-
-  @override
-  String get extremeLowCalorieWarning => 'Advertencia de Calorías Extremadamente Bajas';
-
-  @override
-  String get extremeHighCalorieWarning => 'Advertencia de Calorías Extremadamente Altas';
-
-  @override
-  String get caloriesTooLowMessage => 'Tu ingesta de calorías está significativamente por debajo de las recomendaciones. Esto puede afectar tu salud y metabolismo.';
-
-  @override
-  String get caloriesTooHighMessage => 'Tu ingesta de calorías está significativamente por encima de las recomendaciones. Considera ajustar tus porciones.';
-
-  @override
-  String get weeklyDeficit => 'Déficit Semanal';
-
-  @override
-  String get weeklySurplus => 'Superávit Semanal';
-
-  @override
-  String get phaseAnalysis => 'Análisis de Fase';
-
-  @override
-  String get weeklyAverage => 'Promedio Semanal';
-
-  @override
-  String get lastWeek => 'Última Semana';
-
-  @override
-  String get lastMonth => 'Último Mes';
-
-  @override
-  String get lastThreeMonths => 'Últimos 3 Meses';
-
-  @override
-  String get lastSixMonths => 'Últimos 6 Meses';
-
-  @override
-  String get lastYear => 'Último Año';
-
-  @override
-  String get generateTestData => 'Generar Datos de Prueba';
-
-  @override
-  String get testDataDescription => 'Para fines de demostración, puedes generar datos de muestra para ver cómo se ven las estadísticas.';
-
-  @override
-  String get errorLoadingData => 'Error al cargar datos';
-
-  @override
-  String get tryAgain => 'Intentar de Nuevo';
-
-  @override
-  String get refresh => 'Actualizar';
-
-  @override
-  String get realData => 'Datos Reales';
-
-  @override
-  String get noWeightDataAvailable => 'No hay datos de peso disponibles';
-
-  @override
-  String get noBmiDataAvailable => 'No hay datos de IMC disponibles';
-
-  @override
-  String get cannotCalculateBmiFromData => 'No se puede calcular el IMC con los datos disponibles';
-
-  @override
-  String get noBodyFatDataAvailable => 'No hay datos de grasa corporal disponibles';
-
-  @override
-  String get noCalorieDataAvailable => 'No hay datos de calorías disponibles';
-
-  @override
-  String get bmiUnderweight => 'Bajo peso';
-
-  @override
-  String get bmiNormal => 'Normal';
-
-  @override
-  String get bmiOverweight => 'Sobrepeso';
-
-  @override
-  String get bmiObese => 'Obeso';
-
-  @override
-  String get healthDataIntegration => 'Integración de Datos de Salud';
-
-  @override
-  String healthDataCoverage(String coverage, String healthDataDays, String totalDays) {
-    return 'Cobertura de datos de gasto calórico: $coverage% ($healthDataDays/$totalDays días)';
-  }
-
-  @override
-  String get healthDataActive => 'Usando los datos de tu aplicación de salud para proporcionar un análisis más preciso de déficit/superávit.';
-
-  @override
-  String get healthDataInactive => 'Activa la sincronización de datos de salud en Configuración de Perfil para un análisis más preciso.';
-
-  @override
-  String get calorieBalanceTitle => 'Balance Calórico (Ingesta vs Gasto)';
-
-  @override
-  String get calorieBalanceTip => 'Rastrea tu balance calórico real usando datos de salud. Verde = mantenimiento, Azul = déficit, Naranja = superávit.';
-
-  @override
-  String get estimatedBalance => 'Balance Estimado';
-
-  @override
-  String get actualBalance => 'Balance Real';
-
-  @override
-  String get vsExpenditure => 'vs gasto';
-
-  @override
-  String healthDataAlert(String days) {
-    return 'Alerta de Datos de Salud: $days día(s) con déficits calóricos muy grandes (>1000 cal) basados en el gasto real.';
-  }
-
-  @override
-  String inconsistentDeficitWarning(String variance) {
-    return 'Advertencia: Tu déficit calórico varía significativamente día a día (varianza: $variance cal). Considera una ingesta más consistente.';
-  }
-
-  @override
-  String veryLowCalorieWarning(String days) {
-    return 'Advertencia: $days día(s) con ingesta calórica extremadamente baja (<1000 cal). Esto puede ser poco saludable.';
-  }
-
-  @override
-  String veryHighCalorieNotice(String days) {
-    return 'Aviso: $days día(s) con ingesta calórica muy alta (>1000 cal por encima del mantenimiento).';
-  }
-
-  @override
-  String get extremeDeficitWarning => 'Advertencia: Los déficits calóricos extremos frecuentes pueden ralentizar el metabolismo y causar pérdida muscular.';
-
-  @override
-  String get maintenanceLabel => 'Mantenimiento';
-
-  @override
-  String get bodyFat => 'Grasa Corporal';
-
-  @override
-  String get resetApp => 'Restablecer App';
-
-  @override
-  String get resetAppTitle => 'Restablecer Datos de la Aplicación';
-
-  @override
-  String get resetAppDescription => 'Esto eliminará permanentemente TODOS tus datos incluyendo:\n\n• Tu información de perfil\n• Todos los registros de comidas y datos nutricionales\n• Todas las preferencias y configuraciones\n• Toda la información almacenada\n\nEsta acción no se puede deshacer. ¿Estás seguro de que quieres continuar?';
-
-  @override
-  String get resetAppConfirm => 'Sí, Eliminar Todo';
-
-  @override
-  String get resetAppCancel => 'Cancelar';
-
-  @override
-  String get resetAppSuccess => 'Los datos de la aplicación se han restablecido exitosamente';
-
-  @override
-  String get resetAppError => 'Error al restablecer los datos de la aplicación';
-
-  @override
-  String get dangerZone => 'Zona de Peligro';
-
-  @override
-  String get chatAgentSettingsTitle => 'Configuración del Agente de Chat';
-
-  @override
-  String get chatAgentEnableTitle => 'Activar Modo Agente';
-
-  @override
-  String get chatAgentEnableSubtitle => 'Usa la canalización de agente de varios pasos para el chat';
-
-  @override
-  String get chatAgentDeepSearchTitle => 'Activar Búsqueda Profunda';
-
-  @override
-  String get chatAgentDeepSearchSubtitle => 'Permite que el agente use búsqueda profunda para respuestas más precisas';
-
-  @override
-  String get chatAgentInfoTitle => '¿Qué es el Modo Agente?';
-
-  @override
-  String get chatAgentInfoDescription => 'El modo agente activa la avanzada canalización de razonamiento de varios pasos de PlatePal para el chat. Esto permite que el asistente analice tu consulta, recopile contexto y proporcione respuestas más precisas y explicables. La Búsqueda Profunda permite al agente usar más datos para obtener mejores resultados.';
-
-  @override
-  String get chatSettingsSaved => 'Configuración de chat guardada correctamente';
-
-  @override
-  String get yesterday => 'Ayer';
-
-  @override
-  String get basicInformation => 'Información Básica';
-
-  @override
-  String get pleaseEnterDishName => 'Por favor ingresa un nombre para el plato';
-
-  @override
-  String get imageUrl => 'URL de Imagen';
-
-  @override
-  String get optional => 'Opcional';
-
-  @override
-  String get nutritionInfo => 'Información Nutricional';
-
-  @override
-  String get required => 'Requerido';
-
-  @override
-  String get invalidNumber => 'Número inválido';
-
-  @override
-  String get addIngredient => 'Agregar Ingrediente';
-
-  @override
-  String get noIngredientsAdded => 'No se han agregado ingredientes aún';
-
-  @override
-  String get ingredientsAdded => 'Ingredientes agregados';
-
-  @override
-  String get options => 'Opciones';
-
-  @override
-  String get markAsFavorite => 'Marcar como plato favorito';
-
-  @override
-  String get editDish => 'Editar Plato';
-
-  @override
-  String get dishUpdatedSuccessfully => 'Plato actualizado exitosamente';
-
-  @override
-  String get dishCreatedSuccessfully => 'Plato creado exitosamente';
-
-  @override
-  String get errorSavingDish => 'Error al guardar el plato';
-
-  @override
-  String get ingredientName => 'Nombre del Ingrediente';
-
-  @override
-  String get pleaseEnterIngredientName => 'Por favor ingresa un nombre para el ingrediente';
-
-  @override
-  String get amount => 'Cantidad';
-
-  @override
-  String get unit => 'Unidad';
-
-  @override
-  String get add => 'Agregar';
-
-  @override
-  String get edit => 'Editar';
-
-  @override
-  String get retry => 'Reintentar';
-
-  @override
-  String get errorLoggingDish => 'Error al registrar el plato';
-
-  @override
-  String get allCategories => 'Todas las Categorías';
-
-  @override
-  String get searchDishes => 'Buscar platos...';
-
-  @override
-  String get createDish => 'Crear Plato';
-
-  @override
-  String get noDishesCreated => 'No se han creado platos aún';
-
-  @override
-  String get createFirstDish => 'Crea tu primer plato para comenzar';
-
-  @override
-  String get errorLoadingDishes => 'Error al cargar los platos';
-
-  @override
-  String get noDishesFound => 'No se encontraron platos';
-
-  @override
-  String get tryAdjustingSearch => 'Intenta ajustar tus términos de búsqueda';
-
-  @override
-  String get deleteDish => 'Eliminar Plato';
-
-  @override
-  String deleteDishConfirmation(String dishName) {
-    return '¿Estás seguro de que quieres eliminar \"$dishName\"?';
-  }
-
-  @override
-  String get dishDeletedSuccessfully => 'Plato eliminado exitosamente';
-
-  @override
-  String get failedToDeleteDish => 'Error al eliminar el plato';
-
-  @override
-  String get addedToFavorites => 'Agregado a favoritos';
-
-  @override
-  String get removedFromFavorites => 'Removido de favoritos';
-
-  @override
-  String get errorUpdatingDish => 'Error al actualizar el plato';
-
-  @override
-  String get addToFavorites => 'Agregar a Favoritos';
-
-  @override
-  String get removeFromFavorites => 'Remover de Favoritos';
-
-  @override
-  String get fiber => 'Fibra';
-
-  @override
-  String get favorite => 'Favoritos';
-
-  @override
-  String get createNewDish => 'Crear Nuevo Plato';
-
-  @override
-  String get errorCreatingDish => 'Error al crear el plato';
-
-  @override
-  String get pleaseEnterDescription => 'Por favor ingresa una descripción';
-
-  @override
-  String get pleaseEnterValidUrl => 'Por favor ingresa una URL válida';
-
-  @override
-  String get pleaseEnterIngredient => 'Por favor ingresa un ingrediente';
-
-  @override
-  String get errorDeletingDish => 'Error al eliminar el plato';
-
-  @override
-  String get confirmDeleteDish => '¿Estás seguro de que quieres eliminar este plato?';
-
-  @override
-  String get description => 'Descripción';
-
-  @override
-  String get category => 'Categoría';
-
-  @override
-  String get caloriesPer100g => 'Calorías por 100g';
-
-  @override
-  String get proteinPer100g => 'Proteína por 100g';
-
-  @override
-  String get carbsPer100g => 'Carbohidratos por 100g';
-
-  @override
-  String get fatPer100g => 'Grasa por 100g';
-
-  @override
-  String get fiberPer100g => 'Fibra por 100g';
-
-  @override
-  String get invalidImageUrl => 'URL de imagen inválida';
-
-  @override
-  String get enterIngredientName => 'Ingresa el nombre del ingrediente';
-
-  @override
-  String get toggleFavorite => 'Alternar favorito';
-
-  @override
-  String get basicInfo => 'Información Básica';
-
-  @override
-  String get dishNamePlaceholder => 'Ingrese el nombre del plato';
-
-  @override
-  String get descriptionPlaceholder => 'Ingrese la descripción (opcional)';
-
-  @override
-  String get pickFromGallery => 'Elegir de la Galería';
-
-  @override
-  String get selectImageSource => 'Seleccionar Fuente de Imagen';
-
-  @override
-  String get camera => 'Cámara';
-
-  @override
-  String get gallery => 'Galería';
-
-  @override
-  String get nutritionalInformation => 'Información Nutricional';
-
-  @override
-  String get per100g => 'por 100g';
-
-  @override
-  String get recalculate => 'Recalcular';
-
-  @override
-  String get recalculateNutrition => 'Recalcular Nutrición';
-
-  @override
-  String get nutritionRecalculated => 'Nutrición recalculada desde ingredientes';
-
-  @override
-  String get addManually => 'Agregar Manualmente';
-
-  @override
-  String get saveDish => 'Guardar Plato';
-
-  @override
-  String get saving => 'Guardando...';
-
-  @override
-  String get mg => 'mg';
-
-  @override
-  String get mcg => 'mcg';
-
-  @override
-  String get iu => 'UI';
-
-  @override
-  String get g => 'g';
-
-  @override
-  String get ml => 'ml';
-
-  @override
-  String get cup => 'taza';
-
-  @override
-  String get tbsp => 'cda';
-
-  @override
-  String get tsp => 'cdta';
-
-  @override
-  String get oz => 'oz';
-
-  @override
-  String get piece => 'pieza';
-
-  @override
-  String get slice => 'rebanada';
-
-  @override
-  String get tablespoon => 'cucharada';
-
-  @override
-  String get teaspoon => 'cucharadita';
-
-  @override
-  String get ounce => 'onza';
-
-  @override
-  String get pound => 'libra';
-
-  @override
-  String get gram => 'gramo';
-
-  @override
-  String get kilogram => 'kilogramo';
-
-  @override
-  String get milliliter => 'mililitro';
-
-  @override
-  String get liter => 'litro';
-
-  @override
-  String get editIngredient => 'Editar Ingrediente';
-
-  @override
-  String get deleteIngredient => 'Eliminar Ingrediente';
-
-  @override
-  String get confirmDeleteIngredient => '¿Está seguro de que desea eliminar este ingrediente?';
-
-  @override
-  String get ingredientDeleted => 'Ingrediente eliminado';
-
-  @override
-  String get ingredientAdded => 'Ingrediente agregado';
-
-  @override
-  String get ingredientUpdated => 'Ingrediente actualizado';
-
-  @override
-  String get errorAddingIngredient => 'Error al agregar ingrediente';
-
-  @override
-  String get errorUpdatingIngredient => 'Error al actualizar ingrediente';
-
-  @override
-  String get errorDeletingIngredient => 'Error al eliminar ingrediente';
-
-  @override
-  String get noNutritionData => 'No hay datos nutricionales disponibles';
-
-  @override
-  String get ingredientNamePlaceholder => 'Ingrese nombre del ingrediente';
-
-  @override
-  String get quantity => 'Cantidad';
-
-  @override
-  String get quantityPlaceholder => 'Ingrese cantidad';
-
-  @override
-  String get pleaseEnterQuantity => 'Por favor ingrese una cantidad';
-
-  @override
-  String get pleaseEnterValidNumber => 'Por favor ingrese un número válido';
-
-  @override
-  String get unitPlaceholder => 'ej. g, taza, pieza';
-
-  @override
-  String get pleaseEnterUnit => 'Por favor ingrese una unidad';
-
-  @override
-  String get nutritionInformation => 'Información Nutricional';
-
-  @override
-  String get nutritionPer100g => 'Nutrición por 100g';
-
-  @override
-  String get caloriesPlaceholder => 'Ingrese calorías';
-
-  @override
-  String get kcal => 'kcal';
-
-  @override
-  String get grams => 'g';
-
-  @override
-  String get logDish => 'Registrar Plato';
-
-  @override
-  String get logDishTitle => 'Registrar Plato';
-
-  @override
-  String get selectDate => 'Seleccionar Fecha';
-
-  @override
-  String get selectMealType => 'Seleccionar Tipo de Comida';
-
-  @override
-  String get portionSize => 'Tamaño de Porción';
-
-  @override
-  String get notes => 'Notas';
-
-  @override
-  String get addNotes => 'Agregar notas (opcional)';
-
-  @override
-  String get calculatedNutrition => 'Nutrición Calculada';
-
-  @override
-  String get dishLoggedSuccessfully => '¡Plato registrado exitosamente!';
-
-  @override
-  String get select => 'Seleccionar';
-
-  @override
-  String errorOpeningDishScreen(Object error) {
-    return 'Error al abrir la pantalla del plato: $error';
-  }
-
-  @override
-  String errorPickingImage(Object error) {
+  String componentsChatChatInputErrorPickingImage(Object error) {
     return 'Error al seleccionar la imagen: $error';
   }
 
   @override
-  String get agentProcessingSteps => 'Pasos de procesamiento del agente';
-
-  @override
-  String get copyAll => 'Copiar todo';
-
-  @override
-  String get viewFullData => 'Ver datos completos';
-
-  @override
-  String get viewFullPrompt => 'Ver prompt completo';
-
-  @override
-  String get copiedToClipboard => 'Copiado al portapapeles';
-
-  @override
-  String get barcodeScanningComingSoon => '¡Escaneo de código de barras próximamente!';
-
-  @override
-  String get productSearchComingSoon => '¡Búsqueda de producto próximamente!';
-
-  @override
-  String get configureApiKeyForAiTips => 'Configura tu clave de OpenAI en ajustes para usar consejos de IA';
-
-  @override
-  String get failedToGetAiTip => 'Error al obtener el consejo de IA. Inténtalo de nuevo.';
-
-  @override
-  String get aiNutritionTip => 'Consejo de Nutrición IA';
-
-  @override
-  String get available => 'Disponible';
-
-  @override
-  String get notAvailable => 'No disponible';
-
-  @override
-  String get chatAndAiSettings => 'Configuración de Chat e IA';
-
-  @override
-  String get chatAgentOptions => 'Opciones de Agente de Chat';
-
-  @override
-  String get enableAgentModeDeepSearch => 'Habilitar modo agente, búsqueda profunda y más';
-
-  @override
-  String get chatProfiles => 'Perfiles de Chat';
-
-  @override
-  String get userChatProfile => 'Tu Perfil';
-
-  @override
-  String get botChatProfile => 'Perfil del Bot';
-
-  @override
-  String get customizeUserProfile => 'Personaliza tu perfil de chat';
-
-  @override
-  String get customizeBotProfile => 'Personaliza la personalidad y apariencia del bot';
-
-  @override
-  String get username => 'Nombre de usuario';
-
-  @override
-  String get botName => 'Nombre del Bot';
-
-  @override
-  String get avatar => 'Avatar';
-
-  @override
-  String get changeAvatar => 'Cambiar Avatar';
-
-  @override
-  String get removeAvatar => 'Eliminar Avatar';
-
-  @override
-  String get personality => 'Personalidad';
-
-  @override
-  String get selectPersonality => 'Seleccionar Personalidad';
-
-  @override
-  String get professionalNutritionist => 'Nutricionista Profesional';
-
-  @override
-  String get casualGymBro => 'Gym Bro Casual';
-
-  @override
-  String get angryGreg => 'Greg Enojado';
-
-  @override
-  String get veryAngryBro => 'Bro Muy Enojado';
-
-  @override
-  String get fitnessCoach => 'Entrenador de Fitness';
-
-  @override
-  String get niceAndFriendly => 'Amable y Amigable';
-
-  @override
-  String get selectImage => 'Seleccionar Imagen';
-
-  @override
-  String get profileSaved => 'Perfil guardado exitosamente';
-
-  @override
-  String get profileSaveFailed => 'Error al guardar perfil';
-
-  @override
-  String get editUserProfile => 'Editar Perfil de Usuario';
-
-  @override
-  String get editBotProfile => 'Editar Perfil del Bot';
-
-  @override
-  String get connectToHealth => 'Conectar con Salud';
-
-  @override
-  String get healthDataSync => 'Sincronización de Datos de Salud';
-
-  @override
-  String get healthConnected => 'Datos de salud conectados';
-
-  @override
-  String get healthDisconnected => 'Datos de salud no conectados';
-
-  @override
-  String get syncHealthData => 'Sincronizar Datos de Salud';
-
-  @override
-  String get healthPermissionRequired => 'Se requieren permisos de salud para sincronizar tus datos';
-
-  @override
-  String get healthSyncSuccess => 'Datos de salud sincronizados exitosamente';
-
-  @override
-  String get healthSyncFailed => 'Error al sincronizar datos de salud';
-
-  @override
-  String lastSynced(String date) {
-    return 'Última sincronización: $date';
+  String componentsChatMessageBubbleModificationEmergency(int count) {
+    return '$count correcciones de emergencia aplicadas';
   }
 
   @override
-  String get healthPermissionDenied => 'Permiso de Salud Denegado';
+  String componentsChatMessageBubbleModificationAi(int count) {
+    return '$count mejoras de IA aplicadas';
+  }
 
   @override
-  String get healthPermissionDeniedMessage => 'Para sincronizar tus datos de salud, PlatePal necesita acceso a tu información de salud. Puedes otorgar permisos en la configuración de tu teléfono.';
+  String componentsChatMessageBubbleModificationAutomatic(int count) {
+    return '$count mejoras automáticas aplicadas';
+  }
 
   @override
-  String get openSettings => 'Abrir Configuración';
+  String get componentsChatChatInputImageAttached => 'Imagen adjuntada';
 
   @override
-  String get healthNotAvailable => 'Datos de Salud No Disponibles';
+  String get componentsChatChatInputIngredientsAdded => 'Ingredientes agregados';
 
   @override
-  String get healthNotAvailableMessage => 'Los datos de salud no están disponibles en este dispositivo. Asegúrate de tener Health Connect (Android) o la app Salud (iOS) instalada y configurada.';
+  String get componentsChatChatInputScanBarcode => 'Escanear Código de Barras';
 
   @override
-  String get scanBarcodeToAddProduct => 'Escanea el código de barras para agregar producto';
+  String get componentsChatChatInputSearchProduct => 'Buscar Producto';
 
   @override
-  String get searchForProducts => 'Buscar productos';
+  String get componentsChatChatInputSendMessage => 'Enviar mensaje';
 
   @override
-  String get productNotFound => 'Producto no encontrado';
+  String get componentsChatChatInputTypeMessage => 'Escribe un mensaje...';
 
   @override
-  String get productAddedSuccessfully => 'Producto agregado exitosamente';
+  String get componentsChatChatWelcomeAnalyzeNutrition => 'Analizar nutrición';
 
   @override
-  String errorScanningBarcode(String error) {
+  String get componentsChatChatWelcomeCalculateMacros => 'Calcular macros';
+
+  @override
+  String get componentsChatChatWelcomeChatWelcomeSubtitle => 'Tu asistente de nutrición IA está aquí para ayudar';
+
+  @override
+  String get componentsChatChatWelcomeChatWelcomeTitle => 'Bienvenido a PlatePal';
+
+  @override
+  String get componentsChatChatWelcomeFindAlternatives => 'Encontrar alternativas';
+
+  @override
+  String get componentsChatChatWelcomeGetStartedToday => 'Comienza hoy';
+
+  @override
+  String get componentsChatChatWelcomeIngredientInfo => 'Info de ingredientes';
+
+  @override
+  String get componentsChatChatWelcomeMealPlan => 'Ayuda con plan de comidas';
+
+  @override
+  String get componentsChatChatWelcomeSuggestMeal => 'Sugerir comida';
+
+  @override
+  String get componentsChatChatWelcomeSuggestMealSubtitle => 'Obtén recomendaciones personalizadas de comidas';
+
+  @override
+  String get componentsChatChatWelcomeSuggestMealMessage => 'Sugiéreme una comida saludable basada en mis objetivos de fitness';
+
+  @override
+  String get componentsChatChatWelcomeAnalyzeNutritionSubtitle => 'Analiza los valores nutricionales de tus comidas';
+
+  @override
+  String get componentsChatChatWelcomeAnalyzeNutritionMessage => 'Ayúdame a analizar los valores nutricionales de mi comida';
+
+  @override
+  String get componentsChatChatWelcomeFindAlternativesSubtitle => 'Descubre alternativas saludables de alimentos';
+
+  @override
+  String get componentsChatChatWelcomeFindAlternativesMessage => 'Encuentra alternativas saludables para mi comida actual';
+
+  @override
+  String get componentsChatChatWelcomeCalculateMacrosSubtitle => 'Calcula los macros para tus comidas';
+
+  @override
+  String get componentsChatChatWelcomeCalculateMacrosMessage => 'Ayúdame a calcular los macros para mis comidas';
+
+  @override
+  String get componentsChatChatWelcomeMealPlanSubtitle => 'Crea planes de comidas semanales';
+
+  @override
+  String get componentsChatChatWelcomeMealPlanMessage => 'Ayúdame a crear un plan de comidas semanal';
+
+  @override
+  String get componentsChatChatWelcomeIngredientInfoSubtitle => 'Aprende más sobre los ingredientes y sus beneficios';
+
+  @override
+  String get componentsChatChatWelcomeIngredientInfoMessage => 'Háblame sobre los beneficios nutricionales de los ingredientes';
+
+  @override
+  String get componentsChatChatWelcomeWhatCanIHelpWith => '¿En qué puedo ayudarte?';
+
+  @override
+  String get componentsChatDishSuggestionCardDetails => 'Detalles';
+
+  @override
+  String componentsChatDishSuggestionCardErrorOpeningDishScreen(Object error) {
+    return 'Error al abrir la pantalla del plato: $error';
+  }
+
+  @override
+  String get componentsChatDishSuggestionCardLogDish => 'Registrar Plato';
+
+  @override
+  String get componentsChatMessageBubbleClose => 'Cerrar';
+
+  @override
+  String get componentsChatMessageBubbleIngredients => 'Ingredientes';
+
+  @override
+  String get componentsChatMessageBubbleMessageCopied => 'Mensaje copiado al portapapeles';
+
+  @override
+  String get componentsChatMessageBubbleRetryMessage => 'Reintentar';
+
+  @override
+  String get componentsChatMessageBubbleSelect => 'Seleccionar';
+
+  @override
+  String get componentsChatMessageBubbleTapToViewAgentSteps => 'Toca para ver los pasos del agente';
+
+  @override
+  String get componentsChatMessageBubbleYesterday => 'Ayer';
+
+  @override
+  String get componentsChatNutritionAnalysisCardAddToMeals => 'Agregar a Comidas';
+
+  @override
+  String get componentsChatNutritionAnalysisCardCookingInstructions => 'Instrucciones de Cocina';
+
+  @override
+  String get componentsChatNutritionAnalysisCardDishName => 'Nombre del Plato';
+
+  @override
+  String get componentsChatNutritionAnalysisCardMealType => 'Tipo de Comida';
+
+  @override
+  String get componentsChatNutritionAnalysisCardNutritionAnalysis => 'Análisis Nutricional';
+
+  @override
+  String get componentsChatNutritionAnalysisCardServingSize => 'Tamaño de Porción';
+
+  @override
+  String get componentsChatQuickActionsQuickActions => 'Acciones Rápidas';
+
+  @override
+  String get componentsChatUserProfileCustomizationDialogEditUserProfile => 'Editar Perfil de Usuario';
+
+  @override
+  String get componentsChatUserProfileCustomizationDialogUsername => 'Nombre de usuario';
+
+  @override
+  String get componentsDishesDishCardDelete => 'Eliminar';
+
+  @override
+  String get componentsDishesDishCardEdit => 'Editar';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalAddIngredient => 'Agregar Ingrediente';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalEditIngredient => 'Editar Ingrediente';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalGrams => 'g';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalIngredientName => 'Nombre del Ingrediente';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder => 'Ingrese nombre del ingrediente';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalKcal => 'kcal';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionInformation => 'Información Nutricional';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPer100g => 'Nutrición por 100g';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName => 'Por favor ingresa un nombre para el ingrediente';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalPleaseEnterQuantity => 'Por favor ingrese una cantidad';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber => 'Por favor ingrese un número válido';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalQuantity => 'Cantidad';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalQuantityPlaceholder => 'Ingrese cantidad';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardNutritionalInformation => 'Información Nutricional';
+
+  @override
+  String get componentsModalsDishLogModalAddNotes => 'Agregar notas (opcional)';
+
+  @override
+  String get componentsModalsDishLogModalBreakfast => 'Desayuno';
+
+  @override
+  String get componentsModalsDishLogModalCalculatedNutrition => 'Nutrición Calculada';
+
+  @override
+  String get componentsModalsDishLogModalDinner => 'Cena';
+
+  @override
+  String get componentsModalsDishLogModalDishLoggedSuccessfully => '¡Plato registrado exitosamente!';
+
+  @override
+  String get componentsModalsDishLogModalErrorLoggingDish => 'Error al registrar el plato';
+
+  @override
+  String get componentsModalsDishLogModalLogDishTitle => 'Registrar Plato';
+
+  @override
+  String get componentsModalsDishLogModalLunch => 'Almuerzo';
+
+  @override
+  String get componentsModalsDishLogModalNotes => 'Notas';
+
+  @override
+  String get componentsModalsDishLogModalPortionSize => 'Tamaño de Porción';
+
+  @override
+  String get componentsModalsDishLogModalSelectDate => 'Seleccionar Fecha';
+
+  @override
+  String get componentsModalsDishLogModalSelectMealType => 'Seleccionar Tipo de Comida';
+
+  @override
+  String get componentsModalsDishLogModalSnack => 'Merienda';
+
+  @override
+  String get componentsScannerBarcodeScannerBarcodeScanner => 'Escáner de código de barras';
+
+  @override
+  String componentsScannerBarcodeScannerErrorScanningBarcode(String error) {
     return 'Error al escanear el código de barras';
   }
 
   @override
-  String errorSearchingProduct(String error) {
+  String get componentsScannerBarcodeScannerOpenSettings => 'Abrir Configuración';
+
+  @override
+  String get componentsScannerBarcodeScannerProductNotFound => 'Producto no encontrado';
+
+  @override
+  String get componentsScannerBarcodeScannerScanBarcodeToAddProduct => 'Escanea el código de barras para agregar producto';
+
+  @override
+  String get componentsScannerBarcodeScannerScanningBarcode => 'Escaneando código de barras...';
+
+  @override
+  String componentsScannerProductSearchErrorSearchingProduct(String error) {
     return 'Error al buscar el producto';
   }
 
   @override
-  String get barcodeScanner => 'Escáner de código de barras';
+  String get componentsScannerProductSearchLoadMore => 'Cargar más';
 
   @override
-  String get productSearch => 'Búsqueda de producto';
+  String get componentsScannerProductSearchLocalDishes => 'Platos locales';
 
   @override
-  String get tapToScan => 'Toca para escanear';
+  String get componentsScannerProductSearchLocalIngredients => 'Ingredientes locales';
 
   @override
-  String get scanningBarcode => 'Escaneando código de barras...';
+  String get componentsScannerProductSearchNoProductsFound => 'No se encontraron productos';
 
   @override
-  String get searchProducts => 'Buscar productos';
+  String get componentsScannerProductSearchProductSearch => 'Búsqueda de producto';
 
   @override
-  String get noProductsFound => 'No se encontraron productos';
+  String get componentsScannerProductSearchSearchProducts => 'Buscar productos';
 
   @override
-  String get addToIngredients => 'Agregar a ingredientes';
+  String get componentsSharedErrorDisplayRetry => 'Reintentar';
 
   @override
-  String get productDetails => 'Detalles del producto';
+  String get componentsUiCustomTabBarCalendar => 'Calendario';
 
   @override
-  String get brand => 'Marca';
+  String get componentsUiCustomTabBarChat => 'Chat';
 
   @override
-  String get cameraPermissionRequired => 'Se requiere permiso de cámara';
+  String get componentsUiCustomTabBarMeals => 'Comidas';
 
   @override
-  String get grantCameraPermission => 'Otorgar permiso de cámara';
+  String get componentsUiCustomTabBarMenu => 'Menú';
 
   @override
-  String get barcodeNotFound => 'Código de barras no encontrado';
+  String get providersChatProviderAiThinking => 'La IA está pensando...';
 
   @override
-  String get enterProductName => 'Ingresa el nombre del producto';
+  String get providersChatProviderTestChatResponse => '¡Gracias por probar PlatePal! Esta es una respuesta de prueba para mostrarte cómo funciona nuestro asistente IA. Para obtener consejos nutricionales reales y sugerencias de comidas, por favor configura tu clave API de OpenAI en ajustes.';
 
   @override
-  String get tryDifferentKeywords => 'Intenta con diferentes palabras clave';
+  String get providersChatProviderTestChatWelcome => '¡Este es el modo de prueba! Puedo ayudarte a explorar las características de PlatePal. Intenta preguntarme sobre nutrición, planificación de comidas o recomendaciones de alimentos.';
 
   @override
-  String get selectServingSize => 'Selecciona el tamaño de la porción';
+  String get providersChatProviderWelcomeToChat => '¡Bienvenido a tu asistente nutricional IA! Pregúntame cualquier cosa sobre comidas, nutrición o tus objetivos de fitness.';
 
   @override
-  String get enableCameraPermission => 'Habilitar permiso de cámara';
+  String get screensCalendarAiNutritionTip => 'Consejo de Nutrición IA';
 
   @override
-  String get macroCustomization => 'Personalización de Macros';
+  String get screensCalendarConfigureApiKeyForAiTips => 'Configura tu clave de OpenAI en ajustes para usar consejos de IA';
 
   @override
-  String get macroCustomizationInfo => 'Personaliza tus objetivos de macros. Todos los porcentajes deben sumar 100%.';
+  String get screensCalendarDeleteLog => 'Eliminar Registro';
 
   @override
-  String get macroTargetsUpdated => 'Objetivos de macros actualizados exitosamente';
+  String get screensCalendarDeleteLogConfirmation => '¿Está seguro de que desea eliminar esta comida registrada?';
 
   @override
-  String get resetToDefaults => 'Restablecer por Defecto';
+  String get screensCalendarFailedToDeleteMealLog => 'Error al eliminar el registro de comida';
 
   @override
-  String get healthDataTitle => 'Datos de Salud';
+  String get screensCalendarFailedToGetAiTip => 'Error al obtener el consejo de IA. Inténtalo de nuevo.';
 
   @override
-  String get healthDataTodayPartial => 'Datos de Salud (Hoy - Parcial)';
+  String get screensCalendarMealLogDeletedSuccessfully => 'Registro de comida eliminado exitosamente';
 
   @override
-  String get estimatedCaloriesToday => 'Calorías Estimadas (Hoy)';
+  String get screensCalendarOk => 'OK';
 
   @override
-  String get estimatedCalories => 'Calorías Estimadas';
+  String get screensChatChatAssistant => 'Asistente de Chat IA';
 
   @override
-  String get healthDataMessage => 'Estos datos fueron recopilados de los datos de salud en tu teléfono, proporcionando información precisa sobre las calorías quemadas de tus actividades de fitness para este día completo.';
+  String get screensChatChatCleared => 'Historial del chat eliminado';
 
   @override
-  String get healthDataTodayMessage => 'Estos datos fueron recopilados de los datos de salud en tu teléfono. Como el día de hoy aún no está completo, esto representa las calorías quemadas hasta ahora. Tu total puede aumentar mientras continúes con actividades durante el día.';
+  String get screensChatClearChat => 'Limpiar Chat';
 
   @override
-  String get estimatedCaloriesTodayMessage => 'Este es tu gasto calórico estimado para hoy basado en tu nivel de actividad. Como el día aún no está completo, esto representa tu tasa metabólica basal más actividad estimada. Tus calorías realmente quemadas pueden ser mayores si realizas más actividades hoy.';
+  String get screensChatClearChatConfirmation => '¿Estás seguro de que quieres limpiar el historial del chat? Esta acción no se puede deshacer.';
 
   @override
-  String get estimatedCaloriesMessage => 'Estos datos están estimados basándose en la configuración de tu perfil y nivel de actividad ya que los datos de salud no estaban disponibles para esta fecha.';
+  String get screensChatConfigureApiKeyButton => 'Configurar Clave API';
 
   @override
-  String get analyzeTargets => 'Analizar Objetivos';
+  String get screensChatConfigureApiKeyToUseChat => 'Por favor configura tu clave API de OpenAI en ajustes para usar el asistente de chat IA.';
 
   @override
-  String get debugHealthData => 'Depurar Datos de Salud';
+  String get screensChatLoading => 'Cargando...';
 
   @override
-  String get disconnectHealth => 'Desconectar Salud';
+  String get screensChatNoApiKeyConfigured => 'No hay clave API configurada';
 
   @override
-  String get calorieTargetAnalysis => 'Análisis de Objetivo Calórico';
+  String get screensChatReloadApiKeyButton => 'Recargar Clave API';
 
   @override
-  String get daysAnalyzed => 'Días Analizados';
+  String get screensDishCreateBasicInfo => 'Información Básica';
 
   @override
-  String get currentTarget => 'Objetivo Actual';
+  String get screensDishCreateCamera => 'Cámara';
 
   @override
-  String get averageExpenditure => 'Gasto Promedio';
+  String get screensDishCreateCategory => 'Categoría';
 
   @override
-  String get suggestedTarget => 'Objetivo Sugerido';
+  String get screensDishCreateConfirmDeleteIngredient => '¿Está seguro de que desea eliminar este ingrediente?';
 
   @override
-  String get applySuggestion => 'Aplicar Sugerencia';
+  String get screensDishCreateCreateDish => 'Crear Plato';
 
   @override
-  String get calorieTargetsUpdated => '¡Objetivos calóricos actualizados exitosamente!';
+  String get screensDishCreateDeleteIngredient => 'Eliminar Ingrediente';
 
   @override
-  String get failedToUpdateTargets => 'Error al actualizar objetivos calóricos';
+  String get screensDishCreateDescription => 'Descripción';
 
   @override
-  String get loadMore => 'Cargar más';
+  String get screensDishCreateDescriptionPlaceholder => 'Ingrese la descripción (opcional)';
 
   @override
-  String get localDishes => 'Platos locales';
+  String get screensDishCreateDishCreatedSuccessfully => 'Plato creado exitosamente';
 
   @override
-  String get localIngredients => 'Ingredientes locales';
+  String get screensDishCreateDishNamePlaceholder => 'Ingrese el nombre del plato';
+
+  @override
+  String get screensDishCreateDishUpdatedSuccessfully => 'Plato actualizado exitosamente';
+
+  @override
+  String get screensDishCreateEditDish => 'Editar Plato';
+
+  @override
+  String get screensDishCreateErrorSavingDish => 'Error al guardar el plato';
+
+  @override
+  String get screensDishCreateFavorite => 'Favoritos';
+
+  @override
+  String get screensDishCreateGallery => 'Galería';
+
+  @override
+  String get screensDishCreateIngredientDeleted => 'Ingrediente eliminado';
+
+  @override
+  String get screensDishCreateMarkAsFavorite => 'Marcar como plato favorito';
+
+  @override
+  String get screensDishCreateNoIngredientsAdded => 'No se han agregado ingredientes aún';
+
+  @override
+  String get screensDishCreateNutritionRecalculated => 'Nutrición recalculada desde ingredientes';
+
+  @override
+  String get screensDishCreateOptions => 'Opciones';
+
+  @override
+  String get screensDishCreatePleaseEnterDishName => 'Por favor ingresa un nombre para el plato';
+
+  @override
+  String get screensDishCreateProductAddedSuccessfully => 'Producto agregado exitosamente';
+
+  @override
+  String get screensDishCreateRemoveImage => 'Quitar imagen';
+
+  @override
+  String get screensDishCreateSaveDish => 'Guardar Plato';
+
+  @override
+  String get screensHomeAppTitle => 'PlatePal Tracker';
+
+  @override
+  String get screensHomeWelcomeToPlatePalTracker => 'Bienvenido a PlatePal Tracker';
+
+  @override
+  String get screensMealsAddedToFavorites => 'Agregado a favoritos';
+
+  @override
+  String get screensMealsAddMeal => 'Agregar Comida';
+
+  @override
+  String get screensMealsAddToFavorites => 'Agregar a Favoritos';
+
+  @override
+  String get screensMealsAllCategories => 'Todas las Categorías';
+
+  @override
+  String get screensMealsCreateFirstDish => 'Crea tu primer plato para comenzar';
+
+  @override
+  String get screensMealsDeleteDish => 'Eliminar Plato';
+
+  @override
+  String screensMealsDeleteDishConfirmation(String dishName) {
+    return '¿Estás seguro de que quieres eliminar \"$dishName\"?';
+  }
+
+  @override
+  String get screensMealsDishDeletedSuccessfully => 'Plato eliminado exitosamente';
+
+  @override
+  String get screensMealsErrorLoadingDishes => 'Error al cargar los platos';
+
+  @override
+  String get screensMealsErrorUpdatingDish => 'Error al actualizar el plato';
+
+  @override
+  String get screensMealsFailedToDeleteDish => 'Error al eliminar el plato';
+
+  @override
+  String get screensMealsNoDishesCreated => 'No se han creado platos aún';
+
+  @override
+  String get screensMealsNoDishesFound => 'No se encontraron platos';
+
+  @override
+  String get screensMealsRemovedFromFavorites => 'Removido de favoritos';
+
+  @override
+  String get screensMealsRemoveFromFavorites => 'Remover de Favoritos';
+
+  @override
+  String get screensMealsSearchDishes => 'Buscar platos...';
+
+  @override
+  String get screensMealsTryAdjustingSearch => 'Intenta ajustar tus términos de búsqueda';
+
+  @override
+  String get screensMenuAbout => 'Acerca de';
+
+  @override
+  String get screensMenuAiFeatures => 'IA y Características';
+
+  @override
+  String get screensMenuApiKeySettings => 'Configuración de Clave API';
+
+  @override
+  String get screensMenuAppearance => 'Apariencia';
+
+  @override
+  String get screensMenuChatAgentOptions => 'Opciones de Agente de Chat';
+
+  @override
+  String get screensMenuConfigureApiKey => 'Configura tu clave API de OpenAI';
+
+  @override
+  String get screensMenuContributors => 'Contribuidores';
+
+  @override
+  String get screensMenuCurrentStats => 'Estadísticas Actuales';
+
+  @override
+  String get screensMenuDark => 'Oscuro';
+
+  @override
+  String get screensMenuDataManagement => 'Gestión de Datos';
+
+  @override
+  String get screensMenuEditPersonalInfo => 'Edita tu información personal';
+
+  @override
+  String get screensMenuEnableAgentModeDeepSearch => 'Habilitar modo agente, búsqueda profunda y más';
+
+  @override
+  String get screensMenuExportData => 'Exportar Datos';
+
+  @override
+  String get screensMenuExportMealData => 'Exporta tus datos de comidas';
+
+  @override
+  String get screensMenuImportData => 'Importar Datos';
+
+  @override
+  String get screensMenuImportMealDataBackup => 'Importa datos de comidas desde respaldo';
+
+  @override
+  String get screensMenuInformation => 'Información';
+
+  @override
+  String get screensMenuLanguage => 'Idioma';
+
+  @override
+  String get screensMenuLearnMorePlatePal => 'Aprende más sobre PlatePal';
+
+  @override
+  String get screensMenuLight => 'Claro';
+
+  @override
+  String get screensMenuMadeBy => 'Hecho por MrLappes';
+
+  @override
+  String get screensMenuNutritionGoals => 'Objetivos Nutricionales';
+
+  @override
+  String get screensMenuProfile => 'Perfil';
+
+  @override
+  String get screensMenuSetNutritionTargets => 'Establece tus objetivos nutricionales diarios';
+
+  @override
+  String get screensMenuSystem => 'Sistema';
+
+  @override
+  String get screensMenuTheme => 'Tema';
+
+  @override
+  String get screensMenuUserProfile => 'Perfil de Usuario';
+
+  @override
+  String get screensMenuViewContributors => 'Ver contribuidores del proyecto';
+
+  @override
+  String get screensMenuViewStatistics => 'Ver Estadísticas';
+
+  @override
+  String get screensSettingsAboutAboutAppTitle => 'Acerca de la Aplicación';
+
+  @override
+  String get screensSettingsAboutAboutDescription => 'PlatePal Tracker fue creado para proporcionar una alternativa de código abierto y centrada en la privacidad a las costosas aplicaciones de seguimiento nutricional. Creemos en poner el control en tus manos sin suscripciones, sin anuncios y sin recopilación de datos.';
+
+  @override
+  String get screensSettingsAboutAppMotto => 'Hecho por deportistas para deportistas que odian las aplicaciones de pago';
+
+  @override
+  String get screensSettingsAboutCodersMessage => 'Los programadores no deberían tener que pagar';
+
+  @override
+  String get screensSettingsAboutDataStaysOnDevice => 'Tus datos permanecen en tu dispositivo';
+
+  @override
+  String get screensSettingsAboutFreeOpenSource => '100% gratuito y de código abierto';
+
+  @override
+  String get screensSettingsAboutGithubRepository => 'github.com/MrLappes/platepal-tracker';
+
+  @override
+  String get screensSettingsAboutUseOwnAiKey => 'Usa tu propia clave de IA para control total';
+
+  @override
+  String get screensSettingsAboutWebsite => 'plate-pal.de';
+
+  @override
+  String get screensSettingsAboutWhyPlatePal => '¿Por qué PlatePal?';
+
+  @override
+  String get screensSettingsApiKeySettingsAboutOpenAiApiKey => 'Acerca de la clave API de OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsAiFeaturesEnabled => 'Las funciones de IA están habilitadas';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyBulletPoints => '• Obtén tu clave API desde platform.openai.com\n• Tu clave se almacena localmente en tu dispositivo\n• Los cargos por uso se aplican directamente a tu cuenta de OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyConfigured => 'Clave API configurada';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyDescription => 'Para usar funciones de IA como análisis de comidas y sugerencias, necesitas proporcionar tu propia clave API de OpenAI. Esto asegura que tus datos permanezcan privados y tengas control total.';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyHelperText => 'Ingresa tu clave API de OpenAI o déjalo vacío para desactivar las funciones de IA';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyMustStartWith => 'La clave API debe comenzar con \"sk-\"';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyPlaceholder => 'sk-...';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyRemovedSuccessfully => 'Clave API eliminada exitosamente';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeySavedSuccessfully => 'Clave API guardada exitosamente';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyTestWarning => 'Su clave API será probada con una pequeña solicitud para verificar que funcione. La clave solo se almacena en su dispositivo y nunca se envía a nuestros servidores';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyTooShort => 'La clave API parece ser demasiado corta';
+
+  @override
+  String get screensSettingsApiKeySettingsClipboardEmpty => 'El portapapeles está vacío';
+
+  @override
+  String get screensSettingsApiKeySettingsCouldNotLoadModels => 'No se pudieron cargar los modelos disponibles. Usando lista de modelos predeterminada';
+
+  @override
+  String get screensSettingsApiKeySettingsFailedToAccessClipboard => 'Error al acceder al portapapeles';
+
+  @override
+  String get screensSettingsApiKeySettingsFailedToLoadApiKey => 'Error al cargar la clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsFailedToRemoveApiKey => 'Error al eliminar la clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsGetApiKeyFromOpenAi => 'Obtener clave API de OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsGpt35ModelsInfo => 'Los modelos GPT-3.5 son más rentables para análisis básicos';
+
+  @override
+  String get screensSettingsApiKeySettingsGpt4ModelsInfo => 'Los modelos GPT-4 proporcionan el mejor análisis pero cuestan más';
+
+  @override
+  String get screensSettingsApiKeySettingsLinkError => 'Ocurrió un error al abrir el enlace';
+
+  @override
+  String get screensSettingsApiKeySettingsOpenAiApiKey => 'Clave API de OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsPastedFromClipboard => 'Pegado desde portapapeles';
+
+  @override
+  String get screensSettingsApiKeySettingsPasteFromClipboard => 'Pegar desde portapapeles';
+
+  @override
+  String get screensSettingsApiKeySettingsRemove => 'Eliminar';
+
+  @override
+  String get screensSettingsApiKeySettingsRemoveApiKey => 'Eliminar clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsRemoveApiKeyConfirmation => '¿Estás seguro de que quieres eliminar tu clave API? Esto desactivará las funciones de IA.';
+
+  @override
+  String get screensSettingsApiKeySettingsSelectModel => 'Seleccionar Modelo';
+
+  @override
+  String get screensSettingsApiKeySettingsTestAndSaveApiKey => 'Probar y Guardar Clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsTestingApiKey => 'Probando clave API...';
+
+  @override
+  String get screensSettingsApiKeySettingsUpdateApiKey => 'Actualizar clave API';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle => 'Permite que el agente use búsqueda profunda para respuestas más precisas';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentDeepSearchTitle => 'Activar Búsqueda Profunda';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentEnableSubtitle => 'Usa la canalización de agente de varios pasos para el chat';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentEnableTitle => 'Activar Modo Agente';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentInfoDescription => 'El modo agente activa la avanzada canalización de razonamiento de varios pasos de PlatePal para el chat. Esto permite que el asistente analice tu consulta, recopile contexto y proporcione respuestas más precisas y explicables. La Búsqueda Profunda permite al agente usar más datos para obtener mejores resultados.';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentInfoTitle => '¿Qué es el Modo Agente?';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatAgentSettingsTitle => 'Configuración del Agente de Chat';
+
+  @override
+  String get screensSettingsChatAgentSettingsChatSettingsSaved => 'Configuración de chat guardada correctamente';
+
+  @override
+  String get screensSettingsContributorsBuyMeCreatine => 'Cómprame creatina';
+
+  @override
+  String get screensSettingsContributorsCheckGitHub => 'Echa un vistazo a nuestro repositorio de GitHub';
+
+  @override
+  String get screensSettingsContributorsContributorPlural => 'Contribuidores';
+
+  @override
+  String get screensSettingsContributorsContributorSingular => 'Contribuidor';
+
+  @override
+  String get screensSettingsContributorsContributorsThankYou => '¡Gracias a todos los que han contribuido a hacer posible PlatePal Tracker!';
+
+  @override
+  String get screensSettingsContributorsOpenSourceMessage => 'PlatePal Tracker es de código abierto: ¡únete a nosotros en GitHub!';
+
+  @override
+  String get screensSettingsContributorsSupportDevelopment => 'Apoyar el desarrollo';
+
+  @override
+  String get screensSettingsContributorsSupportMessage => '¿Quieres comprarme mi creatina? Tu apoyo es muy apreciado pero no es para nada obligatorio.';
+
+  @override
+  String get screensSettingsContributorsWantToContribute => '¿Quieres contribuir?';
+
+  @override
+  String get screensSettingsExportDataAllData => 'Todos los Datos';
+
+  @override
+  String get screensSettingsExportDataDishes => 'Platos';
+
+  @override
+  String get screensSettingsExportDataExportAsCsv => 'Exportar como CSV';
+
+  @override
+  String get screensSettingsExportDataExportAsJson => 'Exportar como JSON';
+
+  @override
+  String screensSettingsExportDataExportedItemsCount(int count) {
+    return 'Se exportaron $count elementos';
+  }
+
+  @override
+  String get screensSettingsExportDataExportProgress => 'Exportando datos...';
+
+  @override
+  String get screensSettingsExportDataMealLogs => 'Registros de Comidas';
+
+  @override
+  String get screensSettingsExportDataNutritionGoalsData => 'Objetivos Nutricionales';
+
+  @override
+  String get screensSettingsExportDataSelectDataToExport => 'Seleccionar datos para exportar';
+
+  @override
+  String get screensSettingsExportDataSupplements => 'Suplementos';
+
+  @override
+  String get screensSettingsExportDataUserProfiles => 'Perfiles de Usuario';
+
+  @override
+  String get screensSettingsImportDataHowToHandleDuplicates => '¿Cómo manejar duplicados?';
+
+  @override
+  String screensSettingsImportDataImportedItemsCount(int count) {
+    return 'Se importaron $count elementos';
+  }
+
+  @override
+  String get screensSettingsImportDataImportFailed => 'Error en la importación';
+
+  @override
+  String get screensSettingsImportDataImportFromFile => 'Importar desde Archivo';
+
+  @override
+  String get screensSettingsImportDataImportProgress => 'Importando datos...';
+
+  @override
+  String get screensSettingsImportDataMergeDuplicates => 'Fusionar Duplicados';
+
+  @override
+  String get screensSettingsImportDataOverwriteDuplicates => 'Sobrescribir Duplicados';
+
+  @override
+  String get screensSettingsImportDataSelectDataToImport => 'Seleccionar datos para importar';
+
+  @override
+  String get screensSettingsImportDataSelectFile => 'Seleccionar Archivo';
+
+  @override
+  String get screensSettingsImportDataSkipDuplicates => 'Omitir Duplicados';
+
+  @override
+  String get screensSettingsImportProfileCompletionActivityLevel => 'Nivel de Actividad';
+
+  @override
+  String get screensSettingsImportProfileCompletionAge => 'Edad';
+
+  @override
+  String get screensSettingsImportProfileCompletionAgeRange => 'La edad debe estar entre 13 y 120';
+
+  @override
+  String get screensSettingsImportProfileCompletionBuildMuscle => 'Construir Músculo';
+
+  @override
+  String get screensSettingsImportProfileCompletionCm => 'cm';
+
+  @override
+  String get screensSettingsImportProfileCompletionEmail => 'Correo Electrónico';
+
+  @override
+  String get screensSettingsImportProfileCompletionExtraActive => 'Extremadamente Activo';
+
+  @override
+  String get screensSettingsImportProfileCompletionFemale => 'Femenino';
+
+  @override
+  String get screensSettingsImportProfileCompletionFitnessGoal => 'Objetivo de Fitness';
+
+  @override
+  String get screensSettingsImportProfileCompletionGainWeight => 'Ganar Peso';
+
+  @override
+  String get screensSettingsImportProfileCompletionGender => 'Género';
+
+  @override
+  String get screensSettingsImportProfileCompletionHeight => 'Altura';
+
+  @override
+  String get screensSettingsImportProfileCompletionHeightRange => 'La altura debe estar entre 100-250 cm';
+
+  @override
+  String get screensSettingsImportProfileCompletionImperial => 'Imperial (lb, ft)';
+
+  @override
+  String get screensSettingsImportProfileCompletionInches => 'in';
+
+  @override
+  String get screensSettingsImportProfileCompletionInvalidEmail => 'Por favor ingresa una dirección de correo válida';
+
+  @override
+  String get screensSettingsImportProfileCompletionKg => 'kg';
+
+  @override
+  String get screensSettingsImportProfileCompletionLb => 'lb';
+
+  @override
+  String get screensSettingsImportProfileCompletionLightlyActive => 'Ligeramente Activo';
+
+  @override
+  String get screensSettingsImportProfileCompletionLoseWeight => 'Perder Peso';
+
+  @override
+  String get screensSettingsImportProfileCompletionMaintainWeight => 'Mantener Peso';
+
+  @override
+  String get screensSettingsImportProfileCompletionMale => 'Masculino';
+
+  @override
+  String get screensSettingsImportProfileCompletionMetric => 'Métrico (kg, cm)';
+
+  @override
+  String get screensSettingsImportProfileCompletionModeratelyActive => 'Moderadamente Activo';
+
+  @override
+  String get screensSettingsImportProfileCompletionName => 'Nombre';
+
+  @override
+  String get screensSettingsImportProfileCompletionOther => 'Otro';
+
+  @override
+  String get screensSettingsImportProfileCompletionPersonalInformation => 'Información Personal';
+
+  @override
+  String get screensSettingsImportProfileCompletionPreferences => 'Preferencias';
+
+  @override
+  String get screensSettingsImportProfileCompletionSedentary => 'Sedentario';
+
+  @override
+  String get screensSettingsImportProfileCompletionUnitSystem => 'Sistema de Unidades';
+
+  @override
+  String get screensSettingsImportProfileCompletionVeryActive => 'Muy Activo';
+
+  @override
+  String get screensSettingsImportProfileCompletionWeight => 'Peso';
+
+  @override
+  String get screensSettingsImportProfileCompletionWeightRange => 'El peso debe estar entre 30-300 kg';
+
+  @override
+  String get screensSettingsImportProfileCompletionYears => 'años';
+
+  @override
+  String get screensSettingsMacroCustomizationDiscardChanges => 'Descartar Cambios';
+
+  @override
+  String get screensSettingsMacroCustomizationMacroCustomization => 'Personalización de Macros';
+
+  @override
+  String get screensSettingsMacroCustomizationMacroCustomizationInfo => 'Personaliza tus objetivos de macros. Todos los porcentajes deben sumar 100%.';
+
+  @override
+  String get screensSettingsMacroCustomizationMacroTargetsUpdated => 'Objetivos de macros actualizados exitosamente';
+
+  @override
+  String get screensSettingsMacroCustomizationResetToDefaults => 'Restablecer por Defecto';
+
+  @override
+  String get screensSettingsMacroCustomizationSaveChanges => 'Guardar Cambios';
+
+  @override
+  String get screensSettingsMacroCustomizationUnsavedChanges => 'Cambios No Guardados';
+
+  @override
+  String get screensSettingsMacroCustomizationUnsavedChangesMessage => 'Tienes cambios no guardados. ¿Quieres guardarlos antes de salir?';
+
+  @override
+  String get screensSettingsProfileSettingsAnalyzeTargets => 'Analizar Objetivos';
+
+  @override
+  String get screensSettingsProfileSettingsBmi => 'IMC';
+
+  @override
+  String get screensSettingsProfileSettingsConnectToHealth => 'Conectar con Salud';
+
+  @override
+  String get screensSettingsProfileSettingsDangerZone => 'Zona de Peligro';
+
+  @override
+  String get screensSettingsProfileSettingsDebugHealthData => 'Depurar Datos de Salud';
+
+  @override
+  String get screensSettingsProfileSettingsDisconnectHealth => 'Desconectar Salud';
+
+  @override
+  String get screensSettingsProfileSettingsFitnessGoals => 'Objetivos de Fitness';
+
+  @override
+  String get screensSettingsProfileSettingsHealthConnected => 'Datos de salud conectados';
+
+  @override
+  String get screensSettingsProfileSettingsHealthDataSync => 'Sincronización de Datos de Salud';
+
+  @override
+  String get screensSettingsProfileSettingsHealthDisconnected => 'Datos de salud no conectados';
+
+  @override
+  String get screensSettingsProfileSettingsHealthNotAvailable => 'Datos de Salud No Disponibles';
+
+  @override
+  String get screensSettingsProfileSettingsHealthNotAvailableMessage => 'Los datos de salud no están disponibles en este dispositivo. Asegúrate de tener Health Connect (Android) o la app Salud (iOS) instalada y configurada.';
+
+  @override
+  String get screensSettingsProfileSettingsHealthPermissionDenied => 'Permiso de Salud Denegado';
+
+  @override
+  String get screensSettingsProfileSettingsHealthPermissionDeniedMessage => 'Para sincronizar tus datos de salud, PlatePal necesita acceso a tu información de salud. Puedes otorgar permisos en la configuración de tu teléfono.';
+
+  @override
+  String get screensSettingsProfileSettingsHealthSyncFailed => 'Error al sincronizar datos de salud';
+
+  @override
+  String get screensSettingsProfileSettingsHealthSyncSuccess => 'Datos de salud sincronizados exitosamente';
+
+  @override
+  String get screensSettingsProfileSettingsProfileSettings => 'Configuración de Perfil';
+
+  @override
+  String get screensSettingsProfileSettingsProfileUpdated => 'Perfil actualizado exitosamente';
+
+  @override
+  String get screensSettingsProfileSettingsResetApp => 'Restablecer App';
+
+  @override
+  String get screensSettingsProfileSettingsResetAppCancel => 'Cancelar';
+
+  @override
+  String get screensSettingsProfileSettingsResetAppConfirm => 'Sí, Eliminar Todo';
+
+  @override
+  String get screensSettingsProfileSettingsResetAppDescription => 'Esto eliminará permanentemente TODOS tus datos incluyendo:\n\n• Tu información de perfil\n• Todos los registros de comidas y datos nutricionales\n• Todas las preferencias y configuraciones\n• Toda la información almacenada\n\nEsta acción no se puede deshacer. ¿Estás seguro de que quieres continuar?';
+
+  @override
+  String get screensSettingsProfileSettingsResetAppError => 'Error al restablecer los datos de la aplicación';
+
+  @override
+  String get screensSettingsProfileSettingsResetAppSuccess => 'Los datos de la aplicación se han restablecido exitosamente';
+
+  @override
+  String get screensSettingsProfileSettingsResetAppTitle => 'Restablecer Datos de la Aplicación';
+
+  @override
+  String get screensSettingsProfileSettingsSyncHealthData => 'Sincronizar Datos de Salud';
+
+  @override
+  String get screensSettingsProfileSettingsTargetWeight => 'Peso Objetivo';
+
+  @override
+  String get screensSettingsStatisticsAllTime => 'Todo el Tiempo';
+
+  @override
+  String get screensSettingsStatisticsBmiHistory => 'Historial de IMC';
+
+  @override
+  String get screensSettingsStatisticsBmiNormal => 'Normal';
+
+  @override
+  String get screensSettingsStatisticsBmiObese => 'Obeso';
+
+  @override
+  String get screensSettingsStatisticsBmiOverweight => 'Sobrepeso';
+
+  @override
+  String get screensSettingsStatisticsBmiStatsTip => 'El Índice de Masa Corporal (IMC) se calcula a partir de tus medidas de peso y altura.';
+
+  @override
+  String get screensSettingsStatisticsBmiUnderweight => 'Bajo peso';
+
+  @override
+  String get screensSettingsStatisticsBodyFat => 'Grasa Corporal';
+
+  @override
+  String get screensSettingsStatisticsBodyFatHistory => 'Historial de Grasa Corporal';
+
+  @override
+  String get screensSettingsStatisticsBodyFatStatsTip => 'El porcentaje de grasa corporal ayuda a rastrear tu composición corporal más allá del peso.';
+
+  @override
+  String get screensSettingsStatisticsBulking => 'Volumen';
+
+  @override
+  String get screensSettingsStatisticsCalorieBalanceTip => 'Rastrea tu balance calórico real usando datos de salud. Verde = mantenimiento, Azul = déficit, Naranja = superávit.';
+
+  @override
+  String get screensSettingsStatisticsCalorieBalanceTitle => 'Balance Calórico (Ingesta vs Gasto)';
+
+  @override
+  String get screensSettingsStatisticsCalorieIntakeHistory => 'Ingesta de Calorías vs Mantenimiento';
+
+  @override
+  String get screensSettingsStatisticsCalorieStatsTip => 'Compara tu ingesta diaria de calorías con tus calorías de mantenimiento. Verde indica mantenimiento, azul es fase de corte, naranja es fase de volumen.';
+
+  @override
+  String get screensSettingsStatisticsCannotCalculateBmiFromData => 'No se puede calcular el IMC con los datos disponibles';
+
+  @override
+  String get screensSettingsStatisticsCutting => 'Corte';
+
+  @override
+  String get screensSettingsStatisticsErrorLoadingData => 'Error al cargar datos';
+
+  @override
+  String get screensSettingsStatisticsEstimatedBalance => 'Balance Estimado';
+
+  @override
+  String get screensSettingsStatisticsExtremeDeficitWarning => 'Advertencia: Los déficits calóricos extremos frecuentes pueden ralentizar el metabolismo y causar pérdida muscular.';
+
+  @override
+  String get screensSettingsStatisticsGenerateTestData => 'Generar Datos de Prueba';
+
+  @override
+  String get screensSettingsStatisticsHealthDataActive => 'Usando los datos de tu aplicación de salud para proporcionar un análisis más preciso de déficit/superávit.';
+
+  @override
+  String screensSettingsStatisticsHealthDataAlert(String days) {
+    return 'Alerta de Datos de Salud: $days día(s) con déficits calóricos muy grandes (>1000 cal) basados en el gasto real.';
+  }
+
+  @override
+  String get screensSettingsStatisticsHealthDataInactive => 'Activa la sincronización de datos de salud en Configuración de Perfil para un análisis más preciso.';
+
+  @override
+  String get screensSettingsStatisticsHealthDataIntegration => 'Integración de Datos de Salud';
+
+  @override
+  String screensSettingsStatisticsInconsistentDeficitWarning(String variance) {
+    return 'Advertencia: Tu déficit calórico varía significativamente día a día (varianza: $variance cal). Considera una ingesta más consistente.';
+  }
+
+  @override
+  String get screensSettingsStatisticsLastMonth => 'Último Mes';
+
+  @override
+  String get screensSettingsStatisticsLastSixMonths => 'Últimos 6 Meses';
+
+  @override
+  String get screensSettingsStatisticsLastThreeMonths => 'Últimos 3 Meses';
+
+  @override
+  String get screensSettingsStatisticsLastWeek => 'Última Semana';
+
+  @override
+  String get screensSettingsStatisticsLastYear => 'Último Año';
+
+  @override
+  String get screensSettingsStatisticsMaintenance => 'Mantenimiento';
+
+  @override
+  String get screensSettingsStatisticsNoBmiDataAvailable => 'No hay datos de IMC disponibles';
+
+  @override
+  String get screensSettingsStatisticsNoBodyFatDataAvailable => 'No hay datos de grasa corporal disponibles';
+
+  @override
+  String get screensSettingsStatisticsNoCalorieDataAvailable => 'No hay datos de calorías disponibles';
+
+  @override
+  String get screensSettingsStatisticsNotEnoughDataTitle => 'No Hay Suficientes Datos';
+
+  @override
+  String get screensSettingsStatisticsNoWeightDataAvailable => 'No hay datos de peso disponibles';
+
+  @override
+  String get screensSettingsStatisticsPhaseAnalysis => 'Análisis de Fase';
+
+  @override
+  String get screensSettingsStatisticsRealData => 'Datos Reales';
+
+  @override
+  String get screensSettingsStatisticsRefresh => 'Actualizar';
+
+  @override
+  String get screensSettingsStatisticsStatistics => 'Estadísticas';
+
+  @override
+  String get screensSettingsStatisticsStatisticsEmptyDescription => 'Necesitamos al menos una semana de datos para mostrar estadísticas significativas. Sigue rastreando tus métricas para ver tendencias con el tiempo.';
+
+  @override
+  String get screensSettingsStatisticsTestDataDescription => 'Para fines de demostración, puedes generar datos de muestra para ver cómo se ven las estadísticas.';
+
+  @override
+  String get screensSettingsStatisticsTimeRange => 'Rango de Tiempo';
+
+  @override
+  String get screensSettingsStatisticsTryAgain => 'Intentar de Nuevo';
+
+  @override
+  String get screensSettingsStatisticsUpdateMetricsNow => 'Actualizar Métricas Ahora';
+
+  @override
+  String screensSettingsStatisticsVeryHighCalorieNotice(String days) {
+    return 'Aviso: $days día(s) con ingesta calórica muy alta (>1000 cal por encima del mantenimiento).';
+  }
+
+  @override
+  String screensSettingsStatisticsVeryLowCalorieWarning(String days) {
+    return 'Advertencia: $days día(s) con ingesta calórica extremadamente baja (<1000 cal). Esto puede ser poco saludable.';
+  }
+
+  @override
+  String get screensSettingsStatisticsVsExpenditure => 'vs gasto';
+
+  @override
+  String get screensSettingsStatisticsWeeklyAverage => 'Promedio Semanal';
+
+  @override
+  String get screensSettingsStatisticsWeightHistory => 'Historial de Peso';
+
+  @override
+  String get screensSettingsStatisticsWeightStatsTip => 'El gráfico muestra el peso promedio semanal para tener en cuenta las fluctuaciones diarias debido al peso del agua.';
+
+  @override
+  String get utilsLinkHandlerAvailable => 'Disponible';
+
+  @override
+  String utilsLinkHandlerCouldNotOpenUrl(String url) {
+    return 'No se pudo abrir $url';
+  }
+
+  @override
+  String get utilsLinkHandlerNotAvailable => 'No disponible';
+
+  @override
+  String get utilsLinkHandlerOpeningLink => 'Abriendo página de Buy Me Creatine...';
 }

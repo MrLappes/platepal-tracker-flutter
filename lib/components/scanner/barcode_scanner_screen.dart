@@ -101,7 +101,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         debugPrint('❌ Product not found for barcode: $code');
         if (mounted) {
           setState(() {
-            _errorMessage = AppLocalizations.of(context).productNotFound;
+            _errorMessage = AppLocalizations.of(context).componentsScannerBarcodeScannerProductNotFound;
           });
 
           // Clear error after 3 seconds
@@ -120,7 +120,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         setState(() {
           _errorMessage = AppLocalizations.of(
             context,
-          ).errorScanningBarcode(e.toString());
+          ).componentsScannerBarcodeScannerErrorScanningBarcode(e.toString());
         });
 
         // Clear error after 5 seconds
@@ -157,7 +157,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.barcodeScanner),
+        title: Text(localizations.componentsScannerBarcodeScannerBarcodeScanner),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -209,7 +209,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: Text(localizations.openSettings),
+                        child: Text(localizations.componentsScannerBarcodeScannerOpenSettings),
                       ),
                     ],
                   ],
@@ -238,7 +238,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      localizations.scanningBarcode,
+                      localizations.componentsScannerBarcodeScannerScanningBarcode,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
@@ -254,7 +254,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
                     const SizedBox(height: 8),
                     Text(
-                      localizations.scanBarcodeToAddProduct,
+                      localizations.componentsScannerBarcodeScannerScanBarcodeToAddProduct,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),

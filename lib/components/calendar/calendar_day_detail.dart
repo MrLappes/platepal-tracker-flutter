@@ -76,7 +76,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            log.dish?.name ?? l10n.unknownDish,
+            log.dish?.name ?? l10n.componentsCalendarCalendarDayDetailUnknownDish,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -113,7 +113,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            l10n.noMealsLoggedForDay,
+            l10n.componentsCalendarCalendarDayDetailNoMealsLoggedForDay,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),

@@ -176,8 +176,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                 Expanded(
                   child: Text(
                     widget.ingredient == null
-                        ? l10n.addIngredient
-                        : l10n.editIngredient,
+                        ? l10n.componentsDishesDishFormIngredientFormModalAddIngredient
+                        : l10n.componentsDishesDishFormIngredientFormModalEditIngredient,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
@@ -207,7 +207,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                 Expanded(
                   child: _buildQuickActionButton(
                     icon: Icons.qr_code_scanner,
-                    label: l10n.scanBarcode,
+                    label: l10n.componentsChatChatInputScanBarcode,
                     onTap: _openBarcodeScanner,
                   ),
                 ),
@@ -215,7 +215,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                 Expanded(
                   child: _buildQuickActionButton(
                     icon: Icons.search,
-                    label: l10n.searchProduct,
+                    label: l10n.componentsChatChatInputSearchProduct,
                     onTap: _openProductSearch,
                   ),
                 ),
@@ -237,12 +237,12 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                     // Ingredient Name
                     _buildModernTextField(
                       controller: _nameController,
-                      label: l10n.ingredientName,
-                      hint: l10n.ingredientNamePlaceholder,
+                      label: l10n.componentsDishesDishFormIngredientFormModalIngredientName,
+                      hint: l10n.componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder,
                       icon: Icons.food_bank_outlined,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return l10n.pleaseEnterIngredientName;
+                          return l10n.componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName;
                         }
                         return null;
                       },
@@ -252,7 +252,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
 
                     // Quantity and Unit
                     Text(
-                      l10n.quantity,
+                      l10n.componentsDishesDishFormIngredientFormModalQuantity,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onSurfaceVariant,
@@ -266,7 +266,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                           child: _buildModernTextField(
                             controller: _quantityController,
                             label: '',
-                            hint: l10n.quantityPlaceholder,
+                            hint: l10n.componentsDishesDishFormIngredientFormModalQuantityPlaceholder,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -277,10 +277,10 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             ],
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return l10n.pleaseEnterQuantity;
+                                return l10n.componentsDishesDishFormIngredientFormModalPleaseEnterQuantity;
                               }
                               if (double.tryParse(value) == null) {
-                                return l10n.pleaseEnterValidNumber;
+                                return l10n.componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber;
                               }
                               return null;
                             },
@@ -295,7 +295,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
 
                     // Nutrition Section
                     Text(
-                      l10n.nutritionInformation,
+                      l10n.componentsDishesDishFormIngredientFormModalNutritionInformation,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onSurfaceVariant,
@@ -303,7 +303,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      l10n.nutritionPer100g,
+                      l10n.componentsDishesDishFormIngredientFormModalNutritionPer100g,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant.withValues(
                           alpha: 0.7,
@@ -316,8 +316,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                         Expanded(
                           child: _buildNutritionField(
                             controller: _caloriesController,
-                            label: l10n.calories,
-                            suffix: l10n.kcal,
+                            label: l10n.componentsCalendarMacroSummaryCalories,
+                            suffix: l10n.componentsDishesDishFormIngredientFormModalKcal,
                             icon: Icons.local_fire_department_outlined,
                             color: Colors.orange,
                           ),
@@ -326,8 +326,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                         Expanded(
                           child: _buildNutritionField(
                             controller: _fiberController,
-                            label: l10n.fiber,
-                            suffix: l10n.grams,
+                            label: l10n.componentsCalendarMacroSummaryFiber,
+                            suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                             icon: Icons.grass_outlined,
                             color: Colors.green,
                           ),
@@ -350,8 +350,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   Expanded(
                                     child: _buildNutritionField(
                                       controller: _proteinController,
-                                      label: l10n.protein,
-                                      suffix: l10n.grams,
+                                      label: l10n.componentsCalendarMacroSummaryProtein,
+                                      suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.fitness_center_outlined,
                                       color: Colors.blue,
                                     ),
@@ -360,8 +360,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   Expanded(
                                     child: _buildNutritionField(
                                       controller: _carbsController,
-                                      label: l10n.carbs,
-                                      suffix: l10n.grams,
+                                      label: l10n.componentsCalendarMacroSummaryCarbs,
+                                      suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.grain_outlined,
                                       color: Colors.amber,
                                     ),
@@ -374,8 +374,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   Expanded(
                                     child: _buildNutritionField(
                                       controller: _fatController,
-                                      label: l10n.fat,
-                                      suffix: l10n.grams,
+                                      label: l10n.componentsCalendarMacroSummaryFat,
+                                      suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.water_drop_outlined,
                                       color: Colors.teal,
                                     ),
@@ -394,8 +394,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                               Expanded(
                                 child: _buildNutritionField(
                                   controller: _proteinController,
-                                  label: l10n.protein,
-                                  suffix: l10n.grams,
+                                  label: l10n.componentsCalendarMacroSummaryProtein,
+                                  suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.fitness_center_outlined,
                                   color: Colors.blue,
                                 ),
@@ -404,8 +404,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                               Expanded(
                                 child: _buildNutritionField(
                                   controller: _carbsController,
-                                  label: l10n.carbs,
-                                  suffix: l10n.grams,
+                                  label: l10n.componentsCalendarMacroSummaryCarbs,
+                                  suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.grain_outlined,
                                   color: Colors.amber,
                                 ),
@@ -414,8 +414,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                               Expanded(
                                 child: _buildNutritionField(
                                   controller: _fatController,
-                                  label: l10n.fat,
-                                  suffix: l10n.grams,
+                                  label: l10n.componentsCalendarMacroSummaryFat,
+                                  suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.water_drop_outlined,
                                   color: Colors.teal,
                                 ),
@@ -458,7 +458,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                         ),
                       ),
                       child: Text(
-                        l10n.cancel,
+                        l10n.componentsChatBotProfileCustomizationDialogCancel,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
@@ -486,7 +486,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                           const Icon(Icons.save, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            l10n.save,
+                            l10n.componentsChatBotProfileCustomizationDialogSave,
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,

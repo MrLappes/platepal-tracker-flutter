@@ -49,7 +49,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).chatSettingsSaved),
+          content: Text(AppLocalizations.of(context).screensSettingsChatAgentSettingsChatSettingsSaved),
         ),
       );
     }
@@ -62,7 +62,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.chatAgentSettingsTitle),
+        title: Text(localizations.screensSettingsChatAgentSettingsChatAgentSettingsTitle),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
       ),
@@ -70,8 +70,8 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
         padding: const EdgeInsets.all(24),
         children: [
           SwitchListTile.adaptive(
-            title: Text(localizations.chatAgentEnableTitle),
-            subtitle: Text(localizations.chatAgentEnableSubtitle),
+            title: Text(localizations.screensSettingsChatAgentSettingsChatAgentEnableTitle),
+            subtitle: Text(localizations.screensSettingsChatAgentSettingsChatAgentEnableSubtitle),
             value: agentModeEnabled,
             onChanged: (value) {
               setState(() {
@@ -83,8 +83,8 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
           ),
           const SizedBox(height: 16),
           SwitchListTile.adaptive(
-            title: Text(localizations.chatAgentDeepSearchTitle),
-            subtitle: Text(localizations.chatAgentDeepSearchSubtitle),
+            title: Text(localizations.screensSettingsChatAgentSettingsChatAgentDeepSearchTitle),
+            subtitle: Text(localizations.screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle),
             value: deepSearchEnabled,
             onChanged:
                 agentModeEnabled
@@ -103,7 +103,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                     : Icon(Icons.save),
-            label: Text(localizations.save),
+            label: Text(localizations.componentsChatBotProfileCustomizationDialogSave),
           ),
           const SizedBox(height: 32),
           Card(
@@ -114,14 +114,14 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    localizations.chatAgentInfoTitle,
+                    localizations.screensSettingsChatAgentSettingsChatAgentInfoTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    localizations.chatAgentInfoDescription,
+                    localizations.screensSettingsChatAgentSettingsChatAgentInfoDescription,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],

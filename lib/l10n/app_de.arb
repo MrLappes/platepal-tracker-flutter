@@ -1,531 +1,572 @@
 ﻿{
   "@@locale": "de",
-  "appTitle": "PlatePal Tracker",
-  "welcome": "Willkommen bei PlatePal",
-  "meals": "Mahlzeiten",
-  "nutrition": "Ernährung",
-  "profile": "Profil",
-  "settings": "Einstellungen",
-  "addMeal": "Mahlzeit hinzufügen",
-  "breakfast": "Frühstück",
-  "lunch": "Mittagessen",
-  "dinner": "Abendessen",
-  "snack": "Snack",
-  "noMealsLogged": "Noch keine Mahlzeiten protokolliert",
-  "startTrackingMeals": "Beginnen Sie mit der Verfolgung Ihrer Mahlzeiten, um sie hier zu sehen",
-  "todaysMeals": "Heutige Mahlzeiten",
-  "allMeals": "Alle Mahlzeiten",
-  "mealHistory": "Mahlzeitenverlauf",
-  "filterByMealType": "Nach Mahlzeitentyp filtern",
-  "logMeal": "Mahlzeit protokollieren",
-  "mealLoggedAt": "Protokolliert um {time}",
-  "calories": "Kalorien",
-  "protein": "Protein",
-  "carbs": "Kohlenhydrate",
-  "fat": "Fett",
-  "calendar": "Kalender",
-  "unknownDish": "Unbekanntes Gericht",
-  "noMealsLoggedForDay": "Keine Mahlzeiten für diesen Tag protokolliert",
-  "nutritionSummary": "Nährwerte",
-  "getAiTip": "KI-Tipp",
-  "deleteLog": "Protokoll löschen",
-  "deleteLogConfirmation": "Sind Sie sicher, dass Sie diese protokollierte Mahlzeit löschen möchten?",
-  "delete": "Löschen",
-  "mealLogDeletedSuccessfully": "Mahlzeit-Protokoll erfolgreich gelöscht",
-  "failedToDeleteMealLog": "Löschen des Mahlzeit-Protokolls fehlgeschlagen",
-  "chat": "Chat",
-  "menu": "Menü",
-  "userProfile": "Benutzerprofil",
-  "nutritionGoals": "Ernährungsziele",
-  "appearance": "Erscheinungsbild",
-  "aiFeatures": "KI & Funktionen",
-  "dataManagement": "Datenverwaltung",
-  "information": "Informationen",
-  "apiKeySettings": "API-Schlüssel Einstellungen",
-  "exportData": "Daten exportieren",
-  "importData": "Daten importieren",
-  "selectFile": "Datei auswählen",
-  "selectFilesToImport": "Dateien zum Importieren auswählen",
-  "importFromFile": "Aus Datei importieren",
-  "importJson": "JSON importieren",
-  "importCsv": "CSV importieren",
-  "exportAsJson": "Als JSON exportieren",
-  "exportAsCsv": "Als CSV exportieren",
-  "selectDataToExport": "Zu exportierende Daten auswählen",
-  "selectDataToImport": "Zu importierende Daten auswählen",
-  "userProfiles": "Benutzerprofile",
-  "mealLogs": "Mahlzeiten-Protokolle",
-  "dishes": "Gerichte",
-  "ingredients": "Zutaten",
-  "supplements": "Nahrungsergänzungsmittel",
-  "nutritionGoalsData": "Ernährungsziele",
-  "allData": "Alle Daten",
-  "importProgress": "Daten werden importiert...",
-  "exportProgress": "Daten werden exportiert...",
-  "importSuccessful": "Daten erfolgreich importiert",
-  "exportSuccessful": "Daten erfolgreich exportiert",
-  "importFailed": "Import fehlgeschlagen",
-  "exportFailed": "Export fehlgeschlagen",
-  "noFileSelected": "Keine Datei ausgewählt",
-  "invalidFileFormat": "Ungültiges Dateiformat",
-  "fileNotFound": "Datei nicht gefunden",
-  "dataValidationFailed": "Datenvalidierung fehlgeschlagen",
-  "importedItemsCount": "{count} Elemente importiert",
-  "exportedItemsCount": "{count} Elemente exportiert",
-  "backupAndRestore": "Sicherung & Wiederherstellung",
-  "createBackup": "Sicherung erstellen",
-  "restoreFromBackup": "Aus Sicherung wiederherstellen",
-  "backupCreatedSuccessfully": "Sicherung erfolgreich erstellt",
-  "restoreSuccessful": "Wiederherstellung erfolgreich abgeschlossen",
-  "warningDataWillBeReplaced": "Warnung: Vorhandene Daten werden ersetzt",
-  "confirmRestore": "Sind Sie sicher, dass Sie wiederherstellen möchten? Dies ersetzt alle vorhandenen Daten.",
-  "fileSize": "Dateigröße: {size}",
-  "duplicateItemsFound": "Doppelte Elemente gefunden: {count}",
-  "howToHandleDuplicates": "Wie sollen Duplikate behandelt werden?",
-  "skipDuplicates": "Duplikate überspringen",
-  "overwriteDuplicates": "Duplikate überschreiben",
-  "mergeDuplicates": "Duplikate zusammenführen",
-  "formatNotSupported": "Format nicht unterstützt: {format}",
-  "about": "Über uns",
-  "aboutAppTitle": "Über uns",
-  "madeBy": "Erstellt von MrLappes",
-  "website": "plate-pal.de",
-  "githubRepository": "github.com/MrLappes/platepal-tracker",
-  "appMotto": "Von Sportlern für Sportler gemacht, die kostenpflichtige Apps hassen",
-  "codersMessage": "Programmierer sollten nicht bezahlen müssen",
-  "whyPlatePal": "Warum PlatePal?",
-  "aboutDescription": "PlatePal Tracker wurde entwickelt, um eine datenschutzorientierte, quelloffene Alternative zu teuren Ernährungs-Tracking-Apps zu bieten. Wir glauben daran, die Kontrolle in Ihre Hände zu legen - ohne Abonnements, ohne Werbung und ohne Datensammlung.",
-  "dataStaysOnDevice": "Ihre Daten bleiben auf Ihrem Gerät",
-  "useOwnAiKey": "Verwenden Sie Ihren eigenen KI-Schlüssel für volle Kontrolle",
-  "freeOpenSource": "100% kostenlos und quelloffen",
-  "couldNotOpenUrl": "Konnte {url} nicht öffnen",
-  "linkError": "Beim Öffnen des Links ist ein Fehler aufgetreten",
-  "contributors": "Mitwirkende",
-  "editPersonalInfo": "Bearbeiten Sie Ihre persönlichen Informationen",
-  "setNutritionTargets": "Legen Sie Ihre täglichen Ernährungsziele fest",
-  "configureApiKey": "Konfigurieren Sie Ihren OpenAI API-Schlüssel",
-  "exportMealData": "Exportieren Sie Ihre Mahlzeitdaten",
-  "importMealDataBackup": "Importieren Sie Mahlzeitdaten aus der Sicherung",
-  "learnMorePlatePal": "Erfahren Sie mehr über PlatePal",
-  "viewContributors": "Projektmitwirkende anzeigen",
-  "theme": "Design",
-  "light": "Hell",
-  "dark": "Dunkel",
-  "system": "System",
-  "language": "Sprache",
-  "english": "Englisch",
-  "spanish": "Spanisch",
-  "german": "Deutsch",
-  "contributorSingular": "Mitwirkender",
-  "contributorPlural": "Mitwirkende",
-  "contributorsThankYou": "Danke an alle, die dazu beigetragen haben, PlatePal Tracker möglich zu machen!",
-  "wantToContribute": "Möchten Sie mitwirken?",
-  "openSourceMessage": "PlatePal Tracker ist Open Source - treten Sie uns auf GitHub bei!",
-  "checkGitHub": "Schauen Sie sich unser GitHub-Repository an",
-  "supportDevelopment": "Entwicklung unterstützen",
-  "supportMessage": "Möchten Sie mir mein Kreatin kaufen? Ihre Unterstützung wird sehr geschätzt, ist aber keineswegs verpflichtend.",
-  "buyMeCreatine": "Kaufen Sie mir Kreatin",
-  "openingLink": "Öffne Buy Me Creatine Seite...",
-  "aboutOpenAiApiKey": "Über OpenAI API-Schlüssel",
-  "apiKeyDescription": "Um KI-Funktionen wie Mahlzeitanalyse und Vorschläge zu nutzen, müssen Sie Ihren eigenen OpenAI API-Schlüssel bereitstellen. Dies stellt sicher, dass Ihre Daten privat bleiben und Sie die volle Kontrolle haben.",
-  "apiKeyBulletPoints": "• Holen Sie sich Ihren API-Schlüssel von platform.openai.com\n• Ihr Schlüssel wird lokal auf Ihrem Gerät gespeichert\n• Nutzungsgebühren werden direkt Ihrem OpenAI-Konto belastet",
-  "apiKeyConfigured": "API-Schlüssel konfiguriert",
-  "aiFeaturesEnabled": "KI-Funktionen sind aktiviert",
-  "openAiApiKey": "OpenAI API-Schlüssel",
-  "apiKeyPlaceholder": "sk-...",
-  "apiKeyHelperText": "Geben Sie Ihren OpenAI API-Schlüssel ein oder lassen Sie das Feld leer, um KI-Funktionen zu deaktivieren",
-  "updateApiKey": "API-Schlüssel aktualisieren",
-  "saveApiKey": "API-Schlüssel speichern",
-  "getApiKeyFromOpenAi": "API-Schlüssel von OpenAI holen",
-  "removeApiKey": "API-Schlüssel entfernen",
-  "removeApiKeyConfirmation": "Sind Sie sicher, dass Sie Ihren API-Schlüssel entfernen möchten? Dies deaktiviert KI-Funktionen.",
-  "cancel": "Abbrechen",
-  "remove": "Entfernen",
-  "apiKeyMustStartWith": "API-Schlüssel muss mit \"sk-\" beginnen",
-  "apiKeyTooShort": "API-Schlüssel scheint zu kurz zu sein",
-  "apiKeyRemovedSuccessfully": "API-Schlüssel erfolgreich entfernt",
-  "apiKeySavedSuccessfully": "API-Schlüssel erfolgreich gespeichert",
-  "failedToLoadApiKey": "API-Schlüssel konnte nicht geladen werden",
-  "failedToSaveApiKey": "API-Schlüssel konnte nicht gespeichert werden",
-  "failedToRemoveApiKey": "API-Schlüssel konnte nicht entfernt werden",
-  "visitOpenAiPlatform": "Besuchen Sie platform.openai.com, um Ihren API-Schlüssel zu erhalten",
-  "pasteFromClipboard": "Aus Zwischenablage einfügen",
-  "clipboardEmpty": "Zwischenablage ist leer",
-  "pastedFromClipboard": "Aus Zwischenablage eingefügt",
-  "failedToAccessClipboard": "Zugriff auf Zwischenablage fehlgeschlagen",
-  "@failedToAccessClipboard": {
-    "description": "Error message when clipboard access fails"
+  "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "Keine Mahlzeiten für diesen Tag protokolliert",
+  "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {
+    "description": "Keine Mahlzeiten für diesen Tag protokolliert"
   },
-  "selectModel": "Modell auswählen",
-  "@selectModel": {
-    "description": "Label for model selection dropdown"
+  "componentsCalendarCalendarDayDetailUnknownDish": "Unbekanntes Gericht",
+  "@componentsCalendarCalendarDayDetailUnknownDish": {
+    "description": "Unbekanntes Gericht"
   },
-  "testAndSaveApiKey": "API-Schlüssel testen & speichern",
-  "@testAndSaveApiKey": {
-    "description": "Button text for testing and saving API key"
+  "componentsCalendarMacroSummaryCalories": "Kalorien",
+  "@componentsCalendarMacroSummaryCalories": {
+    "description": "Kalorien"
   },
-  "testingApiKey": "API-Schlüssel wird getestet...",
-  "@testingApiKey": {
-    "description": "Loading message while testing API key"
+  "componentsCalendarMacroSummaryCarbs": "Kohlenhydrate",
+  "@componentsCalendarMacroSummaryCarbs": {
+    "description": "Kohlenhydrate"
   },
-  "gpt4ModelsInfo": "GPT-4 Modelle bieten die beste Analyse, kosten aber mehr",
-  "@gpt4ModelsInfo": {
-    "description": "Information about GPT-4 models"
+  "componentsCalendarMacroSummaryEstimatedCalories": "Geschätzte Kalorien",
+  "@componentsCalendarMacroSummaryEstimatedCalories": {
+    "description": "Geschätzte Kalorien"
   },
-  "gpt35ModelsInfo": "GPT-3.5 Modelle sind kostengünstiger für einfache Analysen",
-  "@gpt35ModelsInfo": {
-    "description": "Information about GPT-3.5 models"
+  "componentsCalendarMacroSummaryEstimatedCaloriesMessage": "Diese Daten sind basierend auf Ihren Profileinstellungen und Aktivitätslevel geschätzt, da für dieses Datum keine Gesundheitsdaten verfügbar waren.",
+  "@componentsCalendarMacroSummaryEstimatedCaloriesMessage": {
+    "description": "Diese Daten sind basierend auf Ihren Profileinstellungen und Aktivitätslevel geschätzt, da für dieses Datum keine Gesundheitsdaten verfügbar waren."
   },
-  "loadingModels": "Verfügbare Modelle werden geladen...",
-  "@loadingModels": {
-    "description": "Loading message while fetching models"
+  "componentsCalendarMacroSummaryEstimatedCaloriesToday": "Geschätzte Kalorien (Heute)",
+  "@componentsCalendarMacroSummaryEstimatedCaloriesToday": {
+    "description": "Geschätzte Kalorien (Heute)"
   },
-  "couldNotLoadModels": "Verfügbare Modelle konnten nicht geladen werden. Verwende Standard-Modellliste",
-  "@couldNotLoadModels": {
-    "description": "Error message when model loading fails"
+  "componentsCalendarMacroSummaryEstimatedCaloriesTodayMessage": "Dies ist Ihr geschätzter Kalorienverbrauch für heute basierend auf Ihrem Aktivitätslevel. Da der Tag noch nicht abgeschlossen ist, repräsentiert dies Ihren Grundumsatz plus geschätzte Aktivität. Ihre tatsächlich verbrannten Kalorien können höher sein, wenn Sie heute mehr Aktivitäten durchführen.",
+  "@componentsCalendarMacroSummaryEstimatedCaloriesTodayMessage": {
+    "description": "Dies ist Ihr geschätzter Kalorienverbrauch für heute basierend auf Ihrem Aktivitätslevel. Da der Tag noch nicht abgeschlossen ist, repräsentiert dies Ihren Grundumsatz plus geschätzte Aktivität. Ihre tatsächlich verbrannten Kalorien können höher sein, wenn Sie heute mehr Aktivitäten durchführen."
   },
-  "apiKeyTestWarning": "Ihr API-Schlüssel wird mit einer kleinen Anfrage getestet, um zu überprüfen, ob er funktioniert. Der Schlüssel wird nur auf Ihrem Gerät gespeichert und niemals an unsere Server gesendet",
-  "@apiKeyTestWarning": {
-    "description": "Warning message about API key testing"
+  "componentsCalendarMacroSummaryFat": "Fett",
+  "@componentsCalendarMacroSummaryFat": {
+    "description": "Fett"
   },
-  "ok": "OK",
-  "@ok": {
-    "description": "OK button text"
+  "componentsCalendarMacroSummaryFiber": "Ballaststoffe",
+  "@componentsCalendarMacroSummaryFiber": {
+    "description": "Ballaststoffe"
   },
-  "welcomeToPlatePalTracker": "Willkommen bei PlatePal Tracker",
-  "@welcomeToPlatePalTracker": {
-    "description": "Welcome message for PlatePal Tracker"
+  "componentsCalendarMacroSummaryGetAiTip": "KI-Tipp",
+  "@componentsCalendarMacroSummaryGetAiTip": {
+    "description": "KI-Tipp"
   },
-  "profileSettings": "Profil-Einstellungen",
-  "personalInformation": "Persönliche Informationen",
-  "name": "Name",
-  "email": "E-Mail",
-  "age": "Alter",
-  "gender": "Geschlecht",
-  "male": "Männlich",
-  "female": "Weiblich",
-  "other": "Andere",
-  "height": "Größe",
-  "weight": "Gewicht",
-  "targetWeight": "Zielgewicht",
-  "activityLevel": "Aktivitätslevel",
-  "sedentary": "Sesshaft",
-  "lightlyActive": "Leicht aktiv",
-  "moderatelyActive": "Mäßig aktiv",
-  "veryActive": "Sehr aktiv",
-  "extraActive": "Extrem aktiv",
-  "fitnessGoals": "Fitnessziele",
-  "fitnessGoal": "Fitnessziel",
-  "loseWeight": "Gewicht verlieren",
-  "maintainWeight": "Gewicht halten",
-  "gainWeight": "Gewicht zunehmen",
-  "buildMuscle": "Muskeln aufbauen",
-  "preferences": "Einstellungen",
-  "unitSystem": "Einheitensystem",
-  "metric": "Metrisch (kg, cm)",
-  "imperial": "Imperial (lb, ft)",
-  "save": "Speichern",
-  "saveChanges": "Änderungen speichern",
-  "discardChanges": "Änderungen verwerfen",
-  "profileUpdated": "Profil erfolgreich aktualisiert",
-  "profileUpdateFailed": "Profil konnte nicht aktualisiert werden",
-  "unsavedChanges": "Nicht gespeicherte Änderungen",
-  "unsavedChangesMessage": "Sie haben nicht gespeicherte Änderungen. Möchten Sie sie vor dem Verlassen speichern?",
-  "deleteProfile": "Profil löschen",
-  "deleteProfileConfirmation": "Sind Sie sicher, dass Sie Ihr Profil löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-  "loading": "Wird geladen...",
-  "requiredField": "Dieses Feld ist erforderlich",
-  "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-  "ageRange": "Das Alter muss zwischen 13 und 120 liegen",
-  "heightRange": "Die Größe muss zwischen 100-250 cm liegen",
-  "weightRange": "Das Gewicht muss zwischen 30-300 kg liegen",
-  "currentStats": "Aktuelle Statistiken",
-  "bmi": "BMI",
-  "bmr": "BMR",
-  "tdee": "TDEE",
-  "years": "Jahre",
-  "cm": "cm",
-  "kg": "kg",
-  "lb": "lb",
-  "ft": "ft",
-  "inches": "in",
-  "chatAssistant": "KI-Chat-Assistent",
-  "chatSubtitle": "Erhalten Sie personalisierte Mahlzeitenvorschläge und Ernährungsberatung",
-  "typeMessage": "Nachricht eingeben...",
-  "sendMessage": "Nachricht senden",
-  "analyzeDish": "Gericht analysieren",
-  "scanBarcode": "Barcode scannen",
-  "searchProduct": "Produkt suchen",
-  "quickActions": "Schnellaktionen",
-  "suggestMeal": "Mahlzeit vorschlagen",
-  "analyzeNutrition": "Ernährung analysieren",
-  "findAlternatives": "Alternativen finden",
-  "calculateMacros": "Makros berechnen",
-  "mealPlan": "Ernährungsplan-Hilfe",
-  "ingredientInfo": "Zutatensinfo",
-  "clearChat": "Chat löschen",
-  "clearChatConfirmation": "Sind Sie sicher, dass Sie den Chat-Verlauf löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-  "chatCleared": "Chat-Verlauf gelöscht",
-  "messageFailedToSend": "Nachricht konnte nicht gesendet werden",
-  "retryMessage": "Wiederholen",
-  "copyMessage": "Nachricht kopieren",
-  "messageCopied": "Nachricht in Zwischenablage kopiert",
-  "aiThinking": "KI denkt nach...",
-  "noApiKeyConfigured": "Kein API-Schlüssel konfiguriert",
-  "configureApiKeyToUseChat": "Bitte konfigurieren Sie Ihren OpenAI API-Schlüssel in den Einstellungen, um den KI-Chat-Assistenten zu verwenden.",
-  "configureApiKeyButton": "API-Schlüssel konfigurieren",
-  "reloadApiKeyButton": "API-Schlüssel neu laden",
-  "welcomeToChat": "Willkommen bei Ihrem KI-Ernährungsassistenten! Fragen Sie mich alles über Mahlzeiten, Ernährung oder Ihre Fitnessziele.",
-  "attachImage": "Bild anhängen",
-  "imageAttached": "Bild angehängt",
-  "removeImage": "Bild entfernen",
-  "takePhoto": "Foto aufnehmen",
-  "chooseFromGallery": "Aus Galerie wählen",
-  "imageSourceSelection": "Bildquelle auswählen",
-  "nutritionAnalysis": "Nährwertanalyse",
-  "addToMeals": "Zu Mahlzeiten hinzufügen",
-  "details": "Details",
-  "tapToViewAgentSteps": "Agent-Details anzeigen",
-  "addedToMealsSuccess": "{dishName} zu Mahlzeiten hinzugefügt",
-  "close": "Schließen",
-  "servingSize": "Portionsgröße",
-  "perServing": "pro Portion",
-  "dishName": "Gerichtname",
-  "cookingInstructions": "Kochanweisungen",
-  "mealType": "Mahlzeitentyp",
-  "addedToMeals": "Erfolgreich zu Mahlzeiten hinzugefügt",
-  "failedToAddMeal": "Fehler beim Hinzufügen der Mahlzeit",
-  "testChatWelcome": "Dies ist der Testmodus! Ich kann Ihnen helfen, die Funktionen von PlatePal zu erkunden. Versuchen Sie, mich nach Ernährung, Essensplanung oder Lebensmittelempfehlungen zu fragen.",
-  "testChatResponse": "Danke, dass Sie PlatePal ausprobieren! Dies ist eine Testantwort, um Ihnen zu zeigen, wie unser KI-Assistent funktioniert. Um echte Ernährungsberatung und Mahlzeitenvorschläge zu erhalten, konfigurieren Sie bitte Ihren OpenAI API-Schlüssel in den Einstellungen.",
-  "chatWelcomeTitle": "Willkommen bei PlatePal",
-  "chatWelcomeSubtitle": "Ihr KI-Ernährungsassistent ist hier, um zu helfen",
-  "getStartedToday": "Heute beginnen",
-  "whatCanIHelpWith": "Wobei kann ich Ihnen helfen?",
-  "featureComingSoon": "Diese Funktion wird bald verfügbar sein!",
-  "statistics": "Statistiken",
-  "viewStatistics": "Statistiken anzeigen",
-  "weightHistory": "Gewichtsverlauf",
-  "bmiHistory": "BMI-Verlauf",
-  "bodyFatHistory": "Körperfett-Verlauf",
-  "calorieIntakeHistory": "Kalorienaufnahme vs. Erhaltung",
-  "weightStatsTip": "Das Diagramm zeigt das wöchentliche Mediangewicht, um tägliche Schwankungen durch Wassergewicht zu berücksichtigen.",
-  "bmiStatsTip": "Der Body Mass Index (BMI) wird aus Ihren Gewichts- und Größenmessungen berechnet.",
-  "bodyFatStatsTip": "Der Körperfettanteil hilft dabei, Ihre Körperzusammensetzung über das Gewicht hinaus zu verfolgen.",
-  "calorieStatsTip": "Vergleichen Sie Ihre tägliche Kalorienaufnahme mit Ihren Erhaltungskalorien. Grün zeigt Erhaltung, Blau ist Definitionsphase, Orange ist Aufbauphase.",
-  "notEnoughDataTitle": "Nicht genügend Daten",
-  "statisticsEmptyDescription": "Wir benötigen mindestens eine Woche Daten, um aussagekräftige Statistiken zu zeigen. Verfolgen Sie weiter Ihre Messwerte, um Trends über die Zeit zu sehen.",
-  "updateMetricsNow": "Messwerte jetzt aktualisieren",
-  "timeRange": "Zeitbereich",
-  "week": "Woche",
-  "month": "Monat",
-  "threeMonths": "3 Monate",
-  "sixMonths": "6 Monate",
-  "year": "Jahr",
-  "allTime": "Alle Zeit",
-  "bulking": "Aufbau",
-  "cutting": "Definition",
-  "maintenance": "Erhaltung",
-  "extremeLowCalorieWarning": "Warnung bei extrem niedrigen Kalorien",
-  "extremeHighCalorieWarning": "Warnung bei extrem hohen Kalorien",
-  "caloriesTooLowMessage": "Ihre Kalorienaufnahme liegt deutlich unter den Empfehlungen. Dies kann Ihre Gesundheit und den Stoffwechsel beeinträchtigen.",
-  "caloriesTooHighMessage": "Ihre Kalorienaufnahme liegt deutlich über den Empfehlungen. Erwägen Sie, Ihre Portionen anzupassen.",
-  "weeklyDeficit": "Wöchentliches Defizit",
-  "weeklySurplus": "Wöchentlicher Überschuss",
-  "phaseAnalysis": "Phasenanalyse",
-  "weeklyAverage": "Wöchentlicher Durchschnitt",
-  "lastWeek": "Letzte Woche",
-  "lastMonth": "Letzter Monat",
-  "lastThreeMonths": "Letzte 3 Monate",
-  "lastSixMonths": "Letzte 6 Monate",
-  "lastYear": "Letztes Jahr",
-  "generateTestData": "Testdaten Generieren",
-  "testDataDescription": "Zu Demonstrationszwecken können Sie Beispieldaten generieren, um zu sehen, wie die Statistiken aussehen.",
-  "errorLoadingData": "Fehler beim Laden der Daten",
-  "tryAgain": "Erneut versuchen",
-  "refresh": "Aktualisieren",
-  "realData": "Echte Daten",
-  "noWeightDataAvailable": "Keine Gewichtsdaten verfügbar",
-  "noBmiDataAvailable": "Keine BMI-Daten verfügbar",
-  "cannotCalculateBmiFromData": "BMI kann aus verfügbaren Daten nicht berechnet werden",
-  "noBodyFatDataAvailable": "Keine Körperfettdaten verfügbar",
-  "noCalorieDataAvailable": "Keine Kaloriendaten verfügbar",
-  "bmiUnderweight": "Untergewicht",
-  "bmiNormal": "Normal",
-  "bmiOverweight": "Übergewicht",
-  "bmiObese": "Adipös",
-  "healthDataIntegration": "Gesundheitsdaten-Integration",
-  "healthDataCoverage": "Abdeckung der Kalorienverbrauchsdaten: {coverage}% ({healthDataDays}/{totalDays} Tage)",
-  "healthDataActive": "Ihre Gesundheits-App-Daten werden für eine genauere Defizit-/Überschussanalyse verwendet.",
-  "healthDataInactive": "Aktivieren Sie die Gesundheitsdatensynchronisation in den Profileinstellungen für eine genauere Analyse.",
-  "calorieBalanceTitle": "Kalorienbilanz (Aufnahme vs. Verbrauch)",
-  "calorieBalanceTip": "Verfolgen Sie Ihre tatsächliche Kalorienbilanz mit Gesundheitsdaten. Grün = Erhaltung, Blau = Defizit, Orange = Überschuss.",
-  "estimatedBalance": "Geschätzte Bilanz",
-  "actualBalance": "Tatsächliche Bilanz",
-  "vsExpenditure": "vs. Verbrauch",
-  "healthDataAlert": "Gesundheitsdaten-Warnung: {days} Tag(e) mit sehr großen Kaloriendefiziten (>1000 kcal) basierend auf dem tatsächlichen Verbrauch.",
-  "inconsistentDeficitWarning": "Warnung: Ihr Kaloriendefizit variiert erheblich von Tag zu Tag (Varianz: {variance} kcal). Erwägen Sie eine konsistentere Aufnahme.",
-  "veryLowCalorieWarning": "Warnung: {days} Tag(e) mit extrem niedriger Kalorienaufnahme (<1000 kcal). Dies kann ungesund sein.",
-  "veryHighCalorieNotice": "Hinweis: {days} Tag(e) mit sehr hoher Kalorienaufnahme (>1000 kcal über dem Erhaltungsbedarf).",
-  "extremeDeficitWarning": "Warnung: Häufige extreme Kaloriendefizite können den Stoffwechsel verlangsamen und Muskelverlust verursachen.",
-  "maintenanceLabel": "Erhaltung",
-  "resetApp": "App Zurücksetzen",
-  "resetAppTitle": "Anwendungsdaten Zurücksetzen",
-  "resetAppDescription": "Dies wird ALLE Ihre Daten dauerhaft löschen, einschließlich:\n\n• Ihre Profilinformationen\n• Alle Mahlzeitenprotokolle und Ernährungsdaten\n• Alle Einstellungen und Präferenzen\n• Alle gespeicherten Informationen\n\nDiese Aktion kann nicht rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?",
-  "resetAppConfirm": "Ja, Alles Löschen",
-  "resetAppCancel": "Abbrechen",
-  "resetAppSuccess": "Anwendungsdaten wurden erfolgreich zurückgesetzt",
-  "resetAppError": "Fehler beim Zurücksetzen der Anwendungsdaten",
-  "dangerZone": "Gefahrenzone",
-  "chatAgentSettingsTitle": "Chat-Agent Einstellungen",
-  "chatAgentEnableTitle": "Agent-Modus aktivieren",
-  "chatAgentEnableSubtitle": "Verwende die mehrstufige Agenten-Pipeline für den Chat",
-  "chatAgentDeepSearchTitle": "Deep Search aktivieren",
-  "chatAgentDeepSearchSubtitle": "Erlaube dem Agenten, Deep Search für genauere Antworten zu verwenden",
-  "chatAgentInfoTitle": "Was ist der Agent-Modus?",
-  "chatAgentInfoDescription": "Der Agent-Modus aktiviert PlatePals fortschrittliche mehrstufige Denk-Pipeline für den Chat. So kann der Assistent deine Anfrage analysieren, Kontext sammeln und genauere, erklärbare Antworten liefern. Deep Search ermöglicht dem Agenten, noch mehr Daten für bessere Ergebnisse zu nutzen.",
-  "chatSettingsSaved": "Chat-Einstellungen erfolgreich gespeichert",
-  "yesterday": "Gestern",
-  "basicInformation": "Grundinformationen",
-  "pleaseEnterDishName": "Bitte geben Sie einen Gerichtnamen ein",
-  "imageUrl": "Bild-URL",
-  "optional": "Optional",
-  "nutritionInfo": "Nährwertinformationen",
-  "required": "Erforderlich",
-  "invalidNumber": "Ungültige Zahl",
-  "addIngredient": "Zutat hinzufügen",
-  "createDish": "Gericht erstellen",
-  "editDish": "Gericht bearbeiten",
-  "deleteDish": "Gericht löschen",
-  "noDishesCreated": "Noch keine Gerichte erstellt",
-  "errorLoadingDishes": "Fehler beim Laden der Gerichte",
-  "addedToFavorites": "Zu Favoriten hinzugefügt",
-  "removedFromFavorites": "Aus Favoriten entfernt",
-  "fiber": "Ballaststoffe",
-  "searchDishes": "Gerichte suchen",
-  "allCategories": "Alle Kategorien",
-  "createNewDish": "Neues Gericht erstellen",
-  "dishUpdatedSuccessfully": "Gericht erfolgreich aktualisiert",
-  "dishCreatedSuccessfully": "Gericht erfolgreich erstellt",
-  "errorUpdatingDish": "Fehler beim Aktualisieren des Gerichts",
-  "errorCreatingDish": "Fehler beim Erstellen des Gerichts",
-  "pleaseEnterDescription": "Bitte geben Sie eine Beschreibung ein",
-  "pleaseEnterValidUrl": "Bitte geben Sie eine gültige URL ein",
-  "pleaseEnterIngredient": "Bitte geben Sie eine Zutat ein",
-  "dishDeletedSuccessfully": "Gericht erfolgreich gelöscht",
-  "errorDeletingDish": "Fehler beim Löschen des Gerichts",
-  "confirmDeleteDish": "Sind Sie sicher, dass Sie dieses Gericht löschen möchten?",
-  "options": "Optionen",
-  "favorite": "Favorit",
-  "description": "Beschreibung",
-  "category": "Kategorie",
-  "caloriesPer100g": "Kalorien per 100g",
-  "proteinPer100g": "Protein per 100g",
-  "carbsPer100g": "Kohlenhydrate per 100g",
-  "fatPer100g": "Fett per 100g",
-  "fiberPer100g": "Ballaststoffe per 100g",
-  "invalidImageUrl": "Ungültige Bild-URL",
-  "enterIngredientName": "Zutatennamen eingeben",
-  "edit": "Bearbeiten",
-  "toggleFavorite": "Favorit umschalten",
-  "ingredientName": "Zutatenname",
-  "pleaseEnterIngredientName": "Bitte geben Sie einen Zutatennamen ein",
-  "editIngredient": "Zutat bearbeiten",
-  "deleteIngredient": "Zutat löschen",
-  "confirmDeleteIngredient": "Sind Sie sicher, dass Sie diese Zutat löschen möchten?",
-  "ingredientDeleted": "Zutat gelöscht",
-  "ingredientAdded": "Zutat hinzugefügt",
-  "ingredientUpdated": "Zutat aktualisiert",
-  "quantity": "Menge",
-  "quantityPlaceholder": "0",
-  "pleaseEnterQuantity": "Bitte geben Sie eine Menge ein",
-  "unit": "Einheit",
-  "unitPlaceholder": "g",
-  "pleaseEnterUnit": "Bitte geben Sie eine Einheit ein",
-  "pleaseEnterValidNumber": "Bitte geben Sie eine gültige Zahl ein",
-  "nutritionInformation": "Nährwertinformationen",
-  "nutritionPer100g": "Nährwerte pro 100g",
-  "kcal": "kcal",
-  "grams": "g",
-  "mg": "mg",
-  "mcg": "mcg",
-  "dishNamePlaceholder": "Gerichtnamen eingeben",
-  "descriptionPlaceholder": "Beschreibung eingeben",
-  "recalculate": "Neu berechnen",
-  "per100g": "pro 100g",
-  "nutritionalInformation": "Nährwertinformationen",
-  "caloriesPlaceholder": "0",
-  "ingredientNamePlaceholder": "Zutatennamen eingeben",
-  "basicInfo": "Grundinformationen",
-  "saveDish": "Gericht speichern",
-  "camera": "Kamera",
-  "gallery": "Galerie",
-  "nutritionRecalculated": "Nährwerte neu berechnet",
-  "markAsFavorite": "Als Favorit markieren",
-  "errorLoggingDish": "Fehler beim eintragen des Gerichtes",
-  "noIngredientsAdded": "Keine Zutaten hinzugefügt",
-  "ingredientsAdded": "Zutaten hinzugefügt",
-  "errorSavingDish": "Fehler beim Speichern des Gerichts",
-  "amount": "Menge",
-  "add": "Hinzufügen",
-  "retry": "Wiederholen",
-  "@retry": {
-    "description": "Retry button text"
+  "componentsCalendarMacroSummaryHealthDataMessage": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt und liefern genaue Informationen über verbrannte Kalorien aus Ihren Fitnessaktivitäten für diesen vollständigen Tag.",
+  "@componentsCalendarMacroSummaryHealthDataMessage": {
+    "description": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt und liefern genaue Informationen über verbrannte Kalorien aus Ihren Fitnessaktivitäten für diesen vollständigen Tag."
   },
-  "createFirstDish": "Erstes Gericht erstellen",
-  "noDishesFound": "Keine Gerichte gefunden",
-  "tryAdjustingSearch": "Versuchen Sie, Ihre Suche anzupassen",
-  "deleteDishConfirmation": "Sind Sie sicher, dass Sie \"{dishName}\" löschen möchten?",
-  "failedToDeleteDish": "Gericht konnte nicht gelöscht werden",
-  "addToFavorites": "Zu Favoriten hinzufügen",
-  "removeFromFavorites": "Aus Favoriten entfernen",
-  "pickFromGallery": "Aus Galerie auswählen",
-  "selectImageSource": "Bildquelle auswählen",
-  "recalculateNutrition": "Nährwerte neu berechnen",
-  "micronutrients": "Mikronährstoffe",
-  "addManually": "Manuell hinzufügen",
-  "saving": "Speichern...",
-  "thiamine": "Thiamin (B1)",
-  "riboflavin": "Riboflavin (B2)",
-  "niacin": "Niacin (B3)",
-  "pantothenicAcid": "Pantothensäure (B5)",
-  "water": "Wasser",
-  "alcohol": "Alkohol",
-  "caffeine": "Koffein",
-  "cholesterol": "Cholesterol",
-  "iu": "IE",
-  "g": "g",
-  "ml": "ml",
-  "cup": "Tasse",
-  "tbsp": "EL",
-  "tsp": "TL",
-  "oz": "oz",
-  "piece": "Stück",
-  "slice": "Scheibe",
-  "tablespoon": "Esslöffel",
-  "teaspoon": "Teelöffel",
-  "ounce": "Unze",
-  "pound": "Pfund",
-  "gram": "Gramm",
-  "kilogram": "Kilogramm",
-  "milliliter": "Milliliter",
-  "liter": "Liter",
-  "errorAddingIngredient": "Fehler beim Hinzufügen der Zutat",
-  "errorUpdatingIngredient": "Fehler beim Aktualisieren der Zutat",
-  "errorDeletingIngredient": "Fehler beim Löschen der Zutat",
-  "noNutritionData": "Keine Nährwertdaten verfügbar",
-  "logDish": "Gericht eintragen",
-  "logDishTitle": "Gericht eintragen",
-  "selectDate": "Datum auswählen",
-  "selectMealType": "Mahlzeitentyp auswählen",
-  "portionSize": "Portionsgröße",
-  "notes": "Notizen",
-  "addNotes": "Notizen hinzufügen (optional)",
-  "calculatedNutrition": "Berechnete Nährwerte",
-  "dishLoggedSuccessfully": "Gericht erfolgreich protokolliert!",
-  "select": "Auswählen",
-  "@select": {"description": "Allgemeiner Auswahltext"},
-  "errorOpeningDishScreen": "Fehler beim Öffnen des Gerichtsbildschirms: {error}",
-  "@errorOpeningDishScreen": {
+  "componentsCalendarMacroSummaryHealthDataTitle": "Gesundheitsdaten",
+  "@componentsCalendarMacroSummaryHealthDataTitle": {
+    "description": "Gesundheitsdaten"
+  },
+  "componentsCalendarMacroSummaryHealthDataTodayMessage": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt. Da der heutige Tag noch nicht abgeschlossen ist, zeigt dies die bisher heute verbrannten Kalorien an. Ihre Gesamtsumme kann sich erhöhen, wenn Sie den Tag über weitere Aktivitäten durchführen.",
+  "@componentsCalendarMacroSummaryHealthDataTodayMessage": {
+    "description": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt. Da der heutige Tag noch nicht abgeschlossen ist, zeigt dies die bisher heute verbrannten Kalorien an. Ihre Gesamtsumme kann sich erhöhen, wenn Sie den Tag über weitere Aktivitäten durchführen."
+  },
+  "componentsCalendarMacroSummaryHealthDataTodayPartial": "Gesundheitsdaten (Heute - Teilweise)",
+  "@componentsCalendarMacroSummaryHealthDataTodayPartial": {
+    "description": "Gesundheitsdaten (Heute - Teilweise)"
+  },
+  "componentsCalendarMacroSummaryNutritionSummary": "Nährwerte",
+  "@componentsCalendarMacroSummaryNutritionSummary": {
+    "description": "Nährwerte"
+  },
+  "componentsCalendarMacroSummaryProtein": "Protein",
+  "@componentsCalendarMacroSummaryProtein": {
+    "description": "Protein"
+  },
+  "componentsCalendarMacroSummaryCompactCalories": "Cal",
+  "@componentsCalendarMacroSummaryCompactCalories": {
+    "description": "Kurzes Label für Kalorien in der kompakten Ansicht"
+  },
+  "componentsCalendarMacroSummaryCompactProtein": "Protein",
+  "@componentsCalendarMacroSummaryCompactProtein": {
+    "description": "Kurzes Label für Protein in der kompakten Ansicht"
+  },
+  "componentsCalendarMacroSummaryCompactCarbs": "Kohlenh.",
+  "@componentsCalendarMacroSummaryCompactCarbs": {
+    "description": "Kurzes Label für Kohlenhydrate in der kompakten Ansicht"
+  },
+  "componentsCalendarMacroSummaryCompactFat": "Fett",
+  "@componentsCalendarMacroSummaryCompactFat": {
+    "description": "Kurzes Label für Fett in der kompakten Ansicht"
+  },
+  "componentsCommonOk": "OK",
+  "@componentsCommonOk": {
+    "description": "Allgemeines OK Button Label"
+  },
+  "componentsChatAgentStepsModalAgentProcessingSteps": "Agenten-Prozessschritte",
+  "@componentsChatAgentStepsModalAgentProcessingSteps": {
+    "description": "Titel für Agenten-Schritte"
+  },
+  "componentsChatAgentStepsModalCopiedToClipboard": "In die Zwischenablage kopiert",
+  "@componentsChatAgentStepsModalCopiedToClipboard": {
+    "description": "Text nach dem Kopieren"
+  },
+  "componentsChatAgentStepsModalCopyAll": "Alles kopieren",
+  "@componentsChatAgentStepsModalCopyAll": {
+    "description": "Button um alles zu kopieren"
+  },
+  "componentsChatAgentStepsModalViewFullData": "Gesamte Daten anzeigen",
+  "@componentsChatAgentStepsModalViewFullData": {
+    "description": "Button für vollständige Daten"
+  },
+  "componentsChatAgentStepsModalViewFullPrompt": "Gesamtes Prompt anzeigen",
+  "@componentsChatAgentStepsModalViewFullPrompt": {
+    "description": "Button für vollständiges Prompt"
+  },
+  "componentsChatAgentStepsModalThinkingProcessTitle": "🧠 Denkprozess",
+  "@componentsChatAgentStepsModalThinkingProcessTitle": {
+    "description": "Titel für die Denk-Sektion"
+  },
+  "componentsChatAgentStepsModalThinkingProcessSubtitle": "Echtzeit-Denkschritte des Agenten",
+  "@componentsChatAgentStepsModalThinkingProcessSubtitle": {
+    "description": "Untertitel für die Denk-Sektion"
+  },
+  "componentsChatAgentStepsModalProcessingStepsTitle": "⚙️ Verarbeitungs-Schritte",
+  "@componentsChatAgentStepsModalProcessingStepsTitle": {
+    "description": "Titel für die Verarbeitungs-Schritte Sektion"
+  },
+  "componentsChatAgentStepsModalProcessingStepsSubtitle": "Detaillierte Schritt-für-Schritt-Ausführung",
+  "@componentsChatAgentStepsModalProcessingStepsSubtitle": {
+    "description": "Untertitel für die Verarbeitungsschritte"
+  },
+  "componentsChatAgentStepsModalProcessingSummary": "Verarbeitungszusammenfassung",
+  "@componentsChatAgentStepsModalProcessingSummary": {
+    "description": "Titel für die Verarbeitungszusammenfassung"
+  },
+  "componentsChatAgentStepsModalCopySummaryTooltip": "Zusammenfassungsdaten kopieren",
+  "@componentsChatAgentStepsModalCopySummaryTooltip": {
+    "description": "Tooltip zum Kopieren der Zusammenfassung"
+  },
+  "componentsChatAgentStepsModalProcessingTime": "Verarbeitungszeit",
+  "@componentsChatAgentStepsModalProcessingTime": {
+    "description": "Label für Verarbeitungszeit"
+  },
+  "componentsChatAgentStepsModalBotType": "Bot-Typ",
+  "@componentsChatAgentStepsModalBotType": {
+    "description": "Label für Bot-Typ"
+  },
+  "componentsChatAgentStepsModalTotalSteps": "Gesamtschritte",
+  "@componentsChatAgentStepsModalTotalSteps": {
+    "description": "Label für Gesamtschritte"
+  },
+  "componentsChatAgentStepsModalSkippedSteps": "Übersprungene Schritte",
+  "@componentsChatAgentStepsModalSkippedSteps": {
+    "description": "Label für übersprungene Schritte"
+  },
+  "componentsChatAgentStepsModalFailedSteps": "Fehlgeschlagene Schritte",
+  "@componentsChatAgentStepsModalFailedSteps": {
+    "description": "Label für fehlgeschlagene Schritte"
+  },
+  "componentsChatAgentStepsModalErrorRecovery": "Fehlerbehebung",
+  "@componentsChatAgentStepsModalErrorRecovery": {
+    "description": "Label für Fehlerbehebungs-Statistiken"
+  },
+  "componentsChatAgentStepsModalCompletedSteps": "Abgeschlossene Schritte",
+  "@componentsChatAgentStepsModalCompletedSteps": {
+    "description": "Label für abgeschlossene Schritte"
+  },
+  "componentsChatAgentStepsModalDeepSearch": "Tiefensuche",
+  "@componentsChatAgentStepsModalDeepSearch": {
+    "description": "Label für Tiefensuch-Einstellung"
+  },
+  "componentsChatAgentStepsModalEnabled": "Aktiviert",
+  "@componentsChatAgentStepsModalEnabled": {
+    "description": "Label aktiviert"
+  },
+  "componentsChatAgentStepsModalDisabled": "Deaktiviert",
+  "@componentsChatAgentStepsModalDisabled": {
+    "description": "Label deaktiviert"
+  },
+  "componentsChatAgentStepsModalModifications": "Änderungen",
+  "@componentsChatAgentStepsModalModifications": {
+    "description": "Label für Modifikationen-Sektion"
+  },
+  "componentsChatAgentStepsModalNoModifications": "Keine nötig ✨",
+  "@componentsChatAgentStepsModalNoModifications": {
+    "description": "Text wenn keine Modifikationen nötig sind"
+  },
+  "componentsChatAgentStepsModalPerfectProcessing": "Perfekte Verarbeitung! Keine Korrekturen oder Modifikationen erforderlich.",
+  "@componentsChatAgentStepsModalPerfectProcessing": {
+    "description": "Detaillierter Text wenn keine Modifikationen nötig sind"
+  },
+  "componentsChatAgentStepsModalPipelineModificationsTitle": "✨ Pipeline-Änderungen",
+  "@componentsChatAgentStepsModalPipelineModificationsTitle": {
+    "description": "Titel für Pipeline-Änderungen Sektion"
+  },
+  "componentsChatAgentStepsModalPipelineModificationsSubtitle": "Keine Änderungen erforderlich - Ihre Anfrage wurde problemlos verarbeitet!",
+  "@componentsChatAgentStepsModalPipelineModificationsSubtitle": {
+    "description": "Untertitel wenn keine Pipeline-Änderungen vorhanden sind"
+  },
+  "componentsChatAgentStepsModalStepModifications": "🔧 Schritt-Änderungen",
+  "@componentsChatAgentStepsModalStepModifications": {
+    "description": "Titel für Schritt-Modifikationen"
+  },
+  "componentsChatAgentStepsModalCopyModifications": "Änderungen kopieren",
+  "@componentsChatAgentStepsModalCopyModifications": {
+    "description": "Tooltip zum Kopieren der Änderungen"
+  },
+  "componentsChatAgentStepsModalSummaryLabel": "Zusammenfassung: {summary}",
+  "@componentsChatAgentStepsModalSummaryLabel": {
+    "description": "Zusammenfassungs-Label mit Platzhalter",
+    "placeholders": { "summary": {
+      "type": "String"
+    } }
+  },
+  "componentsChatAgentStepsModalEnhancedSystemPrompt": "🤖 Verbesserter System-Prompt",
+  "@componentsChatAgentStepsModalEnhancedSystemPrompt": {
+    "description": "Titel für den verbesserten System-Prompt"
+  },
+  "componentsChatAgentStepsModalCopyEnhancedPrompt": "Verbesserten System-Prompt kopieren",
+  "@componentsChatAgentStepsModalCopyEnhancedPrompt": {
+    "description": "Tooltip zum Kopieren des verbesserten Prompts"
+  },
+  "componentsChatAgentStepsModalLengthLabel": "Länge: {count} Zeichen",
+  "@componentsChatAgentStepsModalLengthLabel": {
+    "description": "Längen-Label mit Platzhalter",
+    "placeholders": { "count": {
+      "type": "int"
+    } }
+  },
+  "componentsChatAgentStepsModalTechnicalDetails": "Technische Details",
+  "@componentsChatAgentStepsModalTechnicalDetails": {
+    "description": "Header for technical details in modification item"
+  },
+  "componentsChatAgentStepsModalDataChanges": "Datenänderungen",
+  "@componentsChatAgentStepsModalDataChanges": {
+    "description": "Header for before/after data changes"
+  },
+  "componentsChatAgentStepsModalBefore": "Vorher",
+  "@componentsChatAgentStepsModalBefore": {
+    "description": "Label for before data column"
+  },
+  "componentsChatAgentStepsModalAfter": "Nachher",
+  "@componentsChatAgentStepsModalAfter": {
+    "description": "Label for after data column"
+  },
+  "componentsChatAgentStepsModalStatusSkipped": "Übersprungen",
+  "@componentsChatAgentStepsModalStatusSkipped": {
+    "description": "Status label for skipped steps"
+  },
+  "componentsChatAgentStepsModalStatusErrorRecovered": "Fehler behoben",
+  "@componentsChatAgentStepsModalStatusErrorRecovered": {
+    "description": "Status label when an error was recovered"
+  },
+  "componentsChatAgentStepsModalStatusErrorHandlingFailed": "Fehlerbehandlung fehlgeschlagen",
+  "@componentsChatAgentStepsModalStatusErrorHandlingFailed": {
+    "description": "Status label when error handling failed"
+  },
+  "componentsChatAgentStepsModalStatusCompletedSuccessfully": "Erfolgreich abgeschlossen",
+  "@componentsChatAgentStepsModalStatusCompletedSuccessfully": {
+    "description": "Status label for successful completion"
+  },
+  "componentsChatAgentStepsModalFailed": "Fehlgeschlagen",
+  "@componentsChatAgentStepsModalFailed": {
+    "description": "Generic failed label"
+  },
+  "componentsChatAgentStepsModalBadgeEmergencyOverrides": "Notfall-Überschreibungen",
+  "@componentsChatAgentStepsModalBadgeEmergencyOverrides": {
+    "description": "Label for emergency override badge"
+  },
+  "componentsChatAgentStepsModalBadgeAiValidations": "KI-Validierungen",
+  "@componentsChatAgentStepsModalBadgeAiValidations": {
+    "description": "Label for AI validations badge"
+  },
+  "componentsChatAgentStepsModalBadgeAutomaticFixes": "Automatische Korrekturen",
+  "@componentsChatAgentStepsModalBadgeAutomaticFixes": {
+    "description": "Label for automatic fixes badge"
+  },
+  "componentsChatAgentStepsModalTotalModifications": "Gesamtänderungen: {count}",
+  "@componentsChatAgentStepsModalTotalModifications": {
+    "description": "Gesamtänderungen Text mit Platzhalter",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "componentsChatAgentStepsModalSkipDetails": "⏭️ Details überspringen",
+  "@componentsChatAgentStepsModalSkipDetails": {
+    "description": "Überschrift für den Abschnitt Details überspringen"
+  },
+  "componentsChatAgentStepsModalMetadata": "📊 Metadaten",
+  "@componentsChatAgentStepsModalMetadata": {
+    "description": "Überschrift für den Abschnitt Metadaten"
+  },
+  "componentsChatAgentStepsModalDataOutput": "📤 Datenausgabe",
+  "@componentsChatAgentStepsModalDataOutput": {
+    "description": "Überschrift für den Abschnitt Datenausgabe"
+  },
+  "componentsChatAgentStepsModalErrorDetails": "❌ Fehlerdetails",
+  "@componentsChatAgentStepsModalErrorDetails": {
+    "description": "Überschrift für den Abschnitt Fehlerdetails"
+  },
+  "componentsChatAgentStepsModalRawStepData": "🔍 Rohdaten der Schritte",
+  "@componentsChatAgentStepsModalRawStepData": {
+    "description": "Überschrift für den Abschnitt Rohdaten der Schritte"
+  },
+  "componentsChatAgentStepsModalIdLabel": "ID: {id}",
+  "@componentsChatAgentStepsModalIdLabel": {
+    "description": "ID-Label mit Platzhalter",
+    "placeholders": { "id": { "type": "String" } }
+  },
+  "componentsChatAgentStepsModalTimeLabel": "Zeit: {time}",
+  "@componentsChatAgentStepsModalTimeLabel": {
+    "description": "Zeit-Label mit Platzhalter",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "componentsCommonCopyToClipboard": "In die Zwischenablage kopieren",
+  "@componentsCommonCopyToClipboard": {
+    "description": "Gemeinsamer Tooltip zum Kopieren in die Zwischenablage"
+  },
+  "componentsChatBotProfileCustomizationDialogAngryGreg": "Wütender Greg",
+  "@componentsChatBotProfileCustomizationDialogAngryGreg": {
+    "description": "Wütender Greg Persönlichkeitstyp"
+  },
+  "componentsChatBotProfileCustomizationDialogBotName": "Bot-Name",
+  "@componentsChatBotProfileCustomizationDialogBotName": {
+    "description": "Bot-Name Feld Label"
+  },
+  "componentsChatBotProfileCustomizationDialogCancel": "Abbrechen",
+  "@componentsChatBotProfileCustomizationDialogCancel": {
+    "description": "Cancel button text"
+  },
+  "componentsChatBotProfileCustomizationDialogCasualGymBro": "Entspannter Gym-Bro",
+  "@componentsChatBotProfileCustomizationDialogCasualGymBro": {
+    "description": "Entspannter Gym-Bro Persönlichkeitstyp"
+  },
+  "componentsChatBotProfileCustomizationDialogChangeAvatar": "Avatar ändern",
+  "@componentsChatBotProfileCustomizationDialogChangeAvatar": {
+    "description": "Avatar ändern Button Text"
+  },
+  "componentsChatBotProfileCustomizationDialogChooseFromGallery": "Aus Galerie wählen",
+  "@componentsChatBotProfileCustomizationDialogChooseFromGallery": {
+    "description": "Aus Galerie wählen"
+  },
+  "componentsChatBotProfileCustomizationDialogEditBotProfile": "Bot-Profil bearbeiten",
+  "@componentsChatBotProfileCustomizationDialogEditBotProfile": {
+    "description": "Bot-Profil bearbeiten Dialog Titel"
+  },
+  "componentsChatBotProfileCustomizationDialogFitnessCoach": "Fitness-Trainer",
+  "@componentsChatBotProfileCustomizationDialogFitnessCoach": {
+    "description": "Fitness-Trainer Persönlichkeitstyp"
+  },
+  "componentsChatBotProfileCustomizationDialogNiceAndFriendly": "Nett & freundlich",
+  "@componentsChatBotProfileCustomizationDialogNiceAndFriendly": {
+    "description": "Nett & freundlich Persönlichkeitstyp"
+  },
+  "componentsChatBotProfileCustomizationDialogPersonality": "Persönlichkeit",
+  "@componentsChatBotProfileCustomizationDialogPersonality": {
+    "description": "Persönlichkeit Feld Label"
+  },
+  "componentsChatBotProfileCustomizationDialogProfessionalNutritionist": "Professioneller Ernährungsberater",
+  "@componentsChatBotProfileCustomizationDialogProfessionalNutritionist": {
+    "description": "Professioneller Ernährungsberater Persönlichkeitstyp"
+  },
+  "componentsChatBotProfileCustomizationDialogProfileSaved": "Profil erfolgreich gespeichert",
+  "@componentsChatBotProfileCustomizationDialogProfileSaved": {
+    "description": "Profil gespeichert Erfolg Nachricht"
+  },
+  "componentsChatBotProfileCustomizationDialogProfileSaveFailed": "Profil speichern fehlgeschlagen",
+  "@componentsChatBotProfileCustomizationDialogProfileSaveFailed": {
+    "description": "Profil speichern Fehler Nachricht"
+  },
+  "componentsChatBotProfileCustomizationDialogRemoveAvatar": "Avatar entfernen",
+  "@componentsChatBotProfileCustomizationDialogRemoveAvatar": {
+    "description": "Avatar entfernen Button Text"
+  },
+  "componentsChatBotProfileCustomizationDialogRequiredField": "Dieses Feld ist erforderlich",
+  "@componentsChatBotProfileCustomizationDialogRequiredField": {
+    "description": "Dieses Feld ist erforderlich"
+  },
+  "componentsChatBotProfileCustomizationDialogSave": "Speichern",
+  "@componentsChatBotProfileCustomizationDialogSave": {
+    "description": "Speichern"
+  },
+  "componentsChatBotProfileCustomizationDialogTakePhoto": "Foto aufnehmen",
+  "@componentsChatBotProfileCustomizationDialogTakePhoto": {
+    "description": "Foto aufnehmen"
+  },
+  "componentsChatBotProfileCustomizationDialogVeryAngryBro": "Sehr wütender Bro",
+  "@componentsChatBotProfileCustomizationDialogVeryAngryBro": {
+    "description": "Sehr wütender Bro Persönlichkeitstyp"
+  },
+  "componentsChatBotPersonalityDescriptionNutritionist": "Professionell & Evidenzbasiert",
+  "@componentsChatBotPersonalityDescriptionNutritionist": { "description": "Personality description for nutritionist bot" },
+  "componentsChatBotPersonalityDescriptionCasualGymbro": "Lässig & Motivierend",
+  "@componentsChatBotPersonalityDescriptionCasualGymbro": { "description": "Personality description for casual gymbro" },
+  "componentsChatBotPersonalityDescriptionAngryGreg": "Intensiv & Supplement-fokussiert",
+  "@componentsChatBotPersonalityDescriptionAngryGreg": { "description": "Personality description for angry Greg" },
+  "componentsChatBotPersonalityDescriptionVeryAngryBro": "Extrem Intensiv",
+  "@componentsChatBotPersonalityDescriptionVeryAngryBro": { "description": "Personality description for very angry bro" },
+  "componentsChatBotPersonalityDescriptionFitnessCoach": "Ermutigend & Unterstützend",
+  "@componentsChatBotPersonalityDescriptionFitnessCoach": { "description": "Personality description for fitness coach" },
+  "componentsChatBotPersonalityDescriptionNice": "Freundlich & Hilfsbereit",
+  "@componentsChatBotPersonalityDescriptionNice": { "description": "Personality description for nice bot" },
+  "componentsChatEditBotProfileTooltip": "Bot-Profil bearbeiten",
+  "@componentsChatEditBotProfileTooltip": { "description": "Tooltip for edit bot profile button" },
+  "componentsChatChatInputErrorPickingImage": "Fehler beim Auswählen des Bildes: {error}",
+  "@componentsChatChatInputErrorPickingImage": {
+    "description": "Fehler beim Bild auswählen",
+    "placeholders": {
+      "error": {
+        "type": "Object",
+        "description": "The error message"
+      }
+    }  
+  },
+  "componentsChatMessageBubbleModificationEmergency": "{count} Notfallkorrekturen angewendet",
+  "componentsChatMessageBubbleModificationAi": "{count} KI-Verbesserungen angewendet",
+  "componentsChatMessageBubbleModificationAutomatic": "{count} automatische Verbesserungen angewendet",
+  "@componentsChatMessageBubbleModificationEmergency": {
+    "description": "Hinweis für Notfall-Modifikationen im Nachrichten-Bubble",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "@componentsChatMessageBubbleModificationAi": {
+    "description": "Hinweis für KI-Modifikationen im Nachrichten-Bubble",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "@componentsChatMessageBubbleModificationAutomatic": {
+    "description": "Hinweis für automatische Modifikationen im Nachrichten-Bubble",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatMessageBubbleYou": "Du",
+  "@componentsChatMessageBubbleYou": {
+    "description": "Label for the user in the message bubble"
+  },
+  "componentsChatMessageBubbleAssistant": "Assistent",
+  "@componentsChatMessageBubbleAssistant": {
+    "description": "Label for the assistant in the message bubble"
+  },
+  "componentsChatMessageBubbleBotTag": "Bot",
+  "@componentsChatMessageBubbleBotTag": {
+    "description": "Label to identify the bot in the message bubble"
+  },
+  "componentsChatMessageBubbleSending": "Wird gesendet...",
+  "@componentsChatMessageBubbleSending": {
+    "description": "Text shown while a message is being sent"
+  },
+  "componentsChatMessageBubbleSuggestedDishes": "Vorgeschlagene Gerichte",
+  "@componentsChatMessageBubbleSuggestedDishes": {
+    "description": "Title for the suggested dishes section"
+  },
+  "componentsChatMessageBubbleRecommendation": "Empfehlung",
+  "@componentsChatMessageBubbleRecommendation": {
+    "description": "Label for a recommendation in the message bubble"
+  },
+  "componentsChatMessageBubbleNoRecommendationsAvailable": "Keine Empfehlungen verfügbar.",
+  "@componentsChatMessageBubbleNoRecommendationsAvailable": {
+    "description": "Text shown when no recommendations are available"
+  },
+  "componentsChatChatInputImageAttached": "Bild angehängt",
+  "@componentsChatChatInputImageAttached": {
+    "description": "Bild angehängt"
+  },
+  "componentsChatChatInputIngredientsAdded": "Zutaten hinzugefügt",
+  "@componentsChatChatInputIngredientsAdded": {
+    "description": "Zutaten hinzugefügt"
+  },
+  "componentsChatChatInputScanBarcode": "Barcode scannen",
+  "@componentsChatChatInputScanBarcode": {
+    "description": "Barcode scannen"
+  },
+  "componentsChatChatInputSearchProduct": "Produkt suchen",
+  "@componentsChatChatInputSearchProduct": {
+    "description": "Produkt suchen"
+  },
+  "componentsChatChatInputSendMessage": "Nachricht senden",
+  "@componentsChatChatInputSendMessage": {
+    "description": "Nachricht senden"
+  },
+  "componentsChatChatInputTypeMessage": "Nachricht eingeben...",
+  "@componentsChatChatInputTypeMessage": {
+    "description": "Nachricht eingeben..."
+  },
+  "componentsChatChatWelcomeAnalyzeNutrition": "Ernährung analysieren",
+  "@componentsChatChatWelcomeAnalyzeNutrition": {
+    "description": "Ernährung analysieren"
+  },
+  "componentsChatChatWelcomeCalculateMacros": "Makros berechnen",
+  "@componentsChatChatWelcomeCalculateMacros": {
+    "description": "Makros berechnen"
+  },
+  "componentsChatChatWelcomeChatWelcomeSubtitle": "Ihr KI-Ernährungsassistent ist hier, um zu helfen",
+  "@componentsChatChatWelcomeChatWelcomeSubtitle": {
+    "description": "Ihr KI-Ernährungsassistent ist hier, um zu helfen"
+  },
+  "componentsChatChatWelcomeChatWelcomeTitle": "Willkommen bei PlatePal",
+  "@componentsChatChatWelcomeChatWelcomeTitle": {
+    "description": "Willkommen bei PlatePal"
+  },
+  "componentsChatChatWelcomeFindAlternatives": "Alternativen finden",
+  "@componentsChatChatWelcomeFindAlternatives": {
+    "description": "Alternativen finden"
+  },
+  "componentsChatChatWelcomeGetStartedToday": "Heute beginnen",
+  "@componentsChatChatWelcomeGetStartedToday": {
+    "description": "Heute beginnen"
+  },
+  "componentsChatChatWelcomeIngredientInfo": "Zutatensinfo",
+  "@componentsChatChatWelcomeIngredientInfo": {
+    "description": "Zutatensinfo"
+  },
+  "componentsChatChatWelcomeMealPlan": "Ernährungsplan-Hilfe",
+  "@componentsChatChatWelcomeMealPlan": {
+    "description": "Ernährungsplan-Hilfe"
+  },
+  "componentsChatChatWelcomeSuggestMeal": "Mahlzeit vorschlagen",
+  "@componentsChatChatWelcomeSuggestMeal": {
+    "description": "Mahlzeit vorschlagen"
+  },
+  "componentsChatChatWelcomeWhatCanIHelpWith": "Wobei kann ich Ihnen helfen?",
+  "@componentsChatChatWelcomeWhatCanIHelpWith": {
+    "description": "Wobei kann ich Ihnen helfen?"
+  },
+  "componentsChatChatWelcomeSuggestMealSubtitle": "Erhalte personalisierte Mahlzeitenempfehlungen",
+  "@componentsChatChatWelcomeSuggestMealSubtitle": { "description": "Untertitel für Vorschlag einer Mahlzeit" },
+  "componentsChatChatWelcomeSuggestMealMessage": "Schlag mir eine gesunde Mahlzeit vor, basierend auf meinen Fitnesszielen",
+  "@componentsChatChatWelcomeSuggestMealMessage": { "description": "Nachricht beim Tippen auf Mahlzeit vorschlagen" },
+
+  "componentsChatChatWelcomeAnalyzeNutritionSubtitle": "Analysiere die Nährwerte deiner Mahlzeiten",
+  "@componentsChatChatWelcomeAnalyzeNutritionSubtitle": { "description": "Untertitel für Nährwertanalyse" },
+  "componentsChatChatWelcomeAnalyzeNutritionMessage": "Hilf mir, die Nährwerte in meiner Mahlzeit zu analysieren",
+  "@componentsChatChatWelcomeAnalyzeNutritionMessage": { "description": "Nachricht beim Tippen auf Nährwertanalyse" },
+
+  "componentsChatChatWelcomeFindAlternativesSubtitle": "Entdecke gesunde Lebensmittelalternativen",
+  "@componentsChatChatWelcomeFindAlternativesSubtitle": { "description": "Untertitel für Alternativen finden" },
+  "componentsChatChatWelcomeFindAlternativesMessage": "Finde gesunde Alternativen zu meiner aktuellen Mahlzeit",
+  "@componentsChatChatWelcomeFindAlternativesMessage": { "description": "Nachricht beim Tippen auf Alternativen finden" },
+
+  "componentsChatChatWelcomeCalculateMacrosSubtitle": "Berechne Makros für deine Mahlzeiten",
+  "@componentsChatChatWelcomeCalculateMacrosSubtitle": { "description": "Untertitel für Makros berechnen" },
+  "componentsChatChatWelcomeCalculateMacrosMessage": "Hilf mir, die Makros für meine Mahlzeiten zu berechnen",
+  "@componentsChatChatWelcomeCalculateMacrosMessage": { "description": "Nachricht beim Tippen auf Makros berechnen" },
+
+  "componentsChatChatWelcomeMealPlanSubtitle": "Erstelle wöchentliche Essenspläne",
+  "@componentsChatChatWelcomeMealPlanSubtitle": { "description": "Untertitel für Ernährungsplan" },
+  "componentsChatChatWelcomeMealPlanMessage": "Hilf mir, einen wöchentlichen Ernährungsplan zu erstellen",
+  "@componentsChatChatWelcomeMealPlanMessage": { "description": "Nachricht beim Tippen auf Ernährungsplan" },
+
+  "componentsChatChatWelcomeIngredientInfoSubtitle": "Erfahre mehr über Zutaten und deren Vorteile",
+  "@componentsChatChatWelcomeIngredientInfoSubtitle": { "description": "Untertitel für Zutateninfo" },
+  "componentsChatChatWelcomeIngredientInfoMessage": "Erzähl mir von den ernährungsphysiologischen Vorteilen von Zutaten",
+  "@componentsChatChatWelcomeIngredientInfoMessage": { "description": "Nachricht beim Tippen auf Zutateninfo" },
+    "componentsChatDishSuggestionCardHighProtein": "Proteinreiches Gericht",
+    "@componentsChatDishSuggestionCardHighProtein": { "description": "Titel für proteinreiches Gericht" },
+    "componentsChatDishSuggestionCardHighCarb": "Kohlenhydratreiches Gericht",
+    "@componentsChatDishSuggestionCardHighCarb": { "description": "Titel für kohlenhydratreiches Gericht" },
+    "componentsChatDishSuggestionCardHighFat": "Fettreiches Gericht",
+    "@componentsChatDishSuggestionCardHighFat": { "description": "Titel für fettreiches Gericht" },
+    "componentsChatDishSuggestionCardBalanced": "Ausgewogenes Gericht",
+    "@componentsChatDishSuggestionCardBalanced": { "description": "Titel für ausgewogenes Gericht" },
+    "componentsChatDishSuggestionCardUnbalanced": "Unausgewogenes Gericht",
+    "@componentsChatDishSuggestionCardUnbalanced": { "description": "Titel für unausgewogenes Gericht" },
+    "componentsChatDishSuggestionCardProtein": "Protein",
+    "@componentsChatDishSuggestionCardProtein": { "description": "Proteinlabel für Nährwertbalken" },
+    "componentsChatDishSuggestionCardCarbs": "Kohlenhydrate",
+    "@componentsChatDishSuggestionCardCarbs": { "description": "Kohlenhydratlabel für Nährwertbalken" },
+    "componentsChatDishSuggestionCardFat": "Fett",
+    "@componentsChatDishSuggestionCardFat": { "description": "Fettlabel für Nährwertbalken" },
+    "componentsChatDishSuggestionCardCalories": "Kalorien",
+    "@componentsChatDishSuggestionCardCalories": { "description": "Kalorienlabel für Nährwertbalken" },
+    "componentsChatDishSuggestionCardInspect": "Details",
+    "@componentsChatDishSuggestionCardInspect": { "description": "Buttontext für Details eines Gerichts" },
+  "componentsChatDishSuggestionCardDetails": "Details",
+  "@componentsChatDishSuggestionCardDetails": {
+    "description": "Details"
+  },
+  "componentsChatDishSuggestionCardErrorOpeningDishScreen": "Fehler beim Öffnen des Gerichtsbildschirms: {error}",
+  "@componentsChatDishSuggestionCardErrorOpeningDishScreen": {
     "description": "Fehler beim Öffnen des Gerichtsbildschirms",
     "placeholders": {
       "error": {
@@ -534,256 +575,1488 @@
       }
     }
   },
-  "errorPickingImage": "Fehler beim Auswählen des Bildes: {error}",
-  "@errorPickingImage": {
-    "description": "Fehler beim Bild auswählen",
-    "placeholders": {
-      "error": {
-        "type": "Object",
-        "description": "The error message"
-      }
-    }
+  "componentsChatDishSuggestionCardLogDish": "Gericht eintragen",
+  "@componentsChatDishSuggestionCardLogDish": {
+    "description": "Gericht eintragen"
   },
-  "agentProcessingSteps": "Agenten-Prozessschritte",
-  "@agentProcessingSteps": {"description": "Titel für Agenten-Schritte"},
-  "copyAll": "Alles kopieren",
-  "@copyAll": {"description": "Button um alles zu kopieren"},
-  "viewFullData": "Gesamte Daten anzeigen",
-  "@viewFullData": {"description": "Button für vollständige Daten"},
-  "viewFullPrompt": "Gesamtes Prompt anzeigen",
-  "@viewFullPrompt": {"description": "Button für vollständiges Prompt"},
-  "copiedToClipboard": "In die Zwischenablage kopiert",
-  "@copiedToClipboard": {"description": "Text nach dem Kopieren"},
-  "barcodeScanningComingSoon": "Barcode-Scan bald verfügbar!",
-  "@barcodeScanningComingSoon": {"description": "Hinweis Barcode"},
-  "productSearchComingSoon": "Produktsuche bald verfügbar!",
-  "@productSearchComingSoon": {"description": "Hinweis Produktsuche"},
-  "configureApiKeyForAiTips": "Bitte OpenAI-API-Schlüssel in den Einstellungen konfigurieren, um KI-Tipps zu nutzen",
-  "@configureApiKeyForAiTips": {"description": "Aufforderung API-Schlüssel"},
-  "failedToGetAiTip": "Fehler beim Abrufen des KI-Tipps. Bitte erneut versuchen.",
-  "@failedToGetAiTip": {"description": "Fehler KI-Tipp"},
-  "aiNutritionTip": "KI Ernährungstipp",
-  "@aiNutritionTip": {"description": "Titel KI Tipp"},
-  "available": "Verfügbar",
-  "@available": {"description": "Link verfügbar"},
-  "notAvailable": "Nicht verfügbar",
-  "@notAvailable": {"description": "Link nicht verfügbar"},
-  "chatAndAiSettings": "Chat & KI Einstellungen",
-  "@chatAndAiSettings": {
-    "description": "Titel für Chat und KI Einstellungen Sektion"
+  "componentsChatMessageBubbleClose": "Schließen",
+  "@componentsChatMessageBubbleClose": {
+    "description": "Schließen"
   },
-  "chatAgentOptions": "Chat-Agent Optionen",
-  "@chatAgentOptions": {
-    "description": "Titel für Chat-Agent Optionen"
+  "componentsChatMessageBubbleIngredients": "Zutaten",
+  "@componentsChatMessageBubbleIngredients": {
+    "description": "Zutaten"
   },
-  "enableAgentModeDeepSearch": "Agent-Modus, Deep Search und mehr aktivieren",
-  "@enableAgentModeDeepSearch": {
-    "description": "Untertitel für Chat-Agent Optionen"
+  "componentsChatMessageBubbleMessageCopied": "Nachricht in Zwischenablage kopiert",
+  "@componentsChatMessageBubbleMessageCopied": {
+    "description": "Nachricht in Zwischenablage kopiert"
   },
-  "chatProfiles": "Chat-Profile",
-  "@chatProfiles": {
-    "description": "Titel für Chat-Profile Sektion"
+  "componentsChatMessageBubbleRetryMessage": "Wiederholen",
+  "@componentsChatMessageBubbleRetryMessage": {
+    "description": "Wiederholen"
   },
-  "userChatProfile": "Ihr Profil",
-  "@userChatProfile": {
-    "description": "Benutzer Chat-Profil Sektion"
+  "componentsChatMessageBubbleSelect": "Auswählen",
+  "@componentsChatMessageBubbleSelect": {
+    "description": "Allgemeiner Auswahltext"
   },
-  "botChatProfile": "Bot-Profil",
-  "@botChatProfile": {
-    "description": "Bot Chat-Profil Sektion"
+  "componentsChatMessageBubbleTapToViewAgentSteps": "Agent-Details anzeigen",
+  "@componentsChatMessageBubbleTapToViewAgentSteps": {
+    "description": "Agent-Details anzeigen"
   },
-  "customizeUserProfile": "Passen Sie Ihr Chat-Profil an",
-  "@customizeUserProfile": {
-    "description": "Untertitel für Benutzer-Profil Anpassung"
+  "componentsChatMessageBubbleYesterday": "Gestern",
+  "@componentsChatMessageBubbleYesterday": {
+    "description": "Gestern"
   },
-  "customizeBotProfile": "Passen Sie die Persönlichkeit und das Aussehen des Bots an",
-  "@customizeBotProfile": {
-    "description": "Untertitel für Bot-Profil Anpassung"
+  "componentsChatNutritionAnalysisCardAddToMeals": "Zu Mahlzeiten hinzufügen",
+  "@componentsChatNutritionAnalysisCardAddToMeals": {
+    "description": "Zu Mahlzeiten hinzufügen"
   },
-  "username": "Benutzername",
-  "@username": {
-    "description": "Benutzername Feld Label"
+  "componentsChatNutritionAnalysisCardCookingInstructions": "Kochanweisungen",
+  "@componentsChatNutritionAnalysisCardCookingInstructions": {
+    "description": "Kochanweisungen"
   },
-  "botName": "Bot-Name",
-  "@botName": {
-    "description": "Bot-Name Feld Label"
+  "componentsChatNutritionAnalysisCardDishName": "Gerichtname",
+  "@componentsChatNutritionAnalysisCardDishName": {
+    "description": "Gerichtname"
   },
-  "avatar": "Avatar",
-  "@avatar": {
-    "description": "Avatar Feld Label"
+  "componentsChatNutritionAnalysisCardMealType": "Mahlzeitentyp",
+  "@componentsChatNutritionAnalysisCardMealType": {
+    "description": "Mahlzeitentyp"
   },
-  "changeAvatar": "Avatar ändern",
-  "@changeAvatar": {
-    "description": "Avatar ändern Button Text"
+  "componentsChatNutritionAnalysisCardNutritionAnalysis": "Nährwertanalyse",
+  "@componentsChatNutritionAnalysisCardNutritionAnalysis": {
+    "description": "Nährwertanalyse"
   },
-  "removeAvatar": "Avatar entfernen",
-  "@removeAvatar": {
-    "description": "Avatar entfernen Button Text"
+  "componentsChatNutritionAnalysisCardServingSize": "Portionsgröße",
+  "@componentsChatNutritionAnalysisCardServingSize": {
+    "description": "Portionsgröße"
   },
-  "personality": "Persönlichkeit",
-  "@personality": {
-    "description": "Persönlichkeit Feld Label"
+  "componentsChatQuickActionsQuickActions": "Schnellaktionen",
+  "@componentsChatQuickActionsQuickActions": {
+    "description": "Schnellaktionen"
   },
-  "selectPersonality": "Persönlichkeit auswählen",
-  "@selectPersonality": {
-    "description": "Persönlichkeit auswählen Dropdown Titel"
-  },
-  "professionalNutritionist": "Professioneller Ernährungsberater",
-  "@professionalNutritionist": {
-    "description": "Professioneller Ernährungsberater Persönlichkeitstyp"
-  },
-  "casualGymBro": "Entspannter Gym-Bro",
-  "@casualGymBro": {
-    "description": "Entspannter Gym-Bro Persönlichkeitstyp"
-  },
-  "angryGreg": "Wütender Greg",
-  "@angryGreg": {
-    "description": "Wütender Greg Persönlichkeitstyp"
-  },
-  "veryAngryBro": "Sehr wütender Bro",
-  "@veryAngryBro": {
-    "description": "Sehr wütender Bro Persönlichkeitstyp"
-  },
-  "fitnessCoach": "Fitness-Trainer",
-  "@fitnessCoach": {
-    "description": "Fitness-Trainer Persönlichkeitstyp"
-  },
-  "niceAndFriendly": "Nett & freundlich",
-  "@niceAndFriendly": {
-    "description": "Nett & freundlich Persönlichkeitstyp"
-  },
-  "selectImage": "Bild auswählen",
-  "@selectImage": {
-    "description": "Bild auswählen Button Text"
-  },
-  "profileSaved": "Profil erfolgreich gespeichert",
-  "@profileSaved": {
-    "description": "Profil gespeichert Erfolg Nachricht"
-  },
-  "profileSaveFailed": "Profil speichern fehlgeschlagen",
-  "@profileSaveFailed": {
-    "description": "Profil speichern Fehler Nachricht"
-  },
-  "editUserProfile": "Benutzerprofil bearbeiten",
-  "@editUserProfile": {
+  "componentsChatUserProfileCustomizationDialogEditUserProfile": "Benutzerprofil bearbeiten",
+  "@componentsChatUserProfileCustomizationDialogEditUserProfile": {
     "description": "Benutzerprofil bearbeiten Dialog Titel"
   },
-  "editBotProfile": "Bot-Profil bearbeiten",
-  "@editBotProfile": {
-    "description": "Bot-Profil bearbeiten Dialog Titel"
+  "componentsChatUserProfileCustomizationDialogUsername": "Benutzername",
+  "@componentsChatUserProfileCustomizationDialogUsername": {
+    "description": "Benutzername Feld Label"
   },
-  "connectToHealth": "Mit Gesundheitsdaten verbinden",
-  "@connectToHealth": {
-    "description": "Mit Gesundheit verbinden Button Text"
+  "componentsDishesDishCardDelete": "Löschen",
+  "@componentsDishesDishCardDelete": {
+    "description": "Löschen"
   },
-  "healthDataSync": "Gesundheitsdaten-Synchronisation",
-  "@healthDataSync": {
-    "description": "Gesundheitsdaten-Synchronisation Bereich Titel"
+  "componentsDishesDishCardEdit": "Bearbeiten",
+  "@componentsDishesDishCardEdit": {
+    "description": "Bearbeiten"
   },
-  "healthConnected": "Gesundheitsdaten verbunden",
-  "@healthConnected": {
-    "description": "Gesundheitsdaten verbunden Status Nachricht"
+  "componentsDishesDishFormIngredientFormModalAddIngredient": "Zutat hinzufügen",
+  "@componentsDishesDishFormIngredientFormModalAddIngredient": {
+    "description": "Zutat hinzufügen"
   },
-  "healthDisconnected": "Gesundheitsdaten nicht verbunden",
-  "@healthDisconnected": {
-    "description": "Gesundheitsdaten getrennt Status Nachricht"
+  "componentsDishesDishFormIngredientFormModalEditIngredient": "Zutat bearbeiten",
+  "@componentsDishesDishFormIngredientFormModalEditIngredient": {
+    "description": "Zutat bearbeiten"
   },
-  "syncHealthData": "Gesundheitsdaten synchronisieren",
-  "@syncHealthData": {
-    "description": "Gesundheitsdaten synchronisieren Button Text"
+  "componentsDishesDishFormIngredientFormModalGrams": "g",
+  "@componentsDishesDishFormIngredientFormModalGrams": {
+    "description": "g"
   },
-  "healthPermissionRequired": "Gesundheitsberechtigungen sind erforderlich, um Ihre Daten zu synchronisieren",
-  "@healthPermissionRequired": {
-    "description": "Gesundheitsberechtigung erforderlich Nachricht"
+  "componentsDishesDishFormIngredientFormModalIngredientName": "Zutatenname",
+  "@componentsDishesDishFormIngredientFormModalIngredientName": {
+    "description": "Zutatenname"
   },
-  "healthSyncSuccess": "Gesundheitsdaten erfolgreich synchronisiert",
-  "@healthSyncSuccess": {
-    "description": "Gesundheitssynchronisation erfolgreich Nachricht"
+  "componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder": "Zutatennamen eingeben",
+  "@componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder": {
+    "description": "Zutatennamen eingeben"
   },
-  "healthSyncFailed": "Synchronisation der Gesundheitsdaten fehlgeschlagen",
-  "@healthSyncFailed": {
-    "description": "Gesundheitssynchronisation fehlgeschlagen Nachricht"
+  "componentsDishesDishFormIngredientFormModalKcal": "kcal",
+  "@componentsDishesDishFormIngredientFormModalKcal": {
+    "description": "kcal"
   },
-  "lastSynced": "Zuletzt synchronisiert: {date}",
-  "@lastSynced": {
-    "description": "Zeitstempel der letzten Synchronisation",
+  "componentsDishesDishFormIngredientFormModalNutritionInformation": "Nährwertinformationen",
+  "@componentsDishesDishFormIngredientFormModalNutritionInformation": {
+    "description": "Nährwertinformationen"
+  },
+  "componentsDishesDishFormIngredientFormModalNutritionPer100g": "Nährwerte pro 100g",
+  "@componentsDishesDishFormIngredientFormModalNutritionPer100g": {
+    "description": "Nährwerte pro 100g"
+  },
+  "componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName": "Bitte geben Sie einen Zutatennamen ein",
+  "@componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName": {
+    "description": "Bitte geben Sie einen Zutatennamen ein"
+  },
+  "componentsDishesDishFormIngredientFormModalPleaseEnterQuantity": "Bitte geben Sie eine Menge ein",
+  "@componentsDishesDishFormIngredientFormModalPleaseEnterQuantity": {
+    "description": "Bitte geben Sie eine Menge ein"
+  },
+  "componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber": "Bitte geben Sie eine gültige Zahl ein",
+  "@componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber": {
+    "description": "Bitte geben Sie eine gültige Zahl ein"
+  },
+  "componentsDishesDishFormIngredientFormModalQuantity": "Menge",
+  "@componentsDishesDishFormIngredientFormModalQuantity": {
+    "description": "Menge"
+  },
+  "componentsDishesDishFormIngredientFormModalQuantityPlaceholder": "0",
+  "@componentsDishesDishFormIngredientFormModalQuantityPlaceholder": {
+    "description": "0"
+  },
+  "componentsDishesDishFormSmartNutritionCardNutritionalInformation": "Nährwertinformationen",
+  "@componentsDishesDishFormSmartNutritionCardNutritionalInformation": {
+    "description": "Nährwertinformationen"
+  },
+  "componentsModalsDishLogModalAddNotes": "Notizen hinzufügen (optional)",
+  "@componentsModalsDishLogModalAddNotes": {
+    "description": "Notizen hinzufügen (optional)"
+  },
+  "componentsModalsDishLogModalBreakfast": "Frühstück",
+  "@componentsModalsDishLogModalBreakfast": {
+    "description": "Frühstück"
+  },
+  "componentsModalsDishLogModalCalculatedNutrition": "Berechnete Nährwerte",
+  "@componentsModalsDishLogModalCalculatedNutrition": {
+    "description": "Berechnete Nährwerte"
+  },
+  "componentsModalsDishLogModalDinner": "Abendessen",
+  "@componentsModalsDishLogModalDinner": {
+    "description": "Abendessen"
+  },
+  "componentsModalsDishLogModalDishLoggedSuccessfully": "Gericht erfolgreich protokolliert!",
+  "@componentsModalsDishLogModalDishLoggedSuccessfully": {
+    "description": "Gericht erfolgreich protokolliert!"
+  },
+  "componentsModalsDishLogModalErrorLoggingDish": "Fehler beim eintragen des Gerichtes",
+  "@componentsModalsDishLogModalErrorLoggingDish": {
+    "description": "Fehler beim eintragen des Gerichtes"
+  },
+  "componentsModalsDishLogModalLogDishTitle": "Gericht eintragen",
+  "@componentsModalsDishLogModalLogDishTitle": {
+    "description": "Gericht eintragen"
+  },
+  "componentsModalsDishLogModalLunch": "Mittagessen",
+  "@componentsModalsDishLogModalLunch": {
+    "description": "Mittagessen"
+  },
+  "componentsModalsDishLogModalNotes": "Notizen",
+  "@componentsModalsDishLogModalNotes": {
+    "description": "Notizen"
+  },
+  "componentsModalsDishLogModalPortionSize": "Portionsgröße",
+  "@componentsModalsDishLogModalPortionSize": {
+    "description": "Portionsgröße"
+  },
+  "componentsModalsDishLogModalSelectDate": "Datum auswählen",
+  "@componentsModalsDishLogModalSelectDate": {
+    "description": "Datum auswählen"
+  },
+  "componentsModalsDishLogModalSelectMealType": "Mahlzeitentyp auswählen",
+  "@componentsModalsDishLogModalSelectMealType": {
+    "description": "Mahlzeitentyp auswählen"
+  },
+  "componentsModalsDishLogModalSnack": "Snack",
+  "@componentsModalsDishLogModalSnack": {
+    "description": "Snack"
+  },
+  "componentsScannerBarcodeScannerBarcodeScanner": "Barcode-Scanner",
+  "@componentsScannerBarcodeScannerBarcodeScanner": {
+    "description": "Barcode-Scanner"
+  },
+  "componentsScannerBarcodeScannerErrorScanningBarcode": "Fehler beim Scannen des Barcodes",
+  "@componentsScannerBarcodeScannerErrorScanningBarcode": {
+    "description": "Fehler beim Scannen des Barcodes"
+  },
+  "componentsScannerBarcodeScannerOpenSettings": "Einstellungen Öffnen",
+  "@componentsScannerBarcodeScannerOpenSettings": {
+    "description": "Open settings button text"
+  },
+  "componentsScannerBarcodeScannerProductNotFound": "Produkt nicht gefunden",
+  "@componentsScannerBarcodeScannerProductNotFound": {
+    "description": "Produkt nicht gefunden"
+  },
+  "componentsScannerBarcodeScannerScanBarcodeToAddProduct": "Barcode scannen, um Produkt hinzuzufügen",
+  "@componentsScannerBarcodeScannerScanBarcodeToAddProduct": {
+    "description": "Barcode scannen, um Produkt hinzuzufügen"
+  },
+  "componentsScannerBarcodeScannerScanningBarcode": "Barcode wird gescannt...",
+  "@componentsScannerBarcodeScannerScanningBarcode": {
+    "description": "Barcode wird gescannt..."
+  },
+  "componentsScannerProductSearchErrorSearchingProduct": "Fehler bei der Produktsuche",
+  "@componentsScannerProductSearchErrorSearchingProduct": {
+    "description": "Fehler bei der Produktsuche"
+  },
+  "componentsScannerProductSearchLoadMore": "Mehr laden",
+  "@componentsScannerProductSearchLoadMore": {
+    "description": "Mehr laden"
+  },
+  "componentsScannerProductSearchLocalDishes": "Lokale Gerichte",
+  "@componentsScannerProductSearchLocalDishes": {
+    "description": "Lokale Gerichte"
+  },
+  "componentsScannerProductSearchLocalIngredients": "Lokale Zutaten",
+  "@componentsScannerProductSearchLocalIngredients": {
+    "description": "Lokale Zutaten"
+  },
+  "componentsScannerProductSearchNoProductsFound": "Keine Produkte gefunden",
+  "@componentsScannerProductSearchNoProductsFound": {
+    "description": "Keine Produkte gefunden"
+  },
+  "componentsScannerProductSearchProductSearch": "Produktsuche",
+  "@componentsScannerProductSearchProductSearch": {
+    "description": "Produktsuche"
+  },
+  "componentsScannerProductSearchSearchProducts": "Produkte suchen",
+  "@componentsScannerProductSearchSearchProducts": {
+    "description": "Produkte suchen"
+  },
+  "componentsSharedErrorDisplayRetry": "Wiederholen",
+  "@componentsSharedErrorDisplayRetry": {
+    "description": "Retry button text"
+  },
+  "componentsUiCustomTabBarCalendar": "Kalender",
+  "@componentsUiCustomTabBarCalendar": {
+    "description": "Kalender"
+  },
+  "componentsUiCustomTabBarChat": "Chat",
+  "@componentsUiCustomTabBarChat": {
+    "description": "Chat"
+  },
+  "componentsUiCustomTabBarMeals": "Mahlzeiten",
+  "@componentsUiCustomTabBarMeals": {
+    "description": "Mahlzeiten"
+  },
+  "componentsUiCustomTabBarMenu": "Menü",
+  "@componentsUiCustomTabBarMenu": {
+    "description": "Menü"
+  },
+  "providersChatProviderAiThinking": "KI denkt nach...",
+  "@providersChatProviderAiThinking": {
+    "description": "KI denkt nach..."
+  },
+  "providersChatProviderTestChatResponse": "Danke, dass Sie PlatePal ausprobieren! Dies ist eine Testantwort, um Ihnen zu zeigen, wie unser KI-Assistent funktioniert. Um echte Ernährungsberatung und Mahlzeitenvorschläge zu erhalten, konfigurieren Sie bitte Ihren OpenAI API-Schlüssel in den Einstellungen.",
+  "@providersChatProviderTestChatResponse": {
+    "description": "Danke, dass Sie PlatePal ausprobieren! Dies ist eine Testantwort, um Ihnen zu zeigen, wie unser KI-Assistent funktioniert. Um echte Ernährungsberatung und Mahlzeitenvorschläge zu erhalten, konfigurieren Sie bitte Ihren OpenAI API-Schlüssel in den Einstellungen."
+  },
+  "providersChatProviderTestChatWelcome": "Dies ist der Testmodus! Ich kann Ihnen helfen, die Funktionen von PlatePal zu erkunden. Versuchen Sie, mich nach Ernährung, Essensplanung oder Lebensmittelempfehlungen zu fragen.",
+  "@providersChatProviderTestChatWelcome": {
+    "description": "Dies ist der Testmodus! Ich kann Ihnen helfen, die Funktionen von PlatePal zu erkunden. Versuchen Sie, mich nach Ernährung, Essensplanung oder Lebensmittelempfehlungen zu fragen."
+  },
+  "providersChatProviderWelcomeToChat": "Willkommen bei Ihrem KI-Ernährungsassistenten! Fragen Sie mich alles über Mahlzeiten, Ernährung oder Ihre Fitnessziele.",
+  "@providersChatProviderWelcomeToChat": {
+    "description": "Willkommen bei Ihrem KI-Ernährungsassistenten! Fragen Sie mich alles über Mahlzeiten, Ernährung oder Ihre Fitnessziele."
+  },
+  "screensCalendarAiNutritionTip": "KI Ernährungstipp",
+  "@screensCalendarAiNutritionTip": {
+    "description": "Titel KI Tipp"
+  },
+  "screensCalendarConfigureApiKeyForAiTips": "Bitte OpenAI-API-Schlüssel in den Einstellungen konfigurieren, um KI-Tipps zu nutzen",
+  "@screensCalendarConfigureApiKeyForAiTips": {
+    "description": "Aufforderung API-Schlüssel"
+  },
+  "screensCalendarDeleteLog": "Protokoll löschen",
+  "@screensCalendarDeleteLog": {
+    "description": "Protokoll löschen"
+  },
+  "screensCalendarDeleteLogConfirmation": "Sind Sie sicher, dass Sie diese protokollierte Mahlzeit löschen möchten?",
+  "@screensCalendarDeleteLogConfirmation": {
+    "description": "Sind Sie sicher, dass Sie diese protokollierte Mahlzeit löschen möchten?"
+  },
+  "screensCalendarFailedToDeleteMealLog": "Löschen des Mahlzeit-Protokolls fehlgeschlagen",
+  "@screensCalendarFailedToDeleteMealLog": {
+    "description": "Löschen des Mahlzeit-Protokolls fehlgeschlagen"
+  },
+  "screensCalendarFailedToGetAiTip": "Fehler beim Abrufen des KI-Tipps. Bitte erneut versuchen.",
+  "@screensCalendarFailedToGetAiTip": {
+    "description": "Fehler KI-Tipp"
+  },
+  "screensCalendarMealLogDeletedSuccessfully": "Mahlzeit-Protokoll erfolgreich gelöscht",
+  "@screensCalendarMealLogDeletedSuccessfully": {
+    "description": "Mahlzeit-Protokoll erfolgreich gelöscht"
+  },
+  "screensCalendarOk": "OK",
+  "@screensCalendarOk": {
+    "description": "OK button text"
+  },
+  "screensChatChatAssistant": "KI-Chat-Assistent",
+  "@screensChatChatAssistant": {
+    "description": "KI-Chat-Assistent"
+  },
+  "screensChatChatCleared": "Chat-Verlauf gelöscht",
+  "@screensChatChatCleared": {
+    "description": "Chat-Verlauf gelöscht"
+  },
+  "screensChatClearChat": "Chat löschen",
+  "@screensChatClearChat": {
+    "description": "Chat löschen"
+  },
+  "screensChatClearChatConfirmation": "Sind Sie sicher, dass Sie den Chat-Verlauf löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@screensChatClearChatConfirmation": {
+    "description": "Sind Sie sicher, dass Sie den Chat-Verlauf löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "screensChatConfigureApiKeyButton": "API-Schlüssel konfigurieren",
+  "@screensChatConfigureApiKeyButton": {
+    "description": "API-Schlüssel konfigurieren"
+  },
+  "screensChatConfigureApiKeyToUseChat": "Bitte konfigurieren Sie Ihren OpenAI API-Schlüssel in den Einstellungen, um den KI-Chat-Assistenten zu verwenden.",
+  "@screensChatConfigureApiKeyToUseChat": {
+    "description": "Bitte konfigurieren Sie Ihren OpenAI API-Schlüssel in den Einstellungen, um den KI-Chat-Assistenten zu verwenden."
+  },
+  "screensChatLoading": "Wird geladen...",
+  "@screensChatLoading": {
+    "description": "Wird geladen..."
+  },
+  "screensChatNoApiKeyConfigured": "Kein API-Schlüssel konfiguriert",
+  "@screensChatNoApiKeyConfigured": {
+    "description": "Kein API-Schlüssel konfiguriert"
+  },
+  "screensChatReloadApiKeyButton": "API-Schlüssel neu laden",
+  "@screensChatReloadApiKeyButton": {
+    "description": "API-Schlüssel neu laden"
+  },
+  "screensDishCreateBasicInfo": "Grundinformationen",
+  "@screensDishCreateBasicInfo": {
+    "description": "Grundinformationen"
+  },
+  "screensDishCreateCamera": "Kamera",
+  "@screensDishCreateCamera": {
+    "description": "Kamera"
+  },
+  "screensDishCreateCategory": "Kategorie",
+  "@screensDishCreateCategory": {
+    "description": "Kategorie"
+  },
+  "screensDishCreateConfirmDeleteIngredient": "Sind Sie sicher, dass Sie diese Zutat löschen möchten?",
+  "@screensDishCreateConfirmDeleteIngredient": {
+    "description": "Sind Sie sicher, dass Sie diese Zutat löschen möchten?"
+  },
+  "screensDishCreateCreateDish": "Gericht erstellen",
+  "@screensDishCreateCreateDish": {
+    "description": "Gericht erstellen"
+  },
+  "screensDishCreateDeleteIngredient": "Zutat löschen",
+  "@screensDishCreateDeleteIngredient": {
+    "description": "Zutat löschen"
+  },
+  "screensDishCreateDescription": "Beschreibung",
+  "@screensDishCreateDescription": {
+    "description": "Beschreibung"
+  },
+  "screensDishCreateDescriptionPlaceholder": "Beschreibung eingeben",
+  "@screensDishCreateDescriptionPlaceholder": {
+    "description": "Beschreibung eingeben"
+  },
+  "screensDishCreateDishCreatedSuccessfully": "Gericht erfolgreich erstellt",
+  "@screensDishCreateDishCreatedSuccessfully": {
+    "description": "Gericht erfolgreich erstellt"
+  },
+  "screensDishCreateDishNamePlaceholder": "Gerichtnamen eingeben",
+  "@screensDishCreateDishNamePlaceholder": {
+    "description": "Gerichtnamen eingeben"
+  },
+  "screensDishCreateDishUpdatedSuccessfully": "Gericht erfolgreich aktualisiert",
+  "@screensDishCreateDishUpdatedSuccessfully": {
+    "description": "Gericht erfolgreich aktualisiert"
+  },
+  "screensDishCreateEditDish": "Gericht bearbeiten",
+  "@screensDishCreateEditDish": {
+    "description": "Gericht bearbeiten"
+  },
+  "screensDishCreateErrorSavingDish": "Fehler beim Speichern des Gerichts",
+  "@screensDishCreateErrorSavingDish": {
+    "description": "Fehler beim Speichern des Gerichts"
+  },
+  "screensDishCreateFavorite": "Favorit",
+  "@screensDishCreateFavorite": {
+    "description": "Favorit"
+  },
+  "screensDishCreateGallery": "Galerie",
+  "@screensDishCreateGallery": {
+    "description": "Galerie"
+  },
+  "screensDishCreateIngredientDeleted": "Zutat gelöscht",
+  "@screensDishCreateIngredientDeleted": {
+    "description": "Zutat gelöscht"
+  },
+  "screensDishCreateMarkAsFavorite": "Als Favorit markieren",
+  "@screensDishCreateMarkAsFavorite": {
+    "description": "Als Favorit markieren"
+  },
+  "screensDishCreateNoIngredientsAdded": "Keine Zutaten hinzugefügt",
+  "@screensDishCreateNoIngredientsAdded": {
+    "description": "Keine Zutaten hinzugefügt"
+  },
+  "screensDishCreateNutritionRecalculated": "Nährwerte neu berechnet",
+  "@screensDishCreateNutritionRecalculated": {
+    "description": "Nährwerte neu berechnet"
+  },
+  "screensDishCreateOptions": "Optionen",
+  "@screensDishCreateOptions": {
+    "description": "Optionen"
+  },
+  "screensDishCreatePleaseEnterDishName": "Bitte geben Sie einen Gerichtnamen ein",
+  "@screensDishCreatePleaseEnterDishName": {
+    "description": "Bitte geben Sie einen Gerichtnamen ein"
+  },
+  "screensDishCreateProductAddedSuccessfully": "Produkt erfolgreich hinzugefügt",
+  "@screensDishCreateProductAddedSuccessfully": {
+    "description": "Produkt erfolgreich hinzugefügt"
+  },
+  "screensDishCreateRemoveImage": "Bild entfernen",
+  "@screensDishCreateRemoveImage": {
+    "description": "Bild entfernen"
+  },
+  "screensDishCreateSaveDish": "Gericht speichern",
+  "@screensDishCreateSaveDish": {
+    "description": "Gericht speichern"
+  },
+  "screensHomeAppTitle": "PlatePal Tracker",
+  "@screensHomeAppTitle": {
+    "description": "PlatePal Tracker"
+  },
+  "screensHomeWelcomeToPlatePalTracker": "Willkommen bei PlatePal Tracker",
+  "@screensHomeWelcomeToPlatePalTracker": {
+    "description": "Welcome message for PlatePal Tracker"
+  },
+  "screensMealsAddedToFavorites": "Zu Favoriten hinzugefügt",
+  "@screensMealsAddedToFavorites": {
+    "description": "Zu Favoriten hinzugefügt"
+  },
+  "screensMealsAddMeal": "Mahlzeit hinzufügen",
+  "@screensMealsAddMeal": {
+    "description": "Mahlzeit hinzufügen"
+  },
+  "screensMealsAddToFavorites": "Zu Favoriten hinzufügen",
+  "@screensMealsAddToFavorites": {
+    "description": "Zu Favoriten hinzufügen"
+  },
+  "screensMealsAllCategories": "Alle Kategorien",
+  "@screensMealsAllCategories": {
+    "description": "Alle Kategorien"
+  },
+  "screensMealsCreateFirstDish": "Erstes Gericht erstellen",
+  "@screensMealsCreateFirstDish": {
+    "description": "Erstes Gericht erstellen"
+  },
+  "screensMealsDeleteDish": "Gericht löschen",
+  "@screensMealsDeleteDish": {
+    "description": "Gericht löschen"
+  },
+  "screensMealsDeleteDishConfirmation": "Sind Sie sicher, dass Sie \"{dishName}\" löschen möchten?",
+  "@screensMealsDeleteDishConfirmation": {
+    "description": "Sind Sie sicher, dass Sie \"{dishName}\" löschen möchten?",  
     "placeholders": {
-      "date": {
-        "type": "String",
-        "description": "Das Datum, an dem die Gesundheitsdaten zuletzt synchronisiert wurden"
+      "dishName": {
+        "type": "String"
       }
     }
   },
-  "healthPermissionDenied": "Gesundheitsberechtigung Verweigert",
-  "@healthPermissionDenied": {
-    "description": "Health permission denied dialog title"
+  "screensMealsDishDeletedSuccessfully": "Gericht erfolgreich gelöscht",
+  "@screensMealsDishDeletedSuccessfully": {
+    "description": "Gericht erfolgreich gelöscht"
   },
-  "healthPermissionDeniedMessage": "Um deine Gesundheitsdaten zu synchronisieren, benötigt PlatePal Zugriff auf deine Gesundheitsinformationen. Du kannst Berechtigungen in den Einstellungen deines Telefons erteilen.",
-  "@healthPermissionDeniedMessage": {
-    "description": "Health permission denied dialog message"
+  "screensMealsErrorLoadingDishes": "Fehler beim Laden der Gerichte",
+  "@screensMealsErrorLoadingDishes": {
+    "description": "Fehler beim Laden der Gerichte"
   },
-  "openSettings": "Einstellungen Öffnen",
-  "@openSettings": {
-    "description": "Open settings button text"
+  "screensMealsErrorUpdatingDish": "Fehler beim Aktualisieren des Gerichts",
+  "@screensMealsErrorUpdatingDish": {
+    "description": "Fehler beim Aktualisieren des Gerichts"
   },
-  "@cancel": {
-    "description": "Cancel button text"
+  "screensMealsFailedToDeleteDish": "Gericht konnte nicht gelöscht werden",
+  "@screensMealsFailedToDeleteDish": {
+    "description": "Gericht konnte nicht gelöscht werden"
   },
-  "healthNotAvailable": "Gesundheitsdaten Nicht Verfügbar",
-  "@healthNotAvailable": {
+  "screensMealsNoDishesCreated": "Noch keine Gerichte erstellt",
+  "@screensMealsNoDishesCreated": {
+    "description": "Noch keine Gerichte erstellt"
+  },
+  "screensMealsNoDishesFound": "Keine Gerichte gefunden",
+  "@screensMealsNoDishesFound": {
+    "description": "Keine Gerichte gefunden"
+  },
+  "screensMealsRemovedFromFavorites": "Aus Favoriten entfernt",
+  "@screensMealsRemovedFromFavorites": {
+    "description": "Aus Favoriten entfernt"
+  },
+  "screensMealsRemoveFromFavorites": "Aus Favoriten entfernen",
+  "@screensMealsRemoveFromFavorites": {
+    "description": "Aus Favoriten entfernen"
+  },
+  "screensMealsSearchDishes": "Gerichte suchen",
+  "@screensMealsSearchDishes": {
+    "description": "Gerichte suchen"
+  },
+  "screensMealsTryAdjustingSearch": "Versuchen Sie, Ihre Suche anzupassen",
+  "@screensMealsTryAdjustingSearch": {
+    "description": "Versuchen Sie, Ihre Suche anzupassen"
+  },
+  "screensMenuAbout": "Über uns",
+  "@screensMenuAbout": {
+    "description": "Über uns"
+  },
+  "screensMenuAiFeatures": "KI & Funktionen",
+  "@screensMenuAiFeatures": {
+    "description": "KI & Funktionen"
+  },
+  "screensMenuApiKeySettings": "API-Schlüssel Einstellungen",
+  "@screensMenuApiKeySettings": {
+    "description": "API-Schlüssel Einstellungen"
+  },
+  "screensMenuAppearance": "Erscheinungsbild",
+  "@screensMenuAppearance": {
+    "description": "Erscheinungsbild"
+  },
+  "screensMenuChatAgentOptions": "Chat-Agent Optionen",
+  "@screensMenuChatAgentOptions": {
+    "description": "Titel für Chat-Agent Optionen"
+  },
+  "screensMenuConfigureApiKey": "Konfigurieren Sie Ihren OpenAI API-Schlüssel",
+  "@screensMenuConfigureApiKey": {
+    "description": "Konfigurieren Sie Ihren OpenAI API-Schlüssel"
+  },
+  "screensMenuContributors": "Mitwirkende",
+  "@screensMenuContributors": {
+    "description": "Mitwirkende"
+  },
+  "screensMenuCurrentStats": "Aktuelle Statistiken",
+  "@screensMenuCurrentStats": {
+    "description": "Aktuelle Statistiken"
+  },
+  "screensMenuDark": "Dunkel",
+  "@screensMenuDark": {
+    "description": "Dunkel"
+  },
+  "screensMenuDataManagement": "Datenverwaltung",
+  "@screensMenuDataManagement": {
+    "description": "Datenverwaltung"
+  },
+  "screensMenuEditPersonalInfo": "Bearbeiten Sie Ihre persönlichen Informationen",
+  "@screensMenuEditPersonalInfo": {
+    "description": "Bearbeiten Sie Ihre persönlichen Informationen"
+  },
+  "screensMenuEnableAgentModeDeepSearch": "Agent-Modus, Deep Search und mehr aktivieren",
+  "@screensMenuEnableAgentModeDeepSearch": {
+    "description": "Untertitel für Chat-Agent Optionen"
+  },
+  "screensMenuExportData": "Daten exportieren",
+  "@screensMenuExportData": {
+    "description": "Daten exportieren"
+  },
+  "screensMenuExportMealData": "Exportieren Sie Ihre Mahlzeitdaten",
+  "@screensMenuExportMealData": {
+    "description": "Exportieren Sie Ihre Mahlzeitdaten"
+  },
+  "screensMenuImportData": "Daten importieren",
+  "@screensMenuImportData": {
+    "description": "Daten importieren"
+  },
+  "screensMenuImportMealDataBackup": "Importieren Sie Mahlzeitdaten aus der Sicherung",
+  "@screensMenuImportMealDataBackup": {
+    "description": "Importieren Sie Mahlzeitdaten aus der Sicherung"
+  },
+  "screensMenuInformation": "Informationen",
+  "@screensMenuInformation": {
+    "description": "Informationen"
+  },
+  "screensMenuLanguage": "Sprache",
+  "@screensMenuLanguage": {
+    "description": "Sprache"
+  },
+  "screensMenuLearnMorePlatePal": "Erfahren Sie mehr über PlatePal",
+  "@screensMenuLearnMorePlatePal": {
+    "description": "Erfahren Sie mehr über PlatePal"
+  },
+  "screensMenuLight": "Hell",
+  "@screensMenuLight": {
+    "description": "Hell"
+  },
+  "screensMenuMadeBy": "Erstellt von MrLappes",
+  "@screensMenuMadeBy": {
+    "description": "Erstellt von MrLappes"
+  },
+  "screensMenuNutritionGoals": "Ernährungsziele",
+  "@screensMenuNutritionGoals": {
+    "description": "Ernährungsziele"
+  },
+  "screensMenuProfile": "Profil",
+  "@screensMenuProfile": {
+    "description": "Profil"
+  },
+  "screensMenuSetNutritionTargets": "Legen Sie Ihre täglichen Ernährungsziele fest",
+  "@screensMenuSetNutritionTargets": {
+    "description": "Legen Sie Ihre täglichen Ernährungsziele fest"
+  },
+  "screensMenuSystem": "System",
+  "@screensMenuSystem": {
+    "description": "System"
+  },
+  "screensMenuTheme": "Design",
+  "@screensMenuTheme": {
+    "description": "Design"
+  },
+  "screensMenuUserProfile": "Benutzerprofil",
+  "@screensMenuUserProfile": {
+    "description": "Benutzerprofil"
+  },
+  "screensMenuViewContributors": "Projektmitwirkende anzeigen",
+  "@screensMenuViewContributors": {
+    "description": "Projektmitwirkende anzeigen"
+  },
+  "screensMenuViewStatistics": "Statistiken anzeigen",
+  "@screensMenuViewStatistics": {
+    "description": "Statistiken anzeigen"
+  },
+  "screensSettingsAboutAboutAppTitle": "Über uns",
+  "@screensSettingsAboutAboutAppTitle": {
+    "description": "Über uns"
+  },
+  "screensSettingsAboutAboutDescription": "PlatePal Tracker wurde entwickelt, um eine datenschutzorientierte, quelloffene Alternative zu teuren Ernährungs-Tracking-Apps zu bieten. Wir glauben daran, die Kontrolle in Ihre Hände zu legen - ohne Abonnements, ohne Werbung und ohne Datensammlung.",
+  "@screensSettingsAboutAboutDescription": {
+    "description": "PlatePal Tracker wurde entwickelt, um eine datenschutzorientierte, quelloffene Alternative zu teuren Ernährungs-Tracking-Apps zu bieten. Wir glauben daran, die Kontrolle in Ihre Hände zu legen - ohne Abonnements, ohne Werbung und ohne Datensammlung."
+  },
+  "screensSettingsAboutAppMotto": "Von Sportlern für Sportler gemacht, die kostenpflichtige Apps hassen",
+  "@screensSettingsAboutAppMotto": {
+    "description": "Von Sportlern für Sportler gemacht, die kostenpflichtige Apps hassen"
+  },
+  "screensSettingsAboutCodersMessage": "Programmierer sollten nicht bezahlen müssen",
+  "@screensSettingsAboutCodersMessage": {
+    "description": "Programmierer sollten nicht bezahlen müssen"
+  },
+  "screensSettingsAboutDataStaysOnDevice": "Ihre Daten bleiben auf Ihrem Gerät",
+  "@screensSettingsAboutDataStaysOnDevice": {
+    "description": "Ihre Daten bleiben auf Ihrem Gerät"
+  },
+  "screensSettingsAboutFreeOpenSource": "100% kostenlos und quelloffen",
+  "@screensSettingsAboutFreeOpenSource": {
+    "description": "100% kostenlos und quelloffen"
+  },
+  "screensSettingsAboutGithubRepository": "github.com/MrLappes/platepal-tracker",
+  "@screensSettingsAboutGithubRepository": {
+    "description": "github.com/MrLappes/platepal-tracker"
+  },
+  "screensSettingsAboutUseOwnAiKey": "Verwenden Sie Ihren eigenen KI-Schlüssel für volle Kontrolle",
+  "@screensSettingsAboutUseOwnAiKey": {
+    "description": "Verwenden Sie Ihren eigenen KI-Schlüssel für volle Kontrolle"
+  },
+  "screensSettingsAboutWebsite": "plate-pal.de",
+  "@screensSettingsAboutWebsite": {
+    "description": "plate-pal.de"
+  },
+  "screensSettingsAboutWhyPlatePal": "Warum PlatePal?",
+  "@screensSettingsAboutWhyPlatePal": {
+    "description": "Warum PlatePal?"
+  },
+  "screensSettingsApiKeySettingsAboutOpenAiApiKey": "Über OpenAI API-Schlüssel",
+  "@screensSettingsApiKeySettingsAboutOpenAiApiKey": {
+    "description": "Über OpenAI API-Schlüssel"
+  },
+  "screensSettingsApiKeySettingsAiFeaturesEnabled": "KI-Funktionen sind aktiviert",
+  "@screensSettingsApiKeySettingsAiFeaturesEnabled": {
+    "description": "KI-Funktionen sind aktiviert"
+  },
+  "screensSettingsApiKeySettingsApiKeyBulletPoints": "• Holen Sie sich Ihren API-Schlüssel von platform.openai.com\n• Ihr Schlüssel wird lokal auf Ihrem Gerät gespeichert\n• Nutzungsgebühren werden direkt Ihrem OpenAI-Konto belastet",
+  "@screensSettingsApiKeySettingsApiKeyBulletPoints": {
+    "description": "• Holen Sie sich Ihren API-Schlüssel von platform.openai.com\n• Ihr Schlüssel wird lokal auf Ihrem Gerät gespeichert\n• Nutzungsgebühren werden direkt Ihrem OpenAI-Konto belastet"
+  },
+  "screensSettingsApiKeySettingsApiKeyConfigured": "API-Schlüssel konfiguriert",
+  "@screensSettingsApiKeySettingsApiKeyConfigured": {
+    "description": "API-Schlüssel konfiguriert"
+  },
+  "screensSettingsApiKeySettingsApiKeyDescription": "Um KI-Funktionen wie Mahlzeitanalyse und Vorschläge zu nutzen, müssen Sie Ihren eigenen OpenAI API-Schlüssel bereitstellen. Dies stellt sicher, dass Ihre Daten privat bleiben und Sie die volle Kontrolle haben.",
+  "@screensSettingsApiKeySettingsApiKeyDescription": {
+    "description": "Um KI-Funktionen wie Mahlzeitanalyse und Vorschläge zu nutzen, müssen Sie Ihren eigenen OpenAI API-Schlüssel bereitstellen. Dies stellt sicher, dass Ihre Daten privat bleiben und Sie die volle Kontrolle haben."
+  },
+  "screensSettingsApiKeySettingsApiKeyHelperText": "Geben Sie Ihren OpenAI API-Schlüssel ein oder lassen Sie das Feld leer, um KI-Funktionen zu deaktivieren",
+  "@screensSettingsApiKeySettingsApiKeyHelperText": {
+    "description": "Geben Sie Ihren OpenAI API-Schlüssel ein oder lassen Sie das Feld leer, um KI-Funktionen zu deaktivieren"
+  },
+  "screensSettingsApiKeySettingsApiKeyMustStartWith": "API-Schlüssel muss mit \"sk-\" beginnen",
+  "@screensSettingsApiKeySettingsApiKeyMustStartWith": {
+    "description": "API-Schlüssel muss mit \"sk-\" beginnen"
+  },
+  "screensSettingsApiKeySettingsApiKeyPlaceholder": "sk-...",
+  "@screensSettingsApiKeySettingsApiKeyPlaceholder": {
+    "description": "sk-..."
+  },
+  "screensSettingsApiKeySettingsApiKeyRemovedSuccessfully": "API-Schlüssel erfolgreich entfernt",
+  "@screensSettingsApiKeySettingsApiKeyRemovedSuccessfully": {
+    "description": "API-Schlüssel erfolgreich entfernt"
+  },
+  "screensSettingsApiKeySettingsApiKeySavedSuccessfully": "API-Schlüssel erfolgreich gespeichert",
+  "@screensSettingsApiKeySettingsApiKeySavedSuccessfully": {
+    "description": "API-Schlüssel erfolgreich gespeichert"
+  },
+  "screensSettingsApiKeySettingsApiKeyTestWarning": "Ihr API-Schlüssel wird mit einer kleinen Anfrage getestet, um zu überprüfen, ob er funktioniert. Der Schlüssel wird nur auf Ihrem Gerät gespeichert und niemals an unsere Server gesendet",
+  "@screensSettingsApiKeySettingsApiKeyTestWarning": {
+    "description": "Warning message about API key testing"
+  },
+  "screensSettingsApiKeySettingsApiKeyTooShort": "API-Schlüssel scheint zu kurz zu sein",
+  "@screensSettingsApiKeySettingsApiKeyTooShort": {
+    "description": "API-Schlüssel scheint zu kurz zu sein"
+  },
+  "screensSettingsApiKeySettingsClipboardEmpty": "Zwischenablage ist leer",
+  "@screensSettingsApiKeySettingsClipboardEmpty": {
+    "description": "Zwischenablage ist leer"
+  },
+  "screensSettingsApiKeySettingsCouldNotLoadModels": "Verfügbare Modelle konnten nicht geladen werden. Verwende Standard-Modellliste",
+  "@screensSettingsApiKeySettingsCouldNotLoadModels": {
+    "description": "Error message when model loading fails"
+  },
+  "screensSettingsApiKeySettingsFailedToAccessClipboard": "Zugriff auf Zwischenablage fehlgeschlagen",
+  "@screensSettingsApiKeySettingsFailedToAccessClipboard": {
+    "description": "Error message when clipboard access fails"
+  },
+  "screensSettingsApiKeySettingsFailedToLoadApiKey": "API-Schlüssel konnte nicht geladen werden",
+  "@screensSettingsApiKeySettingsFailedToLoadApiKey": {
+    "description": "API-Schlüssel konnte nicht geladen werden"
+  },
+  "screensSettingsApiKeySettingsFailedToRemoveApiKey": "API-Schlüssel konnte nicht entfernt werden",
+  "@screensSettingsApiKeySettingsFailedToRemoveApiKey": {
+    "description": "API-Schlüssel konnte nicht entfernt werden"
+  },
+  "screensSettingsApiKeySettingsGetApiKeyFromOpenAi": "API-Schlüssel von OpenAI holen",
+  "@screensSettingsApiKeySettingsGetApiKeyFromOpenAi": {
+    "description": "API-Schlüssel von OpenAI holen"
+  },
+  "screensSettingsApiKeySettingsGpt35ModelsInfo": "GPT-3.5 Modelle sind kostengünstiger für einfache Analysen",
+  "@screensSettingsApiKeySettingsGpt35ModelsInfo": {
+    "description": "Information about GPT-3.5 models"
+  },
+  "screensSettingsApiKeySettingsGpt4ModelsInfo": "GPT-4 Modelle bieten die beste Analyse, kosten aber mehr",
+  "@screensSettingsApiKeySettingsGpt4ModelsInfo": {
+    "description": "Information about GPT-4 models"
+  },
+  "screensSettingsApiKeySettingsLinkError": "Beim Öffnen des Links ist ein Fehler aufgetreten",
+  "@screensSettingsApiKeySettingsLinkError": {
+    "description": "Beim Öffnen des Links ist ein Fehler aufgetreten"
+  },
+  "screensSettingsApiKeySettingsOpenAiApiKey": "OpenAI API-Schlüssel",
+  "@screensSettingsApiKeySettingsOpenAiApiKey": {
+    "description": "OpenAI API-Schlüssel"
+  },
+  "screensSettingsApiKeySettingsPastedFromClipboard": "Aus Zwischenablage eingefügt",
+  "@screensSettingsApiKeySettingsPastedFromClipboard": {
+    "description": "Aus Zwischenablage eingefügt"
+  },
+  "screensSettingsApiKeySettingsPasteFromClipboard": "Aus Zwischenablage einfügen",
+  "@screensSettingsApiKeySettingsPasteFromClipboard": {
+    "description": "Aus Zwischenablage einfügen"
+  },
+  "screensSettingsApiKeySettingsRemove": "Entfernen",
+  "@screensSettingsApiKeySettingsRemove": {
+    "description": "Entfernen"
+  },
+  "screensSettingsApiKeySettingsRemoveApiKey": "API-Schlüssel entfernen",
+  "@screensSettingsApiKeySettingsRemoveApiKey": {
+    "description": "API-Schlüssel entfernen"
+  },
+  "screensSettingsApiKeySettingsRemoveApiKeyConfirmation": "Sind Sie sicher, dass Sie Ihren API-Schlüssel entfernen möchten? Dies deaktiviert KI-Funktionen.",
+  "@screensSettingsApiKeySettingsRemoveApiKeyConfirmation": {
+    "description": "Sind Sie sicher, dass Sie Ihren API-Schlüssel entfernen möchten? Dies deaktiviert KI-Funktionen."
+  },
+  "screensSettingsApiKeySettingsSelectModel": "Modell auswählen",
+  "@screensSettingsApiKeySettingsSelectModel": {
+    "description": "Label for model selection dropdown"
+  },
+  "screensSettingsApiKeySettingsTestAndSaveApiKey": "API-Schlüssel testen & speichern",
+  "@screensSettingsApiKeySettingsTestAndSaveApiKey": {
+    "description": "Button text for testing and saving API key"
+  },
+  "screensSettingsApiKeySettingsTestingApiKey": "API-Schlüssel wird getestet...",
+  "@screensSettingsApiKeySettingsTestingApiKey": {
+    "description": "Loading message while testing API key"
+  },
+  "screensSettingsApiKeySettingsUpdateApiKey": "API-Schlüssel aktualisieren",
+  "@screensSettingsApiKeySettingsUpdateApiKey": {
+    "description": "API-Schlüssel aktualisieren"
+  },
+  "screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle": "Erlaube dem Agenten, Deep Search für genauere Antworten zu verwenden",
+  "@screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle": {
+    "description": "Erlaube dem Agenten, Deep Search für genauere Antworten zu verwenden"
+  },
+  "screensSettingsChatAgentSettingsChatAgentDeepSearchTitle": "Deep Search aktivieren",
+  "@screensSettingsChatAgentSettingsChatAgentDeepSearchTitle": {
+    "description": "Deep Search aktivieren"
+  },
+  "screensSettingsChatAgentSettingsChatAgentEnableSubtitle": "Verwende die mehrstufige Agenten-Pipeline für den Chat",
+  "@screensSettingsChatAgentSettingsChatAgentEnableSubtitle": {
+    "description": "Verwende die mehrstufige Agenten-Pipeline für den Chat"
+  },
+  "screensSettingsChatAgentSettingsChatAgentEnableTitle": "Agent-Modus aktivieren",
+  "@screensSettingsChatAgentSettingsChatAgentEnableTitle": {
+    "description": "Agent-Modus aktivieren"
+  },
+  "screensSettingsChatAgentSettingsChatAgentInfoDescription": "Der Agent-Modus aktiviert PlatePals fortschrittliche mehrstufige Denk-Pipeline für den Chat. So kann der Assistent deine Anfrage analysieren, Kontext sammeln und genauere, erklärbare Antworten liefern. Deep Search ermöglicht dem Agenten, noch mehr Daten für bessere Ergebnisse zu nutzen.",
+  "@screensSettingsChatAgentSettingsChatAgentInfoDescription": {
+    "description": "Der Agent-Modus aktiviert PlatePals fortschrittliche mehrstufige Denk-Pipeline für den Chat. So kann der Assistent deine Anfrage analysieren, Kontext sammeln und genauere, erklärbare Antworten liefern. Deep Search ermöglicht dem Agenten, noch mehr Daten für bessere Ergebnisse zu nutzen."
+  },
+  "screensSettingsChatAgentSettingsChatAgentInfoTitle": "Was ist der Agent-Modus?",
+  "@screensSettingsChatAgentSettingsChatAgentInfoTitle": {
+    "description": "Was ist der Agent-Modus?"
+  },
+  "screensSettingsChatAgentSettingsChatAgentSettingsTitle": "Chat-Agent Einstellungen",
+  "@screensSettingsChatAgentSettingsChatAgentSettingsTitle": {
+    "description": "Chat-Agent Einstellungen"
+  },
+  "screensSettingsChatAgentSettingsChatSettingsSaved": "Chat-Einstellungen erfolgreich gespeichert",
+  "@screensSettingsChatAgentSettingsChatSettingsSaved": {
+    "description": "Chat-Einstellungen erfolgreich gespeichert"
+  },
+  "screensSettingsContributorsBuyMeCreatine": "Kaufen Sie mir Kreatin",
+  "@screensSettingsContributorsBuyMeCreatine": {
+    "description": "Kaufen Sie mir Kreatin"
+  },
+  "screensSettingsContributorsCheckGitHub": "Schauen Sie sich unser GitHub-Repository an",
+  "@screensSettingsContributorsCheckGitHub": {
+    "description": "Schauen Sie sich unser GitHub-Repository an"
+  },
+  "screensSettingsContributorsContributorPlural": "Mitwirkende",
+  "@screensSettingsContributorsContributorPlural": {
+    "description": "Mitwirkende"
+  },
+  "screensSettingsContributorsContributorSingular": "Mitwirkender",
+  "@screensSettingsContributorsContributorSingular": {
+    "description": "Mitwirkender"
+  },
+  "screensSettingsContributorsContributorsThankYou": "Danke an alle, die dazu beigetragen haben, PlatePal Tracker möglich zu machen!",
+  "@screensSettingsContributorsContributorsThankYou": {
+    "description": "Danke an alle, die dazu beigetragen haben, PlatePal Tracker möglich zu machen!"
+  },
+  "screensSettingsContributorsOpenSourceMessage": "PlatePal Tracker ist Open Source - treten Sie uns auf GitHub bei!",
+  "@screensSettingsContributorsOpenSourceMessage": {
+    "description": "PlatePal Tracker ist Open Source - treten Sie uns auf GitHub bei!"
+  },
+  "screensSettingsContributorsSupportDevelopment": "Entwicklung unterstützen",
+  "@screensSettingsContributorsSupportDevelopment": {
+    "description": "Entwicklung unterstützen"
+  },
+  "screensSettingsContributorsSupportMessage": "Möchten Sie mir mein Kreatin kaufen? Ihre Unterstützung wird sehr geschätzt, ist aber keineswegs verpflichtend.",
+  "@screensSettingsContributorsSupportMessage": {
+    "description": "Möchten Sie mir mein Kreatin kaufen? Ihre Unterstützung wird sehr geschätzt, ist aber keineswegs verpflichtend."
+  },
+  "screensSettingsContributorsWantToContribute": "Möchten Sie mitwirken?",
+  "@screensSettingsContributorsWantToContribute": {
+    "description": "Möchten Sie mitwirken?"
+  },
+  "screensSettingsExportDataAllData": "Alle Daten",
+  "@screensSettingsExportDataAllData": {
+    "description": "Alle Daten"
+  },
+  "screensSettingsExportDataDishes": "Gerichte",
+  "@screensSettingsExportDataDishes": {
+    "description": "Gerichte"
+  },
+  "screensSettingsExportDataExportAsCsv": "Als CSV exportieren",
+  "@screensSettingsExportDataExportAsCsv": {
+    "description": "Als CSV exportieren"
+  },
+  "screensSettingsExportDataExportAsJson": "Als JSON exportieren",
+  "@screensSettingsExportDataExportAsJson": {
+    "description": "Als JSON exportieren"
+  },
+  "screensSettingsExportDataExportedItemsCount": "{count} Elemente exportiert",
+  "@screensSettingsExportDataExportedItemsCount": {
+    "description": "{count} Elemente exportiert",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "screensSettingsExportDataExportProgress": "Daten werden exportiert...",
+  "@screensSettingsExportDataExportProgress": {
+    "description": "Daten werden exportiert..."
+  },
+  "screensSettingsExportDataMealLogs": "Mahlzeiten-Protokolle",
+  "@screensSettingsExportDataMealLogs": {
+    "description": "Mahlzeiten-Protokolle"
+  },
+  "screensSettingsExportDataNutritionGoalsData": "Ernährungsziele",
+  "@screensSettingsExportDataNutritionGoalsData": {
+    "description": "Ernährungsziele"
+  },
+  "screensSettingsExportDataSelectDataToExport": "Zu exportierende Daten auswählen",
+  "@screensSettingsExportDataSelectDataToExport": {
+    "description": "Zu exportierende Daten auswählen"
+  },
+  "screensSettingsExportDataSupplements": "Nahrungsergänzungsmittel",
+  "@screensSettingsExportDataSupplements": {
+    "description": "Nahrungsergänzungsmittel"
+  },
+  "screensSettingsExportDataUserProfiles": "Benutzerprofile",
+  "@screensSettingsExportDataUserProfiles": {
+    "description": "Benutzerprofile"
+  },
+  "screensSettingsImportDataHowToHandleDuplicates": "Wie sollen Duplikate behandelt werden?",
+  "@screensSettingsImportDataHowToHandleDuplicates": {
+    "description": "Wie sollen Duplikate behandelt werden?"
+  },
+  "screensSettingsImportDataImportedItemsCount": "{count} Elemente importiert",
+  "@screensSettingsImportDataImportedItemsCount": {
+    "description": "{count} Elemente importiert",  
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "screensSettingsImportDataImportFailed": "Import fehlgeschlagen",
+  "@screensSettingsImportDataImportFailed": {
+    "description": "Import fehlgeschlagen"
+  },
+  "screensSettingsImportDataImportFromFile": "Aus Datei importieren",
+  "@screensSettingsImportDataImportFromFile": {
+    "description": "Aus Datei importieren"
+  },
+  "screensSettingsImportDataImportProgress": "Daten werden importiert...",
+  "@screensSettingsImportDataImportProgress": {
+    "description": "Daten werden importiert..."
+  },
+  "screensSettingsImportDataMergeDuplicates": "Duplikate zusammenführen",
+  "@screensSettingsImportDataMergeDuplicates": {
+    "description": "Duplikate zusammenführen"
+  },
+  "screensSettingsImportDataOverwriteDuplicates": "Duplikate überschreiben",
+  "@screensSettingsImportDataOverwriteDuplicates": {
+    "description": "Duplikate überschreiben"
+  },
+  "screensSettingsImportDataSelectDataToImport": "Zu importierende Daten auswählen",
+  "@screensSettingsImportDataSelectDataToImport": {
+    "description": "Zu importierende Daten auswählen"
+  },
+  "screensSettingsImportDataSelectFile": "Datei auswählen",
+  "@screensSettingsImportDataSelectFile": {
+    "description": "Datei auswählen"
+  },
+  "screensSettingsImportDataSkipDuplicates": "Duplikate überspringen",
+  "@screensSettingsImportDataSkipDuplicates": {
+    "description": "Duplikate überspringen"
+  },
+  "screensSettingsImportProfileCompletionActivityLevel": "Aktivitätslevel",
+  "@screensSettingsImportProfileCompletionActivityLevel": {
+    "description": "Aktivitätslevel"
+  },
+  "screensSettingsImportProfileCompletionAge": "Alter",
+  "@screensSettingsImportProfileCompletionAge": {
+    "description": "Alter"
+  },
+  "screensSettingsImportProfileCompletionAgeRange": "Das Alter muss zwischen 13 und 120 liegen",
+  "@screensSettingsImportProfileCompletionAgeRange": {
+    "description": "Das Alter muss zwischen 13 und 120 liegen"
+  },
+  "screensSettingsImportProfileCompletionBuildMuscle": "Muskeln aufbauen",
+  "@screensSettingsImportProfileCompletionBuildMuscle": {
+    "description": "Muskeln aufbauen"
+  },
+  "screensSettingsImportProfileCompletionCm": "cm",
+  "@screensSettingsImportProfileCompletionCm": {
+    "description": "cm"
+  },
+  "screensSettingsImportProfileCompletionEmail": "E-Mail",
+  "@screensSettingsImportProfileCompletionEmail": {
+    "description": "E-Mail"
+  },
+  "screensSettingsImportProfileCompletionExtraActive": "Extrem aktiv",
+  "@screensSettingsImportProfileCompletionExtraActive": {
+    "description": "Extrem aktiv"
+  },
+  "screensSettingsImportProfileCompletionFemale": "Weiblich",
+  "@screensSettingsImportProfileCompletionFemale": {
+    "description": "Weiblich"
+  },
+  "screensSettingsImportProfileCompletionFitnessGoal": "Fitnessziel",
+  "@screensSettingsImportProfileCompletionFitnessGoal": {
+    "description": "Fitnessziel"
+  },
+  "screensSettingsImportProfileCompletionGainWeight": "Gewicht zunehmen",
+  "@screensSettingsImportProfileCompletionGainWeight": {
+    "description": "Gewicht zunehmen"
+  },
+  "screensSettingsImportProfileCompletionGender": "Geschlecht",
+  "@screensSettingsImportProfileCompletionGender": {
+    "description": "Geschlecht"
+  },
+  "screensSettingsImportProfileCompletionHeight": "Größe",
+  "@screensSettingsImportProfileCompletionHeight": {
+    "description": "Größe"
+  },
+  "screensSettingsImportProfileCompletionHeightRange": "Die Größe muss zwischen 100-250 cm liegen",
+  "@screensSettingsImportProfileCompletionHeightRange": {
+    "description": "Die Größe muss zwischen 100-250 cm liegen"
+  },
+  "screensSettingsImportProfileCompletionImperial": "Imperial (lb, ft)",
+  "@screensSettingsImportProfileCompletionImperial": {
+    "description": "Imperial (lb, ft)"
+  },
+  "screensSettingsImportProfileCompletionInches": "in",
+  "@screensSettingsImportProfileCompletionInches": {
+    "description": "in"
+  },
+  "screensSettingsImportProfileCompletionInvalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+  "@screensSettingsImportProfileCompletionInvalidEmail": {
+    "description": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+  },
+  "screensSettingsImportProfileCompletionKg": "kg",
+  "@screensSettingsImportProfileCompletionKg": {
+    "description": "kg"
+  },
+  "screensSettingsImportProfileCompletionLb": "lb",
+  "@screensSettingsImportProfileCompletionLb": {
+    "description": "lb"
+  },
+  "screensSettingsImportProfileCompletionLightlyActive": "Leicht aktiv",
+  "@screensSettingsImportProfileCompletionLightlyActive": {
+    "description": "Leicht aktiv"
+  },
+  "screensSettingsImportProfileCompletionLoseWeight": "Gewicht verlieren",
+  "@screensSettingsImportProfileCompletionLoseWeight": {
+    "description": "Gewicht verlieren"
+  },
+  "screensSettingsImportProfileCompletionMaintainWeight": "Gewicht halten",
+  "@screensSettingsImportProfileCompletionMaintainWeight": {
+    "description": "Gewicht halten"
+  },
+  "screensSettingsImportProfileCompletionMale": "Männlich",
+  "@screensSettingsImportProfileCompletionMale": {
+    "description": "Männlich"
+  },
+  "screensSettingsImportProfileCompletionMetric": "Metrisch (kg, cm)",
+  "@screensSettingsImportProfileCompletionMetric": {
+    "description": "Metrisch (kg, cm)"
+  },
+  "screensSettingsImportProfileCompletionModeratelyActive": "Mäßig aktiv",
+  "@screensSettingsImportProfileCompletionModeratelyActive": {
+    "description": "Mäßig aktiv"
+  },
+  "screensSettingsImportProfileCompletionName": "Name",
+  "@screensSettingsImportProfileCompletionName": {
+    "description": "Name"
+  },
+  "screensSettingsImportProfileCompletionOther": "Andere",
+  "@screensSettingsImportProfileCompletionOther": {
+    "description": "Andere"
+  },
+  "screensSettingsImportProfileCompletionPersonalInformation": "Persönliche Informationen",
+  "@screensSettingsImportProfileCompletionPersonalInformation": {
+    "description": "Persönliche Informationen"
+  },
+  "screensSettingsImportProfileCompletionPreferences": "Einstellungen",
+  "@screensSettingsImportProfileCompletionPreferences": {
+    "description": "Einstellungen"
+  },
+  "screensSettingsImportProfileCompletionSedentary": "Sesshaft",
+  "@screensSettingsImportProfileCompletionSedentary": {
+    "description": "Sesshaft"
+  },
+  "screensSettingsImportProfileCompletionUnitSystem": "Einheitensystem",
+  "@screensSettingsImportProfileCompletionUnitSystem": {
+    "description": "Einheitensystem"
+  },
+  "screensSettingsImportProfileCompletionVeryActive": "Sehr aktiv",
+  "@screensSettingsImportProfileCompletionVeryActive": {
+    "description": "Sehr aktiv"
+  },
+  "screensSettingsImportProfileCompletionWeight": "Gewicht",
+  "@screensSettingsImportProfileCompletionWeight": {
+    "description": "Gewicht"
+  },
+  "screensSettingsImportProfileCompletionWeightRange": "Das Gewicht muss zwischen 30-300 kg liegen",
+  "@screensSettingsImportProfileCompletionWeightRange": {
+    "description": "Das Gewicht muss zwischen 30-300 kg liegen"
+  },
+  "screensSettingsImportProfileCompletionYears": "Jahre",
+  "@screensSettingsImportProfileCompletionYears": {
+    "description": "Jahre"
+  },
+  "screensSettingsMacroCustomizationDiscardChanges": "Änderungen verwerfen",
+  "@screensSettingsMacroCustomizationDiscardChanges": {
+    "description": "Änderungen verwerfen"
+  },
+  "screensSettingsMacroCustomizationMacroCustomization": "Makro-Anpassung",
+  "@screensSettingsMacroCustomizationMacroCustomization": {
+    "description": "Makro-Anpassung"
+  },
+  "screensSettingsMacroCustomizationMacroCustomizationInfo": "Passen Sie Ihre Makro-Ziele an. Alle Prozentsätze müssen sich zu 100% addieren.",
+  "@screensSettingsMacroCustomizationMacroCustomizationInfo": {
+    "description": "Passen Sie Ihre Makro-Ziele an. Alle Prozentsätze müssen sich zu 100% addieren."
+  },
+  "screensSettingsMacroCustomizationMacroTargetsUpdated": "Makro-Ziele erfolgreich aktualisiert",
+  "@screensSettingsMacroCustomizationMacroTargetsUpdated": {
+    "description": "Makro-Ziele erfolgreich aktualisiert"
+  },
+  "screensSettingsMacroCustomizationResetToDefaults": "Auf Standard zurücksetzen",
+  "@screensSettingsMacroCustomizationResetToDefaults": {
+    "description": "Auf Standard zurücksetzen"
+  },
+  "screensSettingsMacroCustomizationSaveChanges": "Änderungen speichern",
+  "@screensSettingsMacroCustomizationSaveChanges": {
+    "description": "Änderungen speichern"
+  },
+  "screensSettingsMacroCustomizationUnsavedChanges": "Nicht gespeicherte Änderungen",
+  "@screensSettingsMacroCustomizationUnsavedChanges": {
+    "description": "Nicht gespeicherte Änderungen"
+  },
+  "screensSettingsMacroCustomizationUnsavedChangesMessage": "Sie haben nicht gespeicherte Änderungen. Möchten Sie sie vor dem Verlassen speichern?",
+  "@screensSettingsMacroCustomizationUnsavedChangesMessage": {
+    "description": "Sie haben nicht gespeicherte Änderungen. Möchten Sie sie vor dem Verlassen speichern?"
+  },
+  "screensSettingsProfileSettingsAnalyzeTargets": "Ziele analysieren",
+  "@screensSettingsProfileSettingsAnalyzeTargets": {
+    "description": "Ziele analysieren"
+  },
+  "screensSettingsProfileSettingsBmi": "BMI",
+  "@screensSettingsProfileSettingsBmi": {
+    "description": "BMI"
+  },
+  "screensSettingsProfileSettingsConnectToHealth": "Mit Gesundheitsdaten verbinden",
+  "@screensSettingsProfileSettingsConnectToHealth": {
+    "description": "Mit Gesundheit verbinden Button Text"
+  },
+  "screensSettingsProfileSettingsDangerZone": "Gefahrenzone",
+  "@screensSettingsProfileSettingsDangerZone": {
+    "description": "Gefahrenzone"
+  },
+  "screensSettingsProfileSettingsDebugHealthData": "Gesundheitsdaten debuggen",
+  "@screensSettingsProfileSettingsDebugHealthData": {
+    "description": "Gesundheitsdaten debuggen"
+  },
+  "screensSettingsProfileSettingsDisconnectHealth": "Gesundheit trennen",
+  "@screensSettingsProfileSettingsDisconnectHealth": {
+    "description": "Gesundheit trennen"
+  },
+  "screensSettingsProfileSettingsFitnessGoals": "Fitnessziele",
+  "@screensSettingsProfileSettingsFitnessGoals": {
+    "description": "Fitnessziele"
+  },
+  "screensSettingsProfileSettingsHealthConnected": "Gesundheitsdaten verbunden",
+  "@screensSettingsProfileSettingsHealthConnected": {
+    "description": "Gesundheitsdaten verbunden Status Nachricht"
+  },
+  "screensSettingsProfileSettingsHealthDataSync": "Gesundheitsdaten-Synchronisation",
+  "@screensSettingsProfileSettingsHealthDataSync": {
+    "description": "Gesundheitsdaten-Synchronisation Bereich Titel"
+  },
+  "screensSettingsProfileSettingsHealthDisconnected": "Gesundheitsdaten nicht verbunden",
+  "@screensSettingsProfileSettingsHealthDisconnected": {
+    "description": "Gesundheitsdaten getrennt Status Nachricht"
+  },
+  "screensSettingsProfileSettingsHealthNotAvailable": "Gesundheitsdaten Nicht Verfügbar",
+  "@screensSettingsProfileSettingsHealthNotAvailable": {
     "description": "Health data not available dialog title"
   },
-  "healthNotAvailableMessage": "Gesundheitsdaten sind auf diesem Gerät nicht verfügbar. Stelle sicher, dass du Health Connect (Android) oder die Health-App (iOS) installiert und konfiguriert hast.",
-  "@healthNotAvailableMessage": {
+  "screensSettingsProfileSettingsHealthNotAvailableMessage": "Gesundheitsdaten sind auf diesem Gerät nicht verfügbar. Stelle sicher, dass du Health Connect (Android) oder die Health-App (iOS) installiert und konfiguriert hast.",
+  "@screensSettingsProfileSettingsHealthNotAvailableMessage": {
     "description": "Health data not available dialog message"
   },
-  "scanBarcodeToAddProduct": "Barcode scannen, um Produkt hinzuzufügen",
-  "searchForProducts": "Nach Produkten suchen",
-  "productNotFound": "Produkt nicht gefunden",
-  "productAddedSuccessfully": "Produkt erfolgreich hinzugefügt",
-  "errorScanningBarcode": "Fehler beim Scannen des Barcodes",
-  "errorSearchingProduct": "Fehler bei der Produktsuche",
-  "barcodeScanner": "Barcode-Scanner",
-  "productSearch": "Produktsuche",
-  "tapToScan": "Zum Scannen tippen",
-  "scanningBarcode": "Barcode wird gescannt...",
-  "searchProducts": "Produkte suchen",
-  "noProductsFound": "Keine Produkte gefunden",
-  "addToIngredients": "Zu Zutaten hinzufügen",
-  "productDetails": "Produktdetails",
-  "brand": "Marke",
-  "cameraPermissionRequired": "Kameraberechtigung erforderlich",
-  "grantCameraPermission": "Kameraberechtigung erteilen",
-  "barcodeNotFound": "Barcode nicht gefunden",
-  "enterProductName": "Produktnamen eingeben",
-  "tryDifferentKeywords": "Versuchen Sie andere Suchbegriffe",
-  "selectServingSize": "Portionsgröße auswählen",
-  "enableCameraPermission": "Kameraberechtigung aktivieren",
-  "macroCustomization": "Makro-Anpassung",
-  "macroCustomizationInfo": "Passen Sie Ihre Makro-Ziele an. Alle Prozentsätze müssen sich zu 100% addieren.",
-  "macroTargetsUpdated": "Makro-Ziele erfolgreich aktualisiert",
-  "resetToDefaults": "Auf Standard zurücksetzen",
-  "healthDataTitle": "Gesundheitsdaten",
-  "healthDataTodayPartial": "Gesundheitsdaten (Heute - Teilweise)",
-  "estimatedCaloriesToday": "Geschätzte Kalorien (Heute)",
-  "estimatedCalories": "Geschätzte Kalorien",
-  "healthDataMessage": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt und liefern genaue Informationen über verbrannte Kalorien aus Ihren Fitnessaktivitäten für diesen vollständigen Tag.",
-  "healthDataTodayMessage": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt. Da der heutige Tag noch nicht abgeschlossen ist, zeigt dies die bisher heute verbrannten Kalorien an. Ihre Gesamtsumme kann sich erhöhen, wenn Sie den Tag über weitere Aktivitäten durchführen.",
-  "estimatedCaloriesTodayMessage": "Dies ist Ihr geschätzter Kalorienverbrauch für heute basierend auf Ihrem Aktivitätslevel. Da der Tag noch nicht abgeschlossen ist, repräsentiert dies Ihren Grundumsatz plus geschätzte Aktivität. Ihre tatsächlich verbrannten Kalorien können höher sein, wenn Sie heute mehr Aktivitäten durchführen.",
-  "estimatedCaloriesMessage": "Diese Daten sind basierend auf Ihren Profileinstellungen und Aktivitätslevel geschätzt, da für dieses Datum keine Gesundheitsdaten verfügbar waren.",
-  "analyzeTargets": "Ziele analysieren",
-  "debugHealthData": "Gesundheitsdaten debuggen",
-  "disconnectHealth": "Gesundheit trennen",
-  "calorieTargetAnalysis": "Kalorienziel-Analyse",
-  "daysAnalyzed": "Analysierte Tage",
-  "currentTarget": "Aktuelles Ziel",
-  "averageExpenditure": "Durchschnittlicher Verbrauch",
-  "suggestedTarget": "Vorgeschlagenes Ziel",
-  "applySuggestion": "Vorschlag anwenden",
-  "calorieTargetsUpdated": "Kalorienziele erfolgreich aktualisiert!",
-  "failedToUpdateTargets": "Aktualisierung der Kalorienziele fehlgeschlagen",
-  "bodyFat": "Körperfett",
-  "loadMore": "Mehr laden",
-  "localDishes": "Lokale Gerichte",
-  "localIngredients": "Lokale Zutaten"
+  "screensSettingsProfileSettingsHealthPermissionDenied": "Gesundheitsberechtigung Verweigert",
+  "@screensSettingsProfileSettingsHealthPermissionDenied": {
+    "description": "Health permission denied dialog title"
+  },
+  "screensSettingsProfileSettingsHealthPermissionDeniedMessage": "Um deine Gesundheitsdaten zu synchronisieren, benötigt PlatePal Zugriff auf deine Gesundheitsinformationen. Du kannst Berechtigungen in den Einstellungen deines Telefons erteilen.",
+  "@screensSettingsProfileSettingsHealthPermissionDeniedMessage": {
+    "description": "Health permission denied dialog message"
+  },
+  "screensSettingsProfileSettingsHealthSyncFailed": "Synchronisation der Gesundheitsdaten fehlgeschlagen",
+  "@screensSettingsProfileSettingsHealthSyncFailed": {
+    "description": "Gesundheitssynchronisation fehlgeschlagen Nachricht"
+  },
+  "screensSettingsProfileSettingsHealthSyncSuccess": "Gesundheitsdaten erfolgreich synchronisiert",
+  "@screensSettingsProfileSettingsHealthSyncSuccess": {
+    "description": "Gesundheitssynchronisation erfolgreich Nachricht"
+  },
+  "screensSettingsProfileSettingsProfileSettings": "Profil-Einstellungen",
+  "@screensSettingsProfileSettingsProfileSettings": {
+    "description": "Profil-Einstellungen"
+  },
+  "screensSettingsProfileSettingsProfileUpdated": "Profil erfolgreich aktualisiert",
+  "@screensSettingsProfileSettingsProfileUpdated": {
+    "description": "Profil erfolgreich aktualisiert"
+  },
+  "screensSettingsProfileSettingsResetApp": "App Zurücksetzen",
+  "@screensSettingsProfileSettingsResetApp": {
+    "description": "App Zurücksetzen"
+  },
+  "screensSettingsProfileSettingsResetAppCancel": "Abbrechen",
+  "@screensSettingsProfileSettingsResetAppCancel": {
+    "description": "Abbrechen"
+  },
+  "screensSettingsProfileSettingsResetAppConfirm": "Ja, Alles Löschen",
+  "@screensSettingsProfileSettingsResetAppConfirm": {
+    "description": "Ja, Alles Löschen"
+  },
+  "screensSettingsProfileSettingsResetAppDescription": "Dies wird ALLE Ihre Daten dauerhaft löschen, einschließlich:\n\n• Ihre Profilinformationen\n• Alle Mahlzeitenprotokolle und Ernährungsdaten\n• Alle Einstellungen und Präferenzen\n• Alle gespeicherten Informationen\n\nDiese Aktion kann nicht rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?",
+  "@screensSettingsProfileSettingsResetAppDescription": {
+    "description": "Dies wird ALLE Ihre Daten dauerhaft löschen, einschließlich:\n\n• Ihre Profilinformationen\n• Alle Mahlzeitenprotokolle und Ernährungsdaten\n• Alle Einstellungen und Präferenzen\n• Alle gespeicherten Informationen\n\nDiese Aktion kann nicht rückgängig gemacht werden. Sind Sie sicher, dass Sie fortfahren möchten?"
+  },
+  "screensSettingsProfileSettingsResetAppError": "Fehler beim Zurücksetzen der Anwendungsdaten",
+  "@screensSettingsProfileSettingsResetAppError": {
+    "description": "Fehler beim Zurücksetzen der Anwendungsdaten"
+  },
+  "screensSettingsProfileSettingsResetAppSuccess": "Anwendungsdaten wurden erfolgreich zurückgesetzt",
+  "@screensSettingsProfileSettingsResetAppSuccess": {
+    "description": "Anwendungsdaten wurden erfolgreich zurückgesetzt"
+  },
+  "screensSettingsProfileSettingsResetAppTitle": "Anwendungsdaten Zurücksetzen",
+  "@screensSettingsProfileSettingsResetAppTitle": {
+    "description": "Anwendungsdaten Zurücksetzen"
+  },
+  "screensSettingsProfileSettingsSyncHealthData": "Gesundheitsdaten synchronisieren",
+  "@screensSettingsProfileSettingsSyncHealthData": {
+    "description": "Gesundheitsdaten synchronisieren Button Text"
+  },
+  "screensSettingsProfileSettingsTargetWeight": "Zielgewicht",
+  "@screensSettingsProfileSettingsTargetWeight": {
+    "description": "Zielgewicht"
+  },
+  "screensSettingsStatisticsAllTime": "Alle Zeit",
+  "@screensSettingsStatisticsAllTime": {
+    "description": "Alle Zeit"
+  },
+  "screensSettingsStatisticsBmiHistory": "BMI-Verlauf",
+  "@screensSettingsStatisticsBmiHistory": {
+    "description": "BMI-Verlauf"
+  },
+  "screensSettingsStatisticsBmiNormal": "Normal",
+  "@screensSettingsStatisticsBmiNormal": {
+    "description": "Normal"
+  },
+  "screensSettingsStatisticsBmiObese": "Adipös",
+  "@screensSettingsStatisticsBmiObese": {
+    "description": "Adipös"
+  },
+  "screensSettingsStatisticsBmiOverweight": "Übergewicht",
+  "@screensSettingsStatisticsBmiOverweight": {
+    "description": "Übergewicht"
+  },
+  "screensSettingsStatisticsBmiStatsTip": "Der Body Mass Index (BMI) wird aus Ihren Gewichts- und Größenmessungen berechnet.",
+  "@screensSettingsStatisticsBmiStatsTip": {
+    "description": "Der Body Mass Index (BMI) wird aus Ihren Gewichts- und Größenmessungen berechnet."
+  },
+  "screensSettingsStatisticsBmiUnderweight": "Untergewicht",
+  "@screensSettingsStatisticsBmiUnderweight": {
+    "description": "Untergewicht"
+  },
+  "screensSettingsStatisticsBodyFat": "Körperfett",
+  "@screensSettingsStatisticsBodyFat": {
+    "description": "Körperfett"
+  },
+  "screensSettingsStatisticsBodyFatHistory": "Körperfett-Verlauf",
+  "@screensSettingsStatisticsBodyFatHistory": {
+    "description": "Körperfett-Verlauf"
+  },
+  "screensSettingsStatisticsBodyFatStatsTip": "Der Körperfettanteil hilft dabei, Ihre Körperzusammensetzung über das Gewicht hinaus zu verfolgen.",
+  "@screensSettingsStatisticsBodyFatStatsTip": {
+    "description": "Der Körperfettanteil hilft dabei, Ihre Körperzusammensetzung über das Gewicht hinaus zu verfolgen."
+  },
+  "screensSettingsStatisticsBulking": "Aufbau",
+  "@screensSettingsStatisticsBulking": {
+    "description": "Aufbau"
+  },
+  "screensSettingsStatisticsCalorieBalanceTip": "Verfolgen Sie Ihre tatsächliche Kalorienbilanz mit Gesundheitsdaten. Grün = Erhaltung, Blau = Defizit, Orange = Überschuss.",
+  "@screensSettingsStatisticsCalorieBalanceTip": {
+    "description": "Verfolgen Sie Ihre tatsächliche Kalorienbilanz mit Gesundheitsdaten. Grün = Erhaltung, Blau = Defizit, Orange = Überschuss."
+  },
+  "screensSettingsStatisticsCalorieBalanceTitle": "Kalorienbilanz (Aufnahme vs. Verbrauch)",
+  "@screensSettingsStatisticsCalorieBalanceTitle": {
+    "description": "Kalorienbilanz (Aufnahme vs. Verbrauch)"
+  },
+  "screensSettingsStatisticsCalorieIntakeHistory": "Kalorienaufnahme vs. Erhaltung",
+  "@screensSettingsStatisticsCalorieIntakeHistory": {
+    "description": "Kalorienaufnahme vs. Erhaltung"
+  },
+  "screensSettingsStatisticsCalorieStatsTip": "Vergleichen Sie Ihre tägliche Kalorienaufnahme mit Ihren Erhaltungskalorien. Grün zeigt Erhaltung, Blau ist Definitionsphase, Orange ist Aufbauphase.",
+  "@screensSettingsStatisticsCalorieStatsTip": {
+    "description": "Vergleichen Sie Ihre tägliche Kalorienaufnahme mit Ihren Erhaltungskalorien. Grün zeigt Erhaltung, Blau ist Definitionsphase, Orange ist Aufbauphase."
+  },
+  "screensSettingsStatisticsCannotCalculateBmiFromData": "BMI kann aus verfügbaren Daten nicht berechnet werden",
+  "@screensSettingsStatisticsCannotCalculateBmiFromData": {
+    "description": "BMI kann aus verfügbaren Daten nicht berechnet werden"
+  },
+  "screensSettingsStatisticsCutting": "Definition",
+  "@screensSettingsStatisticsCutting": {
+    "description": "Definition"
+  },
+  "screensSettingsStatisticsErrorLoadingData": "Fehler beim Laden der Daten",
+  "@screensSettingsStatisticsErrorLoadingData": {
+    "description": "Fehler beim Laden der Daten"
+  },
+  "screensSettingsStatisticsEstimatedBalance": "Geschätzte Bilanz",
+  "@screensSettingsStatisticsEstimatedBalance": {
+    "description": "Geschätzte Bilanz"
+  },
+  "screensSettingsStatisticsExtremeDeficitWarning": "Warnung: Häufige extreme Kaloriendefizite können den Stoffwechsel verlangsamen und Muskelverlust verursachen.",
+  "@screensSettingsStatisticsExtremeDeficitWarning": {
+    "description": "Warnung: Häufige extreme Kaloriendefizite können den Stoffwechsel verlangsamen und Muskelverlust verursachen."
+  },
+  "screensSettingsStatisticsGenerateTestData": "Testdaten Generieren",
+  "@screensSettingsStatisticsGenerateTestData": {
+    "description": "Testdaten Generieren"
+  },
+  "screensSettingsStatisticsHealthDataActive": "Ihre Gesundheits-App-Daten werden für eine genauere Defizit-/Überschussanalyse verwendet.",
+  "@screensSettingsStatisticsHealthDataActive": {
+    "description": "Ihre Gesundheits-App-Daten werden für eine genauere Defizit-/Überschussanalyse verwendet."
+  },
+  "screensSettingsStatisticsHealthDataAlert": "Gesundheitsdaten-Warnung: {days} Tag(e) mit sehr großen Kaloriendefiziten (>1000 kcal) basierend auf dem tatsächlichen Verbrauch.",
+  "@screensSettingsStatisticsHealthDataAlert": {
+    "description": "Gesundheitsdaten-Warnung: {days} Tag(e) mit sehr großen Kaloriendefiziten (>1000 kcal) basierend auf dem tatsächlichen Verbrauch.",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "screensSettingsStatisticsHealthDataInactive": "Aktivieren Sie die Gesundheitsdatensynchronisation in den Profileinstellungen für eine genauere Analyse.",
+  "@screensSettingsStatisticsHealthDataInactive": {
+    "description": "Aktivieren Sie die Gesundheitsdatensynchronisation in den Profileinstellungen für eine genauere Analyse."
+  },
+  "screensSettingsStatisticsHealthDataIntegration": "Gesundheitsdaten-Integration",
+  "@screensSettingsStatisticsHealthDataIntegration": {
+    "description": "Gesundheitsdaten-Integration"
+  },
+  "screensSettingsStatisticsInconsistentDeficitWarning": "Warnung: Ihr Kaloriendefizit variiert erheblich von Tag zu Tag (Varianz: {variance} kcal). Erwägen Sie eine konsistentere Aufnahme.",
+  "@screensSettingsStatisticsInconsistentDeficitWarning": {
+    "description": "Warnung: Ihr Kaloriendefizit variiert erheblich von Tag zu Tag (Varianz: {variance} kcal). Erwägen Sie eine konsistentere Aufnahme.",
+    "placeholders": {
+      "variance": {
+        "type": "String"
+      }
+    }
+  },
+  "screensSettingsStatisticsLastMonth": "Letzter Monat",
+  "@screensSettingsStatisticsLastMonth": {
+    "description": "Letzter Monat"
+  },
+  "screensSettingsStatisticsLastSixMonths": "Letzte 6 Monate",
+  "@screensSettingsStatisticsLastSixMonths": {
+    "description": "Letzte 6 Monate"
+  },
+  "screensSettingsStatisticsLastThreeMonths": "Letzte 3 Monate",
+  "@screensSettingsStatisticsLastThreeMonths": {
+    "description": "Letzte 3 Monate"
+  },
+  "screensSettingsStatisticsLastWeek": "Letzte Woche",
+  "@screensSettingsStatisticsLastWeek": {
+    "description": "Letzte Woche"
+  },
+  "screensSettingsStatisticsLastYear": "Letztes Jahr",
+  "@screensSettingsStatisticsLastYear": {
+    "description": "Letztes Jahr"
+  },
+  "screensSettingsStatisticsMaintenance": "Erhaltung",
+  "@screensSettingsStatisticsMaintenance": {
+    "description": "Erhaltung"
+  },
+  "screensSettingsStatisticsNoBmiDataAvailable": "Keine BMI-Daten verfügbar",
+  "@screensSettingsStatisticsNoBmiDataAvailable": {
+    "description": "Keine BMI-Daten verfügbar"
+  },
+  "screensSettingsStatisticsNoBodyFatDataAvailable": "Keine Körperfettdaten verfügbar",
+  "@screensSettingsStatisticsNoBodyFatDataAvailable": {
+    "description": "Keine Körperfettdaten verfügbar"
+  },
+  "screensSettingsStatisticsNoCalorieDataAvailable": "Keine Kaloriendaten verfügbar",
+  "@screensSettingsStatisticsNoCalorieDataAvailable": {
+    "description": "Keine Kaloriendaten verfügbar"
+  },
+  "screensSettingsStatisticsNotEnoughDataTitle": "Nicht genügend Daten",
+  "@screensSettingsStatisticsNotEnoughDataTitle": {
+    "description": "Nicht genügend Daten"
+  },
+  "screensSettingsStatisticsNoWeightDataAvailable": "Keine Gewichtsdaten verfügbar",
+  "@screensSettingsStatisticsNoWeightDataAvailable": {
+    "description": "Keine Gewichtsdaten verfügbar"
+  },
+  "screensSettingsStatisticsPhaseAnalysis": "Phasenanalyse",
+  "@screensSettingsStatisticsPhaseAnalysis": {
+    "description": "Phasenanalyse"
+  },
+  "screensSettingsStatisticsRealData": "Echte Daten",
+  "@screensSettingsStatisticsRealData": {
+    "description": "Echte Daten"
+  },
+  "screensSettingsStatisticsRefresh": "Aktualisieren",
+  "@screensSettingsStatisticsRefresh": {
+    "description": "Aktualisieren"
+  },
+  "screensSettingsStatisticsStatistics": "Statistiken",
+  "@screensSettingsStatisticsStatistics": {
+    "description": "Statistiken"
+  },
+  "screensSettingsStatisticsStatisticsEmptyDescription": "Wir benötigen mindestens eine Woche Daten, um aussagekräftige Statistiken zu zeigen. Verfolgen Sie weiter Ihre Messwerte, um Trends über die Zeit zu sehen.",
+  "@screensSettingsStatisticsStatisticsEmptyDescription": {
+    "description": "Wir benötigen mindestens eine Woche Daten, um aussagekräftige Statistiken zu zeigen. Verfolgen Sie weiter Ihre Messwerte, um Trends über die Zeit zu sehen."
+  },
+  "screensSettingsStatisticsTestDataDescription": "Zu Demonstrationszwecken können Sie Beispieldaten generieren, um zu sehen, wie die Statistiken aussehen.",
+  "@screensSettingsStatisticsTestDataDescription": {
+    "description": "Zu Demonstrationszwecken können Sie Beispieldaten generieren, um zu sehen, wie die Statistiken aussehen."
+  },
+  "screensSettingsStatisticsTimeRange": "Zeitbereich",
+  "@screensSettingsStatisticsTimeRange": {
+    "description": "Zeitbereich"
+  },
+  "screensSettingsStatisticsTryAgain": "Erneut versuchen",
+  "@screensSettingsStatisticsTryAgain": {
+    "description": "Erneut versuchen"
+  },
+  "screensSettingsStatisticsUpdateMetricsNow": "Messwerte jetzt aktualisieren",
+  "@screensSettingsStatisticsUpdateMetricsNow": {
+    "description": "Messwerte jetzt aktualisieren"
+  },
+  "screensSettingsStatisticsVeryHighCalorieNotice": "Hinweis: {days} Tag(e) mit sehr hoher Kalorienaufnahme (>1000 kcal über dem Erhaltungsbedarf).",
+  "@screensSettingsStatisticsVeryHighCalorieNotice": {
+    "description": "Hinweis: {days} Tag(e) mit sehr hoher Kalorienaufnahme (>1000 kcal über dem Erhaltungsbedarf).",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "screensSettingsStatisticsVeryLowCalorieWarning": "Warnung: {days} Tag(e) mit extrem niedriger Kalorienaufnahme (<1000 kcal). Dies kann ungesund sein.",
+  "@screensSettingsStatisticsVeryLowCalorieWarning": {
+    "description": "Warnung: {days} Tag(e) mit extrem niedriger Kalorienaufnahme (<1000 kcal). Dies kann ungesund sein.",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "screensSettingsStatisticsVsExpenditure": "vs. Verbrauch",
+  "@screensSettingsStatisticsVsExpenditure": {
+    "description": "vs. Verbrauch"
+  },
+  "screensSettingsStatisticsWeeklyAverage": "Wöchentlicher Durchschnitt",
+  "@screensSettingsStatisticsWeeklyAverage": {
+    "description": "Wöchentlicher Durchschnitt"
+  },
+  "screensSettingsStatisticsWeightHistory": "Gewichtsverlauf",
+  "@screensSettingsStatisticsWeightHistory": {
+    "description": "Gewichtsverlauf"
+  },
+  "screensSettingsStatisticsWeightStatsTip": "Das Diagramm zeigt das wöchentliche Mediangewicht, um tägliche Schwankungen durch Wassergewicht zu berücksichtigen.",
+  "@screensSettingsStatisticsWeightStatsTip": {
+    "description": "Das Diagramm zeigt das wöchentliche Mediangewicht, um tägliche Schwankungen durch Wassergewicht zu berücksichtigen."
+  },
+  "utilsLinkHandlerAvailable": "Verfügbar",
+  "@utilsLinkHandlerAvailable": {
+    "description": "Link verfügbar"
+  },
+  "utilsLinkHandlerCouldNotOpenUrl": "Konnte {url} nicht öffnen",
+  "@utilsLinkHandlerCouldNotOpenUrl": {
+    "description": "Konnte {url} nicht öffnen",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "utilsLinkHandlerNotAvailable": "Nicht verfügbar",
+  "@utilsLinkHandlerNotAvailable": {
+    "description": "Link nicht verfügbar"
+  },
+  "utilsLinkHandlerOpeningLink": "Öffne Buy Me Creatine Seite...",
+  "@utilsLinkHandlerOpeningLink": {
+    "description": "Öffne Buy Me Creatine Seite..."
+  }
 }

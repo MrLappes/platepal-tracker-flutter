@@ -149,19 +149,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.deleteLog),
-            content: Text(l10n.deleteLogConfirmation),
+            title: Text(l10n.screensCalendarDeleteLog),
+            content: Text(l10n.screensCalendarDeleteLogConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(l10n.cancel),
+                child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(l10n.delete),
+                child: Text(l10n.componentsDishesDishCardDelete),
               ),
             ],
           ),
@@ -178,7 +178,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.mealLogDeletedSuccessfully),
+              content: Text(l10n.screensCalendarMealLogDeletedSuccessfully),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
@@ -187,7 +187,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.failedToDeleteMealLog),
+              content: Text(l10n.screensCalendarFailedToDeleteMealLog),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -204,7 +204,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.configureApiKeyForAiTips),
+            content: Text(l10n.screensCalendarConfigureApiKeyForAiTips),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -273,7 +273,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.failedToGetAiTip),
+            content: Text(l10n.screensCalendarFailedToGetAiTip),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -298,14 +298,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(l10n.aiNutritionTip),
+                Text(l10n.screensCalendarAiNutritionTip),
               ],
             ),
             content: Text(tip),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.ok),
+                child: Text(l10n.screensCalendarOk),
               ),
             ],
           ),
@@ -537,7 +537,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  log.dish?.name ?? l10n.unknownDish,
+                  log.dish?.name ?? l10n.componentsCalendarCalendarDayDetailUnknownDish,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),

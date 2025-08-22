@@ -132,7 +132,7 @@ class _ChatInputState extends State<ChatInput>
                         children: [
                           _buildMenuOption(
                             icon: Icons.camera_alt,
-                            label: localizations.takePhoto,
+                            label: localizations.componentsChatBotProfileCustomizationDialogTakePhoto,
                             onTap: () {
                               _toggleMenu();
                               _pickImage(ImageSource.camera);
@@ -141,7 +141,7 @@ class _ChatInputState extends State<ChatInput>
                           ),
                           _buildMenuOption(
                             icon: Icons.photo_library,
-                            label: localizations.chooseFromGallery,
+                            label: localizations.componentsChatBotProfileCustomizationDialogChooseFromGallery,
                             onTap: () {
                               _toggleMenu();
                               _pickImage(ImageSource.gallery);
@@ -150,7 +150,7 @@ class _ChatInputState extends State<ChatInput>
                           ),
                           _buildMenuOption(
                             icon: Icons.barcode_reader,
-                            label: localizations.scanBarcode,
+                            label: localizations.componentsChatChatInputScanBarcode,
                             onTap: () {
                               _toggleMenu();
                               _openBarcodeScanner();
@@ -159,7 +159,7 @@ class _ChatInputState extends State<ChatInput>
                           ),
                           _buildMenuOption(
                             icon: Icons.search,
-                            label: localizations.searchProduct,
+                            label: localizations.componentsChatChatInputSearchProduct,
                             onTap: () {
                               _toggleMenu();
                               _openProductSearch();
@@ -244,7 +244,7 @@ class _ChatInputState extends State<ChatInput>
                             controller: _controller,
                             enabled: !widget.isLoading,
                             decoration: InputDecoration(
-                              hintText: localizations.typeMessage,
+                              hintText: localizations.componentsChatChatInputTypeMessage,
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -298,7 +298,7 @@ class _ChatInputState extends State<ChatInput>
                                             : theme.colorScheme.onSurface
                                                 .withValues(alpha: 0.4),
                                   ),
-                          tooltip: localizations.sendMessage,
+                          tooltip: localizations.componentsChatChatInputSendMessage,
                         ),
                       ),
                     ],
@@ -390,7 +390,7 @@ class _ChatInputState extends State<ChatInput>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            localizations.imageAttached,
+            localizations.componentsChatChatInputImageAttached,
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w500,
@@ -472,7 +472,7 @@ class _ChatInputState extends State<ChatInput>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            localizations.ingredientsAdded,
+            localizations.componentsChatChatInputIngredientsAdded,
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w500,
@@ -551,7 +551,7 @@ class _ChatInputState extends State<ChatInput>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context).imageAttached),
+              content: Text(AppLocalizations.of(context).componentsChatChatInputImageAttached),
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(
@@ -567,7 +567,7 @@ class _ChatInputState extends State<ChatInput>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context).errorPickingImage(e.toString()),
+              AppLocalizations.of(context).componentsChatChatInputErrorPickingImage(e.toString()),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,

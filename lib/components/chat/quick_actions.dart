@@ -14,32 +14,32 @@ class QuickActions extends StatelessWidget {
     final actions = [
       _QuickAction(
         icon: Icons.restaurant_menu,
-        label: localizations.suggestMeal,
+        label: localizations.componentsChatChatWelcomeSuggestMeal,
         message: "Suggest a healthy meal for me based on my fitness goals",
       ),
       _QuickAction(
         icon: Icons.analytics,
-        label: localizations.analyzeNutrition,
+        label: localizations.componentsChatChatWelcomeAnalyzeNutrition,
         message: "Help me analyze the nutrition in my meal",
       ),
       _QuickAction(
         icon: Icons.swap_horiz,
-        label: localizations.findAlternatives,
+        label: localizations.componentsChatChatWelcomeFindAlternatives,
         message: "Find healthier alternatives to my current meal",
       ),
       _QuickAction(
         icon: Icons.calculate,
-        label: localizations.calculateMacros,
+        label: localizations.componentsChatChatWelcomeCalculateMacros,
         message: "Help me calculate macros for my meals",
       ),
       _QuickAction(
         icon: Icons.calendar_today,
-        label: localizations.mealPlan,
+        label: localizations.componentsChatChatWelcomeMealPlan,
         message: "Help me create a weekly meal plan",
       ),
       _QuickAction(
         icon: Icons.info,
-        label: localizations.ingredientInfo,
+        label: localizations.componentsChatChatWelcomeIngredientInfo,
         message: "Tell me about the nutritional benefits of ingredients",
       ),
     ];
@@ -50,7 +50,7 @@ class QuickActions extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            localizations.quickActions,
+            localizations.componentsChatQuickActionsQuickActions,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),

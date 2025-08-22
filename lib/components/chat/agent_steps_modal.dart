@@ -21,7 +21,7 @@ class AgentStepsModal extends StatelessWidget {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: Text(l10n.agentProcessingSteps),
+            title: Text(l10n.componentsChatAgentStepsModalAgentProcessingSteps),
             backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             leading: IconButton(
@@ -44,13 +44,18 @@ class AgentStepsModal extends StatelessWidget {
                     deepSearchEnabled,
                     steps.length,
                   ),
-                  const SizedBox(height: 16), // Thinking Steps
+                  const SizedBox(height: 16),
+                  // Thinking Steps
                   if (thinkingSteps.isNotEmpty) ...[
                     _buildSectionCard(
                       context,
                       theme,
-                      '🧠 Thinking Process',
-                      'Real-time agent thinking steps',
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalThinkingProcessTitle,
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalThinkingProcessSubtitle,
                       Column(
                         children: [
                           Row(
@@ -63,7 +68,11 @@ class AgentStepsModal extends StatelessWidget {
                                       thinkingSteps.join('\n'),
                                     ),
                                 icon: const Icon(Icons.copy, size: 16),
-                                label: Text(l10n.copyAll),
+                                label: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).componentsChatAgentStepsModalCopyAll,
+                                ),
                                 style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -94,8 +103,12 @@ class AgentStepsModal extends StatelessWidget {
                     _buildSectionCard(
                       context,
                       theme,
-                      '⚙️ Processing Steps',
-                      'Detailed step-by-step execution',
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalProcessingStepsTitle,
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalProcessingStepsSubtitle,
                       Column(
                         children:
                             steps.asMap().entries.map<Widget>((entry) {
@@ -190,7 +203,9 @@ class AgentStepsModal extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Processing Summary',
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalProcessingSummary,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -203,50 +218,85 @@ class AgentStepsModal extends StatelessWidget {
                         context,
                         const JsonEncoder.withIndent('  ').convert(summaryData),
                       ),
-                  tooltip: 'Copy summary data',
+                  tooltip:
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalCopySummaryTooltip,
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(theme, 'Processing Time', '${processingTime}ms'),
-            _buildInfoRow(theme, 'Bot Type', botType),
-            _buildInfoRow(theme, 'Total Steps', '$stepsCount'),
+            _buildInfoRow(
+              theme,
+              AppLocalizations.of(
+                context,
+              ).componentsChatAgentStepsModalProcessingTime,
+              '${processingTime}ms',
+            ),
+            _buildInfoRow(
+              theme,
+              AppLocalizations.of(context).componentsChatAgentStepsModalBotType,
+              botType,
+            ),
+            _buildInfoRow(
+              theme,
+              AppLocalizations.of(
+                context,
+              ).componentsChatAgentStepsModalTotalSteps,
+              '$stepsCount',
+            ),
             if (skippedSteps > 0)
               _buildInfoRow(
                 theme,
-                'Skipped Steps',
+                AppLocalizations.of(
+                  context,
+                ).componentsChatAgentStepsModalSkippedSteps,
                 '$skippedSteps',
                 color: Colors.orange,
               ),
             if (failedSteps > 0)
               _buildInfoRow(
                 theme,
-                'Failed Steps',
+                AppLocalizations.of(
+                  context,
+                ).componentsChatAgentStepsModalFailedSteps,
                 '$failedSteps',
                 color: Colors.red,
               ),
             if (errorHandlingSteps > 0)
               _buildInfoRow(
                 theme,
-                'Error Recovery',
+                AppLocalizations.of(
+                  context,
+                ).componentsChatAgentStepsModalErrorRecovery,
                 '$errorHandlingSuccessful/$errorHandlingSteps',
                 color: Colors.amber,
               ),
             _buildInfoRow(
               theme,
-              'Completed Steps',
+              AppLocalizations.of(
+                context,
+              ).componentsChatAgentStepsModalCompletedSteps,
               '$completedSteps',
               color: Colors.green,
             ),
             _buildInfoRow(
               theme,
-              'Deep Search',
-              deepSearchEnabled ? 'Enabled' : 'Disabled',
+              AppLocalizations.of(
+                context,
+              ).componentsChatAgentStepsModalDeepSearch,
+              deepSearchEnabled
+                  ? AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalEnabled
+                  : AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalDisabled,
             ),
             // Add modification summary
             if (metadata.containsKey('pipelineModifications')) ...[
               const SizedBox(height: 8),
-              _buildModificationSummaryRow(theme),
+              _buildModificationSummaryRow(context, theme),
             ],
           ],
         ),
@@ -320,7 +370,8 @@ class AgentStepsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildModificationSummaryRow(ThemeData theme) {
+  Widget _buildModificationSummaryRow(BuildContext context, ThemeData theme) {
+    final l10n = AppLocalizations.of(context);
     final modifications =
         metadata['pipelineModifications'] as Map<String, dynamic>? ?? {};
     final summary = modifications['summary'] as Map<String, dynamic>? ?? {};
@@ -353,8 +404,10 @@ class AgentStepsModal extends StatelessWidget {
     if (totalMods == 0) {
       return _buildInfoRow(
         theme,
-        'Modifications',
-        'None needed ✨',
+        AppLocalizations.of(context).componentsChatAgentStepsModalModifications,
+        AppLocalizations.of(
+          context,
+        ).componentsChatAgentStepsModalNoModifications,
         color: Colors.green,
       );
     }
@@ -363,21 +416,31 @@ class AgentStepsModal extends StatelessWidget {
     final hasAi = summary['hasAiValidations'] as bool? ?? false;
     final hasAuto = summary['hasAutomaticFixes'] as bool? ?? false;
 
-    String modText = '$totalMods applied';
+    String modText = l10n.componentsChatAgentStepsModalTotalModifications(
+      totalMods,
+    );
     Color modColor = Colors.blue;
 
     if (hasEmergency) {
-      modText += ' (🚨 Emergency)';
+      modText +=
+          ' (🚨 ${l10n.componentsChatAgentStepsModalBadgeEmergencyOverrides})';
       modColor = Colors.red;
     } else if (hasAi) {
-      modText += ' (🤖 AI Enhanced)';
+      modText +=
+          ' (🤖 ${l10n.componentsChatAgentStepsModalBadgeAiValidations})';
       modColor = Colors.purple;
     } else if (hasAuto) {
-      modText += ' (🔧 Auto Fixed)';
+      modText +=
+          ' (🔧 ${l10n.componentsChatAgentStepsModalBadgeAutomaticFixes})';
       modColor = Colors.green;
     }
 
-    return _buildInfoRow(theme, 'Modifications', modText, color: modColor);
+    return _buildInfoRow(
+      theme,
+      AppLocalizations.of(context).componentsChatAgentStepsModalModifications,
+      modText,
+      color: modColor,
+    );
   }
 
   Widget _buildThinkingStepItem(
@@ -524,25 +587,41 @@ class AgentStepsModal extends StatelessWidget {
               children: [
                 // Skipped step explanation section
                 if (isSkipped) ...[
-                  _buildCopyableSection(context, theme, '⏭️ Skip Details', {
-                    'reason': skipReason ?? 'No reason provided',
-                    'stepName': stepName,
-                    if (data.containsKey('contextRequirements'))
-                      'contextRequirements': data['contextRequirements'],
-                  }, isMetadata: true),
+                  _buildCopyableSection(
+                    context,
+                    theme,
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalSkipDetails,
+                    {
+                      'reason': skipReason ?? 'No reason provided',
+                      'stepName': stepName,
+                      if (data.containsKey('contextRequirements'))
+                        'contextRequirements': data['contextRequirements'],
+                    },
+                    isMetadata: true,
+                  ),
                   const SizedBox(height: 16),
                 ],
 
                 // Metadata section
                 if (timestamp != null || executionTime != null) ...[
-                  _buildCopyableSection(context, theme, '📊 Metadata', {
-                    if (timestamp != null) 'timestamp': timestamp,
-                    if (executionTime != null)
-                      'executionTime': '${executionTime}ms',
-                    'success': success,
-                    'skipped': isSkipped,
-                    'stepName': stepName,
-                  }, isMetadata: true),
+                  _buildCopyableSection(
+                    context,
+                    theme,
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalMetadata,
+                    {
+                      if (timestamp != null) 'timestamp': timestamp,
+                      if (executionTime != null)
+                        'executionTime': '${executionTime}ms',
+                      'success': success,
+                      'skipped': isSkipped,
+                      'stepName': stepName,
+                    },
+                    isMetadata: true,
+                  ),
                   const SizedBox(height: 16),
                 ],
 
@@ -561,7 +640,14 @@ class AgentStepsModal extends StatelessWidget {
 
                 // Data Output section (only show if not skipped and has meaningful data)
                 if (!isSkipped && data.isNotEmpty) ...[
-                  _buildCopyableSection(context, theme, '📤 Data Output', data),
+                  _buildCopyableSection(
+                    context,
+                    theme,
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalDataOutput,
+                    data,
+                  ),
                   const SizedBox(height: 16),
                 ],
 
@@ -570,7 +656,9 @@ class AgentStepsModal extends StatelessWidget {
                   _buildCopyableSection(
                     context,
                     theme,
-                    '❌ Error Details',
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalErrorDetails,
                     error,
                     isError: true,
                   ),
@@ -581,7 +669,9 @@ class AgentStepsModal extends StatelessWidget {
                 _buildCopyableSection(
                   context,
                   theme,
-                  '🔍 Raw Step Data',
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalRawStepData,
                   step,
                   isRaw: true,
                 ),
@@ -646,7 +736,8 @@ class AgentStepsModal extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.copy, size: 18),
               onPressed: () => _copyToClipboard(context, jsonString),
-              tooltip: 'Copy to clipboard',
+              tooltip:
+                  AppLocalizations.of(context).componentsCommonCopyToClipboard,
             ),
           ],
         ),
@@ -662,10 +753,6 @@ class AgentStepsModal extends StatelessWidget {
                     ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
                     : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
-            border:
-                isError
-                    ? Border.all(color: Colors.red.withValues(alpha: 0.3))
-                    : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,7 +771,11 @@ class AgentStepsModal extends StatelessWidget {
                     onPressed:
                         () => _showFullDataDialog(context, title, jsonString),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: Text(AppLocalizations.of(context).viewFullData),
+                    label: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalViewFullData,
+                    ),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -781,7 +872,11 @@ class AgentStepsModal extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Summary: $modificationSummary',
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalSummaryLabel(
+                    modificationSummary,
+                  ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -926,7 +1021,11 @@ class AgentStepsModal extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Length: ${enhancedSystemPrompt.length} characters',
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalLengthLabel(
+                    enhancedSystemPrompt.length,
+                  ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
@@ -950,7 +1049,11 @@ class AgentStepsModal extends StatelessWidget {
                           enhancedSystemPrompt,
                         ),
                     icon: const Icon(Icons.visibility, size: 16),
-                    label: Text(AppLocalizations.of(context).viewFullPrompt),
+                    label: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsChatAgentStepsModalViewFullPrompt,
+                    ),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -1059,7 +1162,11 @@ class AgentStepsModal extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context).copiedToClipboard),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          ).componentsChatAgentStepsModalCopiedToClipboard,
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -1136,8 +1243,12 @@ class AgentStepsModal extends StatelessWidget {
       return _buildSectionCard(
         context,
         theme,
-        '✨ Pipeline Modifications',
-        'No modifications were needed - your request was processed smoothly!',
+        AppLocalizations.of(
+          context,
+        ).componentsChatAgentStepsModalPipelineModificationsTitle,
+        AppLocalizations.of(
+          context,
+        ).componentsChatAgentStepsModalPipelineModificationsSubtitle,
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -1151,7 +1262,9 @@ class AgentStepsModal extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Perfect processing! No corrections or modifications were needed.',
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalPerfectProcessing,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.green[700],
                   ),
@@ -1166,8 +1279,12 @@ class AgentStepsModal extends StatelessWidget {
     return _buildSectionCard(
       context,
       theme,
-      '🔧 Pipeline Modifications',
-      'Automatic fixes and AI improvements applied during processing',
+      AppLocalizations.of(
+        context,
+      ).componentsChatAgentStepsModalPipelineModificationsTitle,
+      AppLocalizations.of(
+        context,
+      ).componentsChatAgentStepsModalPipelineModificationsSubtitle,
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1199,7 +1316,9 @@ class AgentStepsModal extends StatelessWidget {
                       const JsonEncoder.withIndent('  ').convert(modifications),
                     ),
                 icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Copy All Modifications'),
+                label: Text(
+                  AppLocalizations.of(context).componentsCommonCopyToClipboard,
+                ),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
