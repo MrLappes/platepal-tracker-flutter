@@ -163,6 +163,9 @@ class ChatCompletionResponse {
 class OpenAIService {
   static const String _apiKeyKey = 'openai_api_key';
   static const String _selectedModelKey = 'openai_selected_model';
+  static const String _isCompatibilityModeKey = 'openai_compatibility_mode';
+  static const String _customBaseUrlKey = 'openai_custom_base_url';
+  static const String _customModelKey = 'openai_custom_model';
 
   // Default models to show before fetching from API
   static const List<OpenAIModel> _defaultModels = [
@@ -175,14 +178,59 @@ class OpenAIService {
   /// Get the currently selected model
   String get selectedModel => _selectedModelCache ?? 'gpt-4o';
   String? _selectedModelCache;
+
   Future<String?> _getApiKey() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_apiKeyKey);
   }
 
-  Future<String> getSelectedModel() async {
+  Future<bool> getIsCompatibilityMode() async {
     final prefs = await SharedPreferences.getInstance();
-    _selectedModelCache = prefs.getString(_selectedModelKey) ?? 'gpt-4o';
+    return prefs.getBool(_isCompatibilityModeKey) ?? false;
+  }
+
+  Future<void> setIsCompatibilityMode(bool isCompatibility) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isCompatibilityModeKey, isCompatibility);
+  }
+
+  Future<String?> getCustomBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_customBaseUrlKey);
+  }
+
+  Future<void> setCustomBaseUrl(String? url) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (url == null || url.isEmpty) {
+      await prefs.remove(_customBaseUrlKey);
+    } else {
+      await prefs.setString(_customBaseUrlKey, url);
+    }
+  }
+
+  Future<String?> getCustomModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_customModelKey);
+  }
+
+  Future<void> setCustomModel(String? model) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (model == null || model.isEmpty) {
+      await prefs.remove(_customModelKey);
+    } else {
+      await prefs.setString(_customModelKey, model);
+    }
+  }
+
+  Future<String> getSelectedModel() async {
+    final isCompatibility = await getIsCompatibilityMode();
+    if (isCompatibility) {
+      final customModel = await getCustomModel();
+      _selectedModelCache = customModel ?? 'gpt-3.5-turbo';
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      _selectedModelCache = prefs.getString(_selectedModelKey) ?? 'gpt-4o';
+    }
     return _selectedModelCache!;
   }
 
@@ -194,7 +242,38 @@ class OpenAIService {
 
   Future<bool> isConfigured() async {
     final apiKey = await _getApiKey();
+    final isCompatibility = await getIsCompatibilityMode();
+
+    if (isCompatibility) {
+      final customUrl = await getCustomBaseUrl();
+      final customModel = await getCustomModel();
+      return apiKey != null &&
+          apiKey.isNotEmpty &&
+          customUrl != null &&
+          customUrl.isNotEmpty &&
+          customModel != null &&
+          customModel.isNotEmpty;
+    }
+
     return apiKey != null && apiKey.isNotEmpty;
+  }
+
+  Future<String> _getBaseUrl() async {
+    final isCompatibility = await getIsCompatibilityMode();
+    if (isCompatibility) {
+      final customUrl = await getCustomBaseUrl();
+      if (customUrl != null && customUrl.isNotEmpty) {
+        // Ensure URL ends with /v1 if it doesn't already have it
+        if (customUrl.endsWith('/v1')) {
+          return customUrl;
+        } else if (customUrl.endsWith('/')) {
+          return '${customUrl}v1';
+        } else {
+          return '$customUrl/v1';
+        }
+      }
+    }
+    return 'https://api.openai.com/v1';
   }
 
   /// Helper to check if model requires alternate max_tokens key
@@ -207,12 +286,23 @@ class OpenAIService {
     return model.contains('-5');
   }
 
-  Future<ApiKeyTestResult> testApiKey(String apiKey, String model) async {
+  Future<ApiKeyTestResult> testApiKey(
+    String apiKey,
+    String model, {
+    String? customBaseUrl,
+  }) async {
     try {
-      final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+      // Clean the API key of any unwanted characters
+      final cleanedApiKey = apiKey.trim().replaceAll(
+        RegExp(r'[\x00-\x1F\x7F]'),
+        '',
+      );
+
+      final baseUrl = customBaseUrl ?? 'https://api.openai.com/v1';
+      final url = Uri.parse('$baseUrl/chat/completions');
       final headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
+        'Authorization': 'Bearer $cleanedApiKey',
       };
       final bool useCompletionTokens = _useCompletionTokens(model);
       final bool omitTemperature = _omitTemperature(model);
@@ -316,11 +406,19 @@ class OpenAIService {
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('OpenAI API key not configured');
     }
+
+    // Clean the API key of any unwanted characters
+    final cleanedApiKey = apiKey.trim().replaceAll(
+      RegExp(r'[\x00-\x1F\x7F]'),
+      '',
+    );
+
     final model = await getSelectedModel();
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final baseUrl = await _getBaseUrl();
+    final url = Uri.parse('$baseUrl/chat/completions');
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey',
+      'Authorization': 'Bearer $cleanedApiKey',
     };
 
     const systemPrompt =
@@ -416,10 +514,20 @@ class OpenAIService {
     }
   }
 
-  Future<List<OpenAIModel>> getAvailableModels(String apiKey) async {
+  Future<List<OpenAIModel>> getAvailableModels(
+    String apiKey, {
+    String? customBaseUrl,
+  }) async {
     try {
-      final url = Uri.parse('https://api.openai.com/v1/models');
-      final headers = {'Authorization': 'Bearer $apiKey'};
+      // Clean the API key of any unwanted characters
+      final cleanedApiKey = apiKey.trim().replaceAll(
+        RegExp(r'[\x00-\x1F\x7F]'),
+        '',
+      );
+
+      final baseUrl = customBaseUrl ?? 'https://api.openai.com/v1';
+      final url = Uri.parse('$baseUrl/models');
+      final headers = {'Authorization': 'Bearer $cleanedApiKey'};
       final response = await http.get(url, headers: headers);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -460,7 +568,6 @@ class OpenAIService {
     return _defaultModels;
   }
 
-  /// Send a structured chat request to OpenAI using manual HTTP requests
   Future<ChatCompletionResponse> sendChatRequest({
     required List<Map<String, dynamic>> messages,
     double temperature = 0.7,
@@ -472,11 +579,19 @@ class OpenAIService {
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('OpenAI API key not configured');
     }
+
+    // Clean the API key of any unwanted characters
+    final cleanedApiKey = apiKey.trim().replaceAll(
+      RegExp(r'[\x00-\x1F\x7F]'),
+      '',
+    );
+
     final model = await getSelectedModel();
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final baseUrl = await _getBaseUrl();
+    final url = Uri.parse('$baseUrl/chat/completions');
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey',
+      'Authorization': 'Bearer $cleanedApiKey',
     };
     final bool useCompletionTokens = _useCompletionTokens(model);
     final bool omitTemperature = _omitTemperature(model);
