@@ -15,6 +15,8 @@ class ApiKeySettingsScreen extends StatefulWidget {
 class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _apiKeyController = TextEditingController();
+  final _customUrlController = TextEditingController();
+  final _customModelController = TextEditingController();
   final _openAIService = OpenAIService();
 
   bool _isLoading = false;
@@ -22,6 +24,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   bool _hasApiKey = false;
   bool _isLoadingModels = false;
   bool _pasteSuccess = false;
+  bool _isCompatibilityMode = false;
 
   String _selectedModel = 'gpt-4o';
   String? _errorMessage;
@@ -32,6 +35,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   void initState() {
     super.initState();
     _loadApiKey();
+    _loadCompatibilitySettings();
     _loadDefaultModels();
     _loadSelectedModel();
   }
@@ -39,6 +43,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   @override
   void dispose() {
     _apiKeyController.dispose();
+    _customUrlController.dispose();
+    _customModelController.dispose();
     super.dispose();
   }
 
@@ -60,7 +66,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     } catch (e) {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
-      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsFailedToLoadApiKey);
+      _showErrorSnackBar(
+        localizations.screensSettingsApiKeySettingsFailedToLoadApiKey,
+      );
     }
   }
 
@@ -74,6 +82,26 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         _selectedModel = _availableModels.first.id;
       }
     });
+  }
+
+  Future<void> _loadCompatibilitySettings() async {
+    try {
+      final isCompatibility = await _openAIService.getIsCompatibilityMode();
+      final customUrl = await _openAIService.getCustomBaseUrl();
+      final customModel = await _openAIService.getCustomModel();
+
+      setState(() {
+        _isCompatibilityMode = isCompatibility;
+        _customUrlController.text = customUrl ?? '';
+        _customModelController.text = customModel ?? '';
+      });
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      final localizations = AppLocalizations.of(context);
+      _showErrorSnackBar(
+        localizations.screensSettingsApiKeySettingsFailedToLoadApiKey,
+      );
+    }
   }
 
   void _loadDefaultModels() {
@@ -96,7 +124,12 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     });
 
     try {
-      final models = await _openAIService.getAvailableModels(apiKey);
+      final customUrl =
+          _isCompatibilityMode ? _customUrlController.text.trim() : null;
+      final models = await _openAIService.getAvailableModels(
+        apiKey,
+        customBaseUrl: customUrl,
+      );
       setState(() {
         _availableModels = models;
 
@@ -111,7 +144,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
       setState(() {
-        _modelError = localizations.screensSettingsApiKeySettingsCouldNotLoadModels;
+        _modelError =
+            localizations.screensSettingsApiKeySettingsCouldNotLoadModels;
         _availableModels = _openAIService.getDefaultModels();
       });
     } finally {
@@ -124,13 +158,37 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   Future<void> _testAndSaveApiKey() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final apiKey = _apiKeyController.text.trim();
+    final rawApiKey = _apiKeyController.text.trim();
+    // Clean the API key of any unwanted characters (null terminators, control chars)
+    final apiKey = rawApiKey.replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '');
+
     if (apiKey.isEmpty) {
       final localizations = AppLocalizations.of(context);
       setState(() {
-        _errorMessage = localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
+        _errorMessage =
+            localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
       });
       return;
+    }
+
+    // Validate compatibility mode fields
+    if (_isCompatibilityMode) {
+      final customUrl = _customUrlController.text.trim();
+      final customModel = _customModelController.text.trim();
+
+      if (customUrl.isEmpty) {
+        setState(() {
+          _errorMessage = 'Custom base URL is required for compatibility mode';
+        });
+        return;
+      }
+
+      if (customModel.isEmpty) {
+        setState(() {
+          _errorMessage = 'Model name is required for compatibility mode';
+        });
+        return;
+      }
     }
 
     setState(() {
@@ -139,10 +197,19 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     });
 
     try {
+      // Get the model to test
+      final modelToTest =
+          _isCompatibilityMode
+              ? _customModelController.text.trim()
+              : _selectedModel;
+      final customUrl =
+          _isCompatibilityMode ? _customUrlController.text.trim() : null;
+
       // Test API key with selected model
       final testResult = await _openAIService.testApiKey(
         apiKey,
-        _selectedModel,
+        modelToTest,
+        customBaseUrl: customUrl,
       );
 
       if (!testResult.success) {
@@ -152,10 +219,17 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         return;
       }
 
-      // If successful, save the API key and model
+      // If successful, save all settings
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('openai_api_key', apiKey);
-      await _openAIService.setSelectedModel(_selectedModel);
+      await _openAIService.setIsCompatibilityMode(_isCompatibilityMode);
+
+      if (_isCompatibilityMode) {
+        await _openAIService.setCustomBaseUrl(_customUrlController.text.trim());
+        await _openAIService.setCustomModel(_customModelController.text.trim());
+      } else {
+        await _openAIService.setSelectedModel(_selectedModel);
+      }
 
       setState(() {
         _hasApiKey = true;
@@ -194,17 +268,29 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('openai_api_key');
 
+      // Also clear compatibility mode settings
+      await _openAIService.setIsCompatibilityMode(false);
+      await _openAIService.setCustomBaseUrl(null);
+      await _openAIService.setCustomModel(null);
+
       setState(() {
         _apiKeyController.clear();
+        _customUrlController.clear();
+        _customModelController.clear();
         _hasApiKey = false;
+        _isCompatibilityMode = false;
         _errorMessage = null;
       });
 
       if (mounted) {
-        _showSuccessSnackBar(localizations.screensSettingsApiKeySettingsApiKeyRemovedSuccessfully);
+        _showSuccessSnackBar(
+          localizations.screensSettingsApiKeySettingsApiKeyRemovedSuccessfully,
+        );
       }
     } catch (e) {
-      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsFailedToRemoveApiKey);
+      _showErrorSnackBar(
+        localizations.screensSettingsApiKeySettingsFailedToRemoveApiKey,
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -230,8 +316,14 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     try {
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
       if (clipboardData?.text != null && clipboardData!.text!.isNotEmpty) {
+        // Clean the pasted text of any unwanted characters
+        final cleanedText = clipboardData.text!.trim().replaceAll(
+          RegExp(r'[\x00-\x1F\x7F]'),
+          '',
+        );
+
         setState(() {
-          _apiKeyController.text = clipboardData.text!;
+          _apiKeyController.text = cleanedText;
           _pasteSuccess = true;
         });
 
@@ -245,22 +337,28 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         });
 
         // Fetch models if key looks valid
-        if (clipboardData.text!.length > 30) {
-          _fetchAvailableModels(clipboardData.text!);
+        if (cleanedText.length > 30) {
+          _fetchAvailableModels(cleanedText);
         }
 
         // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
-        _showSuccessSnackBar(localizations.screensSettingsApiKeySettingsPastedFromClipboard);
+        _showSuccessSnackBar(
+          localizations.screensSettingsApiKeySettingsPastedFromClipboard,
+        );
       } else {
         // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
-        _showErrorSnackBar(localizations.screensSettingsApiKeySettingsClipboardEmpty);
+        _showErrorSnackBar(
+          localizations.screensSettingsApiKeySettingsClipboardEmpty,
+        );
       }
     } catch (e) {
       // ignore: use_build_context_synchronously
       final localizations = AppLocalizations.of(context);
-      _showErrorSnackBar(localizations.screensSettingsApiKeySettingsFailedToAccessClipboard);
+      _showErrorSnackBar(
+        localizations.screensSettingsApiKeySettingsFailedToAccessClipboard,
+      );
     }
   }
 
@@ -312,7 +410,10 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(localizations.componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  localizations
+                      .componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -331,6 +432,16 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     }
 
     final trimmedValue = value.trim();
+
+    // For compatibility mode, be more flexible with API key format
+    if (_isCompatibilityMode) {
+      if (trimmedValue.length < 10) {
+        return 'API key seems too short';
+      }
+      return null;
+    }
+
+    // For OpenAI mode, enforce OpenAI format
     if (!trimmedValue.startsWith('sk-')) {
       return localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
     }
@@ -382,7 +493,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            localizations.screensSettingsApiKeySettingsAboutOpenAiApiKey,
+                            localizations
+                                .screensSettingsApiKeySettingsAboutOpenAiApiKey,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
@@ -390,12 +502,14 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        localizations.screensSettingsApiKeySettingsApiKeyDescription,
+                        localizations
+                            .screensSettingsApiKeySettingsApiKeyDescription,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        localizations.screensSettingsApiKeySettingsApiKeyBulletPoints,
+                        localizations
+                            .screensSettingsApiKeySettingsApiKeyBulletPoints,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -419,7 +533,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                localizations.screensSettingsApiKeySettingsApiKeyConfigured,
+                                localizations
+                                    .screensSettingsApiKeySettingsApiKeyConfigured,
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleSmall?.copyWith(
@@ -428,7 +543,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                                 ),
                               ),
                               Text(
-                                localizations.screensSettingsApiKeySettingsAiFeaturesEnabled,
+                                localizations
+                                    .screensSettingsApiKeySettingsAiFeaturesEnabled,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.green.shade600),
                               ),
@@ -442,9 +558,75 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                 const SizedBox(height: 16),
               ],
 
+              // Compatibility Mode Toggle
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'API Mode',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        title: const Text('OpenAI Compatible API'),
+                        subtitle: Text(
+                          _isCompatibilityMode
+                              ? 'Using custom OpenAI-compatible API endpoint'
+                              : 'Using official OpenAI API',
+                        ),
+                        value: _isCompatibilityMode,
+                        onChanged: (value) {
+                          setState(() {
+                            _isCompatibilityMode = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Custom Base URL (only in compatibility mode)
+              if (_isCompatibilityMode) ...[
+                Text(
+                  'Base URL',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _customUrlController,
+                  validator: (value) {
+                    if (_isCompatibilityMode &&
+                        (value == null || value.trim().isEmpty)) {
+                      return 'Base URL is required for compatibility mode';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'https://api.example.com/v1',
+                    helperText:
+                        'Enter the base URL for your OpenAI-compatible API',
+                    prefixIcon: const Icon(Icons.link),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+
               // API Key Input
               Text(
-                localizations.screensSettingsApiKeySettingsOpenAiApiKey,
+                _isCompatibilityMode
+                    ? 'API Key'
+                    : localizations.screensSettingsApiKeySettingsOpenAiApiKey,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -461,8 +643,12 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   }
                 },
                 decoration: InputDecoration(
-                  hintText: localizations.screensSettingsApiKeySettingsApiKeyPlaceholder,
-                  helperText: localizations.screensSettingsApiKeySettingsApiKeyHelperText,
+                  hintText:
+                      localizations
+                          .screensSettingsApiKeySettingsApiKeyPlaceholder,
+                  helperText:
+                      localizations
+                          .screensSettingsApiKeySettingsApiKeyHelperText,
                   prefixIcon: const Icon(Icons.key),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -473,7 +659,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                           color: _pasteSuccess ? Colors.green : null,
                         ),
                         onPressed: _isLoading ? null : _pasteFromClipboard,
-                        tooltip: localizations.screensSettingsApiKeySettingsPasteFromClipboard,
+                        tooltip:
+                            localizations
+                                .screensSettingsApiKeySettingsPasteFromClipboard,
                       ),
                       IconButton(
                         icon: Icon(
@@ -498,93 +686,121 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
               // Model Selection
               Text(
-                localizations.screensSettingsApiKeySettingsSelectModel,
+                _isCompatibilityMode
+                    ? 'Model Name'
+                    : localizations.screensSettingsApiKeySettingsSelectModel,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
+              if (_isCompatibilityMode) ...[
+                // Custom model text field for compatibility mode
+                TextFormField(
+                  controller: _customModelController,
+                  validator: (value) {
+                    if (_isCompatibilityMode &&
+                        (value == null || value.trim().isEmpty)) {
+                      return 'Model name is required for compatibility mode';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'gpt-3.5-turbo, claude-3-sonnet, etc.',
+                    helperText:
+                        'Enter the exact model name supported by your API',
+                    prefixIcon: const Icon(Icons.memory),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value:
-                                _availableModels.any(
-                                      (m) => m.id == _selectedModel,
-                                    )
-                                    ? _selectedModel
-                                    : (_availableModels.isNotEmpty
-                                        ? _availableModels.first.id
-                                        : null),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
+              ] else ...[
+                // OpenAI model dropdown
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value:
+                                  _availableModels.any(
+                                        (m) => m.id == _selectedModel,
+                                      )
+                                      ? _selectedModel
+                                      : (_availableModels.isNotEmpty
+                                          ? _availableModels.first.id
+                                          : null),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                              items:
+                                  _availableModels.map((model) {
+                                    return DropdownMenuItem(
+                                      value: model.id,
+                                      child: Text(model.displayName),
+                                    );
+                                  }).toList(),
+                              onChanged:
+                                  _isLoading
+                                      ? null
+                                      : (value) async {
+                                        if (value != null) {
+                                          setState(() {
+                                            _selectedModel = value;
+                                          });
+                                          // Save selected model immediately
+                                          await _openAIService.setSelectedModel(
+                                            value,
+                                          );
+                                        }
+                                      },
+                            ),
+                          ),
+                          if (_isLoadingModels)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 16),
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             ),
-                            items:
-                                _availableModels.map((model) {
-                                  return DropdownMenuItem(
-                                    value: model.id,
-                                    child: Text(model.displayName),
-                                  );
-                                }).toList(),
-                            onChanged:
-                                _isLoading
-                                    ? null
-                                    : (value) async {
-                                      if (value != null) {
-                                        setState(() {
-                                          _selectedModel = value;
-                                        });
-                                        // Save selected model immediately
-                                        await _openAIService.setSelectedModel(
-                                          value,
-                                        );
-                                      }
-                                    },
-                          ),
-                        ),
-                        if (_isLoadingModels)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 16),
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              if (_modelError != null) ...[
+                if (_modelError != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _modelError!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Text(
-                  _modelError!,
+                  _getModelInfoText(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.orange.shade700,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
-              Text(
-                _getModelInfoText(),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
               const SizedBox(height: 24),
 
               // Error Message
@@ -649,41 +865,51 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                localizations.screensSettingsApiKeySettingsTestingApiKey,
+                                localizations
+                                    .screensSettingsApiKeySettingsTestingApiKey,
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ],
                           )
                           : Text(
                             _hasApiKey
-                                ? (localizations.screensSettingsApiKeySettingsUpdateApiKey)
-                                : (localizations.screensSettingsApiKeySettingsTestAndSaveApiKey),
+                                ? (localizations
+                                    .screensSettingsApiKeySettingsUpdateApiKey)
+                                : (localizations
+                                    .screensSettingsApiKeySettingsTestAndSaveApiKey),
                             style: const TextStyle(fontSize: 16),
                           ),
                 ),
               ),
 
-              const SizedBox(height: 16), // Get API Key Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: _isLoading ? null : _openApiKeyUrl,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 16),
+
+              // Get API Key Button (only for OpenAI mode)
+              if (!_isCompatibilityMode) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : _openApiKeyUrl,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.open_in_new),
+                        const SizedBox(width: 8),
+                        Text(
+                          localizations
+                              .screensSettingsApiKeySettingsGetApiKeyFromOpenAi,
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.open_in_new),
-                      const SizedBox(width: 8),
-                      Text(localizations.screensSettingsApiKeySettingsGetApiKeyFromOpenAi),
-                    ],
-                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
