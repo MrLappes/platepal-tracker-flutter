@@ -70,13 +70,16 @@ class ThemeProvider extends ChangeNotifier {
     switch (_themePreference) {
       case ThemePreference.dark:
         _isDark = true;
+        _currentThemeName = AppThemes.dark.name;
         break;
       case ThemePreference.light:
         _isDark = false;
+        _currentThemeName = AppThemes.light.name;
         break;
       case ThemePreference.system:
         final brightness = PlatformDispatcher.instance.platformBrightness;
         _isDark = brightness == Brightness.dark;
+        _currentThemeName = _isDark ? AppThemes.dark.name : AppThemes.light.name;
         break;
     }
 
@@ -111,6 +114,9 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> setThemeByName(String themeName) async {
     if (_currentThemeName != themeName) {
       _currentThemeName = themeName;
+      // Allow overriding the dark/light state based on theme selection
+      final targetTheme = AppThemes.getThemeByName(themeName);
+      _themePreference = targetTheme.isDark ? ThemePreference.dark : ThemePreference.light;
       _updateTheme();
       await _saveThemePreference();
     }
