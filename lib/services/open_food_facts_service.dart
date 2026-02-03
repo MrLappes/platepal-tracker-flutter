@@ -15,11 +15,11 @@ class OpenFoodFactsService {
   }) async {
     try {
       final encodedQuery = Uri.encodeComponent(query);
-      // Using the reliable CGI search endpoint as recommended in docs
+      // Using the reliable CGI search endpoint with optimal parameters for unique results
       final url =
-          'https://world.openfoodfacts.org/cgi/search.pl?search_terms=$encodedQuery&search_simple=1&action=process&json=1&page=$page&page_size=$pageSize&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&nocache=1';
+          'https://world.openfoodfacts.org/cgi/search.pl?action=process&json=1&search_terms=$encodedQuery&page=$page&page_size=$pageSize&sort_by=unique_scans_n&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&nocache=1';
 
-      debugPrint('🔍 Searching Open Food Facts (CGI): $url');
+      debugPrint('🔍 Searching Open Food Facts (CGI Optimized): $url');
       final response = await http.get(
         Uri.parse(url),
         headers: {
