@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/product.dart';
+import '../../providers/locale_provider.dart';
 import '../../services/open_food_facts_service.dart';
 import '../../services/storage/database_service.dart';
 import '../../services/storage/dish_service.dart';
@@ -123,10 +125,18 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     try {
       debugPrint('🔍 Searching for products: $query');
 
+      // Get current locale for regional search filtering
+      final localeProvider =
+          Provider.of<LocaleProvider>(context, listen: false);
+      final countryCode = localeProvider.locale.languageCode;
+      final languageCode = localeProvider.locale.languageCode;
+
       final products = await _openFoodFactsService.searchProducts(
         query.trim(),
         page: _currentPage,
         pageSize: 20,
+        countryCode: countryCode,
+        languageCode: languageCode,
       );
 
       setState(() {
@@ -489,10 +499,32 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                         ],
                         if (_hasSearched &&
                             _searchResults.isEmpty &&
-                            !_isSearching) ...[
-                          Center(child: Text(localizations.componentsScannerProductSearchNoProductsFound)),
+                            !_isSearching &&
+                            _localIngredients.isEmpty &&
+                            _localDishes.isEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32.0),
+                            child: Center(
+                              child: Text(
+                                localizations
+                                    .componentsScannerProductSearchNoProductsFound,
+                              ),
+                            ),
+                          ),
                         ],
-                        ..._searchResults.map(_buildProductCard),
+                        if (_searchResults.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Global Products (Open Food Facts)',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ..._searchResults.map(_buildProductCard),
+                        ],
                         if (_isSearching && _currentPage > 1)
                           const Padding(
                             padding: EdgeInsets.all(8.0),
