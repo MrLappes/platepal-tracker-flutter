@@ -10,10 +10,10 @@ class ThemeProvider extends ChangeNotifier {
   static const String _themePrefKey = 'theme_preference';
   static const String _themeNameKey = 'theme_name';
 
-  ThemePreference _themePreference = ThemePreference.system;
-  String _currentThemeName = AppThemes.light.name;
-  AppTheme _currentTheme = AppThemes.light;
-  bool _isDark = false;
+  ThemePreference _themePreference = ThemePreference.dark;
+  String _currentThemeName = AppThemes.dark.name;
+  AppTheme _currentTheme = AppThemes.dark;
+  bool _isDark = true;
 
   ThemeProvider() {
     _loadThemePreference();
@@ -37,22 +37,15 @@ class ThemeProvider extends ChangeNotifier {
       if (savedPreference != null) {
         _themePreference = ThemePreference.values.firstWhere(
           (e) => e.name == savedPreference,
-          orElse: () => ThemePreference.system,
+          orElse: () => ThemePreference.dark,
         );
-      } // Load theme name
+      }
+
       final savedThemeName = prefs.getString(_themeNameKey);
       if (savedThemeName != null) {
-        // If the saved theme is Light or Dark, migrate to Oceanic
-        if (['Light', 'Dark'].contains(savedThemeName)) {
-          _currentThemeName = 'Oceanic';
-          // Save the migrated theme name
-          await prefs.setString(_themeNameKey, _currentThemeName);
-        } else {
-          _currentThemeName = savedThemeName;
-        }
+        _currentThemeName = savedThemeName;
       } else {
-        // Default to Oceanic for new users
-        _currentThemeName = 'Oceanic';
+        _currentThemeName = AppThemes.dark.name;
       }
 
       _updateTheme();
@@ -74,76 +67,29 @@ class ThemeProvider extends ChangeNotifier {
 
   // Update the current theme based on preference and system brightness
   void _updateTheme() {
-    // Determine if dark mode should be active
+    // Determine if we should use dark mode
+    bool useDark;
     switch (_themePreference) {
       case ThemePreference.dark:
-        _isDark = true;
+        useDark = true;
         break;
       case ThemePreference.light:
-        _isDark = false;
+        useDark = false;
         break;
       case ThemePreference.system:
         final brightness = PlatformDispatcher.instance.platformBrightness;
-        _isDark = brightness == Brightness.dark;
+        useDark = brightness == Brightness.dark;
         break;
     }
 
-    // Get the base theme by name
-    final baseTheme = AppThemes.getThemeByName(_currentThemeName);
+    _isDark = useDark;
 
-    // Create the appropriate theme variant (light/dark)
-    if (_isDark && !baseTheme.isDark) {
-      // If we need dark but the selected theme is light, use the dark variant
-      _currentTheme = _createDarkVariant(baseTheme);
-    } else if (!_isDark && baseTheme.isDark) {
-      // If we need light but the selected theme is dark, use the light variant
-      _currentTheme = _createLightVariant(baseTheme);
-    } else {
-      _currentTheme = baseTheme;
-    }
+    // Get the base theme and apply light/dark variant
+    final baseTheme = AppThemes.getThemeByName(_currentThemeName);
+    _currentTheme = useDark ? baseTheme.toDark() : baseTheme.toLight();
 
     _updateSystemBrightness();
     notifyListeners();
-  }
-
-  // Create a dark variant of a light theme
-  AppTheme _createDarkVariant(AppTheme lightTheme) {
-    return AppTheme(
-      name: '${lightTheme.name} Dark',
-      isDark: true,
-      colors: AppThemeColors(
-        primary: lightTheme.colors.primary,
-        background: const Color(0xFF121212),
-        card: const Color(0xFF1e1e1e),
-        text: const Color(0xFFffffff),
-        border: const Color(0xFF2c2c2c),
-        notification: lightTheme.colors.notification,
-        secondary: lightTheme.colors.secondary,
-        success: lightTheme.colors.success,
-        warning: lightTheme.colors.warning,
-        error: lightTheme.colors.error,
-      ),
-    );
-  }
-
-  // Create a light variant of a dark theme
-  AppTheme _createLightVariant(AppTheme darkTheme) {
-    return AppTheme(
-      name: '${darkTheme.name} Light',
-      isDark: false,
-      colors: AppThemeColors(
-        primary: darkTheme.colors.primary,
-        background: const Color(0xFFffffff),
-        card: const Color(0xFFf8f8f8),
-        text: const Color(0xFF000000),
-        border: const Color(0xFFe0e0e0),
-        notification: darkTheme.colors.notification,
-        secondary: darkTheme.colors.secondary,
-        success: darkTheme.colors.success,
-        warning: darkTheme.colors.warning,
-        error: darkTheme.colors.error,
-      ),
-    );
   }
 
   // Update system UI overlay style based on current theme
@@ -171,62 +117,29 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> setThemeByName(String themeName) async {
     if (_currentThemeName != themeName) {
       _currentThemeName = themeName;
+      // Don't override theme preference when selecting a base theme
+      // Only change preference if explicitly selecting "Light" or "Dark" themes
+      if (themeName == 'Light') {
+        _themePreference = ThemePreference.light;
+      } else if (themeName == 'Dark') {
+        _themePreference = ThemePreference.dark;
+      }
+      // For base themes (PlatePal, Oceanic, Forest), keep current preference
       _updateTheme();
       await _saveThemePreference();
     }
   }
 
-  Future<void> setTheme(ThemePreference preference, {String? themeName}) async {
-    bool changed = false;
-
-    if (_themePreference != preference) {
-      _themePreference = preference;
-      changed = true;
-    }
-
-    if (themeName != null && _currentThemeName != themeName) {
-      _currentThemeName = themeName;
-      changed = true;
-    }
-
-    if (changed) {
-      _updateTheme();
-      await _saveThemePreference();
-    }
-  }
-
-  // Toggle between light and dark mode
   Future<void> toggleTheme() async {
-    switch (_themePreference) {
-      case ThemePreference.light:
-        await setThemePreference(ThemePreference.dark);
-        break;
-      case ThemePreference.dark:
-        await setThemePreference(ThemePreference.light);
-        break;
-      case ThemePreference.system:
-        // If system, toggle to the opposite of current system setting
-        final brightness = PlatformDispatcher.instance.platformBrightness;
-        await setThemePreference(
-          brightness == Brightness.dark
-              ? ThemePreference.light
-              : ThemePreference.dark,
-        );
-        break;
+    if (_themePreference == ThemePreference.light) {
+      await setThemePreference(ThemePreference.dark);
+    } else {
+      await setThemePreference(ThemePreference.light);
     }
   }
 
-  // Get all available theme names (excluding base Light/Dark themes)
   List<String> get availableThemes =>
-      AppThemes.allThemes
-          .where((t) => !['Light', 'Dark'].contains(t.name))
-          .map((t) => t.name)
-          .toList();
-
-  // Get all base theme names (including Light/Dark for backwards compatibility)
+      AppThemes.allThemes.map((t) => t.name).toList();
   List<String> get allAvailableThemes =>
       AppThemes.allThemes.map((t) => t.name).toList();
-
-  // Check if a premium theme is selected (for sponsor themes)
-  bool get isPremiumTheme => !['Light', 'Dark'].contains(_currentThemeName);
 }

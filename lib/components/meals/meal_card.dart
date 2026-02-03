@@ -32,7 +32,7 @@ class MealCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -48,7 +48,10 @@ class MealCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: _getMealTypeColor(mealLog.mealType),
-                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       getMealTypeDisplayName(),
@@ -113,7 +116,10 @@ class MealCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${totalCalories.round()} ${localizations.componentsCalendarMacroSummaryCalories.toLowerCase()}',

@@ -121,10 +121,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.componentsUiCustomTabBarMeals),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: theme.colorScheme.onSurface,
-        elevation: 0,
+        title: Text(
+          '${localizations.componentsUiCustomTabBarMeals.toUpperCase()} //',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -189,15 +188,30 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip(localizations.screensMealsAllCategories, 'all'),
+                        _buildFilterChip(
+                          localizations.screensMealsAllCategories,
+                          'all',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalBreakfast, 'breakfast'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalBreakfast,
+                          'breakfast',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalLunch, 'lunch'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalLunch,
+                          'lunch',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalDinner, 'dinner'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalDinner,
+                          'dinner',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalSnack, 'snack'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalSnack,
+                          'snack',
+                        ),
                       ],
                     ),
                   ),
@@ -284,7 +298,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _loadDishes,
-                    child: Text(localizations.componentsSharedErrorDisplayRetry),
+                    child: Text(
+                      localizations.componentsSharedErrorDisplayRetry,
+                    ),
                   ),
                 ],
               ),
@@ -358,243 +374,128 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
   Widget _buildDishCard(Dish dish) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final localizations = AppLocalizations.of(context);
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () => _viewDishDetails(dish),
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Dish image or placeholder
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: theme.colorScheme.surfaceContainerHighest,
-                ),
-                child:
-                    dish.imageUrl != null
-                        ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            dish.imageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                Icons.restaurant,
-                                size: 24,
-                                color: theme.colorScheme.outline,
-                              );
-                            },
-                          ),
-                        )
-                        : Icon(
-                          Icons.restaurant,
-                          size: 24,
-                          color: theme.colorScheme.outline,
-                        ),
-              ),
-
-              const SizedBox(width: 16),
-
-              // Dish info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Dish name with overflow handling
-                    Text(
-                      dish.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: Category & Macros
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.3),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-
-                    const SizedBox(height: 8),
-
-                    // Nutrition info row
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        // Calories with fire icon
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_fire_department,
-                              size: 12,
-                              color: theme.colorScheme.outline,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${dish.nutrition.calories.round()} kcal',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        // Macros
-                        Text(
-                          'P: ${dish.nutrition.protein.round()}g',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                            fontSize: 11,
-                          ),
-                        ),
-
-                        Text(
-                          ' • ',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                            fontSize: 11,
-                          ),
-                        ),
-
-                        Text(
-                          'C: ${dish.nutrition.carbs.round()}g',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                            fontSize: 11,
-                          ),
-                        ),
-
-                        Text(
-                          ' • ',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                            fontSize: 11,
-                          ),
-                        ),
-
-                        Text(
-                          'F: ${dish.nutrition.fat.round()}g',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                            fontSize: 11,
-                          ),
-                        ),
-
-                        // Favorite indicator
-                        if (dish.isFavorite) ...[
-                          const SizedBox(width: 8),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.favorite,
-                                size: 12,
-                                color: theme.colorScheme.error,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                localizations.screensDishCreateFavorite,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.error,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
+                    child: Text(
+                      (dish.category ?? 'MISC').toUpperCase(),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
                     ),
-                  ],
-                ),
-              ),
-
-              // Navigation arrow
-              Icon(
-                Icons.keyboard_arrow_right,
-                size: 20,
-                color: theme.colorScheme.outline,
-              ),
-
-              const SizedBox(width: 8),
-
-              // Three-dot menu button
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: PopupMenuButton<String>(
-                  onSelected: (value) => _handleDishAction(value, dish),
-                  icon: Icon(
-                    Icons.more_vert,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.edit, size: 18),
-                              const SizedBox(width: 8),
-                              Text(localizations.componentsDishesDishCardEdit),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'favorite',
-                          child: Row(
-                            children: [
-                              Icon(
-                                dish.isFavorite
-                                    ? Icons.favorite_border
-                                    : Icons.favorite,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                dish.isFavorite
-                                    ? localizations.screensMealsRemoveFromFavorites
-                                    : localizations.screensMealsAddToFavorites,
-                              ),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.delete,
-                                size: 18,
-                                color: theme.colorScheme.error,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                localizations.componentsDishesDishCardDelete,
-                                style: TextStyle(
-                                  color: theme.colorScheme.error,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                ),
+                  const Spacer(),
+                  if (dish.isFavorite)
+                    const Icon(Icons.star, color: Colors.amber, size: 16),
+                ],
               ),
-            ],
-          ),
+            ),
+
+            // Main Info
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                dish.name.toUpperCase(),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  letterSpacing: -0.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // Telemetry Grid
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.calories.round()}',
+                    'KCAL',
+                  ),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.protein.round()}G',
+                    'PRO',
+                  ),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.carbs.round()}G',
+                    'CHO',
+                  ),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.fat.round()}G',
+                    'FAT',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTelemetryItem(ThemeData theme, String value, String unit) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        Text(
+          unit,
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontSize: 9,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            letterSpacing: 1,
+          ),
+        ),
+      ],
     );
   }
 
@@ -676,7 +577,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           SnackBar(
             content: Text(
               dish.isFavorite
-                  ? AppLocalizations.of(context).screensMealsRemovedFromFavorites
+                  ? AppLocalizations.of(
+                    context,
+                  ).screensMealsRemovedFromFavorites
                   : AppLocalizations.of(context).screensMealsAddedToFavorites,
             ),
           ),
@@ -686,7 +589,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).screensMealsErrorUpdatingDish),
+            content: Text(
+              AppLocalizations.of(context).screensMealsErrorUpdatingDish,
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -701,19 +606,27 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           (context) => AlertDialog(
             title: Text(AppLocalizations.of(context).screensMealsDeleteDish),
             content: Text(
-              AppLocalizations.of(context).screensMealsDeleteDishConfirmation(dish.name),
+              AppLocalizations.of(
+                context,
+              ).screensMealsDeleteDishConfirmation(dish.name),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context).componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(AppLocalizations.of(context).componentsDishesDishCardDelete),
+                child: Text(
+                  AppLocalizations.of(context).componentsDishesDishCardDelete,
+                ),
               ),
             ],
           ),
@@ -728,7 +641,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(context).screensMealsDishDeletedSuccessfully,
+                AppLocalizations.of(
+                  context,
+                ).screensMealsDishDeletedSuccessfully,
               ),
             ),
           );
@@ -737,7 +652,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context).screensMealsFailedToDeleteDish),
+              content: Text(
+                AppLocalizations.of(context).screensMealsFailedToDeleteDish,
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

@@ -63,7 +63,8 @@ import 'app_localizations_es.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,7 +72,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,18 +85,19 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('de'),
     Locale('en'),
-    Locale('es')
+    Locale('es'),
   ];
 
   /// Message shown when no meals are logged for selected day
@@ -713,7 +716,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Professional Nutritionist'**
-  String get componentsChatBotProfileCustomizationDialogProfessionalNutritionist;
+  String
+  get componentsChatBotProfileCustomizationDialogProfessionalNutritionist;
 
   /// Profile save success message
   ///
@@ -1145,7 +1149,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Enter ingredient name'**
-  String get componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder;
+  String
+  get componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder;
 
   /// kcal
   ///
@@ -1169,7 +1174,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Please enter an ingredient name'**
-  String get componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName;
+  String
+  get componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName;
 
   /// Please enter a quantity
   ///
@@ -3168,9 +3174,94 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opening Buy Me Creatine page...'**
   String get utilsLinkHandlerOpeningLink;
+
+  /// No description provided for @screensSettingsIndustrialSystemInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'SYSTEM INFO //'**
+  String get screensSettingsIndustrialSystemInfo;
+
+  /// No description provided for @screensSettingsIndustrialProjectSchematics.
+  ///
+  /// In en, this message translates to:
+  /// **'PROJECT SCHEMATICS'**
+  String get screensSettingsIndustrialProjectSchematics;
+
+  /// No description provided for @screensSettingsIndustrialCoreDirectives.
+  ///
+  /// In en, this message translates to:
+  /// **'CORE_DIRECTIVES'**
+  String get screensSettingsIndustrialCoreDirectives;
+
+  /// No description provided for @screensSettingsIndustrialNetworkLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'NETWORK_LINKS'**
+  String get screensSettingsIndustrialNetworkLinks;
+
+  /// No description provided for @screensSettingsIndustrialNetworkOperatives.
+  ///
+  /// In en, this message translates to:
+  /// **'NETWORK OPERATIVES'**
+  String get screensSettingsIndustrialNetworkOperatives;
+
+  /// No description provided for @screensSettingsIndustrialSourceRepository.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCE REPOSITORY'**
+  String get screensSettingsIndustrialSourceRepository;
+
+  /// No description provided for @screensSettingsIndustrialOfficialDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL DOMAIN'**
+  String get screensSettingsIndustrialOfficialDomain;
+
+  /// No description provided for @screensSettingsIndustrialWantToContribute.
+  ///
+  /// In en, this message translates to:
+  /// **'WANT TO CONTRIBUTE?'**
+  String get screensSettingsIndustrialWantToContribute;
+
+  /// No description provided for @screensSettingsIndustrialSourceCode.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCE_CODE'**
+  String get screensSettingsIndustrialSourceCode;
+
+  /// Label for build version
+  ///
+  /// In en, this message translates to:
+  /// **'STABLE_BUILD_{version}'**
+  String screensSettingsIndustrialStableBuild(Object version);
+
+  /// No description provided for @screensSettingsContributorsHansRole.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Co-pilot & Resident Hacker'**
+  String get screensSettingsContributorsHansRole;
+
+  /// No description provided for @screensSettingsContributorsHansDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.'**
+  String get screensSettingsContributorsHansDesc;
+
+  /// No description provided for @screensSettingsContributorsMrLappesRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator & Developer'**
+  String get screensSettingsContributorsMrLappesRole;
+
+  /// No description provided for @screensSettingsContributorsMrLappesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.'**
+  String get screensSettingsContributorsMrLappesDesc;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -3179,26 +3270,28 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['de', 'en', 'es'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'de': return AppLocalizationsDe();
-    case 'en': return AppLocalizationsEn();
-    case 'es': return AppLocalizationsEs();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

@@ -174,264 +174,289 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
 
-    return Card(
-      child: AnimatedBuilder(
-        animation: Listenable.merge([
-          _pulseAnimation,
-          _shakeAnimation,
-          widget.recalculatedAnimation,
-        ]),
-        builder: (context, child) {
-          return Transform.scale(
-            scale:
-                widget.justRecalculated
-                    ? widget.recalculatedAnimation.value
-                    : _pulseAnimation.value,
-            child: Transform.translate(
-              offset: Offset(_shakeAnimation.value, 0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _nutritionProfile.color.withValues(alpha: 0.3),
-                    width: 2,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Card(
+        margin: EdgeInsets.zero,
+        elevation: 0,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([
+            _pulseAnimation,
+            _shakeAnimation,
+            widget.recalculatedAnimation,
+          ]),
+          builder: (context, child) {
+            return Transform.scale(
+              scale:
+                  widget.justRecalculated
+                      ? widget.recalculatedAnimation.value
+                      : _pulseAnimation.value,
+              child: Transform.translate(
+                offset: Offset(_shakeAnimation.value, 0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _nutritionProfile.color.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _nutritionProfile.color.withValues(alpha: 0.05),
+                        colorScheme.surface,
+                      ],
+                    ),
                   ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      _nutritionProfile.color.withValues(alpha: 0.05),
-                      colorScheme.surface,
-                    ],
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header with nutrition status
-                      Row(
-                        children: [
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header with nutrition status
+                        Row(
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: _nutritionProfile.color.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _nutritionProfile.icon,
+                                color: _nutritionProfile.color,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.componentsDishesDishFormSmartNutritionCardNutritionalInformation,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: Text(
+                                      _nutritionProfile.getTitle(l10n),
+                                      key: ValueKey(_nutritionProfile),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: _nutritionProfile.color,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (widget.onRecalculate != null)
+                              IconButton(
+                                onPressed: widget.onRecalculate,
+                                icon: const Icon(Icons.calculate_outlined),
+                                tooltip: 'Recalculate from ingredients',
+                                style: IconButton.styleFrom(
+                                  backgroundColor: colorScheme.surfaceContainer,
+                                  foregroundColor: colorScheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Nutrition inputs
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildNutritionField(
+                                controller: widget.caloriesController,
+                                label:
+                                    l10n.componentsCalendarMacroSummaryCalories,
+                                suffix:
+                                    l10n.componentsDishesDishFormIngredientFormModalKcal,
+                                icon: Icons.local_fire_department_outlined,
+                                color: Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildNutritionField(
+                                controller: widget.fiberController,
+                                label: l10n.componentsCalendarMacroSummaryFiber,
+                                suffix:
+                                    l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                icon: Icons.grass_outlined,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Macronutrients - responsive layout
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isNarrow = constraints.maxWidth < 400;
+
+                            if (isNarrow) {
+                              // Narrow screen: 2 fields per row max
+                              return Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildNutritionField(
+                                          controller: widget.proteinController,
+                                          label:
+                                              l10n.componentsCalendarMacroSummaryProtein,
+                                          suffix:
+                                              l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                          icon: Icons.fitness_center_outlined,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: _buildNutritionField(
+                                          controller: widget.carbsController,
+                                          label:
+                                              l10n.componentsCalendarMacroSummaryCarbs,
+                                          suffix:
+                                              l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                          icon: Icons.grain_outlined,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildNutritionField(
+                                          controller: widget.fatController,
+                                          label:
+                                              l10n.componentsCalendarMacroSummaryFat,
+                                          suffix:
+                                              l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                          icon: Icons.water_drop_outlined,
+                                          color: Colors.teal,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      // Empty space to maintain layout consistency
+                                      const Expanded(child: SizedBox()),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            } else {
+                              // Wide screen: 3 fields in one row
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildNutritionField(
+                                      controller: widget.proteinController,
+                                      label:
+                                          l10n.componentsCalendarMacroSummaryProtein,
+                                      suffix:
+                                          l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                      icon: Icons.fitness_center_outlined,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildNutritionField(
+                                      controller: widget.carbsController,
+                                      label:
+                                          l10n.componentsCalendarMacroSummaryCarbs,
+                                      suffix:
+                                          l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                      icon: Icons.grain_outlined,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildNutritionField(
+                                      controller: widget.fatController,
+                                      label:
+                                          l10n.componentsCalendarMacroSummaryFat,
+                                      suffix:
+                                          l10n.componentsDishesDishFormIngredientFormModalGrams,
+                                      icon: Icons.water_drop_outlined,
+                                      color: Colors.teal,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Smart feedback - only show when analysis is available
+                        if (_shouldShowAnalysis())
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: _nutritionProfile.color.withValues(
                                 alpha: 0.1,
                               ),
                               borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              _nutritionProfile.icon,
-                              color: _nutritionProfile.color,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.componentsDishesDishFormSmartNutritionCardNutritionalInformation,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              border: Border.all(
+                                color: _nutritionProfile.color.withValues(
+                                  alpha: 0.3,
                                 ),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  child: Text(
-                                    _nutritionProfile.getTitle(l10n),
-                                    key: ValueKey(_nutritionProfile),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: _nutritionProfile.color,
-                                      fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _nutritionProfile.feedbackIcon,
+                                  color: _nutritionProfile.color,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: Text(
+                                      _nutritionProfile.getFeedback(l10n),
+                                      key: ValueKey(_nutritionProfile),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: _nutritionProfile.color,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          if (widget.onRecalculate != null)
-                            IconButton(
-                              onPressed: widget.onRecalculate,
-                              icon: const Icon(Icons.calculate_outlined),
-                              tooltip: 'Recalculate from ingredients',
-                              style: IconButton.styleFrom(
-                                backgroundColor: colorScheme.surfaceContainer,
-                                foregroundColor: colorScheme.primary,
-                              ),
-                            ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Nutrition inputs
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildNutritionField(
-                              controller: widget.caloriesController,
-                              label: l10n.componentsCalendarMacroSummaryCalories,
-                              suffix: l10n.componentsDishesDishFormIngredientFormModalKcal,
-                              icon: Icons.local_fire_department_outlined,
-                              color: Colors.orange,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildNutritionField(
-                              controller: widget.fiberController,
-                              label: l10n.componentsCalendarMacroSummaryFiber,
-                              suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                              icon: Icons.grass_outlined,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Macronutrients - responsive layout
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final isNarrow = constraints.maxWidth < 400;
-
-                          if (isNarrow) {
-                            // Narrow screen: 2 fields per row max
-                            return Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildNutritionField(
-                                        controller: widget.proteinController,
-                                        label: l10n.componentsCalendarMacroSummaryProtein,
-                                        suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                                        icon: Icons.fitness_center_outlined,
-                                        color: Colors.blue,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _buildNutritionField(
-                                        controller: widget.carbsController,
-                                        label: l10n.componentsCalendarMacroSummaryCarbs,
-                                        suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                                        icon: Icons.grain_outlined,
-                                        color: Colors.amber,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildNutritionField(
-                                        controller: widget.fatController,
-                                        label: l10n.componentsCalendarMacroSummaryFat,
-                                        suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                                        icon: Icons.water_drop_outlined,
-                                        color: Colors.teal,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Empty space to maintain layout consistency
-                                    const Expanded(child: SizedBox()),
-                                  ],
-                                ),
-                              ],
-                            );
-                          } else {
-                            // Wide screen: 3 fields in one row
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: _buildNutritionField(
-                                    controller: widget.proteinController,
-                                    label: l10n.componentsCalendarMacroSummaryProtein,
-                                    suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                                    icon: Icons.fitness_center_outlined,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildNutritionField(
-                                    controller: widget.carbsController,
-                                    label: l10n.componentsCalendarMacroSummaryCarbs,
-                                    suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                                    icon: Icons.grain_outlined,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildNutritionField(
-                                    controller: widget.fatController,
-                                    label: l10n.componentsCalendarMacroSummaryFat,
-                                    suffix: l10n.componentsDishesDishFormIngredientFormModalGrams,
-                                    icon: Icons.water_drop_outlined,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Smart feedback - only show when analysis is available
-                      if (_shouldShowAnalysis())
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: _nutritionProfile.color.withValues(
-                              alpha: 0.1,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: _nutritionProfile.color.withValues(
-                                alpha: 0.3,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                _nutritionProfile.feedbackIcon,
-                                color: _nutritionProfile.color,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  child: Text(
-                                    _nutritionProfile.getFeedback(l10n),
-                                    key: ValueKey(_nutritionProfile),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: _nutritionProfile.color,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

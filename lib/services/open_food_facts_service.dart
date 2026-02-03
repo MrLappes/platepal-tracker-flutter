@@ -12,17 +12,40 @@ class OpenFoodFactsService {
     String query, {
     int page = 1,
     int pageSize = 20,
+    String? countryCode,
+    String? languageCode,
   }) async {
     try {
       final encodedQuery = Uri.encodeComponent(query);
-      final url =
-          '$_baseUrl/search?search_terms=$encodedQuery&page=$page&page_size=$pageSize&fields=code,product_name,brands,image_url,image_front_url,quantity,nutriments';
+      final lc = languageCode ?? 'en';
+      
+      // Map language codes to country names for the tag_0 filter
+      final Map<String, String> countryMap = {
+        'de': 'germany',
+        'en': 'united-states',
+        'es': 'spain',
+        'fr': 'france',
+      };
+      
+      final countryTag = countryMap[countryCode] ?? 'world';
 
-      final response = await http.get(Uri.parse(url));
+      // Using precise tag-based filtering as recommended in advanced search docs
+      final url =
+          'https://world.openfoodfacts.org/cgi/search.pl?action=process&json=1&search_terms=$encodedQuery&page=$page&page_size=$pageSize&sort_by=unique_scans_n&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&tagtype_0=countries&tag_contains_0=contains&tag_0=$countryTag&lc=$lc&nocache=1';
+
+      debugPrint('🔍 Searching Open Food Facts (Advanced Filter: $countryTag): $url');
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'User-Agent':
+              'PlatePalTracker - Android - Version 1.0 - https://github.com/MrLappes/platepal-tracker-flutter',
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final products = data['products'] as List<dynamic>? ?? [];
+        debugPrint('✅ Found ${products.length} products');
 
         return products
             .map((productData) => _parseProduct(productData))
@@ -30,9 +53,11 @@ class OpenFoodFactsService {
             .cast<Product>()
             .toList();
       } else {
+        debugPrint('❌ Search failed: HTTP ${response.statusCode}');
         throw Exception('Failed to search products: ${response.statusCode}');
       }
     } catch (e) {
+      debugPrint('❌ Search error: $e');
       throw Exception('Error searching products: $e');
     }
   }

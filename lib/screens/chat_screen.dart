@@ -77,12 +77,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       chatProvider.updateBotProfile(updatedProfile);
                     },
                   )
-                  : Text(localizations.screensChatChatAssistant);
+                  : Text(
+                    '${localizations.screensChatChatAssistant.toUpperCase()} //',
+                  );
             },
           ),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-          elevation: 0,
           actions: [
             Consumer<ChatProvider>(
               builder: (context, chatProvider, _) {
@@ -330,138 +329,88 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatProvider chatProvider,
   ) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final currentStep = chatProvider.currentAgentStep;
     final message = chatProvider.currentTypingMessage ?? 'AI is thinking...';
     final thinkingSteps = chatProvider.currentThinkingSteps;
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.secondary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.smart_toy,
-              size: 20,
-              color: theme.colorScheme.onPrimary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+          // The Telemetry Header
+          Row(
+            children: [
+              SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.primary,
                   ),
-                ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'SYSTEM ANALYZING ::',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  (currentStep ?? message).toUpperCase(),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          if (thinkingSteps.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: colorScheme.outline.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          currentStep ?? message,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.8,
+                children:
+                    thinkingSteps
+                        .take(5)
+                        .map(
+                          (step) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              '> ${step.toUpperCase()}',
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 10,
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
                             ),
-                            fontWeight: FontWeight.w500,
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (thinkingSteps.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 120),
-                      child: SingleChildScrollView(
-                        reverse: true,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                              thinkingSteps.length > 5
-                                  ? thinkingSteps
-                                      .sublist(thinkingSteps.length - 5)
-                                      .map(
-                                        (step) => Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 1,
-                                          ),
-                                          child: Text(
-                                            step,
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withValues(alpha: 0.6),
-                                                  fontSize: 11,
-                                                ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList()
-                                  : thinkingSteps
-                                      .map(
-                                        (step) => Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 1,
-                                          ),
-                                          child: Text(
-                                            step,
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color: theme
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withValues(alpha: 0.6),
-                                                  fontSize: 11,
-                                                ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+                        )
+                        .toList(),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -479,14 +428,19 @@ class _ChatScreenState extends State<ChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(localizations.componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  localizations
+                      .componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   chatProvider.clearChat(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(localizations.screensChatChatCleared)),
+                    SnackBar(
+                      content: Text(localizations.screensChatChatCleared),
+                    ),
                   );
                 },
                 style: TextButton.styleFrom(
