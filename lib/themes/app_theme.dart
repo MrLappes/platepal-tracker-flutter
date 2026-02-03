@@ -11,6 +11,7 @@ class AppThemeColors {
   final Color success;
   final Color warning;
   final Color error;
+  final Color accent;
 
   const AppThemeColors({
     required this.primary,
@@ -23,6 +24,7 @@ class AppThemeColors {
     required this.success,
     required this.warning,
     required this.error,
+    this.accent = const Color(0xFF00E5FF),
   });
 }
 
@@ -38,161 +40,162 @@ class AppTheme {
   });
 
   ThemeData get materialTheme {
+    final baseTextTheme = Typography.material2021().black;
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: colors.primary,
+      brightness: isDark ? Brightness.dark : Brightness.light,
+      surface: colors.card,
+      onSurface: colors.text,
+      error: colors.error,
+      primary: colors.primary,
+      secondary: colors.secondary,
+      outline: colors.border,
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: isDark ? Brightness.dark : Brightness.light,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: colors.primary,
-        brightness: isDark ? Brightness.dark : Brightness.light,
-        surface: colors.card,
-        error: colors.error,
-      ),
+      colorScheme: colorScheme,
       scaffoldBackgroundColor: colors.background,
       cardColor: colors.card,
       dividerColor: colors.border,
+      
+      // Modern Cyber-minimalistic Typography
       textTheme: TextTheme(
-        bodyLarge: TextStyle(color: colors.text),
-        bodyMedium: TextStyle(color: colors.text),
-        bodySmall: TextStyle(color: colors.text),
-        headlineLarge: TextStyle(color: colors.text),
-        headlineMedium: TextStyle(color: colors.text),
-        headlineSmall: TextStyle(color: colors.text),
+        displayLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+        headlineLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+        titleLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(color: colors.text, fontSize: 16),
+        bodyMedium: TextStyle(color: colors.text.withValues(alpha: 0.8), fontSize: 14),
+        labelLarge: TextStyle(color: colors.primary, fontWeight: FontWeight.bold, letterSpacing: 1.1),
       ),
+
       appBarTheme: AppBarTheme(
         backgroundColor: colors.background,
         foregroundColor: colors.text,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          color: colors.text,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
+        ),
       ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: colors.card,
-        selectedItemColor: colors.primary,
-        unselectedItemColor: colors.text.withValues(alpha: 0.6),
-      ),
+
       cardTheme: CardThemeData(
         color: colors.card,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: colors.border, width: 1.5),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 8),
       ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colors.primary,
-          foregroundColor: isDark ? Colors.black : Colors.white,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
+      ),
+
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.text,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          side: BorderSide(color: colors.border, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: colors.primary,
-        foregroundColor: isDark ? Colors.black : Colors.white,
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.card,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: colors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: colors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: colors.primary, width: 2),
+        ),
+        labelStyle: TextStyle(color: colors.text.withValues(alpha: 0.6)),
+      ),
+
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: colors.background,
+        selectedItemColor: colors.primary,
+        unselectedItemColor: colors.text.withValues(alpha: 0.4),
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       ),
     );
   }
 }
 
-// Predefined themes
 class AppThemes {
-  // Light Theme - matching your React Native colors
-  static const AppTheme light = AppTheme(
-    name: 'Light',
-    isDark: false,
-    colors: AppThemeColors(
-      primary: Color(0xFFfba9eb),
-      background: Color(0xFFffffff),
-      card: Color(0xFFf8f8f8),
-      text: Color(0xFF000000),
-      border: Color(0xFFe0e0e0),
-      notification: Color(0xFFff3b30),
-      secondary: Color(0xFF6C757D),
-      success: Color(0xFF28A745),
-      warning: Color(0xFFFFC107),
-      error: Color(0xFFDC3545),
-    ),
-  );
-
-  // Dark Theme - matching your React Native colors
-  static const AppTheme dark = AppTheme(
-    name: 'Dark',
+  // Industrial Dark - Deep black and Cyber Cyan
+  static const AppTheme industrialDark = AppTheme(
+    name: 'Industrial',
     isDark: true,
     colors: AppThemeColors(
-      primary: Color(0xFFfba9eb),
-      background: Color(0xFF121212),
-      card: Color(0xFF1e1e1e),
-      text: Color(0xFFffffff),
-      border: Color(0xFF2c2c2c),
-      notification: Color(0xFFff453a),
-      secondary: Color(0xFF6C757D),
-      success: Color(0xFF28A745),
-      warning: Color(0xFFFFC107),
-      error: Color(0xFFDC3545),
+      primary: Color(0xFF00E5FF), // Cyber Cyan
+      background: Color(0xFF0A0A0A), // Near Black
+      card: Color(0xFF141414), // Dark Grey
+      text: Color(0xFFE0E0E0), // Cold White
+      border: Color(0xFF222222), // Steel
+      notification: Color(0xFFFF3D00),
+      secondary: Color(0xFF757575),
+      success: Color(0xFF00E676),
+      warning: Color(0xFFFFAB00),
+      error: Color(0xFFFF1744),
     ),
   );
 
-  // Future sponsor themes can be added here
-  static const AppTheme oceanic = AppTheme(
-    name: 'Oceanic',
+  // Studio Light - Clean, high contrast, precise
+  static const AppTheme studioLight = AppTheme(
+    name: 'Studio',
     isDark: false,
     colors: AppThemeColors(
-      primary: Color(0xFF0077BE),
-      background: Color(0xFFffffff),
-      card: Color(0xFFf0f8ff),
-      text: Color(0xFF000000),
-      border: Color(0xFFcce7ff),
-      notification: Color(0xFFff3b30),
-      secondary: Color(0xFF4A90A4),
-      success: Color(0xFF00A86B),
-      warning: Color(0xFFFFB347),
-      error: Color(0xFFE74C3C),
-    ),
-  );
-
-  static const AppTheme forest = AppTheme(
-    name: 'Forest',
-    isDark: false,
-    colors: AppThemeColors(
-      primary: Color(0xFF228B22),
-      background: Color(0xFFffffff),
-      card: Color(0xFFf0fff0),
-      text: Color(0xFF000000),
-      border: Color(0xFFc8e6c8),
-      notification: Color(0xFFff3b30),
-      secondary: Color(0xFF5D8A5D),
-      success: Color(0xFF32CD32),
-      warning: Color(0xFFFFD700),
-      error: Color(0xFFDC143C),
-    ),
-  );
-
-  static const AppTheme platePal = AppTheme(
-    name: 'PlatePal',
-    isDark: false,
-    colors: AppThemeColors(
-      primary: Color(0xFFe384c7), // Original PlatePal primary color
-      background: Color(0xFFF5F5F5),
-      card: Color(0xFFffffff),
-      text: Color(0xFF5B5B5B),
-      border: Color(0xFFe0e0e0),
-      notification: Color(0xFFff3b30),
-      secondary: Color(0xFF9e6593), // Original PlatePal secondary color
-      success: Color(0xFF28A745),
-      warning: Color(0xFFFFC107),
-      error: Color(0xFFDC3545),
+      primary: Color(0xFF000000), // Pure Black actions
+      background: Color(0xFFFFFFFF),
+      card: Color(0xFFFBFBFB),
+      text: Color(0xFF1A1A1A),
+      border: Color(0xFFEEEEEE),
+      notification: Color(0xFFFF3D00),
+      secondary: Color(0xFF9E9E9E),
+      success: Color(0xFF2E7D32),
+      warning: Color(0xFFF57C00),
+      error: Color(0xFFD32F2F),
     ),
   );
 
   static List<AppTheme> get allThemes => [
-    light,
-    dark,
-    oceanic,
-    forest,
-    platePal,
+    industrialDark,
+    studioLight,
   ];
+
+  static AppTheme get dark => industrialDark;
+  static AppTheme get light => studioLight;
 
   static AppTheme getThemeByName(String name) {
     return allThemes.firstWhere(
       (theme) => theme.name == name,
-      orElse: () => light,
+      orElse: () => industrialDark,
     );
   }
 }

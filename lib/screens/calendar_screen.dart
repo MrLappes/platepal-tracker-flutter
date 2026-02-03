@@ -523,51 +523,67 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
         children: [
+          Container(
+            width: 4,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  log.dish?.name ?? l10n.componentsCalendarCalendarDayDetailUnknownDish,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  (log.dish?.name ?? l10n.componentsCalendarCalendarDayDetailUnknownDish).toUpperCase(),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                    fontSize: 13,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${log.mealType} • ${log.calories.toStringAsFixed(0)} cal',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                if (log.servingSize != 1.0) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    'Serving: ${log.servingSize}x',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                Row(
+                  children: [
+                    Text(
+                      log.mealType.toUpperCase(),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      '  |  ',
+                      style: TextStyle(color: colorScheme.outline.withValues(alpha: 0.5)),
+                    ),
+                    Text(
+                      '${log.calories.round()} KCAL',
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           IconButton(
             onPressed: () => _handleDeleteLog(log),
-            icon: Icon(
-              Icons.delete_outline,
-              color: colorScheme.error,
-              size: 20,
+            icon: const Icon(
+              Icons.close,
+              size: 18,
             ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
       ),
