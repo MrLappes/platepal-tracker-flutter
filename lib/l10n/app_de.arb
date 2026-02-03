@@ -2058,5 +2058,58 @@
   "utilsLinkHandlerOpeningLink": "Öffne Buy Me Creatine Seite...",
   "@utilsLinkHandlerOpeningLink": {
     "description": "Öffne Buy Me Creatine Seite..."
-  }
+  },
+  "screensSettingsIndustrialSystemInfo": "SYSTEM INFO //",
+  "@screensSettingsIndustrialSystemInfo": {
+    "description": "Industrial style title for Info/About screen"
+  },
+  "screensSettingsIndustrialProjectSchematics": "PROJEKT-SCHEMATA",
+  "@screensSettingsIndustrialProjectSchematics": {
+    "description": "Industrial style header for project details"
+  },
+  "screensSettingsIndustrialCoreDirectives": "KERN_RICHTLINIEN",
+  "@screensSettingsIndustrialCoreDirectives": {
+    "description": "Industrial style header for mission/directives"
+  },
+  "screensSettingsIndustrialNetworkLinks": "NETZWERK_LINKS",
+  "@screensSettingsIndustrialNetworkLinks": {
+    "description": "Industrial style header for external links"
+  },
+  "screensSettingsIndustrialNetworkOperatives": "NETZWERK-AGENTEN",
+  "@screensSettingsIndustrialNetworkOperatives": {
+    "description": "Industrial style header for contributors"
+  },
+  "screensSettingsIndustrialSourceRepository": "QUELL-REPOSITORY",
+  "@screensSettingsIndustrialSourceRepository": {
+    "description": "Technical label for source code link"
+  },
+  "screensSettingsIndustrialOfficialDomain": "OFFIZIELLE DOMÄNE",
+  "@screensSettingsIndustrialOfficialDomain": {
+    "description": "Technical label for website link"
+  },
+  "screensSettingsIndustrialWantToContribute": "MÖCHTEST DU BEITRAGEN?",
+  "@screensSettingsIndustrialWantToContribute": {
+    "description": "Heading for contribution section"
+  },
+  "screensSettingsIndustrialSourceCode": "QUELLCODE",
+  "@screensSettingsIndustrialSourceCode": {
+    "description": "Button text for source code"
+  },
+  "screensSettingsIndustrialStableBuild": "STABILER_BUILD_{version}",
+  "@screensSettingsIndustrialStableBuild": {
+    "description": "Label for build version",
+    "placeholders": {
+      "version": {
+        "type": "Object",
+        "example": "V1.0.0"
+      }
+    }
+  },
+  "screensSettingsContributorsHansRole": "KI-Copilot & Hacker vor Ort",
+  "@screensSettingsContributorsHansRole": {
+    "description": "Role description for Hans"
+  },
+  "screensSettingsContributorsHansDesc": "Automatisiert den Grind und hält die Telemetrie scharf. Cyber-Minimalismus-Architekt.",
+  "screensSettingsContributorsMrLappesRole": "Schöpfer & Entwickler",
+  "screensSettingsContributorsMrLappesDesc": "Hat PlatePal Tracker mit der Vision geschaffen, eine kostenlose, datenschutzorientierte Ernährungs-App für alle zu entwickeln."
 }

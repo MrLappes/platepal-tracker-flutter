@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../models/product.dart';
+import '../../providers/locale_provider.dart';
 import '../../services/open_food_facts_service.dart';
 import '../../services/storage/database_service.dart';
 import '../../services/storage/dish_service.dart';
@@ -20,7 +22,6 @@ class ProductSearchScreen extends StatefulWidget {
 class _ProductSearchScreenState extends State<ProductSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final OpenFoodFactsService _openFoodFactsService = OpenFoodFactsService();
-  // Local data services and state
   final DatabaseService _databaseService = DatabaseService.instance;
   final DishService _dishService = DishService();
   List<Ingredient> _localIngredients = [];
@@ -53,10 +54,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     super.dispose();
   }
 
-  /// Search for local ingredients and dishes
   Future<void> _searchLocalItems(String query) async {
     final db = await _databaseService.database;
-    // Search ingredients
     final ingMaps = await db.query(
       'ingredients',
       where: 'name LIKE ?',
@@ -93,7 +92,6 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         ),
       );
     }
-    // Search dishes
     final allDishes = await _dishService.getAllDishes();
     final dishes =
         allDishes
@@ -122,11 +120,17 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
     try {
       debugPrint('🔍 Searching for products: $query');
+      final localeProvider = Provider.of<LocaleProvider>(
+        context,
+        listen: false,
+      );
 
       final products = await _openFoodFactsService.searchProducts(
         query.trim(),
         page: _currentPage,
         pageSize: 20,
+        countryCode: localeProvider.locale.languageCode,
+        languageCode: localeProvider.locale.languageCode,
       );
 
       setState(() {
@@ -144,17 +148,12 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         _hasSearched = true;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).componentsScannerProductSearchErrorSearchingProduct(e.toString()),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-  /// Load more products for pagination
   void _loadMore() {
     if (!_isSearching && _hasMoreResults) {
       setState(() => _currentPage++);
@@ -164,153 +163,82 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
   Widget _buildProductCard(Product product) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: InkWell(
         onTap: () {
-          // Close the search screen and call the callback immediately
           Navigator.of(context).pop();
           widget.onProductSelected?.call(product);
         },
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Product image
               Container(
-                width: 60,
-                height: 60,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
+                  border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.3),
+                  ),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child:
                     product.imageUrl != null
-                        ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: product.imageUrl!,
-                            fit: BoxFit.cover,
-                            placeholder:
-                                (context, url) => const Center(
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                ),
-                            errorWidget:
-                                (context, url, error) => const Icon(
-                                  Icons.image_not_supported,
-                                  size: 24,
-                                ),
-                          ),
+                        ? CachedNetworkImage(
+                          imageUrl: product.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget:
+                              (context, url, error) =>
+                                  const Icon(Icons.broken_image, size: 20),
                         )
-                        : const Icon(Icons.food_bank, size: 24),
+                        : const Icon(Icons.fastfood, size: 20),
               ),
-
               const SizedBox(width: 16),
-
-              // Product info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product.name ?? 'Unknown Product',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      (product.name ?? 'UNKNOWN').toUpperCase(),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-
-                    if (product.brand != null) ...[
-                      const SizedBox(height: 4),
+                    if (product.brand != null)
                       Text(
-                        product.brand!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.outline,
+                        product.brand!.toUpperCase(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontSize: 9,
                         ),
                       ),
-                    ],
-
                     if (product.hasNutrition) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (product.nutrition!.calories > 0) ...[
-                            Text(
-                              '${product.nutrition!.calories.toStringAsFixed(0)} kcal',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            if (product.nutrition!.protein > 0 ||
-                                product.nutrition!.carbs > 0 ||
-                                product.nutrition!.fat > 0)
-                              Text(
-                                ' • ',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ),
-                          ],
-                          if (product.nutrition!.protein > 0) ...[
-                            Text(
-                              'P: ${product.nutrition!.protein.toStringAsFixed(1)}g',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.outline,
-                              ),
-                            ),
-                            if (product.nutrition!.carbs > 0 ||
-                                product.nutrition!.fat > 0)
-                              Text(
-                                ' • ',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ),
-                          ],
-                          if (product.nutrition!.carbs > 0) ...[
-                            Text(
-                              'C: ${product.nutrition!.carbs.toStringAsFixed(1)}g',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.outline,
-                              ),
-                            ),
-                            if (product.nutrition!.fat > 0)
-                              Text(
-                                ' • ',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ),
-                          ],
-                          if (product.nutrition!.fat > 0)
-                            Text(
-                              'F: ${product.nutrition!.fat.toStringAsFixed(1)}g',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.outline,
-                              ),
-                            ),
-                        ],
+                      const SizedBox(height: 4),
+                      Text(
+                        '${product.nutrition!.calories.round()} KCAL | P:${product.nutrition!.protein.toStringAsFixed(1)}G | C:${product.nutrition!.carbs.toStringAsFixed(1)}G',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
                       ),
                     ],
                   ],
                 ),
               ),
-
-              // Arrow icon
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: theme.colorScheme.outline,
-              ),
+              Icon(Icons.chevron_right, color: colorScheme.primary),
             ],
           ),
         ),
@@ -322,10 +250,13 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.componentsScannerProductSearchProductSearch),
+        title: Text(
+          '${localizations.componentsChatChatInputSearchProduct.toUpperCase()} //',
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -336,24 +267,23 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       ),
       body: Column(
         children: [
-          // Search bar
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: localizations.componentsScannerProductSearchSearchProducts,
-                prefixIcon: const Icon(Icons.search),
+                hintText:
+                    localizations.screensDishCreateDishNamePlaceholder
+                        .toUpperCase(),
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                contentPadding: const EdgeInsets.all(12),
                 suffixIcon:
                     _searchController.text.isNotEmpty
                         ? IconButton(
@@ -364,29 +294,14 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                           },
                         )
                         : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.5,
-                ),
               ),
-              textInputAction: TextInputAction.search,
               onChanged: (value) {
-                // Debounce search
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (_searchController.text == value) {
-                    _searchProducts(value);
-                  }
-                });
+                if (value.length > 2) {
+                  _searchProducts(value);
+                }
               },
-              onSubmitted: _searchProducts,
             ),
           ),
-
-          // Results and local items
           Expanded(
             child:
                 _isSearching && _currentPage == 1
@@ -394,115 +309,38 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                     : ListView(
                       padding: const EdgeInsets.only(bottom: 16),
                       children: [
-                        if (_localIngredients.isNotEmpty) ...[
+                        if (_localIngredients.isNotEmpty ||
+                            _localDishes.isNotEmpty) ...[
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Text(
-                              localizations.componentsScannerProductSearchLocalIngredients,
-                              style: theme.textTheme.titleMedium,
+                              'LOCAL DATABASE //',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.primary,
+                              ),
                             ),
                           ),
                           ..._localIngredients.map(
-                            (ing) => ListTile(
-                              leading: const Icon(Icons.kitchen),
-                              title: Text(ing.name),
-                              subtitle:
-                                  ing.nutrition != null
-                                      ? Text(
-                                        '${ing.nutrition!.calories.toStringAsFixed(0)} kcal/100g',
-                                      )
-                                      : null,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                widget.onProductSelected?.call(
-                                  Product(
-                                    barcode: ing.barcode,
-                                    name: ing.name,
-                                    brand: null,
-                                    imageUrl: null,
-                                    quantity: '100 g',
-                                    nutrition:
-                                        ing.nutrition != null
-                                            ? ProductNutrition(
-                                              energyKcal100g:
-                                                  ing.nutrition!.calories,
-                                              proteins100g:
-                                                  ing.nutrition!.protein,
-                                              carbohydrates100g:
-                                                  ing.nutrition!.carbs,
-                                              fat100g: ing.nutrition!.fat,
-                                              fiber100g: ing.nutrition!.fiber,
-                                            )
-                                            : ProductNutrition(),
-                                    rawData: {},
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                        if (_localDishes.isNotEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              localizations.componentsScannerProductSearchLocalDishes,
-                              style: theme.textTheme.titleMedium,
-                            ),
+                            (ing) =>
+                                ListTile(title: Text(ing.name.toUpperCase())),
                           ),
                           ..._localDishes.map(
-                            (dish) => ListTile(
-                              leading:
-                                  dish.imageUrl != null
-                                      ? Image.network(
-                                        dish.imageUrl!,
-                                        width: 40,
-                                        height: 40,
-                                        fit: BoxFit.cover,
-                                      )
-                                      : const Icon(Icons.restaurant_menu),
-                              title: Text(dish.name),
-                              subtitle: Text(
-                                '${dish.nutrition.calories.toStringAsFixed(0)} kcal',
+                            (dish) =>
+                                ListTile(title: Text(dish.name.toUpperCase())),
+                          ),
+                        ],
+                        if (_searchResults.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              'GLOBAL FEED //',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.primary,
                               ),
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                widget.onProductSelected?.call(
-                                  Product(
-                                    barcode: dish.id,
-                                    name: dish.name,
-                                    brand: null,
-                                    imageUrl: dish.imageUrl,
-                                    quantity: '1 serving',
-                                    nutrition: ProductNutrition(
-                                      energyKcal100g: dish.nutrition.calories,
-                                      proteins100g: dish.nutrition.protein,
-                                      carbohydrates100g: dish.nutrition.carbs,
-                                      fat100g: dish.nutrition.fat,
-                                      fiber100g: dish.nutrition.fiber,
-                                    ),
-                                    rawData: {},
-                                  ),
-                                );
-                              },
                             ),
                           ),
+                          ..._searchResults.map(_buildProductCard),
                         ],
-                        if (_hasSearched &&
-                            _searchResults.isEmpty &&
-                            !_isSearching) ...[
-                          Center(child: Text(localizations.componentsScannerProductSearchNoProductsFound)),
-                        ],
-                        ..._searchResults.map(_buildProductCard),
-                        if (_isSearching && _currentPage > 1)
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                        if (_hasMoreResults && !_isSearching)
-                          TextButton(
-                            onPressed: _loadMore,
-                            child: Text(localizations.componentsScannerProductSearchLoadMore),
-                          ),
                       ],
                     ),
           ),

@@ -2057,5 +2057,28 @@
   "utilsLinkHandlerOpeningLink": "Abriendo página de Buy Me Creatine...",
   "@utilsLinkHandlerOpeningLink": {
     "description": "Abriendo página de Buy Me Creatine..."
-  }
+  },
+  "screensSettingsIndustrialSystemInfo": "INFORMACIÓN DEL SISTEMA //",
+  "screensSettingsIndustrialProjectSchematics": "ESQUEMÁTICOS DEL PROYECTO",
+  "screensSettingsIndustrialCoreDirectives": "DIRECTIVAS_NUCLEARES",
+  "screensSettingsIndustrialNetworkLinks": "ENLACES_DE_RED",
+  "screensSettingsIndustrialNetworkOperatives": "OPERATIVOS_DE_RED",
+  "screensSettingsIndustrialSourceRepository": "REPOSITORIO_FUENTE",
+  "screensSettingsIndustrialOfficialDomain": "DOMINIO_OFICIAL",
+  "screensSettingsIndustrialWantToContribute": "¿QUIERES CONTRIBUIR?",
+  "screensSettingsIndustrialSourceCode": "CÓDIGO_FUENTE",
+  "screensSettingsIndustrialStableBuild": "VERSIÓN_ESTABLE_{version}",
+  "@screensSettingsIndustrialStableBuild": {
+    "description": "Label for build version",
+    "placeholders": {
+      "version": {
+        "type": "Object",
+        "example": "V1.0.0"
+      }
+    }
+  },
+  "screensSettingsContributorsHansRole": "Copiloto de IA y Hacker Residente",
+  "screensSettingsContributorsHansDesc": "Automatizando el esfuerzo y manteniendo la telemetría nítida. Arquitecto de ciber-minimalismo.",
+  "screensSettingsContributorsMrLappesRole": "Creador y Desarrollador",
+  "screensSettingsContributorsMrLappesDesc": "Creó PlatePal Tracker con la visión de hacer una aplicación de nutrición gratuita y centrada en la privacidad para todos."
 }

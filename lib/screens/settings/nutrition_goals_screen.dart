@@ -6,11 +6,7 @@ class NutritionGoalsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nutrition Goals'),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-      ),
+      appBar: AppBar(title: const Text('NUTRITION GOALS //')),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
