@@ -12,14 +12,19 @@ class OpenFoodFactsService {
     String query, {
     int page = 1,
     int pageSize = 20,
+    String? countryCode,
+    String? languageCode,
   }) async {
     try {
       final encodedQuery = Uri.encodeComponent(query);
-      // Using the reliable CGI search endpoint with optimal parameters for unique results
-      final url =
-          'https://world.openfoodfacts.org/cgi/search.pl?action=process&json=1&search_terms=$encodedQuery&page=$page&page_size=$pageSize&sort_by=unique_scans_n&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&nocache=1';
+      final cc = countryCode ?? 'world';
+      final lc = languageCode ?? 'en';
 
-      debugPrint('🔍 Searching Open Food Facts (CGI Optimized): $url');
+      // Using the reliable CGI search endpoint with region and language filtering
+      final url =
+          'https://world.openfoodfacts.org/cgi/search.pl?action=process&json=1&search_terms=$encodedQuery&page=$page&page_size=$pageSize&sort_by=unique_scans_n&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&nocache=1&cc=$cc&lc=$lc';
+
+      debugPrint('🔍 Searching Open Food Facts (Region: $cc, Lang: $lc): $url');
       final response = await http.get(
         Uri.parse(url),
         headers: {
