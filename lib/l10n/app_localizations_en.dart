@@ -1804,4 +1804,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get utilsLinkHandlerOpeningLink => 'Opening Buy Me Creatine page...';
+
+  @override
+  String get screensSettingsIndustrialSystemInfo => 'SYSTEM INFO //';
+
+  @override
+  String get screensSettingsIndustrialProjectSchematics => 'PROJECT SCHEMATICS';
+
+  @override
+  String get screensSettingsIndustrialCoreDirectives => 'CORE_DIRECTIVES';
+
+  @override
+  String get screensSettingsIndustrialNetworkLinks => 'NETWORK_LINKS';
+
+  @override
+  String get screensSettingsIndustrialNetworkOperatives => 'NETWORK OPERATIVES';
+
+  @override
+  String get screensSettingsIndustrialSourceRepository => 'SOURCE REPOSITORY';
+
+  @override
+  String get screensSettingsIndustrialOfficialDomain => 'OFFICIAL DOMAIN';
+
+  @override
+  String get screensSettingsIndustrialWantToContribute => 'WANT TO CONTRIBUTE?';
+
+  @override
+  String get screensSettingsIndustrialSourceCode => 'SOURCE_CODE';
+
+  @override
+  String screensSettingsIndustrialStableBuild(Object version) {
+    return 'STABLE_BUILD_$version';
+  }
+
+  @override
+  String get screensSettingsContributorsHansRole =>
+      'AI Co-pilot & Resident Hacker';
+
+  @override
+  String get screensSettingsContributorsHansDesc =>
+      'Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.';
 }

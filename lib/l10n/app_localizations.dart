@@ -3174,6 +3174,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opening Buy Me Creatine page...'**
   String get utilsLinkHandlerOpeningLink;
+
+  /// No description provided for @screensSettingsIndustrialSystemInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'SYSTEM INFO //'**
+  String get screensSettingsIndustrialSystemInfo;
+
+  /// No description provided for @screensSettingsIndustrialProjectSchematics.
+  ///
+  /// In en, this message translates to:
+  /// **'PROJECT SCHEMATICS'**
+  String get screensSettingsIndustrialProjectSchematics;
+
+  /// No description provided for @screensSettingsIndustrialCoreDirectives.
+  ///
+  /// In en, this message translates to:
+  /// **'CORE_DIRECTIVES'**
+  String get screensSettingsIndustrialCoreDirectives;
+
+  /// No description provided for @screensSettingsIndustrialNetworkLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'NETWORK_LINKS'**
+  String get screensSettingsIndustrialNetworkLinks;
+
+  /// No description provided for @screensSettingsIndustrialNetworkOperatives.
+  ///
+  /// In en, this message translates to:
+  /// **'NETWORK OPERATIVES'**
+  String get screensSettingsIndustrialNetworkOperatives;
+
+  /// No description provided for @screensSettingsIndustrialSourceRepository.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCE REPOSITORY'**
+  String get screensSettingsIndustrialSourceRepository;
+
+  /// No description provided for @screensSettingsIndustrialOfficialDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL DOMAIN'**
+  String get screensSettingsIndustrialOfficialDomain;
+
+  /// No description provided for @screensSettingsIndustrialWantToContribute.
+  ///
+  /// In en, this message translates to:
+  /// **'WANT TO CONTRIBUTE?'**
+  String get screensSettingsIndustrialWantToContribute;
+
+  /// No description provided for @screensSettingsIndustrialSourceCode.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCE_CODE'**
+  String get screensSettingsIndustrialSourceCode;
+
+  /// Label for build version
+  ///
+  /// In en, this message translates to:
+  /// **'STABLE_BUILD_{version}'**
+  String screensSettingsIndustrialStableBuild(Object version);
+
+  /// No description provided for @screensSettingsContributorsHansRole.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Co-pilot & Resident Hacker'**
+  String get screensSettingsContributorsHansRole;
+
+  /// No description provided for @screensSettingsContributorsHansDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.'**
+  String get screensSettingsContributorsHansDesc;
 }
 
 class _AppLocalizationsDelegate

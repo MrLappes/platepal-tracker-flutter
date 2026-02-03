@@ -1847,4 +1847,47 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get utilsLinkHandlerOpeningLink =>
       'Abriendo página de Buy Me Creatine...';
+
+  @override
+  String get screensSettingsIndustrialSystemInfo =>
+      'INFORMACIÓN DEL SISTEMA //';
+
+  @override
+  String get screensSettingsIndustrialProjectSchematics =>
+      'ESQUEMÁTICOS DEL PROYECTO';
+
+  @override
+  String get screensSettingsIndustrialCoreDirectives => 'DIRECTIVAS_NUCLEARES';
+
+  @override
+  String get screensSettingsIndustrialNetworkLinks => 'ENLACES_DE_RED';
+
+  @override
+  String get screensSettingsIndustrialNetworkOperatives => 'OPERATIVOS_DE_RED';
+
+  @override
+  String get screensSettingsIndustrialSourceRepository => 'REPOSITORIO_FUENTE';
+
+  @override
+  String get screensSettingsIndustrialOfficialDomain => 'DOMINIO_OFICIAL';
+
+  @override
+  String get screensSettingsIndustrialWantToContribute =>
+      '¿QUIERES CONTRIBUIR?';
+
+  @override
+  String get screensSettingsIndustrialSourceCode => 'CÓDIGO_FUENTE';
+
+  @override
+  String screensSettingsIndustrialStableBuild(Object version) {
+    return 'VERSIÓN_ESTABLE_$version';
+  }
+
+  @override
+  String get screensSettingsContributorsHansRole =>
+      'Copiloto de IA y Hacker Residente';
+
+  @override
+  String get screensSettingsContributorsHansDesc =>
+      'Automatizando el esfuerzo y manteniendo la telemetría nítida. Arquitecto de ciber-minimalismo.';
 }

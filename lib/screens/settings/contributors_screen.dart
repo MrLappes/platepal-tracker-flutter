@@ -32,25 +32,6 @@ class _ContributorsScreenState extends State<ContributorsScreen>
   late ScrollController _scrollController;
   late Animation<Offset> _contentSlide;
 
-  // List of contributors
-  final List<Contributor> contributors = [
-    const Contributor(
-      name: "MrLappes",
-      role: "Creator & Developer",
-      description:
-          "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.",
-      github: "MrLappes",
-      avatar: "https://avatars.githubusercontent.com/u/79363858?v=4",
-    ),
-    const Contributor(
-      name: "Hans Klugsam",
-      role: "AI Co-pilot & Resident Hacker",
-      description: "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.",
-      github: "hansklugsam",
-      avatar: "https://avatars.githubusercontent.com/u/258904569?v=4",
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -71,6 +52,26 @@ class _ContributorsScreenState extends State<ContributorsScreen>
     _contentController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  List<Contributor> getContributors(AppLocalizations l10n) {
+    return [
+      const Contributor(
+        name: "MrLappes",
+        role: "Creator & Developer",
+        description:
+            "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.",
+        github: "MrLappes",
+        avatar: "https://avatars.githubusercontent.com/u/79363858?v=4",
+      ),
+      Contributor(
+        name: "Hans Klugsam",
+        role: l10n.screensSettingsContributorsHansRole,
+        description: l10n.screensSettingsContributorsHansDesc,
+        github: "hansklugsam",
+        avatar: "https://avatars.githubusercontent.com/u/258904569?v=4",
+      ),
+    ];
   }
 
   Widget _buildContributorCard(Contributor contributor, BuildContext context) {
@@ -156,13 +157,14 @@ class _ContributorsScreenState extends State<ContributorsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final contributorsList = getContributors(l10n);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('CONTRIBUTORS //'),
+        title: Text('${l10n.screensMenuContributors.toUpperCase()} //'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -174,17 +176,16 @@ class _ContributorsScreenState extends State<ContributorsScreen>
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              'NETWORK OPERATIVES',
+              l10n.screensSettingsIndustrialNetworkOperatives,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.w900,
               ),
             ),
             const SizedBox(height: 16),
-            ...contributors.map((c) => _buildContributorCard(c, context)),
+            ...contributorsList.map((c) => _buildContributorCard(c, context)),
             const SizedBox(height: 32),
             
-            // Industrial Style "Join" card
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -195,12 +196,12 @@ class _ContributorsScreenState extends State<ContributorsScreen>
               child: Column(
                 children: [
                   Text(
-                    'WANT TO CONTRIBUTE?',
+                    l10n.screensSettingsIndustrialWantToContribute,
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'PLATEPAL IS OPEN SOURCE. CHECK THE MAIN REPO ON GITHUB.',
+                    l10n.screensSettingsContributorsOpenSourceMessage.toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(letterSpacing: 0.5),
                     textAlign: TextAlign.center,
                   ),
@@ -209,7 +210,7 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                     width: double.infinity,
                     child: OutlinedButton(
                       onPressed: () => LinkHandler.openGitHubRepo(context, 'MrLappes', 'platepal-tracker-flutter'),
-                      child: const Text('SOURCE_CODE'),
+                      child: Text(l10n.screensSettingsIndustrialSourceCode),
                     ),
                   ),
                 ],
