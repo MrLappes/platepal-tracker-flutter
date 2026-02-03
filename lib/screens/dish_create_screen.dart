@@ -114,7 +114,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
   Future<void> _saveDish() async {
     if (_nameController.text.trim().isEmpty) {
-      _showErrorSnackBar(AppLocalizations.of(context).screensDishCreatePleaseEnterDishName);
+      _showErrorSnackBar(
+        AppLocalizations.of(context).screensDishCreatePleaseEnterDishName,
+      );
       return;
     }
 
@@ -156,7 +158,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         await _dishService.updateDish(dishData);
         if (mounted) {
           _showSuccessSnackBar(
-            AppLocalizations.of(context).screensDishCreateDishUpdatedSuccessfully,
+            AppLocalizations.of(
+              context,
+            ).screensDishCreateDishUpdatedSuccessfully,
           );
         }
       } else {
@@ -164,7 +168,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         await _dishService.saveDish(dishData);
         if (mounted) {
           _showSuccessSnackBar(
-            AppLocalizations.of(context).screensDishCreateDishCreatedSuccessfully,
+            AppLocalizations.of(
+              context,
+            ).screensDishCreateDishCreatedSuccessfully,
           );
         }
       }
@@ -180,7 +186,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     } catch (e) {
       debugPrint('❌ Error saving dish: $e');
       if (mounted) {
-        _showErrorSnackBar(AppLocalizations.of(context).screensDishCreateErrorSavingDish);
+        _showErrorSnackBar(
+          AppLocalizations.of(context).screensDishCreateErrorSavingDish,
+        );
       }
     } finally {
       setState(() => _isLoading = false);
@@ -223,7 +231,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     } catch (e) {
       if (mounted) {
         _showErrorSnackBar(
-          AppLocalizations.of(context).componentsChatChatInputErrorPickingImage(e.toString()),
+          AppLocalizations.of(
+            context,
+          ).componentsChatChatInputErrorPickingImage(e.toString()),
         );
       }
       debugPrint('❌ Error picking image: $e');
@@ -243,7 +253,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               children: [
                 ListTile(
                   leading: const Icon(Icons.camera_alt),
-                  title: Text(AppLocalizations.of(context).screensDishCreateCamera),
+                  title: Text(
+                    AppLocalizations.of(context).screensDishCreateCamera,
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -251,7 +263,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library),
-                  title: Text(AppLocalizations.of(context).screensDishCreateGallery),
+                  title: Text(
+                    AppLocalizations.of(context).screensDishCreateGallery,
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);
@@ -287,7 +301,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           _recalculateNutrition();
         });
         _showSuccessSnackBar(
-          AppLocalizations.of(context).screensDishCreateProductAddedSuccessfully,
+          AppLocalizations.of(
+            context,
+          ).screensDishCreateProductAddedSuccessfully,
         );
       },
       onProductScanned: (product) {
@@ -307,7 +323,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           _recalculateNutrition();
         });
         _showSuccessSnackBar(
-          AppLocalizations.of(context).screensDishCreateProductAddedSuccessfully,
+          AppLocalizations.of(
+            context,
+          ).screensDishCreateProductAddedSuccessfully,
         );
       },
       onProductScanned: (product) {
@@ -406,7 +424,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       });
     });
 
-    _showSuccessSnackBar(AppLocalizations.of(context).screensDishCreateNutritionRecalculated);
+    _showSuccessSnackBar(
+      AppLocalizations.of(context).screensDishCreateNutritionRecalculated,
+    );
   }
 
   void _addIngredient() {
@@ -439,14 +459,22 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context).screensDishCreateDeleteIngredient),
+            title: Text(
+              AppLocalizations.of(context).screensDishCreateDeleteIngredient,
+            ),
             content: Text(
-              AppLocalizations.of(context).screensDishCreateConfirmDeleteIngredient,
+              AppLocalizations.of(
+                context,
+              ).screensDishCreateConfirmDeleteIngredient,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context).componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -455,7 +483,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   });
                   Navigator.pop(context);
                   _showSuccessSnackBar(
-                    AppLocalizations.of(context).screensDishCreateIngredientDeleted,
+                    AppLocalizations.of(
+                      context,
+                    ).screensDishCreateIngredientDeleted,
                   );
                 },
                 child: Text(
@@ -469,204 +499,282 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   }
 
   Widget _buildImageSelector() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Image',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'IMAGE',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 12),
-            if (_selectedImage != null)
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                ),
-              )
-            else
-              Container(
-                height: 120,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.3),
-                    style: BorderStyle.solid,
-                  ),
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.image,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_selectedImage != null)
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: colorScheme.outline.withValues(alpha: 0.5),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'No image selected',
-                      style: TextStyle(
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                  ),
+                )
+              else
+                Container(
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: colorScheme.outline.withValues(alpha: 0.5),
+                      style: BorderStyle.solid,
+                    ),
+                    color: colorScheme.surfaceContainer,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.image,
+                        size: 40,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _showImageSourceSelector,
-                    icon: const Icon(Icons.add_a_photo),
-                    label: Text(
-                      _selectedImage != null ? 'Change Image' : 'Add Image',
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No image selected',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _showImageSourceSelector,
+                  icon: const Icon(Icons.add_a_photo, size: 16),
+                  label: Text(
+                    (_selectedImage != null ? 'CHANGE IMAGE' : 'ADD IMAGE'),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildQuickActions() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Quick Actions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _openBarcodeScanner,
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: Text(AppLocalizations.of(context).componentsChatChatInputScanBarcode),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _openProductSearch,
-                    icon: const Icon(Icons.search),
-                    label: Text(AppLocalizations.of(context).componentsChatChatInputSearchProduct),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'QUICK ACTIONS',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
+          ),
         ),
-      ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.5),
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _openBarcodeScanner,
+                      icon: const Icon(Icons.qr_code_scanner, size: 16),
+                      label: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).componentsChatChatInputScanBarcode.toUpperCase(),
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _openProductSearch,
+                      icon: const Icon(Icons.search, size: 16),
+                      label: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).componentsChatChatInputSearchProduct.toUpperCase(),
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildBasicInformation() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context).screensDishCreateBasicInfo,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).componentsChatNutritionAnalysisCardDishName} *',
-                hintText: AppLocalizations.of(context).screensDishCreateDishNamePlaceholder,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.restaurant),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).screensDishCreateDescription,
-                hintText: AppLocalizations.of(context).screensDishCreateDescriptionPlaceholder,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.description),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).screensDishCreateCategory,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.category),
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: 'breakfast',
-                  child: Text(AppLocalizations.of(context).componentsModalsDishLogModalBreakfast),
-                ),
-                DropdownMenuItem(
-                  value: 'lunch',
-                  child: Text(AppLocalizations.of(context).componentsModalsDishLogModalLunch),
-                ),
-                DropdownMenuItem(
-                  value: 'dinner',
-                  child: Text(AppLocalizations.of(context).componentsModalsDishLogModalDinner),
-                ),
-                DropdownMenuItem(
-                  value: 'snack',
-                  child: Text(AppLocalizations.of(context).componentsModalsDishLogModalSnack),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedCategory = value);
-                }
-              },
-            ),
-          ],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context).screensDishCreateBasicInfo.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
+          ),
         ),
-      ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.5),
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText:
+                      '${AppLocalizations.of(context).componentsChatNutritionAnalysisCardDishName} *',
+                  hintText:
+                      AppLocalizations.of(
+                        context,
+                      ).screensDishCreateDishNamePlaceholder,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  prefixIcon: const Icon(Icons.restaurant, size: 18),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descriptionController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context).screensDishCreateDescription,
+                  hintText:
+                      AppLocalizations.of(
+                        context,
+                      ).screensDishCreateDescriptionPlaceholder,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  prefixIcon: const Icon(Icons.description, size: 18),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context).screensDishCreateCategory,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  prefixIcon: const Icon(Icons.category, size: 18),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'breakfast',
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsModalsDishLogModalBreakfast,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'lunch',
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsModalsDishLogModalLunch,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'dinner',
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsModalsDishLogModalDinner,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'snack',
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsModalsDishLogModalSnack,
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedCategory = value);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -684,100 +792,151 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   }
 
   Widget _buildIngredientsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context).componentsChatMessageBubbleIngredients,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: _addIngredient,
-                  icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalAddIngredient),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_ingredients.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.restaurant_menu,
-                      size: 48,
-                      color: Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      AppLocalizations.of(context).screensDishCreateNoIngredientsAdded,
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _ingredients.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final ingredient = _ingredients[index];
-                  return _buildIngredientCard(ingredient, index);
-                },
+            Text(
+              AppLocalizations.of(
+                context,
+              ).componentsChatMessageBubbleIngredients.toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.0,
               ),
+            ),
+            OutlinedButton.icon(
+              onPressed: _addIngredient,
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(
+                AppLocalizations.of(context)
+                    .componentsDishesDishFormIngredientFormModalAddIngredient
+                    .toUpperCase(),
+                style: const TextStyle(fontSize: 10),
+              ),
+            ),
           ],
         ),
-      ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.5),
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            children: [
+              if (_ingredients.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: colorScheme.outline.withValues(alpha: 0.3),
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.restaurant_menu,
+                        size: 48,
+                        color: colorScheme.onSurface.withValues(alpha: 0.3),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).screensDishCreateNoIngredientsAdded.toUpperCase(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _ingredients.length,
+                  separatorBuilder:
+                      (context, index) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final ingredient = _ingredients[index];
+                    return _buildIngredientCard(ingredient, index);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildOptionsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context).screensDishCreateOptions,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              title: Text(AppLocalizations.of(context).screensDishCreateFavorite),
-              subtitle: Text(AppLocalizations.of(context).screensDishCreateMarkAsFavorite),
-              value: _isFavorite,
-              onChanged: (value) => setState(() => _isFavorite = value),
-              secondary: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : null,
-              ),
-            ),
-          ],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context).screensDishCreateOptions.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
+          ),
         ),
-      ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.5),
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            children: [
+              SwitchListTile(
+                title: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).screensDishCreateFavorite.toUpperCase(),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                  ),
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context).screensDishCreateMarkAsFavorite,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                ),
+                value: _isFavorite,
+                onChanged: (value) => setState(() => _isFavorite = value),
+                secondary: Icon(
+                  _isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: _isFavorite ? colorScheme.error : null,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -789,8 +948,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,13 +961,16 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                  ),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child: Icon(
                   Icons.restaurant,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 20,
+                  color: colorScheme.primary,
+                  size: 18,
                 ),
               ),
               const SizedBox(width: 12),
@@ -863,7 +1025,11 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                               color: colorScheme.primary,
                             ),
                             const SizedBox(width: 8),
-                            Text(AppLocalizations.of(context).componentsDishesDishCardEdit),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).componentsDishesDishCardEdit,
+                            ),
                           ],
                         ),
                       ),
@@ -878,7 +1044,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              AppLocalizations.of(context).componentsDishesDishCardDelete,
+                              AppLocalizations.of(
+                                context,
+                              ).componentsDishesDishCardDelete,
                               style: TextStyle(color: colorScheme.error),
                             ),
                           ],
@@ -964,7 +1132,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         text,
@@ -983,8 +1152,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       appBar: AppBar(
         title: Text(
           widget.dish != null
-              ? AppLocalizations.of(context).screensDishCreateEditDish
-              : AppLocalizations.of(context).screensDishCreateCreateDish,
+              ? '${AppLocalizations.of(context).screensDishCreateEditDish.toUpperCase()} //'
+              : '${AppLocalizations.of(context).screensDishCreateCreateDish.toUpperCase()} //',
         ),
         actions: [
           if (_isLoading)
@@ -1000,7 +1169,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
             TextButton(
               onPressed: _saveDish,
               child: Text(
-                AppLocalizations.of(context).componentsChatBotProfileCustomizationDialogSave,
+                AppLocalizations.of(
+                  context,
+                ).componentsChatBotProfileCustomizationDialogSave,
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.bold,
@@ -1041,7 +1212,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 label: Text(
                   widget.dish != null
                       ? AppLocalizations.of(context).screensDishCreateSaveDish
-                      : AppLocalizations.of(context).screensDishCreateCreateDish,
+                      : AppLocalizations.of(
+                        context,
+                      ).screensDishCreateCreateDish,
                 ),
               ),
     );

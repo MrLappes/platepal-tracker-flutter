@@ -77,12 +77,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       chatProvider.updateBotProfile(updatedProfile);
                     },
                   )
-                  : Text(localizations.screensChatChatAssistant);
+                  : Text(
+                    '${localizations.screensChatChatAssistant.toUpperCase()} //',
+                  );
             },
           ),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-          elevation: 0,
           actions: [
             Consumer<ChatProvider>(
               builder: (context, chatProvider, _) {
@@ -375,7 +374,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ],
           ),
-          
+
           if (thinkingSteps.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -384,21 +383,31 @@ class _ChatScreenState extends State<ChatScreen> {
               decoration: BoxDecoration(
                 color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: colorScheme.outline.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: thinkingSteps.take(5).map((step) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '> ${step.toUpperCase()}',
-                    style: TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 10,
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                )).toList(),
+                children:
+                    thinkingSteps
+                        .take(5)
+                        .map(
+                          (step) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              '> ${step.toUpperCase()}',
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 10,
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
               ),
             ),
           ],
@@ -419,14 +428,19 @@ class _ChatScreenState extends State<ChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(localizations.componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  localizations
+                      .componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   chatProvider.clearChat(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(localizations.screensChatChatCleared)),
+                    SnackBar(
+                      content: Text(localizations.screensChatChatCleared),
+                    ),
                   );
                 },
                 style: TextButton.styleFrom(

@@ -51,8 +51,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).screensMenuImportData),
-        elevation: 2,
+        title: Text(
+          '${AppLocalizations.of(context).screensMenuImportData.toUpperCase()} //',
+        ),
       ),
       body:
           _isImporting || _isRestoring
@@ -94,7 +95,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           Text(
             _isRestoring
                 ? 'Restoring from backup...'
-                : AppLocalizations.of(context).screensSettingsImportDataImportProgress,
+                : AppLocalizations.of(
+                  context,
+                ).screensSettingsImportDataImportProgress,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -226,7 +229,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 label: Text(
                   _selectedFilePath != null
                       ? 'Change File'
-                      : AppLocalizations.of(context).screensSettingsImportDataSelectFile,
+                      : AppLocalizations.of(
+                        context,
+                      ).screensSettingsImportDataSelectFile,
                 ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -259,7 +264,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 Icon(Icons.checklist, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context).screensSettingsImportDataSelectDataToImport,
+                  AppLocalizations.of(
+                    context,
+                  ).screensSettingsImportDataSelectDataToImport,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -313,11 +320,13 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
         subtitle = 'Your meal history and nutrition logs';
         break;
       case DataType.userProfiles:
-        title = AppLocalizations.of(context).screensSettingsExportDataUserProfiles;
+        title =
+            AppLocalizations.of(context).screensSettingsExportDataUserProfiles;
         subtitle = 'User profile and preferences';
         break;
       case DataType.ingredients:
-        title = AppLocalizations.of(context).componentsChatMessageBubbleIngredients;
+        title =
+            AppLocalizations.of(context).componentsChatMessageBubbleIngredients;
         subtitle = 'Ingredient database';
         break;
       case DataType.allData:
@@ -372,7 +381,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 Icon(Icons.merge_type, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context).screensSettingsImportDataHowToHandleDuplicates,
+                  AppLocalizations.of(
+                    context,
+                  ).screensSettingsImportDataHowToHandleDuplicates,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -381,7 +392,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             ),
             const SizedBox(height: 16),
             RadioListTile<DuplicateHandling>(
-              title: Text(AppLocalizations.of(context).screensSettingsImportDataSkipDuplicates),
+              title: Text(
+                AppLocalizations.of(
+                  context,
+                ).screensSettingsImportDataSkipDuplicates,
+              ),
               subtitle: const Text(
                 'Keep existing data, skip imported duplicates',
               ),
@@ -395,7 +410,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               secondary: const Icon(Icons.skip_next, color: Colors.blue),
             ),
             RadioListTile<DuplicateHandling>(
-              title: Text(AppLocalizations.of(context).screensSettingsImportDataOverwriteDuplicates),
+              title: Text(
+                AppLocalizations.of(
+                  context,
+                ).screensSettingsImportDataOverwriteDuplicates,
+              ),
               subtitle: const Text('Replace existing data with imported data'),
               value: DuplicateHandling.overwrite,
               groupValue: _duplicateHandling,
@@ -407,7 +426,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               secondary: const Icon(Icons.update, color: Colors.orange),
             ),
             RadioListTile<DuplicateHandling>(
-              title: Text(AppLocalizations.of(context).screensSettingsImportDataMergeDuplicates),
+              title: Text(
+                AppLocalizations.of(
+                  context,
+                ).screensSettingsImportDataMergeDuplicates,
+              ),
               subtitle: const Text('Merge data intelligently'),
               value: DuplicateHandling.merge,
               groupValue: _duplicateHandling,
@@ -736,7 +759,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 content: Text(
                   AppLocalizations.of(
                     context,
-                  ).screensSettingsImportDataImportedItemsCount(result.itemsProcessed),
+                  ).screensSettingsImportDataImportedItemsCount(
+                    result.itemsProcessed,
+                  ),
                 ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
@@ -754,7 +779,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             _lastError =
                 result.errors.isNotEmpty
                     ? 'Import completed with ${result.errors.length} errors'
-                    : AppLocalizations.of(context).screensSettingsImportDataImportFailed;
+                    : AppLocalizations.of(
+                      context,
+                    ).screensSettingsImportDataImportFailed;
           });
         }
       }

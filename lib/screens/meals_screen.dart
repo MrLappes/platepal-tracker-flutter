@@ -121,10 +121,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.componentsUiCustomTabBarMeals),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: theme.colorScheme.onSurface,
-        elevation: 0,
+        title: Text(
+          '${localizations.componentsUiCustomTabBarMeals.toUpperCase()} //',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -189,15 +188,30 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip(localizations.screensMealsAllCategories, 'all'),
+                        _buildFilterChip(
+                          localizations.screensMealsAllCategories,
+                          'all',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalBreakfast, 'breakfast'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalBreakfast,
+                          'breakfast',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalLunch, 'lunch'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalLunch,
+                          'lunch',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalDinner, 'dinner'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalDinner,
+                          'dinner',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(localizations.componentsModalsDishLogModalSnack, 'snack'),
+                        _buildFilterChip(
+                          localizations.componentsModalsDishLogModalSnack,
+                          'snack',
+                        ),
                       ],
                     ),
                   ),
@@ -284,7 +298,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _loadDishes,
-                    child: Text(localizations.componentsSharedErrorDisplayRetry),
+                    child: Text(
+                      localizations.componentsSharedErrorDisplayRetry,
+                    ),
                   ),
                 ],
               ),
@@ -366,7 +382,10 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5), width: 1),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.5),
+          width: 1,
+        ),
       ),
       child: InkWell(
         onTap: () => _viewDishDetails(dish),
@@ -380,11 +399,16 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
                       (dish.category ?? 'MISC').toUpperCase(),
@@ -423,10 +447,26 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildTelemetryItem(theme, '${dish.nutrition.calories.round()}', 'KCAL'),
-                  _buildTelemetryItem(theme, '${dish.nutrition.protein.round()}G', 'PRO'),
-                  _buildTelemetryItem(theme, '${dish.nutrition.carbs.round()}G', 'CHO'),
-                  _buildTelemetryItem(theme, '${dish.nutrition.fat.round()}G', 'FAT'),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.calories.round()}',
+                    'KCAL',
+                  ),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.protein.round()}G',
+                    'PRO',
+                  ),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.carbs.round()}G',
+                    'CHO',
+                  ),
+                  _buildTelemetryItem(
+                    theme,
+                    '${dish.nutrition.fat.round()}G',
+                    'FAT',
+                  ),
                 ],
               ),
             ),
@@ -537,7 +577,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           SnackBar(
             content: Text(
               dish.isFavorite
-                  ? AppLocalizations.of(context).screensMealsRemovedFromFavorites
+                  ? AppLocalizations.of(
+                    context,
+                  ).screensMealsRemovedFromFavorites
                   : AppLocalizations.of(context).screensMealsAddedToFavorites,
             ),
           ),
@@ -547,7 +589,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).screensMealsErrorUpdatingDish),
+            content: Text(
+              AppLocalizations.of(context).screensMealsErrorUpdatingDish,
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -562,19 +606,27 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           (context) => AlertDialog(
             title: Text(AppLocalizations.of(context).screensMealsDeleteDish),
             content: Text(
-              AppLocalizations.of(context).screensMealsDeleteDishConfirmation(dish.name),
+              AppLocalizations.of(
+                context,
+              ).screensMealsDeleteDishConfirmation(dish.name),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context).componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(AppLocalizations.of(context).componentsDishesDishCardDelete),
+                child: Text(
+                  AppLocalizations.of(context).componentsDishesDishCardDelete,
+                ),
               ),
             ],
           ),
@@ -589,7 +641,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(context).screensMealsDishDeletedSuccessfully,
+                AppLocalizations.of(
+                  context,
+                ).screensMealsDishDeletedSuccessfully,
               ),
             ),
           );
@@ -598,7 +652,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context).screensMealsFailedToDeleteDish),
+              content: Text(
+                AppLocalizations.of(context).screensMealsFailedToDeleteDish,
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

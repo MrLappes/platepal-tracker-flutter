@@ -467,7 +467,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     final localizations = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.screensMenuApiKeySettings),
+        title: Text(
+          '${localizations.screensMenuApiKeySettings.toUpperCase()} //',
+        ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),

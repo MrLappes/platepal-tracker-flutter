@@ -43,7 +43,9 @@ class _ContributorsScreenState extends State<ContributorsScreen>
     _contentSlide = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _contentController, curve: Curves.easeOutCubic));
+    ).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeOutCubic),
+    );
     _contentController.forward();
   }
 
@@ -56,11 +58,10 @@ class _ContributorsScreenState extends State<ContributorsScreen>
 
   List<Contributor> getContributors(AppLocalizations l10n) {
     return [
-      const Contributor(
+      Contributor(
         name: "MrLappes",
-        role: "Creator & Developer",
-        description:
-            "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.",
+        role: l10n.screensSettingsContributorsMrLappesRole,
+        description: l10n.screensSettingsContributorsMrLappesDesc,
         github: "MrLappes",
         avatar: "https://avatars.githubusercontent.com/u/79363858?v=4",
       ),
@@ -99,15 +100,16 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                     color: colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(2),
                   ),
-                  child: contributor.avatar != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(2),
-                          child: CachedNetworkImage(
-                            imageUrl: contributor.avatar!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Icon(Icons.person, color: colorScheme.primary),
+                  child:
+                      contributor.avatar != null
+                          ? ClipRRect(
+                            borderRadius: BorderRadius.circular(2),
+                            child: CachedNetworkImage(
+                              imageUrl: contributor.avatar!,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                          : Icon(Icons.person, color: colorScheme.primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -133,7 +135,11 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                 ),
                 if (contributor.github != null)
                   IconButton(
-                    onPressed: () => LinkHandler.openGitHubProfile(context, contributor.github!),
+                    onPressed:
+                        () => LinkHandler.openGitHubProfile(
+                          context,
+                          contributor.github!,
+                        ),
                     icon: const Icon(Icons.terminal, size: 18),
                     color: colorScheme.primary,
                   ),
@@ -185,31 +191,43 @@ class _ContributorsScreenState extends State<ContributorsScreen>
             const SizedBox(height: 16),
             ...contributorsList.map((c) => _buildContributorCard(c, context)),
             const SizedBox(height: 32),
-            
+
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: colorScheme.primary.withValues(alpha: 0.05),
-                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.3),
+                ),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Column(
                 children: [
                   Text(
                     l10n.screensSettingsIndustrialWantToContribute,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.screensSettingsContributorsOpenSourceMessage.toUpperCase(),
-                    style: theme.textTheme.bodySmall?.copyWith(letterSpacing: 0.5),
+                    l10n.screensSettingsContributorsOpenSourceMessage
+                        .toUpperCase(),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      letterSpacing: 0.5,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
-                      onPressed: () => LinkHandler.openGitHubRepo(context, 'MrLappes', 'platepal-tracker-flutter'),
+                      onPressed:
+                          () => LinkHandler.openGitHubRepo(
+                            context,
+                            'MrLappes',
+                            'platepal-tracker-flutter',
+                          ),
                       child: Text(l10n.screensSettingsIndustrialSourceCode),
                     ),
                   ),

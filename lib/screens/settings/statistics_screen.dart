@@ -628,7 +628,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               const SizedBox(height: 8),
               Text(_error!),
               const SizedBox(height: 24),
-              ElevatedButton(onPressed: _loadData, child: Text(l10n.screensSettingsStatisticsTryAgain)),
+              ElevatedButton(
+                onPressed: _loadData,
+                child: Text(l10n.screensSettingsStatisticsTryAgain),
+              ),
             ],
           ),
         ),
@@ -639,7 +642,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.screensSettingsStatisticsStatistics),
+        title: Text(
+          '${l10n.screensSettingsStatisticsStatistics.toUpperCase()} //',
+        ),
         actions: [
           // Show "Back to Real Data" button when showing test data
           if (_isShowingTestData)
@@ -1095,7 +1100,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildWeightChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable));
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable),
+      );
     }
 
     // Use weekly median for weight to smooth out daily fluctuations
@@ -1118,7 +1125,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildBMIChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (_metricsHistory.isEmpty) {
-      return Center(child: Text(l10n.screensSettingsStatisticsNoBmiDataAvailable));
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsNoBmiDataAvailable),
+      );
     }
 
     // Calculate BMI for each entry
@@ -1139,7 +1148,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .toList();
 
     if (bmiData.isEmpty) {
-      return Center(child: Text(l10n.screensSettingsStatisticsCannotCalculateBmiFromData));
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsCannotCalculateBmiFromData),
+      );
     }
 
     return CustomPaint(
@@ -1180,7 +1191,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
     if (bodyFatData.isEmpty) {
-      return Center(child: Text(l10n.screensSettingsStatisticsNoBodyFatDataAvailable));
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsNoBodyFatDataAvailable),
+      );
     }
 
     return CustomPaint(
@@ -1200,7 +1213,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildCalorieChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
-      return Center(child: Text(l10n.screensSettingsStatisticsNoCalorieDataAvailable));
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsNoCalorieDataAvailable),
+      );
     }
 
     return CustomPaint(
@@ -1560,7 +1575,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .where((entry) => (entry['calories'] as double) < 1000)
             .length;
     if (veryLowDays > 0) {
-      warnings.add(l10n.screensSettingsStatisticsVeryLowCalorieWarning(veryLowDays.toString()));
+      warnings.add(
+        l10n.screensSettingsStatisticsVeryLowCalorieWarning(
+          veryLowDays.toString(),
+        ),
+      );
     }
 
     // Check for extremely high calorie days
@@ -1573,7 +1592,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             )
             .length;
     if (veryHighDays > 0) {
-      warnings.add(l10n.screensSettingsStatisticsVeryHighCalorieNotice(veryHighDays.toString()));
+      warnings.add(
+        l10n.screensSettingsStatisticsVeryHighCalorieNotice(
+          veryHighDays.toString(),
+        ),
+      );
     }
 
     // Check for consistent extreme deficit
@@ -1599,7 +1622,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 deficit < -1000; // More than 1000 cal deficit
           }).length;
       if (largeDeficitDays > 0) {
-        warnings.add(l10n.screensSettingsStatisticsHealthDataAlert(largeDeficitDays.toString()));
+        warnings.add(
+          l10n.screensSettingsStatisticsHealthDataAlert(
+            largeDeficitDays.toString(),
+          ),
+        );
       }
 
       // Check for inconsistent deficit patterns
@@ -1620,7 +1647,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           // High variance in deficits
           final varianceValue = math.sqrt(deficitVariance).round();
           warnings.add(
-            l10n.screensSettingsStatisticsInconsistentDeficitWarning(varianceValue.toString()),
+            l10n.screensSettingsStatisticsInconsistentDeficitWarning(
+              varianceValue.toString(),
+            ),
           );
         }
       }
