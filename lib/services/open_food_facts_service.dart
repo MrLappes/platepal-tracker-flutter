@@ -15,13 +15,17 @@ class OpenFoodFactsService {
   }) async {
     try {
       final encodedQuery = Uri.encodeComponent(query);
+      // Using the reliable CGI search endpoint as recommended in docs
       final url =
-          '$_baseUrl/search?search_terms=$encodedQuery&page=$page&page_size=$pageSize&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&json=true';
+          'https://world.openfoodfacts.org/cgi/search.pl?search_terms=$encodedQuery&search_simple=1&action=process&json=1&page=$page&page_size=$pageSize&fields=code,product_name,product_name_en,brands,image_url,image_front_url,quantity,nutriments&nocache=1';
 
-      debugPrint('🔍 Searching Open Food Facts: $url');
+      debugPrint('🔍 Searching Open Food Facts (CGI): $url');
       final response = await http.get(
         Uri.parse(url),
-        headers: {'User-Agent': 'PlatePalTracker - Android - Version 1.0'},
+        headers: {
+          'User-Agent':
+              'PlatePalTracker - Android - Version 1.0 - https://github.com/MrLappes/platepal-tracker-flutter',
+        },
       );
 
       if (response.statusCode == 200) {
