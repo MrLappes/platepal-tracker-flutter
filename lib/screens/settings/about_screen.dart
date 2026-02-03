@@ -244,7 +244,7 @@ class _AboutScreenState extends State<AboutScreen>
                               style: Theme.of(
                                 context,
                               ).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                             const SizedBox(height: 24), // Website Link
@@ -285,7 +285,7 @@ class _AboutScreenState extends State<AboutScreen>
                                 context,
                               ).textTheme.bodyMedium?.copyWith(
                                 fontStyle: FontStyle.italic,
-                                color: Theme.of(context).colorScheme.outline,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                               textAlign: TextAlign.center,
                             ),
