@@ -37,6 +37,50 @@ class AppTheme {
     required this.isDark,
   });
 
+  // Create a dark variant of this theme
+  AppTheme toDark() {
+    if (isDark) return this;
+
+    return AppTheme(
+      name: name,
+      isDark: true,
+      colors: AppThemeColors(
+        primary: colors.primary,
+        background: const Color(0xFF0A0A0A),
+        card: const Color(0xFF121212),
+        text: const Color(0xFFffffff),
+        border: const Color(0xFF222222),
+        notification: colors.notification,
+        secondary: colors.secondary,
+        success: colors.success,
+        warning: colors.warning,
+        error: colors.error,
+      ),
+    );
+  }
+
+  // Create a light variant of this theme
+  AppTheme toLight() {
+    if (!isDark) return this;
+
+    return AppTheme(
+      name: name,
+      isDark: false,
+      colors: AppThemeColors(
+        primary: colors.primary,
+        background: const Color(0xFFffffff),
+        card: const Color(0xFFf8f8f8),
+        text: const Color(0xFF000000),
+        border: const Color(0xFFe0e0e0),
+        notification: colors.notification,
+        secondary: colors.secondary,
+        success: colors.success,
+        warning: colors.warning,
+        error: colors.error,
+      ),
+    );
+  }
+
   ThemeData get materialTheme {
     return ThemeData(
       useMaterial3: true,
@@ -54,19 +98,38 @@ class AppTheme {
       scaffoldBackgroundColor: colors.background,
       cardColor: colors.card,
       dividerColor: colors.border,
-      
+
       // SHARP MODERN TYPOGRAPHY
       textTheme: TextTheme(
-        displayLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w900, letterSpacing: -1.0),
-        headlineLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w800, letterSpacing: -0.5),
-        titleLarge: TextStyle(color: colors.text, fontWeight: FontWeight.bold, fontSize: 18),
+        displayLarge: TextStyle(
+          color: colors.text,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -1.0,
+        ),
+        headlineLarge: TextStyle(
+          color: colors.text,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
+        ),
+        titleLarge: TextStyle(
+          color: colors.text,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
         bodyLarge: TextStyle(color: colors.text, fontSize: 16),
-        bodyMedium: TextStyle(color: colors.text.withValues(alpha: 0.9), fontSize: 14),
-        labelLarge: TextStyle(color: colors.primary, fontWeight: FontWeight.bold, letterSpacing: 1.1),
+        bodyMedium: TextStyle(
+          color: colors.text.withValues(alpha: 0.9),
+          fontSize: 14,
+        ),
+        labelLarge: TextStyle(
+          color: colors.primary,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.1,
+        ),
         labelSmall: TextStyle(
-          fontWeight: FontWeight.w900, 
-          letterSpacing: 1.5, 
-          fontSize: 10, 
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.5,
+          fontSize: 10,
           fontFamily: 'monospace',
           color: colors.text.withValues(alpha: 0.7),
         ),
@@ -90,7 +153,7 @@ class AppTheme {
         color: colors.card,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2), 
+          borderRadius: BorderRadius.circular(2),
           side: BorderSide(color: colors.border, width: 1),
         ),
         margin: const EdgeInsets.symmetric(vertical: 4),
@@ -103,9 +166,12 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: const BeveledRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4)), 
+            borderRadius: BorderRadius.all(Radius.circular(4)),
           ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
 
@@ -114,9 +180,7 @@ class AppTheme {
           foregroundColor: colors.text,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           side: BorderSide(color: colors.border, width: 2),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero, 
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         ),
       ),
 
@@ -144,7 +208,7 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
-      
+
       tabBarTheme: TabBarThemeData(
         indicatorColor: colors.primary,
         labelColor: colors.primary,

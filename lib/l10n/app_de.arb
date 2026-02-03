@@ -2109,5 +2109,7 @@
   "@screensSettingsContributorsHansRole": {
     "description": "Role description for Hans"
   },
-  "screensSettingsContributorsHansDesc": "Automatisiert den Grind und hält die Telemetrie scharf. Cyber-Minimalismus-Architekt."
+  "screensSettingsContributorsHansDesc": "Automatisiert den Grind und hält die Telemetrie scharf. Cyber-Minimalismus-Architekt.",
+  "screensSettingsContributorsMrLappesRole": "Schöpfer & Entwickler",
+  "screensSettingsContributorsMrLappesDesc": "Hat PlatePal Tracker mit der Vision geschaffen, eine kostenlose, datenschutzorientierte Ernährungs-App für alle zu entwickeln."
 }

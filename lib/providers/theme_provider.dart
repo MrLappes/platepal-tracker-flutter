@@ -10,7 +10,7 @@ class ThemeProvider extends ChangeNotifier {
   static const String _themePrefKey = 'theme_preference';
   static const String _themeNameKey = 'theme_name';
 
-  ThemePreference _themePreference = ThemePreference.dark; 
+  ThemePreference _themePreference = ThemePreference.dark;
   String _currentThemeName = AppThemes.dark.name;
   AppTheme _currentTheme = AppThemes.dark;
   bool _isDark = true;
@@ -39,7 +39,7 @@ class ThemeProvider extends ChangeNotifier {
           (e) => e.name == savedPreference,
           orElse: () => ThemePreference.dark,
         );
-      } 
+      }
 
       final savedThemeName = prefs.getString(_themeNameKey);
       if (savedThemeName != null) {
@@ -67,23 +67,26 @@ class ThemeProvider extends ChangeNotifier {
 
   // Update the current theme based on preference and system brightness
   void _updateTheme() {
+    // Determine if we should use dark mode
+    bool useDark;
     switch (_themePreference) {
       case ThemePreference.dark:
-        _isDark = true;
-        _currentThemeName = AppThemes.dark.name;
+        useDark = true;
         break;
       case ThemePreference.light:
-        _isDark = false;
-        _currentThemeName = AppThemes.light.name;
+        useDark = false;
         break;
       case ThemePreference.system:
         final brightness = PlatformDispatcher.instance.platformBrightness;
-        _isDark = brightness == Brightness.dark;
-        _currentThemeName = _isDark ? AppThemes.dark.name : AppThemes.light.name;
+        useDark = brightness == Brightness.dark;
         break;
     }
 
-    _currentTheme = AppThemes.getThemeByName(_currentThemeName);
+    _isDark = useDark;
+
+    // Get the base theme and apply light/dark variant
+    final baseTheme = AppThemes.getThemeByName(_currentThemeName);
+    _currentTheme = useDark ? baseTheme.toDark() : baseTheme.toLight();
 
     _updateSystemBrightness();
     notifyListeners();
@@ -114,9 +117,14 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> setThemeByName(String themeName) async {
     if (_currentThemeName != themeName) {
       _currentThemeName = themeName;
-      // Allow overriding the dark/light state based on theme selection
-      final targetTheme = AppThemes.getThemeByName(themeName);
-      _themePreference = targetTheme.isDark ? ThemePreference.dark : ThemePreference.light;
+      // Don't override theme preference when selecting a base theme
+      // Only change preference if explicitly selecting "Light" or "Dark" themes
+      if (themeName == 'Light') {
+        _themePreference = ThemePreference.light;
+      } else if (themeName == 'Dark') {
+        _themePreference = ThemePreference.dark;
+      }
+      // For base themes (PlatePal, Oceanic, Forest), keep current preference
       _updateTheme();
       await _saveThemePreference();
     }
@@ -130,6 +138,8 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  List<String> get availableThemes => AppThemes.allThemes.map((t) => t.name).toList();
-  List<String> get allAvailableThemes => AppThemes.allThemes.map((t) => t.name).toList();
+  List<String> get availableThemes =>
+      AppThemes.allThemes.map((t) => t.name).toList();
+  List<String> get allAvailableThemes =>
+      AppThemes.allThemes.map((t) => t.name).toList();
 }

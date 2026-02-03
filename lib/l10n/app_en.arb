@@ -2169,6 +2169,8 @@
     }
   },
   "screensSettingsContributorsHansRole": "AI Co-pilot & Resident Hacker",
-  "screensSettingsContributorsHansDesc": "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect."
+  "screensSettingsContributorsHansDesc": "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.",
+  "screensSettingsContributorsMrLappesRole": "Creator & Developer",
+  "screensSettingsContributorsMrLappesDesc": "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone."
 }
 

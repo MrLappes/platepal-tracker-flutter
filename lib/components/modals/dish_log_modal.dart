@@ -81,7 +81,11 @@ class _DishLogModalState extends State<DishLogModal> {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).componentsModalsDishLogModalDishLoggedSuccessfully),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).componentsModalsDishLogModalDishLoggedSuccessfully,
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -90,7 +94,11 @@ class _DishLogModalState extends State<DishLogModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).componentsModalsDishLogModalErrorLoggingDish),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).componentsModalsDishLogModalErrorLoggingDish,
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -125,8 +133,8 @@ class _DishLogModalState extends State<DishLogModal> {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+              topLeft: Radius.circular(4),
+              topRight: Radius.circular(4),
             ),
             boxShadow: [
               BoxShadow(
@@ -158,8 +166,8 @@ class _DishLogModalState extends State<DishLogModal> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
                   ),
                 ),
                 child: Row(
@@ -171,7 +179,8 @@ class _DishLogModalState extends State<DishLogModal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            localizations.componentsModalsDishLogModalLogDishTitle,
+                            localizations
+                                .componentsModalsDishLogModalLogDishTitle,
                             style: theme.textTheme.headlineSmall?.copyWith(
                               color: theme.colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
@@ -210,7 +219,9 @@ class _DishLogModalState extends State<DishLogModal> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Date Selection
-                        _buildSectionTitle(localizations.componentsModalsDishLogModalSelectDate),
+                        _buildSectionTitle(
+                          localizations.componentsModalsDishLogModalSelectDate,
+                        ),
                         const SizedBox(height: 8),
                         InkWell(
                           onTap: _selectDate,
@@ -249,7 +260,10 @@ class _DishLogModalState extends State<DishLogModal> {
                         const SizedBox(height: 20),
 
                         // Meal Type Selection
-                        _buildSectionTitle(localizations.componentsModalsDishLogModalSelectMealType),
+                        _buildSectionTitle(
+                          localizations
+                              .componentsModalsDishLogModalSelectMealType,
+                        ),
                         const SizedBox(height: 12),
                         Row(
                           children:
@@ -334,7 +348,9 @@ class _DishLogModalState extends State<DishLogModal> {
                         const SizedBox(height: 20),
 
                         // Portion Size
-                        _buildSectionTitle(localizations.componentsModalsDishLogModalPortionSize),
+                        _buildSectionTitle(
+                          localizations.componentsModalsDishLogModalPortionSize,
+                        ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -375,7 +391,10 @@ class _DishLogModalState extends State<DishLogModal> {
                         const SizedBox(height: 20),
 
                         // Calculated Nutrition
-                        _buildSectionTitle(localizations.componentsModalsDishLogModalCalculatedNutrition),
+                        _buildSectionTitle(
+                          localizations
+                              .componentsModalsDishLogModalCalculatedNutrition,
+                        ),
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -387,19 +406,22 @@ class _DishLogModalState extends State<DishLogModal> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildNutritionItem(
-                                localizations.componentsCalendarMacroSummaryCalories,
+                                localizations
+                                    .componentsCalendarMacroSummaryCalories,
                                 calculatedCalories.round().toString(),
                                 'kcal',
                                 Colors.red,
                               ),
                               _buildNutritionItem(
-                                localizations.componentsCalendarMacroSummaryProtein,
+                                localizations
+                                    .componentsCalendarMacroSummaryProtein,
                                 calculatedProtein.toStringAsFixed(1),
                                 'g',
                                 Colors.blue,
                               ),
                               _buildNutritionItem(
-                                localizations.componentsCalendarMacroSummaryCarbs,
+                                localizations
+                                    .componentsCalendarMacroSummaryCarbs,
                                 calculatedCarbs.toStringAsFixed(1),
                                 'g',
                                 Colors.orange,
@@ -417,12 +439,16 @@ class _DishLogModalState extends State<DishLogModal> {
                         const SizedBox(height: 20),
 
                         // Notes
-                        _buildSectionTitle(localizations.componentsModalsDishLogModalNotes),
+                        _buildSectionTitle(
+                          localizations.componentsModalsDishLogModalNotes,
+                        ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: _notesController,
                           decoration: InputDecoration(
-                            hintText: localizations.componentsModalsDishLogModalAddNotes,
+                            hintText:
+                                localizations
+                                    .componentsModalsDishLogModalAddNotes,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -458,7 +484,10 @@ class _DishLogModalState extends State<DishLogModal> {
                             _isLoading
                                 ? null
                                 : () => Navigator.of(context).pop(),
-                        child: Text(localizations.componentsChatBotProfileCustomizationDialogCancel),
+                        child: Text(
+                          localizations
+                              .componentsChatBotProfileCustomizationDialogCancel,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -477,7 +506,10 @@ class _DishLogModalState extends State<DishLogModal> {
                                     ),
                                   ),
                                 )
-                                : Text(localizations.componentsChatBotProfileCustomizationDialogSave),
+                                : Text(
+                                  localizations
+                                      .componentsChatBotProfileCustomizationDialogSave,
+                                ),
                       ),
                     ),
                   ],

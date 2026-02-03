@@ -3246,6 +3246,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.'**
   String get screensSettingsContributorsHansDesc;
+
+  /// No description provided for @screensSettingsContributorsMrLappesRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator & Developer'**
+  String get screensSettingsContributorsMrLappesRole;
+
+  /// No description provided for @screensSettingsContributorsMrLappesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.'**
+  String get screensSettingsContributorsMrLappesDesc;
 }
 
 class _AppLocalizationsDelegate

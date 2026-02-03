@@ -1892,4 +1892,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get screensSettingsContributorsHansDesc =>
       'Automatisiert den Grind und hält die Telemetrie scharf. Cyber-Minimalismus-Architekt.';
+
+  @override
+  String get screensSettingsContributorsMrLappesRole => 'Schöpfer & Entwickler';
+
+  @override
+  String get screensSettingsContributorsMrLappesDesc =>
+      'Hat PlatePal Tracker mit der Vision geschaffen, eine kostenlose, datenschutzorientierte Ernährungs-App für alle zu entwickeln.';
 }

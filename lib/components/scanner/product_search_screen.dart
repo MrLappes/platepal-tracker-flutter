@@ -120,8 +120,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
     try {
       debugPrint('🔍 Searching for products: $query');
-      final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
-      
+      final localeProvider = Provider.of<LocaleProvider>(
+        context,
+        listen: false,
+      );
+
       final products = await _openFoodFactsService.searchProducts(
         query.trim(),
         page: _currentPage,
@@ -145,9 +148,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         _hasSearched = true;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -182,16 +185,24 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+                  color: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
+                  border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.3),
+                  ),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                child: product.imageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: product.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 20),
-                      )
-                    : const Icon(Icons.fastfood, size: 20),
+                child:
+                    product.imageUrl != null
+                        ? CachedNetworkImage(
+                          imageUrl: product.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget:
+                              (context, url, error) =>
+                                  const Icon(Icons.broken_image, size: 20),
+                        )
+                        : const Icon(Icons.fastfood, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -200,20 +211,28 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   children: [
                     Text(
                       (product.name ?? 'UNKNOWN').toUpperCase(),
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900, fontSize: 13),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (product.brand != null)
                       Text(
                         product.brand!.toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(color: colorScheme.primary, fontSize: 9),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontSize: 9,
+                        ),
                       ),
                     if (product.hasNutrition) ...[
                       const SizedBox(height: 4),
                       Text(
                         '${product.nutrition!.calories.round()} KCAL | P:${product.nutrition!.protein.toStringAsFixed(1)}G | C:${product.nutrition!.carbs.toStringAsFixed(1)}G',
-                        style: theme.textTheme.labelSmall?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.7)),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
                       ),
                     ],
                   ],
@@ -235,7 +254,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('PRODUCT SEARCH //'),
+        title: Text(
+          '${localizations.componentsChatChatInputSearchProduct.toUpperCase()} //',
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -251,17 +272,28 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'INPUT SEARCH TERMS...',
-                prefixIcon: Icon(Icons.search, color: colorScheme.primary),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _searchProducts('');
-                        },
-                      )
-                    : null,
+                hintText:
+                    localizations.screensDishCreateDishNamePlaceholder
+                        .toUpperCase(),
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                contentPadding: const EdgeInsets.all(12),
+                suffixIcon:
+                    _searchController.text.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _searchProducts('');
+                          },
+                        )
+                        : null,
               ),
               onChanged: (value) {
                 if (value.length > 2) {
@@ -271,28 +303,46 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             ),
           ),
           Expanded(
-            child: _isSearching && _currentPage == 1
-                ? const Center(child: CircularProgressIndicator())
-                : ListView(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    children: [
-                      if (_localIngredients.isNotEmpty || _localDishes.isNotEmpty) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text('LOCAL DATABASE //', style: theme.textTheme.labelSmall?.copyWith(color: colorScheme.primary)),
-                        ),
-                        ..._localIngredients.map((ing) => ListTile(title: Text(ing.name.toUpperCase()))),
-                        ..._localDishes.map((dish) => ListTile(title: Text(dish.name.toUpperCase()))),
+            child:
+                _isSearching && _currentPage == 1
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      children: [
+                        if (_localIngredients.isNotEmpty ||
+                            _localDishes.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              'LOCAL DATABASE //',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          ..._localIngredients.map(
+                            (ing) =>
+                                ListTile(title: Text(ing.name.toUpperCase())),
+                          ),
+                          ..._localDishes.map(
+                            (dish) =>
+                                ListTile(title: Text(dish.name.toUpperCase())),
+                          ),
+                        ],
+                        if (_searchResults.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              'GLOBAL FEED //',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          ..._searchResults.map(_buildProductCard),
+                        ],
                       ],
-                      if (_searchResults.isNotEmpty) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text('GLOBAL FEED //', style: theme.textTheme.labelSmall?.copyWith(color: colorScheme.primary)),
-                        ),
-                        ..._searchResults.map(_buildProductCard),
-                      ],
-                    ],
-                  ),
+                    ),
           ),
         ],
       ),

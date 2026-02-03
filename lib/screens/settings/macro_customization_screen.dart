@@ -354,7 +354,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.screensSettingsMacroCustomizationMacroTargetsUpdated),
+            content: Text(
+              l10n.screensSettingsMacroCustomizationMacroTargetsUpdated,
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -433,9 +435,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.screensSettingsMacroCustomizationMacroCustomization),
-          backgroundColor: colorScheme.surface,
-          foregroundColor: colorScheme.onSurface,
+          title: Text(
+            '${l10n.screensSettingsMacroCustomizationMacroCustomization.toUpperCase()} //',
+          ),
           actions: [
             if (_hasUnsavedChanges)
               IconButton(
@@ -471,7 +473,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                               _isSaving
                                   ? null
                                   : () => Navigator.of(context).pop(),
-                          child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
+                          child: Text(
+                            l10n.screensSettingsMacroCustomizationDiscardChanges,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -487,7 +491,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : Text(l10n.screensSettingsMacroCustomizationSaveChanges),
+                                  : Text(
+                                    l10n.screensSettingsMacroCustomizationSaveChanges,
+                                  ),
                         ),
                       ),
                     ],
@@ -1015,7 +1021,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               child: TextButton.icon(
                 onPressed: _resetToDefaults,
                 icon: const Icon(Icons.refresh),
-                label: Text(l10n.screensSettingsMacroCustomizationResetToDefaults),
+                label: Text(
+                  l10n.screensSettingsMacroCustomizationResetToDefaults,
+                ),
               ),
             ),
           ],
@@ -1031,11 +1039,15 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       builder:
           (context) => AlertDialog(
             title: Text(l10n.screensSettingsMacroCustomizationUnsavedChanges),
-            content: Text(l10n.screensSettingsMacroCustomizationUnsavedChangesMessage),
+            content: Text(
+              l10n.screensSettingsMacroCustomizationUnsavedChangesMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
+                child: Text(
+                  l10n.screensSettingsMacroCustomizationDiscardChanges,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),

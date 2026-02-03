@@ -2078,5 +2078,7 @@
     }
   },
   "screensSettingsContributorsHansRole": "Copiloto de IA y Hacker Residente",
-  "screensSettingsContributorsHansDesc": "Automatizando el esfuerzo y manteniendo la telemetría nítida. Arquitecto de ciber-minimalismo."
+  "screensSettingsContributorsHansDesc": "Automatizando el esfuerzo y manteniendo la telemetría nítida. Arquitecto de ciber-minimalismo.",
+  "screensSettingsContributorsMrLappesRole": "Creador y Desarrollador",
+  "screensSettingsContributorsMrLappesDesc": "Creó PlatePal Tracker con la visión de hacer una aplicación de nutrición gratuita y centrada en la privacidad para todos."
 }

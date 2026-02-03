@@ -575,11 +575,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       builder:
           (context) => AlertDialog(
             title: Text(l10n.screensSettingsMacroCustomizationUnsavedChanges),
-            content: Text(l10n.screensSettingsMacroCustomizationUnsavedChangesMessage),
+            content: Text(
+              l10n.screensSettingsMacroCustomizationUnsavedChangesMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
+                child: Text(
+                  l10n.screensSettingsMacroCustomizationDiscardChanges,
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -747,9 +751,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.screensSettingsProfileSettingsProfileSettings),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
+          title: Text(
+            '${l10n.screensSettingsProfileSettingsProfileSettings.toUpperCase()} //',
+          ),
           actions: [
             if (_hasUnsavedChanges)
               IconButton(
@@ -794,7 +798,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                               _isSaving
                                   ? null
                                   : () => _showUnsavedChangesDialog(),
-                          child: Text(l10n.screensSettingsMacroCustomizationDiscardChanges),
+                          child: Text(
+                            l10n.screensSettingsMacroCustomizationDiscardChanges,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -810,7 +816,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : Text(l10n.screensSettingsMacroCustomizationSaveChanges),
+                                  : Text(
+                                    l10n.screensSettingsMacroCustomizationSaveChanges,
+                                  ),
                         ),
                       ),
                     ],
@@ -830,7 +838,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Personal Information Section
-            _buildSectionHeader(l10n.screensSettingsImportProfileCompletionPersonalInformation),
+            _buildSectionHeader(
+              l10n.screensSettingsImportProfileCompletionPersonalInformation,
+            ),
             _buildPersonalInfoCard(l10n),
             const SizedBox(height: 24),
 
@@ -840,21 +850,29 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             const SizedBox(height: 24),
 
             // Fitness Goals Section
-            _buildSectionHeader(l10n.screensSettingsProfileSettingsFitnessGoals),
+            _buildSectionHeader(
+              l10n.screensSettingsProfileSettingsFitnessGoals,
+            ),
             _buildFitnessGoalsCard(l10n),
             const SizedBox(height: 24), // Preferences Section
-            _buildSectionHeader(l10n.screensSettingsImportProfileCompletionPreferences),
+            _buildSectionHeader(
+              l10n.screensSettingsImportProfileCompletionPreferences,
+            ),
             _buildPreferencesCard(l10n),
             const SizedBox(
               height: 24,
             ), // Health Data Sync Section (only show when health is available AND connected)
             if (_isHealthAvailable && _healthService.isConnected) ...[
-              _buildSectionHeader(l10n.screensSettingsProfileSettingsHealthDataSync),
+              _buildSectionHeader(
+                l10n.screensSettingsProfileSettingsHealthDataSync,
+              ),
               _buildHealthSyncCard(l10n),
               const SizedBox(height: 24),
             ] else if (_isHealthAvailable) ...[
               // Show connection option when available but not connected
-              _buildSectionHeader(l10n.screensSettingsProfileSettingsHealthDataSync),
+              _buildSectionHeader(
+                l10n.screensSettingsProfileSettingsHealthDataSync,
+              ),
               _buildHealthSyncCard(l10n),
               const SizedBox(height: 24),
             ],
@@ -923,10 +941,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     label: l10n.screensSettingsImportProfileCompletionGender,
                     icon: Icons.person_outline,
                     items: [
-                      DropdownMenuItem(value: 'male', child: Text(l10n.screensSettingsImportProfileCompletionMale)),
+                      DropdownMenuItem(
+                        value: 'male',
+                        child: Text(
+                          l10n.screensSettingsImportProfileCompletionMale,
+                        ),
+                      ),
                       DropdownMenuItem(
                         value: 'female',
-                        child: Text(l10n.screensSettingsImportProfileCompletionFemale),
+                        child: Text(
+                          l10n.screensSettingsImportProfileCompletionFemale,
+                        ),
                       ),
                     ],
                     onChanged: (value) {
@@ -957,7 +982,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildTextField(
                     controller: _heightController,
-                    label: '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
+                    label:
+                        '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
                     icon: Icons.height,
                     keyboardType: TextInputType.number,
                     validator: _validateHeight,
@@ -967,7 +993,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildTextField(
                     controller: _weightController,
-                    label: '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
+                    label:
+                        '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
                     icon: Icons.monitor_weight,
                     keyboardType: TextInputType.number,
                     validator: _validateWeight,
@@ -991,7 +1018,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildDropdown<String>(
                     value: _selectedActivityLevel,
-                    label: l10n.screensSettingsImportProfileCompletionActivityLevel,
+                    label:
+                        l10n.screensSettingsImportProfileCompletionActivityLevel,
                     icon: Icons.directions_run,
                     items:
                         _activityLevels.keys.map((level) {
@@ -1045,7 +1073,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             const SizedBox(height: 16),
             _buildTextField(
               controller: _targetWeightController,
-              label: '${l10n.screensSettingsProfileSettingsTargetWeight} (${isMetric ? 'kg' : 'lbs'})',
+              label:
+                  '${l10n.screensSettingsProfileSettingsTargetWeight} (${isMetric ? 'kg' : 'lbs'})',
               icon: Icons.track_changes,
               keyboardType: TextInputType.number,
               validator: _validateWeight,
@@ -1080,8 +1109,18 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               label: l10n.screensSettingsImportProfileCompletionUnitSystem,
               icon: Icons.straighten,
               items: [
-                DropdownMenuItem(value: 'metric', child: Text(l10n.screensSettingsImportProfileCompletionMetric)),
-                DropdownMenuItem(value: 'imperial', child: Text(l10n.screensSettingsImportProfileCompletionImperial)),
+                DropdownMenuItem(
+                  value: 'metric',
+                  child: Text(
+                    l10n.screensSettingsImportProfileCompletionMetric,
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'imperial',
+                  child: Text(
+                    l10n.screensSettingsImportProfileCompletionImperial,
+                  ),
+                ),
               ],
               onChanged: (value) {
                 setState(() {
@@ -1120,8 +1159,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     children: [
                       Text(
                         _healthService.isConnected
-                            ? (l10n.screensSettingsProfileSettingsHealthConnected)
-                            : (l10n.screensSettingsProfileSettingsHealthDisconnected),
+                            ? (l10n
+                                .screensSettingsProfileSettingsHealthConnected)
+                            : (l10n
+                                .screensSettingsProfileSettingsHealthDisconnected),
                         style: Theme.of(
                           context,
                         ).textTheme.titleMedium?.copyWith(
@@ -1158,7 +1199,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                           : const Icon(Icons.add_link),
-                  label: Text(l10n.screensSettingsProfileSettingsConnectToHealth),
+                  label: Text(
+                    l10n.screensSettingsProfileSettingsConnectToHealth,
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -1179,7 +1222,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                           : const Icon(Icons.sync),
-                  label: Text(l10n.screensSettingsProfileSettingsSyncHealthData),
+                  label: Text(
+                    l10n.screensSettingsProfileSettingsSyncHealthData,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1188,7 +1233,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isHealthSyncing ? null : _analyzeCalorieTargets,
                   icon: const Icon(Icons.analytics),
-                  label: Text(l10n.screensSettingsProfileSettingsAnalyzeTargets),
+                  label: Text(
+                    l10n.screensSettingsProfileSettingsAnalyzeTargets,
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     foregroundColor: Theme.of(context).colorScheme.onSecondary,
@@ -1203,7 +1250,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _isHealthSyncing ? null : _debugHealthData,
                       icon: const Icon(Icons.bug_report),
-                      label: Text(l10n.screensSettingsProfileSettingsDebugHealthData),
+                      label: Text(
+                        l10n.screensSettingsProfileSettingsDebugHealthData,
+                      ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
@@ -1220,7 +1269,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                 setState(() {});
                               },
                       icon: const Icon(Icons.link_off),
-                      label: Text(l10n.screensSettingsProfileSettingsDisconnectHealth),
+                      label: Text(
+                        l10n.screensSettingsProfileSettingsDisconnectHealth,
+                      ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
@@ -1638,7 +1689,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${l10n.screensSettingsProfileSettingsResetAppError}: $e'),
+            content: Text(
+              '${l10n.screensSettingsProfileSettingsResetAppError}: $e',
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -1656,11 +1709,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(l10n.screensSettingsProfileSettingsHealthPermissionDenied),
-          content: Text(l10n.screensSettingsProfileSettingsHealthPermissionDeniedMessage),
+          title: Text(
+            l10n.screensSettingsProfileSettingsHealthPermissionDenied,
+          ),
+          content: Text(
+            l10n.screensSettingsProfileSettingsHealthPermissionDeniedMessage,
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
+              child: Text(
+                l10n.componentsChatBotProfileCustomizationDialogCancel,
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -1688,10 +1747,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(l10n.screensSettingsProfileSettingsHealthNotAvailable),
-          content: Text(l10n.screensSettingsProfileSettingsHealthNotAvailableMessage),
+          content: Text(
+            l10n.screensSettingsProfileSettingsHealthNotAvailableMessage,
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
+              child: Text(
+                l10n.componentsChatBotProfileCustomizationDialogCancel,
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -1833,7 +1896,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  l10n.componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               if (analysis.needsAdjustment)
                 ElevatedButton(

@@ -75,10 +75,7 @@ class _ImportProfileCompletionScreenState
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Complete Profile'),
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      ),
+      appBar: AppBar(title: const Text('COMPLETE PROFILE //')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -120,7 +117,10 @@ class _ImportProfileCompletionScreenState
             const SizedBox(height: 24),
 
             // Personal Information
-            Text(l10n.screensSettingsImportProfileCompletionPersonalInformation, style: theme.textTheme.titleMedium),
+            Text(
+              l10n.screensSettingsImportProfileCompletionPersonalInformation,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 16),
 
             Card(
@@ -131,13 +131,15 @@ class _ImportProfileCompletionScreenState
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: l10n.screensSettingsImportProfileCompletionName,
+                        labelText:
+                            l10n.screensSettingsImportProfileCompletionName,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.person),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+                          return l10n
+                              .componentsChatBotProfileCustomizationDialogRequiredField;
                         }
                         return null;
                       },
@@ -147,17 +149,20 @@ class _ImportProfileCompletionScreenState
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: l10n.screensSettingsImportProfileCompletionEmail,
+                        labelText:
+                            l10n.screensSettingsImportProfileCompletionEmail,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.email),
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+                          return l10n
+                              .componentsChatBotProfileCustomizationDialogRequiredField;
                         }
                         if (!value.contains('@')) {
-                          return l10n.screensSettingsImportProfileCompletionInvalidEmail;
+                          return l10n
+                              .screensSettingsImportProfileCompletionInvalidEmail;
                         }
                         return null;
                       },
@@ -170,19 +175,23 @@ class _ImportProfileCompletionScreenState
                           child: TextFormField(
                             controller: _ageController,
                             decoration: InputDecoration(
-                              labelText: l10n.screensSettingsImportProfileCompletionAge,
+                              labelText:
+                                  l10n.screensSettingsImportProfileCompletionAge,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.cake),
-                              suffixText: l10n.screensSettingsImportProfileCompletionYears,
+                              suffixText:
+                                  l10n.screensSettingsImportProfileCompletionYears,
                             ),
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+                                return l10n
+                                    .componentsChatBotProfileCustomizationDialogRequiredField;
                               }
                               final age = int.tryParse(value);
                               if (age == null || age < 13 || age > 120) {
-                                return l10n.screensSettingsImportProfileCompletionAgeRange;
+                                return l10n
+                                    .screensSettingsImportProfileCompletionAgeRange;
                               }
                               return null;
                             },
@@ -193,22 +202,29 @@ class _ImportProfileCompletionScreenState
                           child: DropdownButtonFormField<String>(
                             value: _selectedGender,
                             decoration: InputDecoration(
-                              labelText: l10n.screensSettingsImportProfileCompletionGender,
+                              labelText:
+                                  l10n.screensSettingsImportProfileCompletionGender,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.wc),
                             ),
                             items: [
                               DropdownMenuItem(
                                 value: 'male',
-                                child: Text(l10n.screensSettingsImportProfileCompletionMale),
+                                child: Text(
+                                  l10n.screensSettingsImportProfileCompletionMale,
+                                ),
                               ),
                               DropdownMenuItem(
                                 value: 'female',
-                                child: Text(l10n.screensSettingsImportProfileCompletionFemale),
+                                child: Text(
+                                  l10n.screensSettingsImportProfileCompletionFemale,
+                                ),
                               ),
                               DropdownMenuItem(
                                 value: 'other',
-                                child: Text(l10n.screensSettingsImportProfileCompletionOther),
+                                child: Text(
+                                  l10n.screensSettingsImportProfileCompletionOther,
+                                ),
                               ),
                             ],
                             onChanged: (value) {
@@ -228,18 +244,22 @@ class _ImportProfileCompletionScreenState
                           child: TextFormField(
                             controller: _heightController,
                             decoration: InputDecoration(
-                              labelText: l10n.screensSettingsImportProfileCompletionHeight,
+                              labelText:
+                                  l10n.screensSettingsImportProfileCompletionHeight,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.height),
                               suffixText:
                                   _selectedUnitSystem == 'metric'
-                                      ? l10n.screensSettingsImportProfileCompletionCm
-                                      : l10n.screensSettingsImportProfileCompletionInches,
+                                      ? l10n
+                                          .screensSettingsImportProfileCompletionCm
+                                      : l10n
+                                          .screensSettingsImportProfileCompletionInches,
                             ),
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+                                return l10n
+                                    .componentsChatBotProfileCustomizationDialogRequiredField;
                               }
                               final height = double.tryParse(value);
                               if (height == null) {
@@ -247,7 +267,8 @@ class _ImportProfileCompletionScreenState
                               }
                               if (_selectedUnitSystem == 'metric') {
                                 if (height < 100 || height > 250) {
-                                  return l10n.screensSettingsImportProfileCompletionHeightRange;
+                                  return l10n
+                                      .screensSettingsImportProfileCompletionHeightRange;
                                 }
                               } else {
                                 if (height < 36 || height > 96) {
@@ -263,18 +284,22 @@ class _ImportProfileCompletionScreenState
                           child: TextFormField(
                             controller: _weightController,
                             decoration: InputDecoration(
-                              labelText: l10n.screensSettingsImportProfileCompletionWeight,
+                              labelText:
+                                  l10n.screensSettingsImportProfileCompletionWeight,
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.monitor_weight),
                               suffixText:
                                   _selectedUnitSystem == 'metric'
-                                      ? l10n.screensSettingsImportProfileCompletionKg
-                                      : l10n.screensSettingsImportProfileCompletionLb,
+                                      ? l10n
+                                          .screensSettingsImportProfileCompletionKg
+                                      : l10n
+                                          .screensSettingsImportProfileCompletionLb,
                             ),
                             keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+                                return l10n
+                                    .componentsChatBotProfileCustomizationDialogRequiredField;
                               }
                               final weight = double.tryParse(value);
                               if (weight == null) {
@@ -282,7 +307,8 @@ class _ImportProfileCompletionScreenState
                               }
                               if (_selectedUnitSystem == 'metric') {
                                 if (weight < 30 || weight > 300) {
-                                  return l10n.screensSettingsImportProfileCompletionWeightRange;
+                                  return l10n
+                                      .screensSettingsImportProfileCompletionWeightRange;
                                 }
                               } else {
                                 if (weight < 66 || weight > 660) {
@@ -303,7 +329,10 @@ class _ImportProfileCompletionScreenState
             const SizedBox(height: 24),
 
             // Preferences
-            Text(l10n.screensSettingsImportProfileCompletionPreferences, style: theme.textTheme.titleMedium),
+            Text(
+              l10n.screensSettingsImportProfileCompletionPreferences,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 16),
 
             Card(
@@ -314,18 +343,23 @@ class _ImportProfileCompletionScreenState
                     DropdownButtonFormField<String>(
                       value: _selectedUnitSystem,
                       decoration: InputDecoration(
-                        labelText: l10n.screensSettingsImportProfileCompletionUnitSystem,
+                        labelText:
+                            l10n.screensSettingsImportProfileCompletionUnitSystem,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.straighten),
                       ),
                       items: [
                         DropdownMenuItem(
                           value: 'metric',
-                          child: Text(l10n.screensSettingsImportProfileCompletionMetric),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionMetric,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'imperial',
-                          child: Text(l10n.screensSettingsImportProfileCompletionImperial),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionImperial,
+                          ),
                         ),
                       ],
                       onChanged: (value) {
@@ -339,30 +373,41 @@ class _ImportProfileCompletionScreenState
                     DropdownButtonFormField<String>(
                       value: _selectedActivityLevel,
                       decoration: InputDecoration(
-                        labelText: l10n.screensSettingsImportProfileCompletionActivityLevel,
+                        labelText:
+                            l10n.screensSettingsImportProfileCompletionActivityLevel,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.directions_run),
                       ),
                       items: [
                         DropdownMenuItem(
                           value: 'sedentary',
-                          child: Text(l10n.screensSettingsImportProfileCompletionSedentary),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionSedentary,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'lightlyActive',
-                          child: Text(l10n.screensSettingsImportProfileCompletionLightlyActive),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionLightlyActive,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'moderatelyActive',
-                          child: Text(l10n.screensSettingsImportProfileCompletionModeratelyActive),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionModeratelyActive,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'veryActive',
-                          child: Text(l10n.screensSettingsImportProfileCompletionVeryActive),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionVeryActive,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'extraActive',
-                          child: Text(l10n.screensSettingsImportProfileCompletionExtraActive),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionExtraActive,
+                          ),
                         ),
                       ],
                       onChanged: (value) {
@@ -376,26 +421,35 @@ class _ImportProfileCompletionScreenState
                     DropdownButtonFormField<String>(
                       value: _selectedFitnessGoal,
                       decoration: InputDecoration(
-                        labelText: l10n.screensSettingsImportProfileCompletionFitnessGoal,
+                        labelText:
+                            l10n.screensSettingsImportProfileCompletionFitnessGoal,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.flag),
                       ),
                       items: [
                         DropdownMenuItem(
                           value: 'loseWeight',
-                          child: Text(l10n.screensSettingsImportProfileCompletionLoseWeight),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionLoseWeight,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'maintainWeight',
-                          child: Text(l10n.screensSettingsImportProfileCompletionMaintainWeight),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionMaintainWeight,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'gainWeight',
-                          child: Text(l10n.screensSettingsImportProfileCompletionGainWeight),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionGainWeight,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'buildMuscle',
-                          child: Text(l10n.screensSettingsImportProfileCompletionBuildMuscle),
+                          child: Text(
+                            l10n.screensSettingsImportProfileCompletionBuildMuscle,
+                          ),
                         ),
                       ],
                       onChanged: (value) {
@@ -435,7 +489,9 @@ class _ImportProfileCompletionScreenState
                 flex: 2,
                 child: FilledButton(
                   onPressed: _saveProfile,
-                  child: Text(l10n.componentsChatBotProfileCustomizationDialogSave),
+                  child: Text(
+                    l10n.componentsChatBotProfileCustomizationDialogSave,
+                  ),
                 ),
               ),
             ],
