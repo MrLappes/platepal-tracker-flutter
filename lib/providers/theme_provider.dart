@@ -10,9 +10,9 @@ class ThemeProvider extends ChangeNotifier {
   static const String _themePrefKey = 'theme_preference';
   static const String _themeNameKey = 'theme_name';
 
-  ThemePreference _themePreference = ThemePreference.dark; // Default to Dark
-  String _currentThemeName = AppThemes.originalCyber.name;
-  AppTheme _currentTheme = AppThemes.originalCyber;
+  ThemePreference _themePreference = ThemePreference.dark; 
+  String _currentThemeName = AppThemes.dark.name;
+  AppTheme _currentTheme = AppThemes.dark;
   bool _isDark = true;
 
   ThemeProvider() {
@@ -45,7 +45,7 @@ class ThemeProvider extends ChangeNotifier {
       if (savedThemeName != null) {
         _currentThemeName = savedThemeName;
       } else {
-        _currentThemeName = AppThemes.originalCyber.name;
+        _currentThemeName = AppThemes.dark.name;
       }
 
       _updateTheme();
@@ -80,7 +80,7 @@ class ThemeProvider extends ChangeNotifier {
         break;
     }
 
-    _currentTheme = _isDark ? AppThemes.originalCyber : AppThemes.customLight;
+    _currentTheme = AppThemes.getThemeByName(_currentThemeName);
 
     _updateSystemBrightness();
     notifyListeners();
@@ -108,17 +108,6 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleTheme() async {
-    if (_themePreference == ThemePreference.light) {
-      await setThemePreference(ThemePreference.dark);
-    } else {
-      await setThemePreference(ThemePreference.light);
-    }
-  }
-
-  // Restore logic for MenuScreen
-  List<String> get availableThemes => AppThemes.allThemes.map((t) => t.name).toList();
-
   Future<void> setThemeByName(String themeName) async {
     if (_currentThemeName != themeName) {
       _currentThemeName = themeName;
@@ -127,5 +116,14 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> toggleTheme() async {
+    if (_themePreference == ThemePreference.light) {
+      await setThemePreference(ThemePreference.dark);
+    } else {
+      await setThemePreference(ThemePreference.light);
+    }
+  }
+
+  List<String> get availableThemes => AppThemes.allThemes.map((t) => t.name).toList();
   List<String> get allAvailableThemes => AppThemes.allThemes.map((t) => t.name).toList();
 }
