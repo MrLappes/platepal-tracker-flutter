@@ -451,7 +451,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           unit,
           style: theme.textTheme.labelSmall?.copyWith(
             fontSize: 9,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             letterSpacing: 1,
           ),
         ),

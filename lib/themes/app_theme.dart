@@ -55,13 +55,21 @@ class AppTheme {
       cardColor: colors.card,
       dividerColor: colors.border,
       
+      // SHARP MODERN TYPOGRAPHY
       textTheme: TextTheme(
         displayLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w900, letterSpacing: -1.0),
         headlineLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w800, letterSpacing: -0.5),
         titleLarge: TextStyle(color: colors.text, fontWeight: FontWeight.bold, fontSize: 18),
         bodyLarge: TextStyle(color: colors.text, fontSize: 16),
-        bodyMedium: TextStyle(color: colors.text.withValues(alpha: 0.7), fontSize: 14),
-        labelSmall: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 10, fontFamily: 'monospace'),
+        bodyMedium: TextStyle(color: colors.text.withValues(alpha: 0.9), fontSize: 14),
+        labelLarge: TextStyle(color: colors.primary, fontWeight: FontWeight.bold, letterSpacing: 1.1),
+        labelSmall: TextStyle(
+          fontWeight: FontWeight.w900, 
+          letterSpacing: 1.5, 
+          fontSize: 10, 
+          fontFamily: 'monospace',
+          color: colors.text.withValues(alpha: 0.7),
+        ),
       ),
 
       appBarTheme: AppBarTheme(
