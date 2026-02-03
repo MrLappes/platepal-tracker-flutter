@@ -569,7 +569,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                     Text(
                       '${log.calories.round()} KCAL',
-                      style: theme.textTheme.labelSmall,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.9),
+                      ),
                     ),
                   ],
                 ),
@@ -578,9 +580,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           IconButton(
             onPressed: () => _handleDeleteLog(log),
-            icon: const Icon(
+            icon: Icon(
               Icons.close,
               size: 18,
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
