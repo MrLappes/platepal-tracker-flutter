@@ -116,5 +116,16 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
+  // Restore logic for MenuScreen
+  List<String> get availableThemes => AppThemes.allThemes.map((t) => t.name).toList();
+
+  Future<void> setThemeByName(String themeName) async {
+    if (_currentThemeName != themeName) {
+      _currentThemeName = themeName;
+      _updateTheme();
+      await _saveThemePreference();
+    }
+  }
+
   List<String> get allAvailableThemes => AppThemes.allThemes.map((t) => t.name).toList();
 }
