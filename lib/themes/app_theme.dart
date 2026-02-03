@@ -140,7 +140,7 @@ class AppTheme {
         landscapeLayout: BottomNavigationBarLandscapeLayout.spread,
       ),
       
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         indicatorColor: colors.primary,
         labelColor: colors.primary,
         unselectedLabelColor: colors.text.withValues(alpha: 0.5),

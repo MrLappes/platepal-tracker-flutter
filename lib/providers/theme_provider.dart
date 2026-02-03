@@ -11,8 +11,8 @@ class ThemeProvider extends ChangeNotifier {
   static const String _themeNameKey = 'theme_name';
 
   ThemePreference _themePreference = ThemePreference.dark; // Default to Dark
-  String _currentThemeName = AppThemes.industrialDark.name;
-  AppTheme _currentTheme = AppThemes.industrialDark;
+  String _currentThemeName = AppThemes.originalCyber.name;
+  AppTheme _currentTheme = AppThemes.originalCyber;
   bool _isDark = true;
 
   ThemeProvider() {
@@ -45,7 +45,7 @@ class ThemeProvider extends ChangeNotifier {
       if (savedThemeName != null) {
         _currentThemeName = savedThemeName;
       } else {
-        _currentThemeName = AppThemes.industrialDark.name;
+        _currentThemeName = AppThemes.originalCyber.name;
       }
 
       _updateTheme();
@@ -80,7 +80,7 @@ class ThemeProvider extends ChangeNotifier {
         break;
     }
 
-    _currentTheme = _isDark ? AppThemes.industrialDark : AppThemes.studioLight;
+    _currentTheme = _isDark ? AppThemes.originalCyber : AppThemes.customLight;
 
     _updateSystemBrightness();
     notifyListeners();
