@@ -55,17 +55,15 @@ class AppTheme {
       cardColor: colors.card,
       dividerColor: colors.border,
       
-      // SHARP MODERN TYPOGRAPHY
       textTheme: TextTheme(
         displayLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w900, letterSpacing: -1.0),
         headlineLarge: TextStyle(color: colors.text, fontWeight: FontWeight.w800, letterSpacing: -0.5),
         titleLarge: TextStyle(color: colors.text, fontWeight: FontWeight.bold, fontSize: 18),
         bodyLarge: TextStyle(color: colors.text, fontSize: 16),
         bodyMedium: TextStyle(color: colors.text.withValues(alpha: 0.7), fontSize: 14),
-        labelSmall: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2, fontSize: 10),
+        labelSmall: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 10, fontFamily: 'monospace'),
       ),
 
-      // SQUARE DESIGN LANGUAGE
       appBarTheme: AppBarTheme(
         backgroundColor: colors.background,
         foregroundColor: colors.text,
@@ -84,7 +82,7 @@ class AppTheme {
         color: colors.card,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(2), // ALMOST SQUARE
+          borderRadius: BorderRadius.circular(2), 
           side: BorderSide(color: colors.border, width: 1),
         ),
         margin: const EdgeInsets.symmetric(vertical: 4),
@@ -97,7 +95,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: const BeveledRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4)), // TECHNICAL CUT
+            borderRadius: BorderRadius.all(Radius.circular(4)), 
           ),
           textStyle: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
@@ -109,7 +107,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           side: BorderSide(color: colors.border, width: 2),
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero, // FULL SQUARE
+            borderRadius: BorderRadius.zero, 
           ),
         ),
       ),
@@ -137,7 +135,6 @@ class AppTheme {
         unselectedItemColor: colors.text.withValues(alpha: 0.3),
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        landscapeLayout: BottomNavigationBarLandscapeLayout.spread,
       ),
       
       tabBarTheme: TabBarThemeData(
@@ -151,15 +148,31 @@ class AppTheme {
 }
 
 class AppThemes {
-  // Original Palette LANDING IN INDUSTRIAL FORM
-  static const AppTheme originalCyber = AppTheme(
-    name: 'Original-Grid',
+  static const AppTheme light = AppTheme(
+    name: 'Light',
+    isDark: false,
+    colors: AppThemeColors(
+      primary: Color(0xFFfba9eb),
+      background: Color(0xFFffffff),
+      card: Color(0xFFf8f8f8),
+      text: Color(0xFF000000),
+      border: Color(0xFFe0e0e0),
+      notification: Color(0xFFff3b30),
+      secondary: Color(0xFF6C757D),
+      success: Color(0xFF28A745),
+      warning: Color(0xFFFFC107),
+      error: Color(0xFFDC3545),
+    ),
+  );
+
+  static const AppTheme dark = AppTheme(
+    name: 'Dark',
     isDark: true,
     colors: AppThemeColors(
-      primary: Color(0xFFfba9eb), // Your Pink
-      background: Color(0xFF0A0A0A), // High Contrast Dark
+      primary: Color(0xFFfba9eb),
+      background: Color(0xFF0A0A0A),
       card: Color(0xFF121212),
-      text: Color(0xFFFFFFFF),
+      text: Color(0xFFffffff),
       border: Color(0xFF222222),
       notification: Color(0xFFff453a),
       secondary: Color(0xFF6C757D),
@@ -169,31 +182,69 @@ class AppThemes {
     ),
   );
 
-  static const AppTheme customLight = AppTheme(
-    name: 'Studio-Square',
+  static const AppTheme oceanic = AppTheme(
+    name: 'Oceanic',
     isDark: false,
     colors: AppThemeColors(
-      primary: Color(0xFFfba9eb),
-      background: Color(0xFFFFFFFF),
-      card: Color(0xFFF5F5F5),
+      primary: Color(0xFF0077BE),
+      background: Color(0xFFffffff),
+      card: Color(0xFFf0f8ff),
       text: Color(0xFF000000),
-      border: Color(0xFFE0E0E0),
+      border: Color(0xFFcce7ff),
       notification: Color(0xFFff3b30),
-      secondary: Color(0xFF6C757D),
+      secondary: Color(0xFF4A90A4),
+      success: Color(0xFF00A86B),
+      warning: Color(0xFFFFB347),
+      error: Color(0xFFE74C3C),
+    ),
+  );
+
+  static const AppTheme forest = AppTheme(
+    name: 'Forest',
+    isDark: false,
+    colors: AppThemeColors(
+      primary: Color(0xFF228B22),
+      background: Color(0xFFffffff),
+      card: Color(0xFFf0fff0),
+      text: Color(0xFF000000),
+      border: Color(0xFFc8e6c8),
+      notification: Color(0xFFff3b30),
+      secondary: Color(0xFF5D8A5D),
+      success: Color(0xFF32CD32),
+      warning: Color(0xFFFFD700),
+      error: Color(0xFFDC143C),
+    ),
+  );
+
+  static const AppTheme platePal = AppTheme(
+    name: 'PlatePal',
+    isDark: false,
+    colors: AppThemeColors(
+      primary: Color(0xFFe384c7),
+      background: Color(0xFFF5F5F5),
+      card: Color(0xFFffffff),
+      text: Color(0xFF5B5B5B),
+      border: Color(0xFFe0e0e0),
+      notification: Color(0xFFff3b30),
+      secondary: Color(0xFF9e6593),
       success: Color(0xFF28A745),
       warning: Color(0xFFFFC107),
       error: Color(0xFFDC3545),
     ),
   );
 
-  static List<AppTheme> get allThemes => [originalCyber, customLight];
-  static AppTheme get dark => originalCyber;
-  static AppTheme get light => customLight;
+  static List<AppTheme> get allThemes => [
+    light,
+    dark,
+    oceanic,
+    forest,
+    platePal,
+  ];
 
   static AppTheme getThemeByName(String name) {
     return allThemes.firstWhere(
       (theme) => theme.name == name,
-      orElse: () => originalCyber,
+      orElse: () => dark,
     );
   }
 }
