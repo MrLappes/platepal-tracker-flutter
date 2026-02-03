@@ -42,7 +42,7 @@ class _AboutScreenState extends State<AboutScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SYSTEM INFO //'),
+        title: Text(localizations.screensSettingsIndustrialSystemInfo),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -55,9 +55,8 @@ class _AboutScreenState extends State<AboutScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // SCHEMATIC HEADER
               Text(
-                'PROJECT SCHEMATICS',
+                localizations.screensSettingsIndustrialProjectSchematics,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w900,
@@ -65,7 +64,6 @@ class _AboutScreenState extends State<AboutScreen>
               ),
               const SizedBox(height: 16),
               
-              // MAIN INFO BOX
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -85,7 +83,7 @@ class _AboutScreenState extends State<AboutScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'STABLE_BUILD_V1.12.6',
+                      localizations.screensSettingsIndustrialStableBuild('V1.12.6'),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
@@ -108,9 +106,8 @@ class _AboutScreenState extends State<AboutScreen>
               
               const SizedBox(height: 24),
               
-              // CORE PRINCIPLES (SYMMETRIC TO CONTRIBUTORS)
               Text(
-                'CORE_DIRECTIVES',
+                localizations.screensSettingsIndustrialCoreDirectives,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w900,
@@ -123,9 +120,8 @@ class _AboutScreenState extends State<AboutScreen>
               
               const SizedBox(height: 32),
               
-              // REPO LINKS
               Text(
-                'NETWORK_LINKS',
+                localizations.screensSettingsIndustrialNetworkLinks,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w900,
@@ -135,14 +131,14 @@ class _AboutScreenState extends State<AboutScreen>
               _buildLinkCard(
                 context, 
                 Icons.code, 
-                'SOURCE REPOSITORY', 
+                localizations.screensSettingsIndustrialSourceRepository, 
                 () => LinkHandler.openGitHubRepo(context, 'MrLappes', 'platepal-tracker-flutter')
               ),
               const SizedBox(height: 12),
               _buildLinkCard(
                 context, 
                 Icons.public, 
-                'OFFICIAL DOMAIN', 
+                localizations.screensSettingsIndustrialOfficialDomain, 
                 () => LinkHandler.openPlatePalWebsite(context)
               ),
               

@@ -2148,5 +2148,27 @@
   "utilsLinkHandlerOpeningLink": "Opening Buy Me Creatine page...",
   "@utilsLinkHandlerOpeningLink": {
     "description": "Loading message for opening external link"
-  }
+  },
+  "screensSettingsIndustrialSystemInfo": "SYSTEM INFO //",
+  "screensSettingsIndustrialProjectSchematics": "PROJECT SCHEMATICS",
+  "screensSettingsIndustrialCoreDirectives": "CORE_DIRECTIVES",
+  "screensSettingsIndustrialNetworkLinks": "NETWORK_LINKS",
+  "screensSettingsIndustrialNetworkOperatives": "NETWORK OPERATIVES",
+  "screensSettingsIndustrialSourceRepository": "SOURCE REPOSITORY",
+  "screensSettingsIndustrialOfficialDomain": "OFFICIAL DOMAIN",
+  "screensSettingsIndustrialWantToContribute": "WANT TO CONTRIBUTE?",
+  "screensSettingsIndustrialSourceCode": "SOURCE_CODE",
+  "screensSettingsIndustrialStableBuild": "STABLE_BUILD_{version}",
+  "@screensSettingsIndustrialStableBuild": {
+    "description": "Label for build version",
+    "placeholders": {
+      "version": {
+        "type": "Object",
+        "example": "V1.0.0"
+      }
+    }
+  },
+  "screensSettingsContributorsHansRole": "AI Co-pilot & Resident Hacker",
+  "screensSettingsContributorsHansDesc": "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect."
 }
+

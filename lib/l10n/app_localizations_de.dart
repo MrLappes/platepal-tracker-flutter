@@ -1851,4 +1851,45 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get utilsLinkHandlerOpeningLink => 'Öffne Buy Me Creatine Seite...';
+
+  @override
+  String get screensSettingsIndustrialSystemInfo => 'SYSTEM INFO //';
+
+  @override
+  String get screensSettingsIndustrialProjectSchematics => 'PROJEKT-SCHEMATA';
+
+  @override
+  String get screensSettingsIndustrialCoreDirectives => 'KERN_RICHTLINIEN';
+
+  @override
+  String get screensSettingsIndustrialNetworkLinks => 'NETZWERK_LINKS';
+
+  @override
+  String get screensSettingsIndustrialNetworkOperatives => 'NETZWERK-AGENTEN';
+
+  @override
+  String get screensSettingsIndustrialSourceRepository => 'QUELL-REPOSITORY';
+
+  @override
+  String get screensSettingsIndustrialOfficialDomain => 'OFFIZIELLE DOMÄNE';
+
+  @override
+  String get screensSettingsIndustrialWantToContribute =>
+      'MÖCHTEST DU BEITRAGEN?';
+
+  @override
+  String get screensSettingsIndustrialSourceCode => 'QUELLCODE';
+
+  @override
+  String screensSettingsIndustrialStableBuild(Object version) {
+    return 'STABILER_BUILD_$version';
+  }
+
+  @override
+  String get screensSettingsContributorsHansRole =>
+      'KI-Copilot & Hacker vor Ort';
+
+  @override
+  String get screensSettingsContributorsHansDesc =>
+      'Automatisiert den Grind und hält die Telemetrie scharf. Cyber-Minimalismus-Architekt.';
 }
