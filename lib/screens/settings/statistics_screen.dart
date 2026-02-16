@@ -72,6 +72,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     await _calorieExpenditureService.initialize();
     await _healthService.loadConnectionStatus();
     _isHealthConnected = _healthService.isConnected;
+
+    // Refresh calorie-burn cache on screen visit
+    if (_isHealthConnected) {
+      _healthService.refreshCaloriesBurnedCache();
+    }
   }
 
   // Load user profile and metrics history

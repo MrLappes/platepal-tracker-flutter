@@ -1,10 +1,12 @@
 import '../../models/dish.dart';
+import '../health_service.dart';
 import 'database_service.dart';
 import 'dish_service.dart';
 
 class MealLogService {
   final DatabaseService _databaseService = DatabaseService.instance;
   final DishService _dishService = DishService();
+  final HealthService _healthService = HealthService();
 
   // Log a meal
   Future<int> logMeal({
@@ -15,16 +17,62 @@ class MealLogService {
     DateTime? loggedAt,
   }) async {
     final db = await _databaseService.database;
+    final now = loggedAt ?? DateTime.now();
 
     final int id = await db.insert('meal_logs', {
       'user_id': userId,
       'dish_id': dishId,
       'serving_size': servingSize,
       'meal_type': mealType,
-      'logged_at': (loggedAt ?? DateTime.now()).toIso8601String(),
+      'logged_at': now.toIso8601String(),
     });
 
+    // Write nutrition record to Health Connect (fire-and-forget)
+    _writeNutritionToHealth(
+      dishId: dishId,
+      servingSize: servingSize,
+      mealType: mealType,
+      loggedAt: now,
+    );
+
     return id;
+  }
+
+  /// Write the dish's nutrition data to Health Connect / Apple Health.
+  /// Non-blocking – errors are logged but do not affect the meal log.
+  Future<void> _writeNutritionToHealth({
+    required String dishId,
+    required double servingSize,
+    required String mealType,
+    required DateTime loggedAt,
+  }) async {
+    try {
+      if (!_healthService.isConnected) return;
+
+      final dish = await _dishService.getDishById(dishId);
+      if (dish == null) return;
+
+      final nutrition = dish.nutrition;
+      // Scale nutrition values by serving size (1.0 = 100%)
+      final scale = servingSize;
+
+      await _healthService.writeMealToHealth(
+        name: dish.name,
+        mealType: mealType,
+        calories: nutrition.calories * scale,
+        protein: nutrition.protein * scale,
+        carbs: nutrition.carbs * scale,
+        fat: nutrition.fat * scale,
+        fiber: nutrition.fiber > 0 ? nutrition.fiber * scale : null,
+        sugar: nutrition.sugar > 0 ? nutrition.sugar * scale : null,
+        sodium: nutrition.sodium > 0 ? nutrition.sodium * scale : null,
+        startTime: loggedAt,
+      );
+    } catch (e) {
+      // Silently log – don't let health write failures break meal logging
+      // ignore: avoid_print
+      print('HealthService nutrition write failed: $e');
+    }
   }
 
   // Get meals by date range
