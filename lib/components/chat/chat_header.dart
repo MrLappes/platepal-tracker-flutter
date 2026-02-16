@@ -26,7 +26,6 @@ class ChatHeader extends StatelessWidget {
   }
 
   Widget _buildBotAvatar(BuildContext context) {
-    final theme = Theme.of(context);
     // Use transparent Material, let parent control color
     return Material(
       color: Colors.transparent,

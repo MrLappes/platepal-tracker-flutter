@@ -375,7 +375,6 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   Widget _buildDishCard(Dish dish) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final localizations = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -538,20 +537,6 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       backgroundColor: Colors.transparent, // Makes the modal look better
       builder: (context) => DishLogModal(dish: dish),
     );
-  }
-
-  void _handleDishAction(String action, Dish dish) {
-    switch (action) {
-      case 'edit':
-        _editDishDetails(dish);
-        break;
-      case 'favorite':
-        _toggleFavorite(dish);
-        break;
-      case 'delete':
-        _deleteDish(dish);
-        break;
-    }
   }
 
   Future<void> _toggleFavorite(Dish dish) async {
