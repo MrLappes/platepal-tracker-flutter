@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'services/health_service.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
 import 'screens/menu_screen.dart';
@@ -25,6 +26,9 @@ import 'providers/storage_provider.dart';
 import 'providers/app_state_provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  _initHealthOnLaunch(); // fire-and-forget
+
   runApp(
     MultiProvider(
       providers: [
@@ -37,6 +41,19 @@ void main() {
       child: StorageProvider(child: const PlatePalApp()),
     ),
   );
+}
+
+/// Load health connection status and refresh calorie-burn cache on app launch.
+Future<void> _initHealthOnLaunch() async {
+  try {
+    final healthService = HealthService();
+    await healthService.loadConnectionStatus();
+    if (healthService.isConnected) {
+      healthService.refreshCaloriesBurnedCache(); // fire-and-forget
+    }
+  } catch (_) {
+    // Non-critical – swallow errors so the app always starts
+  }
 }
 
 class PlatePalApp extends StatelessWidget {

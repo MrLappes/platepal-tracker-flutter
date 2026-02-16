@@ -271,41 +271,16 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
   }
 
-  // Sync health data
+  // Sync health data – refreshes the calorie-burn cache
   Future<void> _syncHealthData() async {
     if (!_healthService.isConnected) return;
 
     setState(() => _isHealthSyncing = true);
 
     try {
-      final healthData = await _healthService.syncHealthData();
-      if (healthData != null && mounted) {
-        // Update form fields with health data if available
-        if (healthData.containsKey('weight')) {
-          final weight = healthData['weight']['value'] as num;
-          if (_selectedUnitSystem == 'metric') {
-            _weightController.text = weight.round().toString();
-          } else {
-            _weightController.text = (weight * 2.2046).round().toString();
-          }
-        }
+      await _healthService.refreshCaloriesBurnedCache();
 
-        if (healthData.containsKey('height')) {
-          final height = healthData['height']['value'] as num;
-          if (_selectedUnitSystem == 'metric') {
-            _heightController.text = height.round().toString();
-          } else {
-            _heightController.text = (height / 2.54).round().toString();
-          }
-        }
-
-        if (healthData.containsKey('bodyFat')) {
-          final bodyFat = healthData['bodyFat']['value'] as num;
-          _bodyFatController.text = bodyFat.toStringAsFixed(1);
-        }
-
-        _onFieldChanged();
-
+      if (mounted) {
         final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1243,41 +1218,25 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Icon buttons in horizontal row
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _isHealthSyncing ? null : _debugHealthData,
-                      icon: const Icon(Icons.bug_report),
-                      label: Text(
-                        l10n.screensSettingsProfileSettingsDebugHealthData,
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                      ),
-                    ),
+              // Disconnect button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed:
+                      _isHealthSyncing
+                          ? null
+                          : () async {
+                            await _healthService.disconnectFromHealth();
+                            setState(() {});
+                          },
+                  icon: const Icon(Icons.link_off),
+                  label: Text(
+                    l10n.screensSettingsProfileSettingsDisconnectHealth,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed:
-                          _isHealthSyncing
-                              ? null
-                              : () async {
-                                await _healthService.disconnectFromHealth();
-                                setState(() {});
-                              },
-                      icon: const Icon(Icons.link_off),
-                      label: Text(
-                        l10n.screensSettingsProfileSettingsDisconnectHealth,
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                      ),
-                    ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                ],
+                ),
               ),
             ],
             if (!_healthService.isConnected) ...[
@@ -1315,7 +1274,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Sync your weight, height, and daily burned calories from your device\'s health app. When you tap "Connect to Health", you\'ll be asked to grant permissions.',
+                      'Sync your daily burned calories from Health Connect and automatically write your PlatePal meal nutrition data back. Tap "Connect to Health" to grant permissions.',
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
@@ -1984,93 +1943,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       }
     } finally {
       setState(() => _isSaving = false);
-    }
-  }
-
-  // Debug health data (temporary method for testing)
-  Future<void> _debugHealthData() async {
-    if (!_healthService.isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Health service not connected'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isHealthSyncing = true);
-
-    try {
-      final debugInfo = await _healthService.debugAvailableHealthData();
-
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Health Data Debug Info'),
-                content: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Available Data Types:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      ...debugInfo['available_types'].entries.map(
-                        (e) => Text('${e.key}: ${e.value}'),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Permissions:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      ...debugInfo['permissions'].entries.map(
-                        (e) => Text('${e.key}: ${e.value}'),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Recent Data:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      ...debugInfo['recent_data'].entries.map(
-                        (e) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${e.key}:'),
-                            Text('  ${e.value}'),
-                            const SizedBox(height: 4),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Debug failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      setState(() => _isHealthSyncing = false);
     }
   }
 }

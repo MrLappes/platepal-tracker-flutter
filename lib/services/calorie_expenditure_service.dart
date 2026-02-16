@@ -86,15 +86,14 @@ class CalorieExpenditureService {
         ); // false = real data (stored from health)
       }
 
-      // If it's today or recent dates, try to sync fresh data from health service
+      // If it's today or recent dates, try a cache refresh and retry
       final isRecentDate = DateTime.now().difference(date).inDays <= 7;
       if (isRecentDate && _healthService.isConnected) {
         developer.log(
-          'Attempting to sync recent health data',
+          'Attempting to refresh calorie cache for recent data',
           name: 'CalorieExpenditureService',
         );
-        await _healthService
-            .syncCaloriesBurnedDataSmart(); // Try again after sync using smart method
+        await _healthService.refreshCaloriesBurnedCache();
         final syncedCalories = await _healthService
             .getCaloriesBurnedForDateSmart(date);
         if (syncedCalories != null && syncedCalories > 0) {
@@ -224,11 +223,13 @@ class CalorieExpenditureService {
         );
       }
 
-      // Get calories burned data for analysis period
-      final caloriesData = await _healthService.getCaloriesBurnedForDates(days);
+      // Get calories burned data for analysis period from cache
+      final caloriesData = await _healthService.refreshCaloriesBurnedCache(
+        days: days,
+      );
       final storedData = await _healthService.getStoredCaloriesBurnedData();
 
-      // Combine health data with stored data
+      // Combine fresh data with stored data
       final combinedData = Map<String, double>.from(storedData);
       combinedData.addAll(caloriesData);
 
@@ -356,9 +357,9 @@ class CalorieExpenditureService {
   Future<CalorieTargetAnalysis> syncAndAnalyze() async {
     await initialize();
 
-    // Sync latest health data
+    // Refresh calorie cache from Health Connect
     if (_healthService.isConnected) {
-      await _healthService.syncCaloriesBurnedData();
+      await _healthService.refreshCaloriesBurnedCache(days: 14);
     }
 
     // Perform analysis
