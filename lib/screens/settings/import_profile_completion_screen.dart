@@ -200,7 +200,7 @@ class _ImportProfileCompletionScreenState
                         const SizedBox(width: 16),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _selectedGender,
+                            initialValue: _selectedGender,
                             decoration: InputDecoration(
                               labelText:
                                   l10n.screensSettingsImportProfileCompletionGender,
@@ -341,7 +341,7 @@ class _ImportProfileCompletionScreenState
                 child: Column(
                   children: [
                     DropdownButtonFormField<String>(
-                      value: _selectedUnitSystem,
+                      initialValue: _selectedUnitSystem,
                       decoration: InputDecoration(
                         labelText:
                             l10n.screensSettingsImportProfileCompletionUnitSystem,
@@ -371,7 +371,7 @@ class _ImportProfileCompletionScreenState
                     const SizedBox(height: 16),
 
                     DropdownButtonFormField<String>(
-                      value: _selectedActivityLevel,
+                      initialValue: _selectedActivityLevel,
                       decoration: InputDecoration(
                         labelText:
                             l10n.screensSettingsImportProfileCompletionActivityLevel,
@@ -419,7 +419,7 @@ class _ImportProfileCompletionScreenState
                     const SizedBox(height: 16),
 
                     DropdownButtonFormField<String>(
-                      value: _selectedFitnessGoal,
+                      initialValue: _selectedFitnessGoal,
                       decoration: InputDecoration(
                         labelText:
                             l10n.screensSettingsImportProfileCompletionFitnessGoal,
