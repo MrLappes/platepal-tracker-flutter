@@ -9,7 +9,8 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay => 'No meals logged for this day';
+  String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay =>
+      'No meals logged for this day';
 
   @override
   String get componentsCalendarCalendarDayDetailUnknownDish => 'Unknown Dish';
@@ -21,16 +22,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsCalendarMacroSummaryCarbs => 'Carbs';
 
   @override
-  String get componentsCalendarMacroSummaryEstimatedCalories => 'Estimated Calories';
+  String get componentsCalendarMacroSummaryEstimatedCalories =>
+      'Estimated Calories';
 
   @override
-  String get componentsCalendarMacroSummaryEstimatedCaloriesMessage => 'This data is estimated based on your profile settings and activity level since health data wasn\'t available for this date.';
+  String get componentsCalendarMacroSummaryEstimatedCaloriesMessage =>
+      'This data is estimated based on your profile settings and activity level since health data wasn\'t available for this date.';
 
   @override
-  String get componentsCalendarMacroSummaryEstimatedCaloriesToday => 'Estimated Calories (Today)';
+  String get componentsCalendarMacroSummaryEstimatedCaloriesToday =>
+      'Estimated Calories (Today)';
 
   @override
-  String get componentsCalendarMacroSummaryEstimatedCaloriesTodayMessage => 'This is your estimated calorie expenditure for today based on your activity level. Since the day isn\'t complete yet, this represents your base metabolic rate plus estimated activity. Your actual calories burned may be higher if you do more activities today.';
+  String get componentsCalendarMacroSummaryEstimatedCaloriesTodayMessage =>
+      'This is your estimated calorie expenditure for today based on your activity level. Since the day isn\'t complete yet, this represents your base metabolic rate plus estimated activity. Your actual calories burned may be higher if you do more activities today.';
 
   @override
   String get componentsCalendarMacroSummaryFat => 'Fat';
@@ -42,19 +47,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsCalendarMacroSummaryGetAiTip => 'Get AI Tip';
 
   @override
-  String get componentsCalendarMacroSummaryHealthDataMessage => 'This data was gathered from health data on your phone, providing accurate calories burned information from your fitness activities for this complete day.';
+  String get componentsCalendarMacroSummaryHealthDataMessage =>
+      'This data was gathered from health data on your phone, providing accurate calories burned information from your fitness activities for this complete day.';
 
   @override
   String get componentsCalendarMacroSummaryHealthDataTitle => 'Health Data';
 
   @override
-  String get componentsCalendarMacroSummaryHealthDataTodayMessage => 'This data was gathered from health data on your phone. Since today isn\'t complete yet, this represents calories burned so far today. Your total may increase as you continue activities throughout the day.';
+  String get componentsCalendarMacroSummaryHealthDataTodayMessage =>
+      'This data was gathered from health data on your phone. Since today isn\'t complete yet, this represents calories burned so far today. Your total may increase as you continue activities throughout the day.';
 
   @override
-  String get componentsCalendarMacroSummaryHealthDataTodayPartial => 'Health Data (Today - Partial)';
+  String get componentsCalendarMacroSummaryHealthDataTodayPartial =>
+      'Health Data (Today - Partial)';
 
   @override
-  String get componentsCalendarMacroSummaryNutritionSummary => 'Nutrition Summary';
+  String get componentsCalendarMacroSummaryNutritionSummary =>
+      'Nutrition Summary';
 
   @override
   String get componentsCalendarMacroSummaryProtein => 'Protein';
@@ -75,10 +84,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsCommonOk => 'OK';
 
   @override
-  String get componentsChatAgentStepsModalAgentProcessingSteps => 'Agent Processing Steps';
+  String get componentsChatAgentStepsModalAgentProcessingSteps =>
+      'Agent Processing Steps';
 
   @override
-  String get componentsChatAgentStepsModalCopiedToClipboard => 'Copied to clipboard';
+  String get componentsChatAgentStepsModalCopiedToClipboard =>
+      'Copied to clipboard';
 
   @override
   String get componentsChatAgentStepsModalCopyAll => 'Copy All';
@@ -90,22 +101,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatAgentStepsModalViewFullPrompt => 'View Full Prompt';
 
   @override
-  String get componentsChatAgentStepsModalThinkingProcessTitle => '🧠 Thinking Process';
+  String get componentsChatAgentStepsModalThinkingProcessTitle =>
+      '🧠 Thinking Process';
 
   @override
-  String get componentsChatAgentStepsModalThinkingProcessSubtitle => 'Real-time agent thinking steps';
+  String get componentsChatAgentStepsModalThinkingProcessSubtitle =>
+      'Real-time agent thinking steps';
 
   @override
-  String get componentsChatAgentStepsModalProcessingStepsTitle => '⚙️ Processing Steps';
+  String get componentsChatAgentStepsModalProcessingStepsTitle =>
+      '⚙️ Processing Steps';
 
   @override
-  String get componentsChatAgentStepsModalProcessingStepsSubtitle => 'Detailed step-by-step execution';
+  String get componentsChatAgentStepsModalProcessingStepsSubtitle =>
+      'Detailed step-by-step execution';
 
   @override
-  String get componentsChatAgentStepsModalProcessingSummary => 'Processing Summary';
+  String get componentsChatAgentStepsModalProcessingSummary =>
+      'Processing Summary';
 
   @override
-  String get componentsChatAgentStepsModalCopySummaryTooltip => 'Copy summary data';
+  String get componentsChatAgentStepsModalCopySummaryTooltip =>
+      'Copy summary data';
 
   @override
   String get componentsChatAgentStepsModalProcessingTime => 'Processing Time';
@@ -144,19 +161,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatAgentStepsModalNoModifications => 'None needed ✨';
 
   @override
-  String get componentsChatAgentStepsModalPerfectProcessing => 'Perfect processing! No corrections or modifications were needed.';
+  String get componentsChatAgentStepsModalPerfectProcessing =>
+      'Perfect processing! No corrections or modifications were needed.';
 
   @override
-  String get componentsChatAgentStepsModalPipelineModificationsTitle => '✨ Pipeline Modifications';
+  String get componentsChatAgentStepsModalPipelineModificationsTitle =>
+      '✨ Pipeline Modifications';
 
   @override
-  String get componentsChatAgentStepsModalPipelineModificationsSubtitle => 'No modifications were needed - your request was processed smoothly!';
+  String get componentsChatAgentStepsModalPipelineModificationsSubtitle =>
+      'No modifications were needed - your request was processed smoothly!';
 
   @override
-  String get componentsChatAgentStepsModalStepModifications => '🔧 Step Modifications';
+  String get componentsChatAgentStepsModalStepModifications =>
+      '🔧 Step Modifications';
 
   @override
-  String get componentsChatAgentStepsModalCopyModifications => 'Copy modifications';
+  String get componentsChatAgentStepsModalCopyModifications =>
+      'Copy modifications';
 
   @override
   String componentsChatAgentStepsModalSummaryLabel(String summary) {
@@ -164,10 +186,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get componentsChatAgentStepsModalEnhancedSystemPrompt => '🤖 Enhanced System Prompt';
+  String get componentsChatAgentStepsModalEnhancedSystemPrompt =>
+      '🤖 Enhanced System Prompt';
 
   @override
-  String get componentsChatAgentStepsModalCopyEnhancedPrompt => 'Copy enhanced system prompt';
+  String get componentsChatAgentStepsModalCopyEnhancedPrompt =>
+      'Copy enhanced system prompt';
 
   @override
   String get componentsChatDishSuggestionCardHighProtein => 'High protein dish';
@@ -218,7 +242,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatMessageBubbleRecommendation => 'Recommendation';
 
   @override
-  String get componentsChatMessageBubbleNoRecommendationsAvailable => 'No recommendations available.';
+  String get componentsChatMessageBubbleNoRecommendationsAvailable =>
+      'No recommendations available.';
 
   @override
   String componentsChatAgentStepsModalLengthLabel(int count) {
@@ -226,7 +251,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get componentsChatAgentStepsModalTechnicalDetails => 'Technical Details';
+  String get componentsChatAgentStepsModalTechnicalDetails =>
+      'Technical Details';
 
   @override
   String get componentsChatAgentStepsModalDataChanges => 'Data Changes';
@@ -241,25 +267,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatAgentStepsModalStatusSkipped => 'Skipped';
 
   @override
-  String get componentsChatAgentStepsModalStatusErrorRecovered => 'Error recovered';
+  String get componentsChatAgentStepsModalStatusErrorRecovered =>
+      'Error recovered';
 
   @override
-  String get componentsChatAgentStepsModalStatusErrorHandlingFailed => 'Error handling failed';
+  String get componentsChatAgentStepsModalStatusErrorHandlingFailed =>
+      'Error handling failed';
 
   @override
-  String get componentsChatAgentStepsModalStatusCompletedSuccessfully => 'Completed successfully';
+  String get componentsChatAgentStepsModalStatusCompletedSuccessfully =>
+      'Completed successfully';
 
   @override
   String get componentsChatAgentStepsModalFailed => 'Failed';
 
   @override
-  String get componentsChatAgentStepsModalBadgeEmergencyOverrides => 'Emergency overrides';
+  String get componentsChatAgentStepsModalBadgeEmergencyOverrides =>
+      'Emergency overrides';
 
   @override
-  String get componentsChatAgentStepsModalBadgeAiValidations => 'AI validations';
+  String get componentsChatAgentStepsModalBadgeAiValidations =>
+      'AI validations';
 
   @override
-  String get componentsChatAgentStepsModalBadgeAutomaticFixes => 'Automatic fixes';
+  String get componentsChatAgentStepsModalBadgeAutomaticFixes =>
+      'Automatic fixes';
 
   @override
   String componentsChatAgentStepsModalTotalModifications(int count) {
@@ -295,7 +327,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsCommonCopyToClipboard => 'Copy to clipboard';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogAngryGreg => 'Angry Greg';
+  String get componentsChatBotProfileCustomizationDialogAngryGreg =>
+      'Angry Greg';
 
   @override
   String get componentsChatBotProfileCustomizationDialogBotName => 'Bot Name';
@@ -304,67 +337,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatBotProfileCustomizationDialogCancel => 'Cancel';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogCasualGymBro => 'Casual Gym Bro';
+  String get componentsChatBotProfileCustomizationDialogCasualGymBro =>
+      'Casual Gym Bro';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogChangeAvatar => 'Change Avatar';
+  String get componentsChatBotProfileCustomizationDialogChangeAvatar =>
+      'Change Avatar';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogChooseFromGallery => 'Choose from Gallery';
+  String get componentsChatBotProfileCustomizationDialogChooseFromGallery =>
+      'Choose from Gallery';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogEditBotProfile => 'Edit Bot Profile';
+  String get componentsChatBotProfileCustomizationDialogEditBotProfile =>
+      'Edit Bot Profile';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogFitnessCoach => 'Fitness Coach';
+  String get componentsChatBotProfileCustomizationDialogFitnessCoach =>
+      'Fitness Coach';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogNiceAndFriendly => 'Nice & Friendly';
+  String get componentsChatBotProfileCustomizationDialogNiceAndFriendly =>
+      'Nice & Friendly';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogPersonality => 'Personality';
+  String get componentsChatBotProfileCustomizationDialogPersonality =>
+      'Personality';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogProfessionalNutritionist => 'Professional Nutritionist';
+  String
+  get componentsChatBotProfileCustomizationDialogProfessionalNutritionist =>
+      'Professional Nutritionist';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogProfileSaved => 'Profile saved successfully';
+  String get componentsChatBotProfileCustomizationDialogProfileSaved =>
+      'Profile saved successfully';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogProfileSaveFailed => 'Failed to save profile';
+  String get componentsChatBotProfileCustomizationDialogProfileSaveFailed =>
+      'Failed to save profile';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogRemoveAvatar => 'Remove Avatar';
+  String get componentsChatBotProfileCustomizationDialogRemoveAvatar =>
+      'Remove Avatar';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogRequiredField => 'This field is required';
+  String get componentsChatBotProfileCustomizationDialogRequiredField =>
+      'This field is required';
 
   @override
   String get componentsChatBotProfileCustomizationDialogSave => 'Save';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogTakePhoto => 'Take Photo';
+  String get componentsChatBotProfileCustomizationDialogTakePhoto =>
+      'Take Photo';
 
   @override
-  String get componentsChatBotProfileCustomizationDialogVeryAngryBro => 'Very Angry Bro';
+  String get componentsChatBotProfileCustomizationDialogVeryAngryBro =>
+      'Very Angry Bro';
 
   @override
-  String get componentsChatBotPersonalityDescriptionNutritionist => 'Professional & Evidence-based';
+  String get componentsChatBotPersonalityDescriptionNutritionist =>
+      'Professional & Evidence-based';
 
   @override
-  String get componentsChatBotPersonalityDescriptionCasualGymbro => 'Casual & Motivational';
+  String get componentsChatBotPersonalityDescriptionCasualGymbro =>
+      'Casual & Motivational';
 
   @override
-  String get componentsChatBotPersonalityDescriptionAngryGreg => 'Intense & Supplement-focused';
+  String get componentsChatBotPersonalityDescriptionAngryGreg =>
+      'Intense & Supplement-focused';
 
   @override
-  String get componentsChatBotPersonalityDescriptionVeryAngryBro => 'Extremely Intense';
+  String get componentsChatBotPersonalityDescriptionVeryAngryBro =>
+      'Extremely Intense';
 
   @override
-  String get componentsChatBotPersonalityDescriptionFitnessCoach => 'Encouraging & Supportive';
+  String get componentsChatBotPersonalityDescriptionFitnessCoach =>
+      'Encouraging & Supportive';
 
   @override
-  String get componentsChatBotPersonalityDescriptionNice => 'Friendly & Helpful';
+  String get componentsChatBotPersonalityDescriptionNice =>
+      'Friendly & Helpful';
 
   @override
   String get componentsChatEditBotProfileTooltip => 'Edit Bot Profile';
@@ -414,7 +468,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatChatWelcomeCalculateMacros => 'Calculate macros';
 
   @override
-  String get componentsChatChatWelcomeChatWelcomeSubtitle => 'Your AI nutrition assistant is here to help';
+  String get componentsChatChatWelcomeChatWelcomeSubtitle =>
+      'Your AI nutrition assistant is here to help';
 
   @override
   String get componentsChatChatWelcomeChatWelcomeTitle => 'Welcome to PlatePal';
@@ -435,43 +490,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatChatWelcomeSuggestMeal => 'Suggest a meal';
 
   @override
-  String get componentsChatChatWelcomeSuggestMealSubtitle => 'Get personalized meal recommendations';
+  String get componentsChatChatWelcomeSuggestMealSubtitle =>
+      'Get personalized meal recommendations';
 
   @override
-  String get componentsChatChatWelcomeSuggestMealMessage => 'Suggest a healthy meal based on my fitness goals';
+  String get componentsChatChatWelcomeSuggestMealMessage =>
+      'Suggest a healthy meal based on my fitness goals';
 
   @override
-  String get componentsChatChatWelcomeAnalyzeNutritionSubtitle => 'Analyze the nutritional values of your meals';
+  String get componentsChatChatWelcomeAnalyzeNutritionSubtitle =>
+      'Analyze the nutritional values of your meals';
 
   @override
-  String get componentsChatChatWelcomeAnalyzeNutritionMessage => 'Help me analyze the nutritional values in my meal';
+  String get componentsChatChatWelcomeAnalyzeNutritionMessage =>
+      'Help me analyze the nutritional values in my meal';
 
   @override
-  String get componentsChatChatWelcomeFindAlternativesSubtitle => 'Discover healthy food alternatives';
+  String get componentsChatChatWelcomeFindAlternativesSubtitle =>
+      'Discover healthy food alternatives';
 
   @override
-  String get componentsChatChatWelcomeFindAlternativesMessage => 'Find healthy alternatives to my current meal';
+  String get componentsChatChatWelcomeFindAlternativesMessage =>
+      'Find healthy alternatives to my current meal';
 
   @override
-  String get componentsChatChatWelcomeCalculateMacrosSubtitle => 'Calculate macros for your meals';
+  String get componentsChatChatWelcomeCalculateMacrosSubtitle =>
+      'Calculate macros for your meals';
 
   @override
-  String get componentsChatChatWelcomeCalculateMacrosMessage => 'Help me calculate the macros for my meals';
+  String get componentsChatChatWelcomeCalculateMacrosMessage =>
+      'Help me calculate the macros for my meals';
 
   @override
-  String get componentsChatChatWelcomeMealPlanSubtitle => 'Create weekly meal plans';
+  String get componentsChatChatWelcomeMealPlanSubtitle =>
+      'Create weekly meal plans';
 
   @override
-  String get componentsChatChatWelcomeMealPlanMessage => 'Help me create a weekly meal plan';
+  String get componentsChatChatWelcomeMealPlanMessage =>
+      'Help me create a weekly meal plan';
 
   @override
-  String get componentsChatChatWelcomeIngredientInfoSubtitle => 'Learn more about ingredients and their benefits';
+  String get componentsChatChatWelcomeIngredientInfoSubtitle =>
+      'Learn more about ingredients and their benefits';
 
   @override
-  String get componentsChatChatWelcomeIngredientInfoMessage => 'Tell me about the nutritional benefits of ingredients';
+  String get componentsChatChatWelcomeIngredientInfoMessage =>
+      'Tell me about the nutritional benefits of ingredients';
 
   @override
-  String get componentsChatChatWelcomeWhatCanIHelpWith => 'What can I help you with?';
+  String get componentsChatChatWelcomeWhatCanIHelpWith =>
+      'What can I help you with?';
 
   @override
   String get componentsChatDishSuggestionCardDetails => 'Details';
@@ -491,7 +559,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatMessageBubbleIngredients => 'Ingredients';
 
   @override
-  String get componentsChatMessageBubbleMessageCopied => 'Message copied to clipboard';
+  String get componentsChatMessageBubbleMessageCopied =>
+      'Message copied to clipboard';
 
   @override
   String get componentsChatMessageBubbleRetryMessage => 'Retry';
@@ -500,7 +569,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatMessageBubbleSelect => 'Select';
 
   @override
-  String get componentsChatMessageBubbleTapToViewAgentSteps => 'Tap to view agent steps';
+  String get componentsChatMessageBubbleTapToViewAgentSteps =>
+      'Tap to view agent steps';
 
   @override
   String get componentsChatMessageBubbleYesterday => 'Yesterday';
@@ -509,7 +579,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatNutritionAnalysisCardAddToMeals => 'Add to Meals';
 
   @override
-  String get componentsChatNutritionAnalysisCardCookingInstructions => 'Cooking Instructions';
+  String get componentsChatNutritionAnalysisCardCookingInstructions =>
+      'Cooking Instructions';
 
   @override
   String get componentsChatNutritionAnalysisCardDishName => 'Dish Name';
@@ -518,7 +589,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatNutritionAnalysisCardMealType => 'Meal Type';
 
   @override
-  String get componentsChatNutritionAnalysisCardNutritionAnalysis => 'Nutrition Analysis';
+  String get componentsChatNutritionAnalysisCardNutritionAnalysis =>
+      'Nutrition Analysis';
 
   @override
   String get componentsChatNutritionAnalysisCardServingSize => 'Serving Size';
@@ -527,7 +599,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatQuickActionsQuickActions => 'Quick Actions';
 
   @override
-  String get componentsChatUserProfileCustomizationDialogEditUserProfile => 'Edit User Profile';
+  String get componentsChatUserProfileCustomizationDialogEditUserProfile =>
+      'Edit User Profile';
 
   @override
   String get componentsChatUserProfileCustomizationDialogUsername => 'Username';
@@ -539,46 +612,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsDishesDishCardEdit => 'Edit';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalAddIngredient => 'Add Ingredient';
+  String get componentsDishesDishFormIngredientFormModalAddIngredient =>
+      'Add Ingredient';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalEditIngredient => 'Edit Ingredient';
+  String get componentsDishesDishFormIngredientFormModalEditIngredient =>
+      'Edit Ingredient';
 
   @override
   String get componentsDishesDishFormIngredientFormModalGrams => 'g';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalIngredientName => 'Ingredient Name';
+  String get componentsDishesDishFormIngredientFormModalIngredientName =>
+      'Ingredient Name';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder => 'Enter ingredient name';
+  String
+  get componentsDishesDishFormIngredientFormModalIngredientNamePlaceholder =>
+      'Enter ingredient name';
 
   @override
   String get componentsDishesDishFormIngredientFormModalKcal => 'kcal';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalNutritionInformation => 'Nutrition Information';
+  String get componentsDishesDishFormIngredientFormModalNutritionInformation =>
+      'Nutrition Information';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalNutritionPer100g => 'Nutrition per 100g';
+  String get componentsDishesDishFormIngredientFormModalNutritionPer100g =>
+      'Nutrition per 100g';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName => 'Please enter an ingredient name';
+  String
+  get componentsDishesDishFormIngredientFormModalPleaseEnterIngredientName =>
+      'Please enter an ingredient name';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalPleaseEnterQuantity => 'Please enter a quantity';
+  String get componentsDishesDishFormIngredientFormModalPleaseEnterQuantity =>
+      'Please enter a quantity';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber => 'Please enter a valid number';
+  String
+  get componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber =>
+      'Please enter a valid number';
 
   @override
   String get componentsDishesDishFormIngredientFormModalQuantity => 'Quantity';
 
   @override
-  String get componentsDishesDishFormIngredientFormModalQuantityPlaceholder => 'Enter quantity';
+  String get componentsDishesDishFormIngredientFormModalQuantityPlaceholder =>
+      'Enter quantity';
 
   @override
-  String get componentsDishesDishFormSmartNutritionCardNutritionalInformation => 'Nutritional Information';
+  String get componentsDishesDishFormSmartNutritionCardNutritionalInformation =>
+      'Nutritional Information';
 
   @override
   String get componentsModalsDishLogModalAddNotes => 'Add notes (optional)';
@@ -587,16 +674,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsModalsDishLogModalBreakfast => 'Breakfast';
 
   @override
-  String get componentsModalsDishLogModalCalculatedNutrition => 'Calculated Nutrition';
+  String get componentsModalsDishLogModalCalculatedNutrition =>
+      'Calculated Nutrition';
 
   @override
   String get componentsModalsDishLogModalDinner => 'Dinner';
 
   @override
-  String get componentsModalsDishLogModalDishLoggedSuccessfully => 'Dish logged successfully!';
+  String get componentsModalsDishLogModalDishLoggedSuccessfully =>
+      'Dish logged successfully!';
 
   @override
-  String get componentsModalsDishLogModalErrorLoggingDish => 'There was an error logging the dish';
+  String get componentsModalsDishLogModalErrorLoggingDish =>
+      'There was an error logging the dish';
 
   @override
   String get componentsModalsDishLogModalLogDishTitle => 'Log Dish';
@@ -631,13 +721,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsScannerBarcodeScannerOpenSettings => 'Open Settings';
 
   @override
-  String get componentsScannerBarcodeScannerProductNotFound => 'Product not found';
+  String get componentsScannerBarcodeScannerProductNotFound =>
+      'Product not found';
 
   @override
-  String get componentsScannerBarcodeScannerScanBarcodeToAddProduct => 'Scan a barcode to quickly add products';
+  String get componentsScannerBarcodeScannerScanBarcodeToAddProduct =>
+      'Scan a barcode to quickly add products';
 
   @override
-  String get componentsScannerBarcodeScannerScanningBarcode => 'Scanning barcode...';
+  String get componentsScannerBarcodeScannerScanningBarcode =>
+      'Scanning barcode...';
 
   @override
   String componentsScannerProductSearchErrorSearchingProduct(String error) {
@@ -651,16 +744,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsScannerProductSearchLocalDishes => 'Local Dishes';
 
   @override
-  String get componentsScannerProductSearchLocalIngredients => 'Local ingredients';
+  String get componentsScannerProductSearchLocalIngredients =>
+      'Local ingredients';
 
   @override
-  String get componentsScannerProductSearchNoProductsFound => 'No products found';
+  String get componentsScannerProductSearchNoProductsFound =>
+      'No products found';
 
   @override
   String get componentsScannerProductSearchProductSearch => 'Product Search';
 
   @override
-  String get componentsScannerProductSearchSearchProducts => 'Search products...';
+  String get componentsScannerProductSearchSearchProducts =>
+      'Search products...';
 
   @override
   String get componentsSharedErrorDisplayRetry => 'Retry';
@@ -681,34 +777,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get providersChatProviderAiThinking => 'AI is thinking...';
 
   @override
-  String get providersChatProviderTestChatResponse => 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
+  String get providersChatProviderTestChatResponse =>
+      'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
 
   @override
-  String get providersChatProviderTestChatWelcome => 'This is test mode! I can help you explore PlatePal\'s features. Try asking me about nutrition, meal planning, or food recommendations.';
+  String get providersChatProviderTestChatWelcome =>
+      'This is test mode! I can help you explore PlatePal\'s features. Try asking me about nutrition, meal planning, or food recommendations.';
 
   @override
-  String get providersChatProviderWelcomeToChat => 'Welcome to your AI nutrition assistant! Ask me anything about meals, nutrition, or your fitness goals.';
+  String get providersChatProviderWelcomeToChat =>
+      'Welcome to your AI nutrition assistant! Ask me anything about meals, nutrition, or your fitness goals.';
 
   @override
   String get screensCalendarAiNutritionTip => 'AI Nutrition Tip';
 
   @override
-  String get screensCalendarConfigureApiKeyForAiTips => 'Please configure your OpenAI API key in settings to use AI tips';
+  String get screensCalendarConfigureApiKeyForAiTips =>
+      'Please configure your OpenAI API key in settings to use AI tips';
 
   @override
   String get screensCalendarDeleteLog => 'Delete Log';
 
   @override
-  String get screensCalendarDeleteLogConfirmation => 'Are you sure you want to delete this logged meal?';
+  String get screensCalendarDeleteLogConfirmation =>
+      'Are you sure you want to delete this logged meal?';
 
   @override
-  String get screensCalendarFailedToDeleteMealLog => 'Failed to delete meal log';
+  String get screensCalendarFailedToDeleteMealLog =>
+      'Failed to delete meal log';
 
   @override
-  String get screensCalendarFailedToGetAiTip => 'Failed to get AI tip. Please try again.';
+  String get screensCalendarFailedToGetAiTip =>
+      'Failed to get AI tip. Please try again.';
 
   @override
-  String get screensCalendarMealLogDeletedSuccessfully => 'Meal log deleted successfully';
+  String get screensCalendarMealLogDeletedSuccessfully =>
+      'Meal log deleted successfully';
 
   @override
   String get screensCalendarOk => 'OK';
@@ -723,13 +827,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensChatClearChat => 'Clear Chat';
 
   @override
-  String get screensChatClearChatConfirmation => 'Are you sure you want to clear the chat history? This action cannot be undone.';
+  String get screensChatClearChatConfirmation =>
+      'Are you sure you want to clear the chat history? This action cannot be undone.';
 
   @override
   String get screensChatConfigureApiKeyButton => 'Configure API Key';
 
   @override
-  String get screensChatConfigureApiKeyToUseChat => 'Please configure your OpenAI API key in settings to use the AI chat assistant.';
+  String get screensChatConfigureApiKeyToUseChat =>
+      'Please configure your OpenAI API key in settings to use the AI chat assistant.';
 
   @override
   String get screensChatLoading => 'Loading...';
@@ -750,7 +856,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensDishCreateCategory => 'Category';
 
   @override
-  String get screensDishCreateConfirmDeleteIngredient => 'Are you sure you want to delete this ingredient?';
+  String get screensDishCreateConfirmDeleteIngredient =>
+      'Are you sure you want to delete this ingredient?';
 
   @override
   String get screensDishCreateCreateDish => 'Create Dish';
@@ -762,16 +869,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensDishCreateDescription => 'Description';
 
   @override
-  String get screensDishCreateDescriptionPlaceholder => 'Enter description (optional)';
+  String get screensDishCreateDescriptionPlaceholder =>
+      'Enter description (optional)';
 
   @override
-  String get screensDishCreateDishCreatedSuccessfully => 'Dish created successfully';
+  String get screensDishCreateDishCreatedSuccessfully =>
+      'Dish created successfully';
 
   @override
   String get screensDishCreateDishNamePlaceholder => 'Enter dish name';
 
   @override
-  String get screensDishCreateDishUpdatedSuccessfully => 'Dish updated successfully';
+  String get screensDishCreateDishUpdatedSuccessfully =>
+      'Dish updated successfully';
 
   @override
   String get screensDishCreateEditDish => 'Edit Dish';
@@ -795,7 +905,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensDishCreateNoIngredientsAdded => 'No ingredients added yet';
 
   @override
-  String get screensDishCreateNutritionRecalculated => 'Nutrition recalculated from ingredients';
+  String get screensDishCreateNutritionRecalculated =>
+      'Nutrition recalculated from ingredients';
 
   @override
   String get screensDishCreateOptions => 'Options';
@@ -804,7 +915,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensDishCreatePleaseEnterDishName => 'Please enter a dish name';
 
   @override
-  String get screensDishCreateProductAddedSuccessfully => 'Product added successfully';
+  String get screensDishCreateProductAddedSuccessfully =>
+      'Product added successfully';
 
   @override
   String get screensDishCreateRemoveImage => 'Remove image';
@@ -816,7 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensHomeAppTitle => 'PlatePal Tracker';
 
   @override
-  String get screensHomeWelcomeToPlatePalTracker => 'Welcome to PlatePal Tracker';
+  String get screensHomeWelcomeToPlatePalTracker =>
+      'Welcome to PlatePal Tracker';
 
   @override
   String get screensMealsAddedToFavorites => 'Added to favorites';
@@ -831,7 +944,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensMealsAllCategories => 'All Categories';
 
   @override
-  String get screensMealsCreateFirstDish => 'Create your first dish to get started';
+  String get screensMealsCreateFirstDish =>
+      'Create your first dish to get started';
 
   @override
   String get screensMealsDeleteDish => 'Delete Dish';
@@ -869,7 +983,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensMealsSearchDishes => 'Search dishes...';
 
   @override
-  String get screensMealsTryAdjustingSearch => 'Try adjusting your search terms';
+  String get screensMealsTryAdjustingSearch =>
+      'Try adjusting your search terms';
 
   @override
   String get screensMenuAbout => 'About';
@@ -905,7 +1020,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensMenuEditPersonalInfo => 'Edit your personal information';
 
   @override
-  String get screensMenuEnableAgentModeDeepSearch => 'Enable agent mode, deep search, and more';
+  String get screensMenuEnableAgentModeDeepSearch =>
+      'Enable agent mode, deep search, and more';
 
   @override
   String get screensMenuExportData => 'Export Data';
@@ -941,7 +1057,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensMenuProfile => 'Profile';
 
   @override
-  String get screensMenuSetNutritionTargets => 'Set your daily nutrition targets';
+  String get screensMenuSetNutritionTargets =>
+      'Set your daily nutrition targets';
 
   @override
   String get screensMenuSystem => 'System';
@@ -962,25 +1079,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsAboutAboutAppTitle => 'About the App';
 
   @override
-  String get screensSettingsAboutAboutDescription => 'PlatePal Tracker was created to provide a privacy-focused, open-source alternative to expensive nutrition tracking apps. We believe in putting control in your hands with no subscriptions, no ads, and no data collection.';
+  String get screensSettingsAboutAboutDescription =>
+      'PlatePal Tracker was created to provide a privacy-focused, open-source alternative to expensive nutrition tracking apps. We believe in putting control in your hands with no subscriptions, no ads, and no data collection.';
 
   @override
-  String get screensSettingsAboutAppMotto => 'Made by gym guys for gym guys that hate paid apps';
+  String get screensSettingsAboutAppMotto =>
+      'Made by gym guys for gym guys that hate paid apps';
 
   @override
-  String get screensSettingsAboutCodersMessage => 'Coders shouldn\'t have to pay';
+  String get screensSettingsAboutCodersMessage =>
+      'Coders shouldn\'t have to pay';
 
   @override
-  String get screensSettingsAboutDataStaysOnDevice => 'Your data stays on your device';
+  String get screensSettingsAboutDataStaysOnDevice =>
+      'Your data stays on your device';
 
   @override
   String get screensSettingsAboutFreeOpenSource => '100% free and open source';
 
   @override
-  String get screensSettingsAboutGithubRepository => 'github.com/MrLappes/platepal-tracker';
+  String get screensSettingsAboutGithubRepository =>
+      'github.com/MrLappes/platepal-tracker';
 
   @override
-  String get screensSettingsAboutUseOwnAiKey => 'Use your own AI key for full control';
+  String get screensSettingsAboutUseOwnAiKey =>
+      'Use your own AI key for full control';
 
   @override
   String get screensSettingsAboutWebsite => 'plate-pal.de';
@@ -989,76 +1112,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsAboutWhyPlatePal => 'Why PlatePal?';
 
   @override
-  String get screensSettingsApiKeySettingsAboutOpenAiApiKey => 'About OpenAI API Key';
+  String get screensSettingsApiKeySettingsAboutOpenAiApiKey =>
+      'About OpenAI API Key';
 
   @override
-  String get screensSettingsApiKeySettingsAiFeaturesEnabled => 'AI features are enabled';
+  String get screensSettingsApiKeySettingsAiFeaturesEnabled =>
+      'AI features are enabled';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyBulletPoints => '• Get your API key from platform.openai.com\n• Your key is stored locally on your device\n• Usage charges apply directly to your OpenAI account';
+  String get screensSettingsApiKeySettingsApiKeyBulletPoints =>
+      '• Get your API key from platform.openai.com\n• Your key is stored locally on your device\n• Usage charges apply directly to your OpenAI account';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyConfigured => 'API Key Configured';
+  String get screensSettingsApiKeySettingsApiKeyConfigured =>
+      'API Key Configured';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyDescription => 'To use AI features like meal analysis and suggestions, you need to provide your own OpenAI API key. This ensures your data stays private and you have full control.';
+  String get screensSettingsApiKeySettingsApiKeyDescription =>
+      'To use AI features like meal analysis and suggestions, you need to provide your own OpenAI API key. This ensures your data stays private and you have full control.';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyHelperText => 'Enter your OpenAI API key or leave empty to disable AI features';
+  String get screensSettingsApiKeySettingsApiKeyHelperText =>
+      'Enter your OpenAI API key or leave empty to disable AI features';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyMustStartWith => 'API key must start with \"sk-\"';
+  String get screensSettingsApiKeySettingsApiKeyMustStartWith =>
+      'API key must start with \"sk-\"';
 
   @override
   String get screensSettingsApiKeySettingsApiKeyPlaceholder => 'sk-...';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyRemovedSuccessfully => 'API key removed successfully';
+  String get screensSettingsApiKeySettingsApiKeyRemovedSuccessfully =>
+      'API key removed successfully';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeySavedSuccessfully => 'API key saved successfully';
+  String get screensSettingsApiKeySettingsApiKeySavedSuccessfully =>
+      'API key saved successfully';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyTestWarning => 'Your API key will be tested with a small request to verify it works. The key is only stored on your device and never sent to our servers';
+  String get screensSettingsApiKeySettingsApiKeyTestWarning =>
+      'Your API key will be tested with a small request to verify it works. The key is only stored on your device and never sent to our servers';
 
   @override
-  String get screensSettingsApiKeySettingsApiKeyTooShort => 'API key appears to be too short';
+  String get screensSettingsApiKeySettingsApiKeyTooShort =>
+      'API key appears to be too short';
 
   @override
-  String get screensSettingsApiKeySettingsClipboardEmpty => 'Clipboard is empty';
+  String get screensSettingsApiKeySettingsClipboardEmpty =>
+      'Clipboard is empty';
 
   @override
-  String get screensSettingsApiKeySettingsCouldNotLoadModels => 'Could not load available models. Using default model list';
+  String get screensSettingsApiKeySettingsCouldNotLoadModels =>
+      'Could not load available models. Using default model list';
 
   @override
-  String get screensSettingsApiKeySettingsFailedToAccessClipboard => 'Failed to access clipboard';
+  String get screensSettingsApiKeySettingsFailedToAccessClipboard =>
+      'Failed to access clipboard';
 
   @override
-  String get screensSettingsApiKeySettingsFailedToLoadApiKey => 'Failed to load API key';
+  String get screensSettingsApiKeySettingsFailedToLoadApiKey =>
+      'Failed to load API key';
 
   @override
-  String get screensSettingsApiKeySettingsFailedToRemoveApiKey => 'Failed to remove API key';
+  String get screensSettingsApiKeySettingsFailedToRemoveApiKey =>
+      'Failed to remove API key';
 
   @override
-  String get screensSettingsApiKeySettingsGetApiKeyFromOpenAi => 'Get API Key from OpenAI';
+  String get screensSettingsApiKeySettingsGetApiKeyFromOpenAi =>
+      'Get API Key from OpenAI';
 
   @override
-  String get screensSettingsApiKeySettingsGpt35ModelsInfo => 'GPT-3.5 models are more cost-effective for basic analysis';
+  String get screensSettingsApiKeySettingsGpt35ModelsInfo =>
+      'GPT-3.5 models are more cost-effective for basic analysis';
 
   @override
-  String get screensSettingsApiKeySettingsGpt4ModelsInfo => 'GPT-4 models provide the best analysis but cost more';
+  String get screensSettingsApiKeySettingsGpt4ModelsInfo =>
+      'GPT-4 models provide the best analysis but cost more';
 
   @override
-  String get screensSettingsApiKeySettingsLinkError => 'An error occurred opening the link';
+  String get screensSettingsApiKeySettingsLinkError =>
+      'An error occurred opening the link';
 
   @override
   String get screensSettingsApiKeySettingsOpenAiApiKey => 'OpenAI API Key';
 
   @override
-  String get screensSettingsApiKeySettingsPastedFromClipboard => 'Pasted from clipboard';
+  String get screensSettingsApiKeySettingsPastedFromClipboard =>
+      'Pasted from clipboard';
 
   @override
-  String get screensSettingsApiKeySettingsPasteFromClipboard => 'Paste from Clipboard';
+  String get screensSettingsApiKeySettingsPasteFromClipboard =>
+      'Paste from Clipboard';
 
   @override
   String get screensSettingsApiKeySettingsRemove => 'Remove';
@@ -1067,13 +1212,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsApiKeySettingsRemoveApiKey => 'Remove API Key';
 
   @override
-  String get screensSettingsApiKeySettingsRemoveApiKeyConfirmation => 'Are you sure you want to remove your API key? This will disable AI features.';
+  String get screensSettingsApiKeySettingsRemoveApiKeyConfirmation =>
+      'Are you sure you want to remove your API key? This will disable AI features.';
 
   @override
   String get screensSettingsApiKeySettingsSelectModel => 'Select Model';
 
   @override
-  String get screensSettingsApiKeySettingsTestAndSaveApiKey => 'Test & Save API Key';
+  String get screensSettingsApiKeySettingsTestAndSaveApiKey =>
+      'Test & Save API Key';
 
   @override
   String get screensSettingsApiKeySettingsTestingApiKey => 'Testing API key...';
@@ -1082,34 +1229,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsApiKeySettingsUpdateApiKey => 'Update API Key';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle => 'Allow the agent to use deep search for more accurate answers';
+  String get screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle =>
+      'Allow the agent to use deep search for more accurate answers';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentDeepSearchTitle => 'Enable Deep Search';
+  String get screensSettingsChatAgentSettingsChatAgentDeepSearchTitle =>
+      'Enable Deep Search';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentEnableSubtitle => 'Use the multi-step agent pipeline for chat';
+  String get screensSettingsChatAgentSettingsChatAgentEnableSubtitle =>
+      'Use the multi-step agent pipeline for chat';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentEnableTitle => 'Enable Agent Mode';
+  String get screensSettingsChatAgentSettingsChatAgentEnableTitle =>
+      'Enable Agent Mode';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentInfoDescription => 'Agent mode enables PlatePal\'s advanced multi-step reasoning pipeline for chat. This allows the assistant to analyze your query, gather context, and provide more accurate, explainable answers. Deep Search lets the agent use more data for even better results.';
+  String get screensSettingsChatAgentSettingsChatAgentInfoDescription =>
+      'Agent mode enables PlatePal\'s advanced multi-step reasoning pipeline for chat. This allows the assistant to analyze your query, gather context, and provide more accurate, explainable answers. Deep Search lets the agent use more data for even better results.';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentInfoTitle => 'What is Agent Mode?';
+  String get screensSettingsChatAgentSettingsChatAgentInfoTitle =>
+      'What is Agent Mode?';
 
   @override
-  String get screensSettingsChatAgentSettingsChatAgentSettingsTitle => 'Chat Agent Settings';
+  String get screensSettingsChatAgentSettingsChatAgentSettingsTitle =>
+      'Chat Agent Settings';
 
   @override
-  String get screensSettingsChatAgentSettingsChatSettingsSaved => 'Chat settings saved successfully';
+  String get screensSettingsChatAgentSettingsChatSettingsSaved =>
+      'Chat settings saved successfully';
 
   @override
   String get screensSettingsContributorsBuyMeCreatine => 'Buy Me Creatine';
 
   @override
-  String get screensSettingsContributorsCheckGitHub => 'Check Out Our GitHub Repository';
+  String get screensSettingsContributorsCheckGitHub =>
+      'Check Out Our GitHub Repository';
 
   @override
   String get screensSettingsContributorsContributorPlural => 'Contributors';
@@ -1118,19 +1274,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsContributorsContributorSingular => 'Contributor';
 
   @override
-  String get screensSettingsContributorsContributorsThankYou => 'Thanks to everyone who has contributed to making PlatePal Tracker possible!';
+  String get screensSettingsContributorsContributorsThankYou =>
+      'Thanks to everyone who has contributed to making PlatePal Tracker possible!';
 
   @override
-  String get screensSettingsContributorsOpenSourceMessage => 'PlatePal Tracker is open source - join us on GitHub!';
+  String get screensSettingsContributorsOpenSourceMessage =>
+      'PlatePal Tracker is open source - join us on GitHub!';
 
   @override
-  String get screensSettingsContributorsSupportDevelopment => 'Support Development';
+  String get screensSettingsContributorsSupportDevelopment =>
+      'Support Development';
 
   @override
-  String get screensSettingsContributorsSupportMessage => 'You want to buy me my creatine? Your support is greatly appreciated but not at all mandatory.';
+  String get screensSettingsContributorsSupportMessage =>
+      'You want to buy me my creatine? Your support is greatly appreciated but not at all mandatory.';
 
   @override
-  String get screensSettingsContributorsWantToContribute => 'Want to Contribute?';
+  String get screensSettingsContributorsWantToContribute =>
+      'Want to Contribute?';
 
   @override
   String get screensSettingsExportDataAllData => 'All Data';
@@ -1159,7 +1320,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsExportDataNutritionGoalsData => 'Nutrition Goals';
 
   @override
-  String get screensSettingsExportDataSelectDataToExport => 'Select data to export';
+  String get screensSettingsExportDataSelectDataToExport =>
+      'Select data to export';
 
   @override
   String get screensSettingsExportDataSupplements => 'Supplements';
@@ -1168,7 +1330,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsExportDataUserProfiles => 'User Profiles';
 
   @override
-  String get screensSettingsImportDataHowToHandleDuplicates => 'How to handle duplicates?';
+  String get screensSettingsImportDataHowToHandleDuplicates =>
+      'How to handle duplicates?';
 
   @override
   String screensSettingsImportDataImportedItemsCount(int count) {
@@ -1188,10 +1351,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportDataMergeDuplicates => 'Merge Duplicates';
 
   @override
-  String get screensSettingsImportDataOverwriteDuplicates => 'Overwrite Duplicates';
+  String get screensSettingsImportDataOverwriteDuplicates =>
+      'Overwrite Duplicates';
 
   @override
-  String get screensSettingsImportDataSelectDataToImport => 'Select data to import';
+  String get screensSettingsImportDataSelectDataToImport =>
+      'Select data to import';
 
   @override
   String get screensSettingsImportDataSelectFile => 'Select File';
@@ -1200,16 +1365,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportDataSkipDuplicates => 'Skip Duplicates';
 
   @override
-  String get screensSettingsImportProfileCompletionActivityLevel => 'Activity Level';
+  String get screensSettingsImportProfileCompletionActivityLevel =>
+      'Activity Level';
 
   @override
   String get screensSettingsImportProfileCompletionAge => 'Age';
 
   @override
-  String get screensSettingsImportProfileCompletionAgeRange => 'Age must be between 13 and 120';
+  String get screensSettingsImportProfileCompletionAgeRange =>
+      'Age must be between 13 and 120';
 
   @override
-  String get screensSettingsImportProfileCompletionBuildMuscle => 'Build Muscle';
+  String get screensSettingsImportProfileCompletionBuildMuscle =>
+      'Build Muscle';
 
   @override
   String get screensSettingsImportProfileCompletionCm => 'cm';
@@ -1218,13 +1386,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportProfileCompletionEmail => 'Email';
 
   @override
-  String get screensSettingsImportProfileCompletionExtraActive => 'Extra Active';
+  String get screensSettingsImportProfileCompletionExtraActive =>
+      'Extra Active';
 
   @override
   String get screensSettingsImportProfileCompletionFemale => 'Female';
 
   @override
-  String get screensSettingsImportProfileCompletionFitnessGoal => 'Fitness Goal';
+  String get screensSettingsImportProfileCompletionFitnessGoal =>
+      'Fitness Goal';
 
   @override
   String get screensSettingsImportProfileCompletionGainWeight => 'Gain Weight';
@@ -1236,16 +1406,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportProfileCompletionHeight => 'Height';
 
   @override
-  String get screensSettingsImportProfileCompletionHeightRange => 'Height must be between 100-250 cm';
+  String get screensSettingsImportProfileCompletionHeightRange =>
+      'Height must be between 100-250 cm';
 
   @override
-  String get screensSettingsImportProfileCompletionImperial => 'Imperial (lb, ft)';
+  String get screensSettingsImportProfileCompletionImperial =>
+      'Imperial (lb, ft)';
 
   @override
   String get screensSettingsImportProfileCompletionInches => 'in';
 
   @override
-  String get screensSettingsImportProfileCompletionInvalidEmail => 'Please enter a valid email address';
+  String get screensSettingsImportProfileCompletionInvalidEmail =>
+      'Please enter a valid email address';
 
   @override
   String get screensSettingsImportProfileCompletionKg => 'kg';
@@ -1254,13 +1427,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportProfileCompletionLb => 'lb';
 
   @override
-  String get screensSettingsImportProfileCompletionLightlyActive => 'Lightly Active';
+  String get screensSettingsImportProfileCompletionLightlyActive =>
+      'Lightly Active';
 
   @override
   String get screensSettingsImportProfileCompletionLoseWeight => 'Lose Weight';
 
   @override
-  String get screensSettingsImportProfileCompletionMaintainWeight => 'Maintain Weight';
+  String get screensSettingsImportProfileCompletionMaintainWeight =>
+      'Maintain Weight';
 
   @override
   String get screensSettingsImportProfileCompletionMale => 'Male';
@@ -1269,7 +1444,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportProfileCompletionMetric => 'Metric (kg, cm)';
 
   @override
-  String get screensSettingsImportProfileCompletionModeratelyActive => 'Moderately Active';
+  String get screensSettingsImportProfileCompletionModeratelyActive =>
+      'Moderately Active';
 
   @override
   String get screensSettingsImportProfileCompletionName => 'Name';
@@ -1278,7 +1454,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportProfileCompletionOther => 'Other';
 
   @override
-  String get screensSettingsImportProfileCompletionPersonalInformation => 'Personal Information';
+  String get screensSettingsImportProfileCompletionPersonalInformation =>
+      'Personal Information';
 
   @override
   String get screensSettingsImportProfileCompletionPreferences => 'Preferences';
@@ -1296,34 +1473,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportProfileCompletionWeight => 'Weight';
 
   @override
-  String get screensSettingsImportProfileCompletionWeightRange => 'Weight must be between 30-300 kg';
+  String get screensSettingsImportProfileCompletionWeightRange =>
+      'Weight must be between 30-300 kg';
 
   @override
   String get screensSettingsImportProfileCompletionYears => 'years';
 
   @override
-  String get screensSettingsMacroCustomizationDiscardChanges => 'Discard Changes';
+  String get screensSettingsMacroCustomizationDiscardChanges =>
+      'Discard Changes';
 
   @override
-  String get screensSettingsMacroCustomizationMacroCustomization => 'Macro Customization';
+  String get screensSettingsMacroCustomizationMacroCustomization =>
+      'Macro Customization';
 
   @override
-  String get screensSettingsMacroCustomizationMacroCustomizationInfo => 'Customize your macro targets. All percentages must add up to 100%.';
+  String get screensSettingsMacroCustomizationMacroCustomizationInfo =>
+      'Customize your macro targets. All percentages must add up to 100%.';
 
   @override
-  String get screensSettingsMacroCustomizationMacroTargetsUpdated => 'Macro targets updated successfully';
+  String get screensSettingsMacroCustomizationMacroTargetsUpdated =>
+      'Macro targets updated successfully';
 
   @override
-  String get screensSettingsMacroCustomizationResetToDefaults => 'Reset to Defaults';
+  String get screensSettingsMacroCustomizationResetToDefaults =>
+      'Reset to Defaults';
 
   @override
   String get screensSettingsMacroCustomizationSaveChanges => 'Save Changes';
 
   @override
-  String get screensSettingsMacroCustomizationUnsavedChanges => 'Unsaved Changes';
+  String get screensSettingsMacroCustomizationUnsavedChanges =>
+      'Unsaved Changes';
 
   @override
-  String get screensSettingsMacroCustomizationUnsavedChangesMessage => 'You have unsaved changes. Do you want to save them before leaving?';
+  String get screensSettingsMacroCustomizationUnsavedChangesMessage =>
+      'You have unsaved changes. Do you want to save them before leaving?';
 
   @override
   String get screensSettingsProfileSettingsAnalyzeTargets => 'Analyze Targets';
@@ -1332,52 +1517,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsProfileSettingsBmi => 'BMI';
 
   @override
-  String get screensSettingsProfileSettingsConnectToHealth => 'Connect to Health';
+  String get screensSettingsProfileSettingsConnectToHealth =>
+      'Connect to Health';
 
   @override
   String get screensSettingsProfileSettingsDangerZone => 'Danger Zone';
 
   @override
-  String get screensSettingsProfileSettingsDebugHealthData => 'Debug Health Data';
+  String get screensSettingsProfileSettingsDebugHealthData =>
+      'Debug Health Data';
 
   @override
-  String get screensSettingsProfileSettingsDisconnectHealth => 'Disconnect Health';
+  String get screensSettingsProfileSettingsDisconnectHealth =>
+      'Disconnect Health';
 
   @override
   String get screensSettingsProfileSettingsFitnessGoals => 'Fitness Goals';
 
   @override
-  String get screensSettingsProfileSettingsHealthConnected => 'Health data connected';
+  String get screensSettingsProfileSettingsHealthConnected =>
+      'Health data connected';
 
   @override
   String get screensSettingsProfileSettingsHealthDataSync => 'Health Data Sync';
 
   @override
-  String get screensSettingsProfileSettingsHealthDisconnected => 'Health data not connected';
+  String get screensSettingsProfileSettingsHealthDisconnected =>
+      'Health data not connected';
 
   @override
-  String get screensSettingsProfileSettingsHealthNotAvailable => 'Health Data Not Available';
+  String get screensSettingsProfileSettingsHealthNotAvailable =>
+      'Health Data Not Available';
 
   @override
-  String get screensSettingsProfileSettingsHealthNotAvailableMessage => 'Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.';
+  String get screensSettingsProfileSettingsHealthNotAvailableMessage =>
+      'Health data is not available on this device. Make sure you have Health Connect (Android) or Health app (iOS) installed and configured.';
 
   @override
-  String get screensSettingsProfileSettingsHealthPermissionDenied => 'Health Permission Denied';
+  String get screensSettingsProfileSettingsHealthPermissionDenied =>
+      'Health Permission Denied';
 
   @override
-  String get screensSettingsProfileSettingsHealthPermissionDeniedMessage => 'To sync your health data, PlatePal needs access to your health information. You can grant permissions in your phone\'s settings.';
+  String get screensSettingsProfileSettingsHealthPermissionDeniedMessage =>
+      'To sync your health data, PlatePal needs access to your health information. You can grant permissions in your phone\'s settings.';
 
   @override
-  String get screensSettingsProfileSettingsHealthSyncFailed => 'Failed to sync health data';
+  String get screensSettingsProfileSettingsHealthSyncFailed =>
+      'Failed to sync health data';
 
   @override
-  String get screensSettingsProfileSettingsHealthSyncSuccess => 'Health data synced successfully';
+  String get screensSettingsProfileSettingsHealthSyncSuccess =>
+      'Health data synced successfully';
 
   @override
-  String get screensSettingsProfileSettingsProfileSettings => 'Profile Settings';
+  String get screensSettingsProfileSettingsProfileSettings =>
+      'Profile Settings';
 
   @override
-  String get screensSettingsProfileSettingsProfileUpdated => 'Profile updated successfully';
+  String get screensSettingsProfileSettingsProfileUpdated =>
+      'Profile updated successfully';
 
   @override
   String get screensSettingsProfileSettingsResetApp => 'Reset App';
@@ -1386,19 +1584,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsProfileSettingsResetAppCancel => 'Cancel';
 
   @override
-  String get screensSettingsProfileSettingsResetAppConfirm => 'Yes, Delete Everything';
+  String get screensSettingsProfileSettingsResetAppConfirm =>
+      'Yes, Delete Everything';
 
   @override
-  String get screensSettingsProfileSettingsResetAppDescription => 'This will permanently delete ALL your data including:\n\n• Your profile information\n• All meal logs and nutrition data\n• All preferences and settings\n• All stored information\n\nThis action cannot be undone. Are you sure you want to continue?';
+  String get screensSettingsProfileSettingsResetAppDescription =>
+      'This will permanently delete ALL your data including:\n\n• Your profile information\n• All meal logs and nutrition data\n• All preferences and settings\n• All stored information\n\nThis action cannot be undone. Are you sure you want to continue?';
 
   @override
-  String get screensSettingsProfileSettingsResetAppError => 'Failed to reset application data';
+  String get screensSettingsProfileSettingsResetAppError =>
+      'Failed to reset application data';
 
   @override
-  String get screensSettingsProfileSettingsResetAppSuccess => 'Application data has been reset successfully';
+  String get screensSettingsProfileSettingsResetAppSuccess =>
+      'Application data has been reset successfully';
 
   @override
-  String get screensSettingsProfileSettingsResetAppTitle => 'Reset Application Data';
+  String get screensSettingsProfileSettingsResetAppTitle =>
+      'Reset Application Data';
 
   @override
   String get screensSettingsProfileSettingsSyncHealthData => 'Sync Health Data';
@@ -1422,7 +1625,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsStatisticsBmiOverweight => 'Overweight';
 
   @override
-  String get screensSettingsStatisticsBmiStatsTip => 'Body Mass Index (BMI) is calculated from your weight and height measurements.';
+  String get screensSettingsStatisticsBmiStatsTip =>
+      'Body Mass Index (BMI) is calculated from your weight and height measurements.';
 
   @override
   String get screensSettingsStatisticsBmiUnderweight => 'Underweight';
@@ -1434,25 +1638,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsStatisticsBodyFatHistory => 'Body Fat History';
 
   @override
-  String get screensSettingsStatisticsBodyFatStatsTip => 'Body fat percentage helps track your body composition beyond just weight.';
+  String get screensSettingsStatisticsBodyFatStatsTip =>
+      'Body fat percentage helps track your body composition beyond just weight.';
 
   @override
   String get screensSettingsStatisticsBulking => 'Bulking';
 
   @override
-  String get screensSettingsStatisticsCalorieBalanceTip => 'Track your actual calorie balance using health data. Green = maintenance, Blue = deficit, Orange = surplus.';
+  String get screensSettingsStatisticsCalorieBalanceTip =>
+      'Track your actual calorie balance using health data. Green = maintenance, Blue = deficit, Orange = surplus.';
 
   @override
-  String get screensSettingsStatisticsCalorieBalanceTitle => 'Calorie Balance (Intake vs Expenditure)';
+  String get screensSettingsStatisticsCalorieBalanceTitle =>
+      'Calorie Balance (Intake vs Expenditure)';
 
   @override
-  String get screensSettingsStatisticsCalorieIntakeHistory => 'Calorie Intake vs Maintenance';
+  String get screensSettingsStatisticsCalorieIntakeHistory =>
+      'Calorie Intake vs Maintenance';
 
   @override
-  String get screensSettingsStatisticsCalorieStatsTip => 'Compare your daily calorie intake to your maintenance calories. Green indicates maintenance, blue is cutting phase, orange is bulking phase.';
+  String get screensSettingsStatisticsCalorieStatsTip =>
+      'Compare your daily calorie intake to your maintenance calories. Green indicates maintenance, blue is cutting phase, orange is bulking phase.';
 
   @override
-  String get screensSettingsStatisticsCannotCalculateBmiFromData => 'Cannot calculate BMI from available data';
+  String get screensSettingsStatisticsCannotCalculateBmiFromData =>
+      'Cannot calculate BMI from available data';
 
   @override
   String get screensSettingsStatisticsCutting => 'Cutting';
@@ -1464,13 +1674,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsStatisticsEstimatedBalance => 'Estimated Balance';
 
   @override
-  String get screensSettingsStatisticsExtremeDeficitWarning => 'Warning: Frequent extreme calorie deficits may slow metabolism and cause muscle loss.';
+  String get screensSettingsStatisticsExtremeDeficitWarning =>
+      'Warning: Frequent extreme calorie deficits may slow metabolism and cause muscle loss.';
 
   @override
   String get screensSettingsStatisticsGenerateTestData => 'Generate Test Data';
 
   @override
-  String get screensSettingsStatisticsHealthDataActive => 'Using your health app data to provide more accurate deficit/surplus analysis.';
+  String get screensSettingsStatisticsHealthDataActive =>
+      'Using your health app data to provide more accurate deficit/surplus analysis.';
 
   @override
   String screensSettingsStatisticsHealthDataAlert(String days) {
@@ -1478,10 +1690,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get screensSettingsStatisticsHealthDataInactive => 'Enable health data sync in Profile Settings for more accurate analysis.';
+  String get screensSettingsStatisticsHealthDataInactive =>
+      'Enable health data sync in Profile Settings for more accurate analysis.';
 
   @override
-  String get screensSettingsStatisticsHealthDataIntegration => 'Health Data Integration';
+  String get screensSettingsStatisticsHealthDataIntegration =>
+      'Health Data Integration';
 
   @override
   String screensSettingsStatisticsInconsistentDeficitWarning(String variance) {
@@ -1507,19 +1721,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsStatisticsMaintenance => 'Maintenance';
 
   @override
-  String get screensSettingsStatisticsNoBmiDataAvailable => 'No BMI data available';
+  String get screensSettingsStatisticsNoBmiDataAvailable =>
+      'No BMI data available';
 
   @override
-  String get screensSettingsStatisticsNoBodyFatDataAvailable => 'No body fat data available';
+  String get screensSettingsStatisticsNoBodyFatDataAvailable =>
+      'No body fat data available';
 
   @override
-  String get screensSettingsStatisticsNoCalorieDataAvailable => 'No calorie data available';
+  String get screensSettingsStatisticsNoCalorieDataAvailable =>
+      'No calorie data available';
 
   @override
   String get screensSettingsStatisticsNotEnoughDataTitle => 'Not Enough Data';
 
   @override
-  String get screensSettingsStatisticsNoWeightDataAvailable => 'No weight data available';
+  String get screensSettingsStatisticsNoWeightDataAvailable =>
+      'No weight data available';
 
   @override
   String get screensSettingsStatisticsPhaseAnalysis => 'Phase Analysis';
@@ -1534,10 +1752,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsStatisticsStatistics => 'Statistics';
 
   @override
-  String get screensSettingsStatisticsStatisticsEmptyDescription => 'We need at least a week of data to show meaningful statistics. Keep tracking your metrics to see trends over time.';
+  String get screensSettingsStatisticsStatisticsEmptyDescription =>
+      'We need at least a week of data to show meaningful statistics. Keep tracking your metrics to see trends over time.';
 
   @override
-  String get screensSettingsStatisticsTestDataDescription => 'For demonstration purposes, you can generate sample data to see how the statistics look.';
+  String get screensSettingsStatisticsTestDataDescription =>
+      'For demonstration purposes, you can generate sample data to see how the statistics look.';
 
   @override
   String get screensSettingsStatisticsTimeRange => 'Time Range';
@@ -1568,7 +1788,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsStatisticsWeightHistory => 'Weight History';
 
   @override
-  String get screensSettingsStatisticsWeightStatsTip => 'The graph shows median weekly weight to account for daily fluctuations due to water weight.';
+  String get screensSettingsStatisticsWeightStatsTip =>
+      'The graph shows median weekly weight to account for daily fluctuations due to water weight.';
 
   @override
   String get utilsLinkHandlerAvailable => 'Available';
@@ -1617,14 +1838,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get screensSettingsContributorsHansRole => 'AI Co-pilot & Resident Hacker';
+  String get screensSettingsContributorsHansRole =>
+      'AI Co-pilot & Resident Hacker';
 
   @override
-  String get screensSettingsContributorsHansDesc => 'Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.';
+  String get screensSettingsContributorsHansDesc =>
+      'Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.';
 
   @override
   String get screensSettingsContributorsMrLappesRole => 'Creator & Developer';
 
   @override
-  String get screensSettingsContributorsMrLappesDesc => 'Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.';
+  String get screensSettingsContributorsMrLappesDesc =>
+      'Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.';
 }

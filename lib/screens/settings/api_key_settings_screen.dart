@@ -732,7 +732,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value:
+                              initialValue:
                                   _availableModels.any(
                                         (m) => m.id == _selectedModel,
                                       )

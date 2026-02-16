@@ -89,7 +89,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
                 if (!value) deepSearchEnabled = false;
               });
             },
-            activeColor: theme.colorScheme.primary,
+            activeThumbColor: theme.colorScheme.primary,
           ),
           const SizedBox(height: 16),
           SwitchListTile.adaptive(
@@ -106,7 +106,7 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
                 agentModeEnabled
                     ? (value) => setState(() => deepSearchEnabled = value)
                     : null,
-            activeColor: theme.colorScheme.primary,
+            activeThumbColor: theme.colorScheme.primary,
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
