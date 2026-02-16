@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import '../storage/dish_service.dart';
 import '../storage/meal_log_service.dart';
 import '../storage/database_service.dart';
+import '../storage/user_profile_service.dart';
 import '../../models/dish.dart';
+import '../../models/user_profile.dart';
 
 enum DataType {
   userProfiles,
@@ -25,6 +28,7 @@ enum DuplicateHandling { skip, overwrite, merge }
 class ImportExportService {
   final DishService _dishService = DishService();
   final MealLogService _mealLogService = MealLogService();
+  final UserProfileService _userProfileService = UserProfileService();
 
   Future<ImportExportResult> exportData({
     required List<DataType> dataTypes,
@@ -444,8 +448,12 @@ class ImportExportService {
     try {
       switch (type) {
         case DataType.userProfiles:
-          // TODO: Implement user profiles export when service is available
-          return <Map<String, dynamic>>[];
+          try {
+            final userProfiles = await _getAllUserProfiles();
+            return userProfiles;
+          } catch (e) {
+            throw Exception('Failed to retrieve user profiles: $e');
+          }
         case DataType.mealLogs:
           try {
             // Get all meal logs from both tables
@@ -501,14 +509,23 @@ class ImportExportService {
             throw Exception('Failed to retrieve dishes: $e');
           }
         case DataType.ingredients:
-          // TODO: Implement ingredients export when service is available
-          return <Map<String, dynamic>>[];
+          try {
+            final ingredients = await _getAllIngredients();
+            return ingredients;
+          } catch (e) {
+            throw Exception('Failed to retrieve ingredients: $e');
+          }
         case DataType.supplements:
-          // TODO: Implement supplements export when service is available
+          // No supplements table in database yet
+          debugPrint('⚠️ Supplements export not implemented (no database table)');
           return <Map<String, dynamic>>[];
         case DataType.fitnessGoals:
-          // TODO: Implement fitness goals export when service is available
-          return <Map<String, dynamic>>[];
+          try {
+            final fitnessGoals = await _getAllFitnessGoals();
+            return fitnessGoals;
+          } catch (e) {
+            throw Exception('Failed to retrieve fitness goals: $e');
+          }
         case DataType.allData:
           final allData = <String, dynamic>{};
           for (final dataType in DataType.values) {
@@ -1186,13 +1203,49 @@ class ImportExportService {
         }
         return false;
       case DataType.userProfiles:
-      case DataType.mealLogs:
-      case DataType.ingredients:
-      case DataType.supplements:
-      case DataType.fitnessGoals:
-        // TODO: Implement checks for other data types when services are available
+        final id = item['id'] as String?;
+        if (id != null) {
+          final profile = await _userProfileService.getUserProfile(id);
+          return profile != null;
+        }
         return false;
-      default:
+      case DataType.ingredients:
+        final id = item['id'] as String?;
+        if (id != null) {
+          final db = await DatabaseService.instance.database;
+          final results = await db.query(
+            'ingredients',
+            where: 'id = ?',
+            whereArgs: [id],
+          );
+          return results.isNotEmpty;
+        }
+        return false;
+      case DataType.fitnessGoals:
+        final id = item['id'] as int?;
+        final userId = item['userId'] as String?;
+        if (id != null) {
+          final db = await DatabaseService.instance.database;
+          final results = await db.query(
+            'fitness_goals',
+            where: 'id = ?',
+            whereArgs: [id],
+          );
+          return results.isNotEmpty;
+        } else if (userId != null) {
+          // Check if user has any fitness goals
+          final db = await DatabaseService.instance.database;
+          final results = await db.query(
+            'fitness_goals',
+            where: 'user_id = ?',
+            whereArgs: [userId],
+          );
+          return results.isNotEmpty;
+        }
+        return false;
+      case DataType.mealLogs:
+      case DataType.supplements:
+      case DataType.allData:
         return false;
     }
   }
@@ -1217,20 +1270,25 @@ class ImportExportService {
           'Meal logs should be processed through _processMealLogs method',
         );
       case DataType.userProfiles:
-        // TODO: Implement user profiles saving when service is available
-        debugPrint('⚠️ User profiles saving not yet implemented');
+        await _saveUserProfileItem(
+          item as Map<String, dynamic>,
+          duplicateHandling,
+        );
         break;
       case DataType.ingredients:
-        // TODO: Implement ingredients saving when service is available
-        debugPrint('⚠️ Ingredients saving not yet implemented');
+        await _saveIngredientItem(
+          item as Map<String, dynamic>,
+          duplicateHandling,
+        );
         break;
       case DataType.supplements:
-        // TODO: Implement supplements saving when service is available
-        debugPrint('⚠️ Supplements saving not yet implemented');
+        debugPrint('⚠️ Supplements saving not yet implemented (no database table)');
         break;
       case DataType.fitnessGoals:
-        // TODO: Implement fitness goals saving when service is available
-        debugPrint('⚠️ Fitness goals saving not yet implemented');
+        await _saveFitnessGoalItem(
+          item as Map<String, dynamic>,
+          duplicateHandling,
+        );
         break;
       case DataType.allData:
         throw Exception('allData should not be processed as individual items');
@@ -1289,6 +1347,171 @@ class ImportExportService {
     } catch (e) {
       debugPrint('❌ Error converting dish data: $e');
       debugPrint('❌ Dish data: $dishData');
+      rethrow;
+    }
+  }
+
+  /// Save a user profile item to the database
+  Future<void> _saveUserProfileItem(
+    Map<String, dynamic> profileData,
+    DuplicateHandling duplicateHandling,
+  ) async {
+    try {
+      // Convert to UserProfile object
+      final profile = _convertToUserProfileObject(profileData);
+
+      // Check if profile already exists
+      final existingProfile = await _userProfileService.getUserProfile(profile.id);
+
+      if (existingProfile != null) {
+        switch (duplicateHandling) {
+          case DuplicateHandling.skip:
+            debugPrint('⏭️ Skipping duplicate user profile: ${profile.name}');
+            return;
+          case DuplicateHandling.overwrite:
+          case DuplicateHandling.merge:
+            debugPrint('🔄 Updating user profile: ${profile.name}');
+            await _userProfileService.saveUserProfile(profile);
+            break;
+        }
+      } else {
+        debugPrint('✨ Creating new user profile: ${profile.name}');
+        await _userProfileService.saveUserProfile(profile);
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving user profile: $e');
+      rethrow;
+    }
+  }
+
+  /// Save an ingredient item to the database
+  Future<void> _saveIngredientItem(
+    Map<String, dynamic> ingredientData,
+    DuplicateHandling duplicateHandling,
+  ) async {
+    try {
+      final db = await DatabaseService.instance.database;
+      final id = ingredientData['id'] as String;
+      final name = ingredientData['name'] as String;
+      final barcode = ingredientData['barcode'] as String?;
+
+      // Check if ingredient exists
+      final existing = await db.query(
+        'ingredients',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (existing.isNotEmpty && duplicateHandling == DuplicateHandling.skip) {
+        debugPrint('⏭️ Skipping duplicate ingredient: $name');
+        return;
+      }
+
+      // Save/update ingredient
+      await db.insert(
+        'ingredients',
+        {
+          'id': id,
+          'name': name,
+          'barcode': barcode,
+        },
+        conflictAlgorithm: duplicateHandling == DuplicateHandling.skip
+            ? ConflictAlgorithm.ignore
+            : ConflictAlgorithm.replace,
+      );
+
+      // Save nutrition info if available
+      if (ingredientData.containsKey('nutrition') &&
+          ingredientData['nutrition'] != null) {
+        final nutrition = ingredientData['nutrition'] as Map<String, dynamic>;
+        await db.insert(
+          'ingredient_nutrition',
+          {
+            'ingredient_id': id,
+            'calories': nutrition['calories'],
+            'protein': nutrition['protein'],
+            'carbs': nutrition['carbs'],
+            'fat': nutrition['fat'],
+            'fiber': nutrition['fiber'] ?? 0.0,
+          },
+          conflictAlgorithm: duplicateHandling == DuplicateHandling.skip
+              ? ConflictAlgorithm.ignore
+              : ConflictAlgorithm.replace,
+        );
+      }
+
+      debugPrint('✅ Saved ingredient: $name');
+    } catch (e) {
+      debugPrint('❌ Error saving ingredient: $e');
+      rethrow;
+    }
+  }
+
+  /// Save a fitness goal item to the database
+  Future<void> _saveFitnessGoalItem(
+    Map<String, dynamic> goalData,
+    DuplicateHandling duplicateHandling,
+  ) async {
+    try {
+      final db = await DatabaseService.instance.database;
+      final userId = goalData['userId'] as String;
+      final id = goalData['id'] as int?;
+
+      // Check if goal exists
+      if (id != null) {
+        final existing = await db.query(
+          'fitness_goals',
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+
+        if (existing.isNotEmpty && duplicateHandling == DuplicateHandling.skip) {
+          debugPrint('⏭️ Skipping duplicate fitness goal for user: $userId');
+          return;
+        }
+      }
+
+      // Save fitness goal
+      await db.insert(
+        'fitness_goals',
+        {
+          'user_id': userId,
+          'goal': goalData['goal'],
+          'target_weight': goalData['targetWeight'],
+          'target_calories': goalData['targetCalories'],
+          'target_protein': goalData['targetProtein'],
+          'target_carbs': goalData['targetCarbs'],
+          'target_fat': goalData['targetFat'],
+          'target_fiber': goalData['targetFiber'] ?? 25.0,
+          'created_at': goalData['createdAt'] ?? DateTime.now().toIso8601String(),
+          'updated_at': goalData['updatedAt'] ?? DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: duplicateHandling == DuplicateHandling.skip
+            ? ConflictAlgorithm.ignore
+            : ConflictAlgorithm.replace,
+      );
+
+      debugPrint('✅ Saved fitness goal for user: $userId');
+    } catch (e) {
+      debugPrint('❌ Error saving fitness goal: $e');
+      rethrow;
+    }
+  }
+
+  /// Convert import data to a UserProfile object
+  UserProfile _convertToUserProfileObject(Map<String, dynamic> profileData) {
+    try {
+      // Handle direct UserProfile JSON format
+      if (profileData.containsKey('goals') && profileData['goals'] is Map) {
+        return UserProfile.fromJson(profileData);
+      }
+
+      // Handle old format conversion
+      final convertedData = _convertOldUserProfileFormat(profileData);
+      return UserProfile.fromJson(convertedData);
+    } catch (e) {
+      debugPrint('❌ Error converting user profile data: $e');
+      debugPrint('❌ Profile data: $profileData');
       rethrow;
     }
   }
@@ -1399,6 +1622,165 @@ class ImportExportService {
   Future<List<Map<String, dynamic>>> _getAllDishLogs() async {
     final db = await DatabaseService.instance.database;
     return await db.query('dish_logs', orderBy: 'logged_at DESC');
+  }
+
+  /// Get all user profiles with their related data
+  Future<List<Map<String, dynamic>>> _getAllUserProfiles() async {
+    final db = await DatabaseService.instance.database;
+    final userMaps = await db.query('user_profiles');
+    final userProfiles = <Map<String, dynamic>>[];
+
+    for (final userMap in userMaps) {
+      final userId = userMap['id'] as String;
+
+      // Get fitness goals
+      final goalsMaps = await db.query(
+        'fitness_goals',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+        orderBy: 'created_at DESC',
+        limit: 1,
+      );
+
+      // Get dietary preferences
+      final prefMaps = await db.query(
+        'dietary_preferences',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+        orderBy: 'created_at DESC',
+        limit: 1,
+      );
+
+      // Build user profile JSON
+      final userProfile = <String, dynamic>{
+        'id': userMap['id'],
+        'name': userMap['name'],
+        'email': userMap['email'],
+        'age': userMap['age'],
+        'gender': userMap['gender'],
+        'height': userMap['height'],
+        'weight': userMap['weight'],
+        'activityLevel': userMap['activity_level'],
+        'preferredUnit': userMap['preferred_unit'],
+        'createdAt': userMap['created_at'],
+        'updatedAt': userMap['updated_at'],
+      };
+
+      // Add fitness goals if available
+      if (goalsMaps.isNotEmpty) {
+        final goalsMap = goalsMaps.first;
+        userProfile['goals'] = {
+          'goal': goalsMap['goal'],
+          'targetWeight': goalsMap['target_weight'],
+          'targetCalories': goalsMap['target_calories'],
+          'targetProtein': goalsMap['target_protein'],
+          'targetCarbs': goalsMap['target_carbs'],
+          'targetFat': goalsMap['target_fat'],
+          'targetFiber': goalsMap['target_fiber'],
+        };
+      }
+
+      // Add dietary preferences if available
+      if (prefMaps.isNotEmpty) {
+        final prefMap = prefMaps.first;
+        final prefId = prefMap['id'] as int;
+
+        // Get allergies
+        final allergiesMaps = await db.query(
+          'allergies',
+          where: 'preference_id = ?',
+          whereArgs: [prefId],
+        );
+        final allergies = allergiesMaps.map((m) => m['allergy'] as String).toList();
+
+        // Get dislikes
+        final dislikesMaps = await db.query(
+          'dislikes',
+          where: 'preference_id = ?',
+          whereArgs: [prefId],
+        );
+        final dislikes = dislikesMaps.map((m) => m['dislike'] as String).toList();
+
+        // Get cuisine preferences
+        final cuisineMaps = await db.query(
+          'cuisine_preferences',
+          where: 'preference_id = ?',
+          whereArgs: [prefId],
+        );
+        final cuisines = cuisineMaps.map((m) => m['cuisine'] as String).toList();
+
+        userProfile['preferences'] = {
+          'allergies': allergies,
+          'dislikes': dislikes,
+          'dietType': prefMap['diet_type'],
+          'preferOrganic': (prefMap['prefer_organic'] as int) == 1,
+          'cuisinePreferences': cuisines,
+        };
+      }
+
+      userProfiles.add(userProfile);
+    }
+
+    return userProfiles;
+  }
+
+  /// Get all ingredients with their nutrition info
+  Future<List<Map<String, dynamic>>> _getAllIngredients() async {
+    final db = await DatabaseService.instance.database;
+    final ingredientMaps = await db.query('ingredients');
+    final ingredients = <Map<String, dynamic>>[];
+
+    for (final ingMap in ingredientMaps) {
+      final ingredientId = ingMap['id'] as String;
+
+      // Get nutrition info for this ingredient
+      final nutritionMaps = await db.query(
+        'ingredient_nutrition',
+        where: 'ingredient_id = ?',
+        whereArgs: [ingredientId],
+      );
+
+      final ingredient = <String, dynamic>{
+        'id': ingMap['id'],
+        'name': ingMap['name'],
+        'barcode': ingMap['barcode'],
+      };
+
+      if (nutritionMaps.isNotEmpty) {
+        final nutMap = nutritionMaps.first;
+        ingredient['nutrition'] = {
+          'calories': nutMap['calories'],
+          'protein': nutMap['protein'],
+          'carbs': nutMap['carbs'],
+          'fat': nutMap['fat'],
+          'fiber': nutMap['fiber'],
+        };
+      }
+
+      ingredients.add(ingredient);
+    }
+
+    return ingredients;
+  }
+
+  /// Get all fitness goals
+  Future<List<Map<String, dynamic>>> _getAllFitnessGoals() async {
+    final db = await DatabaseService.instance.database;
+    final goalsMaps = await db.query('fitness_goals', orderBy: 'created_at DESC');
+    
+    return goalsMaps.map((map) => {
+      'id': map['id'],
+      'userId': map['user_id'],
+      'goal': map['goal'],
+      'targetWeight': map['target_weight'],
+      'targetCalories': map['target_calories'],
+      'targetProtein': map['target_protein'],
+      'targetCarbs': map['target_carbs'],
+      'targetFat': map['target_fat'],
+      'targetFiber': map['target_fiber'],
+      'createdAt': map['created_at'],
+      'updatedAt': map['updated_at'],
+    }).toList();
   }
 
   /// Create automatic backup of current data

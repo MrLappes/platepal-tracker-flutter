@@ -421,6 +421,87 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                   const Spacer(),
                   if (dish.isFavorite)
                     const Icon(Icons.star, color: Colors.amber, size: 16),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: 18,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'edit':
+                          _editDishDetails(dish);
+                          break;
+                        case 'favorite':
+                          _toggleFavorite(dish);
+                          break;
+                        case 'delete':
+                          _deleteDish(dish);
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit,
+                              size: 18,
+                              color: colorScheme.onSurface,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).componentsDishesDishCardEdit,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'favorite',
+                        child: Row(
+                          children: [
+                            Icon(
+                              dish.isFavorite ? Icons.star : Icons.star_border,
+                              size: 18,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              dish.isFavorite
+                                  ? AppLocalizations.of(
+                                    context,
+                                  ).screensMealsRemoveFromFavorites
+                                  : AppLocalizations.of(
+                                    context,
+                                  ).screensMealsAddToFavorites,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              size: 18,
+                              color: colorScheme.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).componentsDishesDishCardDelete,
+                              style: TextStyle(color: colorScheme.error),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
