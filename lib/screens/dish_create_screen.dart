@@ -722,7 +722,6 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText:
                       AppLocalizations.of(context).screensDishCreateCategory,

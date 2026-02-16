@@ -21,6 +21,7 @@ class ProductSearchScreen extends StatefulWidget {
 
 class _ProductSearchScreenState extends State<ProductSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final OpenFoodFactsService _openFoodFactsService = OpenFoodFactsService();
   final DatabaseService _databaseService = DatabaseService.instance;
   final DishService _dishService = DishService();
@@ -30,7 +31,6 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   bool _hasMoreResults = false;
   List<Product> _searchResults = [];
   bool _isSearching = false;
-  bool _hasSearched = false;
 
   @override
   void initState() {
@@ -46,11 +46,20 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         });
       }
     });
+    
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -103,23 +112,29 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     });
   }
 
-  Future<void> _searchProducts(String query) async {
+  Future<void> _searchProducts(String query, {bool isNewSearch = true}) async {
     if (query.trim().isEmpty) {
       setState(() {
         _searchResults = [];
-        _hasSearched = false;
         _currentPage = 1;
         _hasMoreResults = false;
       });
       return;
     }
 
+    // Prevent duplicate requests
+    if (_isSearching) return;
+
     setState(() {
       _isSearching = true;
+      if (isNewSearch) {
+        _currentPage = 1;
+        _searchResults = [];
+      }
     });
 
     try {
-      debugPrint('🔍 Searching for products: $query');
+      debugPrint('🔍 Searching for products: $query (page $_currentPage)');
       final localeProvider = Provider.of<LocaleProvider>(
         context,
         listen: false,
@@ -134,18 +149,20 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       );
 
       setState(() {
-        _searchResults = products;
-        _hasSearched = true;
+        if (isNewSearch) {
+          _searchResults = products;
+        } else {
+          _searchResults.addAll(products);
+        }
         _isSearching = false;
         _hasMoreResults = products.length == 20;
       });
 
-      debugPrint('✅ Found ${products.length} products');
+      debugPrint('✅ Found ${products.length} products (total: ${_searchResults.length})');
     } catch (e) {
       debugPrint('❌ Error searching products: $e');
       setState(() {
         _isSearching = false;
-        _hasSearched = true;
       });
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -157,7 +174,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   void _loadMore() {
     if (!_isSearching && _hasMoreResults) {
       setState(() => _currentPage++);
-      _searchProducts(_searchController.text.trim());
+      _searchProducts(_searchController.text.trim(), isNewSearch: false);
     }
   }
 
@@ -297,7 +314,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
               ),
               onChanged: (value) {
                 if (value.length > 2) {
-                  _searchProducts(value);
+                  _searchProducts(value, isNewSearch: true);
                 }
               },
             ),
@@ -307,6 +324,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 _isSearching && _currentPage == 1
                     ? const Center(child: CircularProgressIndicator())
                     : ListView(
+                      controller: _scrollController,
                       padding: const EdgeInsets.only(bottom: 16),
                       children: [
                         if (_localIngredients.isNotEmpty ||
@@ -340,6 +358,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                             ),
                           ),
                           ..._searchResults.map(_buildProductCard),
+                          if (_isSearching && _currentPage > 1)
+                            const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
                         ],
                       ],
                     ),
