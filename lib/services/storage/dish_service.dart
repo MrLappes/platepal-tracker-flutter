@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../models/dish.dart';
 import '../calorie_expenditure_service.dart';
+import '../health_service.dart';
 import 'database_service.dart';
 
 class DishService {
   final DatabaseService _databaseService = DatabaseService.instance;
   final CalorieExpenditureService _calorieExpenditureService =
       CalorieExpenditureService();
+  final HealthService _healthService = HealthService();
   // Get all dishes
   Future<List<Dish>> getAllDishes() async {
     debugPrint('🔍 DishService: Getting all dishes from database...');
@@ -460,7 +463,52 @@ class DishService {
       'fiber': fiber,
     });
 
+    // Write nutrition to Health Connect (fire-and-forget)
+    _writeNutritionToHealth(
+      dish: dish,
+      servingSize: servingSize,
+      mealType: mealType,
+      loggedAt: loggedAt,
+    );
+
     return logId;
+  }
+
+  /// Write the dish's nutrition data to Health Connect / Google Fit.
+  /// Non-blocking – errors are logged but never block meal logging.
+  Future<void> _writeNutritionToHealth({
+    required Dish dish,
+    required double servingSize,
+    required String mealType,
+    required DateTime loggedAt,
+  }) async {
+    try {
+      if (!_healthService.isConnected) return;
+
+      // Check if write-meals preference is enabled
+      final prefs = await SharedPreferences.getInstance();
+      final writeMealsEnabled =
+          prefs.getBool('health_write_meals_enabled') ?? true;
+      if (!writeMealsEnabled) return;
+
+      final nutrition = dish.nutrition;
+      final scale = servingSize;
+
+      await _healthService.writeMealToHealth(
+        name: dish.name,
+        mealType: mealType,
+        calories: nutrition.calories * scale,
+        protein: nutrition.protein * scale,
+        carbs: nutrition.carbs * scale,
+        fat: nutrition.fat * scale,
+        fiber: nutrition.fiber > 0 ? nutrition.fiber * scale : null,
+        sugar: nutrition.sugar > 0 ? nutrition.sugar * scale : null,
+        sodium: nutrition.sodium > 0 ? nutrition.sodium * scale : null,
+        startTime: loggedAt,
+      );
+    } catch (e) {
+      debugPrint('HealthService nutrition write failed: $e');
+    }
   }
 
   Future<List<DishLog>> getDishLogsForDate(DateTime date) async {
@@ -524,18 +572,16 @@ class DishService {
       carbs: (row['total_carbs'] as num).toDouble(),
       fat: (row['total_fat'] as num).toDouble(),
       fiber: (row['total_fiber'] as num).toDouble(),
+      isHealthConnected: _healthService.isConnected,
     ); // Try to get calories burned for this date
     final (caloriesBurned, isEstimated) = await _calorieExpenditureService
         .getCaloriesBurnedForDateWithStatus(date);
 
-    if (caloriesBurned != null && caloriesBurned > 0) {
-      return baseSummary.copyWithCaloriesBurned(
-        caloriesBurned,
-        isEstimated: isEstimated,
-      );
-    }
-
-    return baseSummary;
+    return baseSummary.copyWithCaloriesBurned(
+      caloriesBurned,
+      isEstimated: isEstimated,
+      isHealthConnected: _healthService.isConnected,
+    );
   }
 
   Future<void> deleteDishLog(String logId) async {

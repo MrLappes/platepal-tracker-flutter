@@ -1898,4 +1898,196 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsContributorsMrLappesDesc =>
       'Creó PlatePal Tracker con la visión de hacer una aplicación de nutrición gratuita y centrada en la privacidad para todos.';
+
+  @override
+  String get screensSettingsHealthSettingsTitle => 'HEALTH CONNECT //';
+
+  @override
+  String get screensSettingsHealthSettingsConnected => 'Conectado';
+
+  @override
+  String get screensSettingsHealthSettingsNotConnected => 'No conectado';
+
+  @override
+  String screensSettingsHealthSettingsLastSynced(String time) {
+    return 'Última sincronización: $time';
+  }
+
+  @override
+  String get screensSettingsHealthSettingsNotAvailableOnDevice =>
+      'Health Connect no está disponible en este dispositivo.';
+
+  @override
+  String get screensSettingsHealthSettingsDisconnectTitle =>
+      'Desconectar Health';
+
+  @override
+  String get screensSettingsHealthSettingsDisconnectMessage =>
+      'Esto dejará de sincronizar las calorías quemadas de Health Connect y dejará de escribir datos de comidas. Sus datos existentes se conservarán.';
+
+  @override
+  String get screensSettingsHealthSettingsDisconnect => 'Desconectar';
+
+  @override
+  String get screensSettingsHealthSettingsDataOverview => 'RESUMEN DE DATOS';
+
+  @override
+  String get screensSettingsHealthSettingsTodaysBurned => 'Quemadas hoy';
+
+  @override
+  String get screensSettingsHealthSettingsNoDataYet => 'Sin datos aún';
+
+  @override
+  String screensSettingsHealthSettingsDaysCached(int count) {
+    return '$count días de datos en caché';
+  }
+
+  @override
+  String get screensSettingsHealthSettingsSyncControls =>
+      'CONTROLES DE SINCRONIZACIÓN';
+
+  @override
+  String get screensSettingsHealthSettingsSyncDescription =>
+      'Obtiene los últimos datos de calorías quemadas de Health Connect de los últimos 7 días.';
+
+  @override
+  String get screensSettingsHealthSettingsOpenHealthConnect =>
+      'Abrir Health Connect';
+
+  @override
+  String get screensSettingsHealthSettingsWriteBehavior =>
+      'COMPORTAMIENTO DE ESCRITURA';
+
+  @override
+  String get screensSettingsHealthSettingsWriteMeals =>
+      'Escribir comidas en Health Connect';
+
+  @override
+  String get screensSettingsHealthSettingsWriteMealsDescription =>
+      'Registrar nutrición automáticamente al guardar una comida';
+
+  @override
+  String get screensSettingsHealthSettingsTargetAnalysis =>
+      'ANÁLISIS DE OBJETIVOS';
+
+  @override
+  String get screensSettingsHealthSettingsTargetAnalysisDescription =>
+      'Compare su gasto calórico de Health Connect con sus objetivos calóricos actuales para ver si se necesitan ajustes.';
+
+  @override
+  String get screensSettingsHealthSettingsCurrentTarget => 'Objetivo actual';
+
+  @override
+  String get screensSettingsHealthSettingsAvgExpenditure => 'Gasto promedio';
+
+  @override
+  String get screensSettingsHealthSettingsSuggestedTarget =>
+      'Objetivo sugerido';
+
+  @override
+  String get screensSettingsHealthSettingsDaysAnalyzed => 'Días analizados';
+
+  @override
+  String get screensSettingsHealthSettingsApply => 'Aplicar';
+
+  @override
+  String screensSettingsHealthSettingsCalorieTargetUpdated(String target) {
+    return 'Objetivo calórico actualizado a $target kcal';
+  }
+
+  @override
+  String get screensSettingsHealthSettingsCalorieTargetUpdateFailed =>
+      'Error al actualizar el objetivo calórico';
+
+  @override
+  String screensSettingsHealthSettingsAnalysisFailed(String error) {
+    return 'Análisis fallido: $error';
+  }
+
+  @override
+  String get screensSettingsHealthSettingsAboutHealthConnect =>
+      'ACERCA DE HEALTH CONNECT';
+
+  @override
+  String get screensSettingsHealthSettingsAboutDescription =>
+      'Conecta PlatePal a Health Connect (Google Fit) para:';
+
+  @override
+  String get screensSettingsHealthSettingsFeatureReadCalories =>
+      'Leer las calorías reales quemadas del seguimiento de actividad';
+
+  @override
+  String get screensSettingsHealthSettingsFeatureWriteMeals =>
+      'Escribir automáticamente datos de nutrición en Health Connect';
+
+  @override
+  String get screensSettingsHealthSettingsFeatureNetBalance =>
+      'Ver el balance calórico neto preciso (consumidas vs quemadas)';
+
+  @override
+  String get screensSettingsHealthSettingsFeatureRecommendations =>
+      'Obtener recomendaciones de objetivos calóricos basadas en gasto real';
+
+  @override
+  String get screensSettingsHealthSettingsAboutNote =>
+      'Cuando está conectado, Health Connect se convierte en la única fuente de verdad para las calorías quemadas — sin valores estimados.';
+
+  @override
+  String get screensSettingsHealthSettingsJustNow => 'Ahora mismo';
+
+  @override
+  String screensSettingsHealthSettingsMinutesAgo(int minutes) {
+    return 'hace $minutes min';
+  }
+
+  @override
+  String screensSettingsHealthSettingsHoursAgo(int hours) {
+    return 'hace $hours h';
+  }
+
+  @override
+  String screensSettingsHealthSettingsDaysAgo(int days) {
+    return 'hace $days d';
+  }
+
+  @override
+  String get screensMenuHealthAndFitness => 'Salud y Fitness';
+
+  @override
+  String get screensMenuHealthConnect => 'HEALTH CONNECT';
+
+  @override
+  String get screensMenuHealthConnectedSubtitle =>
+      'Conectado — sincronizando con Google Fit';
+
+  @override
+  String get screensMenuHealthDisconnectedSubtitle =>
+      'Sincronizar con Google Fit y Health Connect';
+
+  @override
+  String componentsCalendarMacroSummaryBurned(String calories) {
+    return '$calories quemadas';
+  }
+
+  @override
+  String componentsCalendarMacroSummaryNetCalories(String value) {
+    return 'Neto: $value';
+  }
+
+  @override
+  String get componentsCalendarMacroSummaryNoBurnData =>
+      'Sin datos de gasto para este día';
+
+  @override
+  String get screensCalendarHealthDeleteWarning =>
+      'La entrada de nutrición en Health Connect no se eliminará. Puede eliminarla manualmente en la aplicación Health Connect.';
+
+  @override
+  String get screensSettingsProfileSettingsManageHealthConnect =>
+      'Gestionar Health Connect';
+
+  @override
+  String screensSettingsProfileSettingsLastSynced(String time) {
+    return 'Última sincronización: $time';
+  }
 }

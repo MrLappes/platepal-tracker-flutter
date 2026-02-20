@@ -4,6 +4,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../models/dish.dart';
 import '../models/user_profile.dart';
 import '../services/storage/dish_service.dart';
+import '../services/health_service.dart';
 import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
 import '../services/chat/openai_service.dart';
@@ -20,6 +21,7 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   final DishService _dishService = DishService();
+  final HealthService _healthService = HealthService();
   late final UserProfileRepository _userProfileRepository;
   final OpenAIService _openAIService = OpenAIService();
   DateTime _selectedDate = DateTime.now();
@@ -150,11 +152,45 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder:
           (context) => AlertDialog(
             title: Text(l10n.screensCalendarDeleteLog),
-            content: Text(l10n.screensCalendarDeleteLogConfirmation),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.screensCalendarDeleteLogConfirmation),
+                if (_healthService.isConnected) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).screensCalendarHealthDeleteWarning,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(l10n.componentsChatBotProfileCustomizationDialogCancel),
+                child: Text(
+                  l10n.componentsChatBotProfileCustomizationDialogCancel,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -528,7 +564,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5), width: 1),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.5),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -546,7 +585,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  (log.dish?.name ?? l10n.componentsCalendarCalendarDayDetailUnknownDish).toUpperCase(),
+                  (log.dish?.name ??
+                          l10n.componentsCalendarCalendarDayDetailUnknownDish)
+                      .toUpperCase(),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.5,
@@ -565,7 +606,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                     Text(
                       '  |  ',
-                      style: TextStyle(color: colorScheme.outline.withValues(alpha: 0.5)),
+                      style: TextStyle(
+                        color: colorScheme.outline.withValues(alpha: 0.5),
+                      ),
                     ),
                     Text(
                       '${log.calories.round()} KCAL',
@@ -719,6 +762,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   isCaloriesBurnedEstimated:
                                       _selectedDaySummary!
                                           .isCaloriesBurnedEstimated,
+                                  isHealthConnected:
+                                      _selectedDaySummary!.isHealthConnected,
                                   calorieTarget:
                                       _userProfile?.goals.targetCalories,
                                   proteinTarget:

@@ -10,6 +10,7 @@ class MacroSummary extends StatefulWidget {
   final double fiber;
   final double? caloriesBurned;
   final bool isCaloriesBurnedEstimated;
+  final bool isHealthConnected;
   final double? calorieTarget;
   final double? proteinTarget;
   final double? carbsTarget;
@@ -29,6 +30,7 @@ class MacroSummary extends StatefulWidget {
     this.fiber = 0,
     this.caloriesBurned,
     this.isCaloriesBurnedEstimated = true,
+    this.isHealthConnected = false,
     this.calorieTarget,
     this.proteinTarget,
     this.carbsTarget,
@@ -226,33 +228,142 @@ class _MacroSummaryState extends State<MacroSummary> {
     // Use calories burned as max if available, otherwise use calorie target
     final double? maxCalories = widget.caloriesBurned ?? widget.calorieTarget;
 
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildMacroBar(
-            label: l10n.componentsCalendarMacroSummaryCalories,
-            current: widget.calories,
-            target: maxCalories,
-            unit: '',
-            color: _getCaloriesColor(widget.calories, maxCalories),
-            context: context,
-          ),
-        ),
-        // Show info icon only when we have real health data (not estimated)
-        if (widget.caloriesBurned != null &&
-            !widget.isCaloriesBurnedEstimated) ...[
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => _showHealthDataInfo(context),
-            child: Icon(
-              Icons.info_outline,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+        Row(
+          children: [
+            Expanded(
+              child: _buildMacroBar(
+                label: l10n.componentsCalendarMacroSummaryCalories,
+                current: widget.calories,
+                target: maxCalories,
+                unit: '',
+                color: _getCaloriesColor(widget.calories, maxCalories),
+                context: context,
+              ),
             ),
-          ),
-        ],
+            // Show info icon only when we have real health data (not estimated)
+            if (widget.caloriesBurned != null &&
+                !widget.isCaloriesBurnedEstimated) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showHealthDataInfo(context),
+                child: Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
+        // Burned calories & net display
+        _buildBurnedCaloriesRow(context, l10n),
       ],
     );
+  }
+
+  /// Build a row showing calories burned from Health Connect and net balance
+  Widget _buildBurnedCaloriesRow(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // If health is connected and we have data, show it
+    if (widget.caloriesBurned != null && widget.caloriesBurned! > 0) {
+      final netCalories = widget.calories - widget.caloriesBurned!;
+      final isDeficit = netCalories < 0;
+
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Row(
+          children: [
+            // Burned calories
+            Icon(
+              Icons.local_fire_department,
+              size: 14,
+              color: Colors.deepOrange,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              l10n.componentsCalendarMacroSummaryBurned(
+                widget.caloriesBurned!.toStringAsFixed(0),
+              ),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            // Net calories
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color:
+                    isDeficit
+                        ? const Color(0xFF4ade80).withValues(alpha: 0.15)
+                        : const Color(0xFFfacc15).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isDeficit ? Icons.trending_down : Icons.trending_up,
+                    size: 12,
+                    color:
+                        isDeficit
+                            ? const Color(0xFF16a34a)
+                            : const Color(0xFFd97706),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.componentsCalendarMacroSummaryNetCalories(
+                      '${netCalories >= 0 ? '+' : ''}${netCalories.toStringAsFixed(0)}',
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      color:
+                          isDeficit
+                              ? const Color(0xFF16a34a)
+                              : const Color(0xFFd97706),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // If health is connected but no data for this date
+    if (widget.isHealthConnected && widget.caloriesBurned == null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Row(
+          children: [
+            Icon(
+              Icons.local_fire_department,
+              size: 14,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              l10n.componentsCalendarMacroSummaryNoBurnData,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                fontStyle: FontStyle.italic,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Not connected — show nothing
+    return const SizedBox.shrink();
   }
 
   void _showHealthDataInfo(BuildContext context) {

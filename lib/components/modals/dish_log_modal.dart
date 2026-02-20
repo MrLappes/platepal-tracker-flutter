@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../models/dish.dart';
 import '../../services/storage/dish_service.dart';
+import '../../services/health_service.dart';
 
 class DishLogModal extends StatefulWidget {
   final Dish dish;
@@ -14,6 +15,7 @@ class DishLogModal extends StatefulWidget {
 
 class _DishLogModalState extends State<DishLogModal> {
   final DishService _dishService = DishService();
+  final HealthService _healthService = HealthService();
   final TextEditingController _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
@@ -81,10 +83,21 @@ class _DishLogModalState extends State<DishLogModal> {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              ).componentsModalsDishLogModalDishLoggedSuccessfully,
+            content: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).componentsModalsDishLogModalDishLoggedSuccessfully,
+                  ),
+                ),
+                if (_healthService.isConnected)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Icon(Icons.sync, color: Colors.white, size: 16),
+                  ),
+              ],
             ),
             backgroundColor: Colors.green,
           ),

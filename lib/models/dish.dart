@@ -292,6 +292,7 @@ class DailyMacroSummary {
   final double fiber;
   final double? caloriesBurned;
   final bool isCaloriesBurnedEstimated;
+  final bool isHealthConnected;
 
   const DailyMacroSummary({
     required this.calories,
@@ -301,12 +302,14 @@ class DailyMacroSummary {
     required this.fiber,
     this.caloriesBurned,
     this.isCaloriesBurnedEstimated = true,
+    this.isHealthConnected = false,
   });
 
   /// Create a copy with calories burned data
   DailyMacroSummary copyWithCaloriesBurned(
-    double caloriesBurned, {
+    double? caloriesBurned, {
     bool isEstimated = true,
+    bool isHealthConnected = false,
   }) {
     return DailyMacroSummary(
       calories: calories,
@@ -316,6 +319,7 @@ class DailyMacroSummary {
       fiber: fiber,
       caloriesBurned: caloriesBurned,
       isCaloriesBurnedEstimated: isEstimated,
+      isHealthConnected: isHealthConnected,
     );
   }
 
@@ -329,6 +333,7 @@ class DailyMacroSummary {
       caloriesBurned: (json['caloriesBurned'] as num?)?.toDouble(),
       isCaloriesBurnedEstimated:
           json['isCaloriesBurnedEstimated'] as bool? ?? true,
+      isHealthConnected: json['isHealthConnected'] as bool? ?? false,
     );
   }
   Map<String, dynamic> toJson() {
@@ -340,6 +345,7 @@ class DailyMacroSummary {
       'fiber': fiber,
       'caloriesBurned': caloriesBurned,
       'isCaloriesBurnedEstimated': isCaloriesBurnedEstimated,
+      'isHealthConnected': isHealthConnected,
     };
   }
 }

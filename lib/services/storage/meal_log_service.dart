@@ -1,4 +1,5 @@
 import '../../models/dish.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../health_service.dart';
 import 'database_service.dart';
 import 'dish_service.dart';
@@ -48,6 +49,12 @@ class MealLogService {
   }) async {
     try {
       if (!_healthService.isConnected) return;
+
+      // Check if write-meals preference is enabled
+      final prefs = await SharedPreferences.getInstance();
+      final writeMealsEnabled =
+          prefs.getBool('health_write_meals_enabled') ?? true;
+      if (!writeMealsEnabled) return;
 
       final dish = await _dishService.getDishById(dishId);
       if (dish == null) return;

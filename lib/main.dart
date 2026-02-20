@@ -18,6 +18,7 @@ import 'screens/settings/contributors_screen.dart';
 import 'screens/settings/export_data_screen.dart';
 import 'screens/settings/import_data_screen.dart';
 import 'screens/settings/chat_agent_settings_screen.dart';
+import 'screens/settings/health_settings_screen.dart';
 import 'providers/meal_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -145,6 +146,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/settings/chat-agent',
       builder: (context, state) => const ChatAgentSettingsScreen(),
+    ),
+    GoRoute(
+      path: '/settings/health',
+      builder: (context, state) => const HealthSettingsScreen(),
     ),
   ],
 );

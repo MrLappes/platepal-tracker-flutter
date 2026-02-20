@@ -46,12 +46,13 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         });
       }
     });
-    
+
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMore();
     }
   }
@@ -158,7 +159,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         _hasMoreResults = products.length == 20;
       });
 
-      debugPrint('✅ Found ${products.length} products (total: ${_searchResults.length})');
+      debugPrint(
+        '✅ Found ${products.length} products (total: ${_searchResults.length})',
+      );
     } catch (e) {
       debugPrint('❌ Error searching products: $e');
       setState(() {
@@ -338,14 +341,231 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                               ),
                             ),
                           ),
-                          ..._localIngredients.map(
-                            (ing) =>
-                                ListTile(title: Text(ing.name.toUpperCase())),
-                          ),
-                          ..._localDishes.map(
-                            (dish) =>
-                                ListTile(title: Text(dish.name.toUpperCase())),
-                          ),
+                          ..._localIngredients.map((ing) {
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                // Convert Ingredient to Product
+                                final product = Product(
+                                  name: ing.name,
+                                  brand: null,
+                                  barcode: ing.barcode,
+                                  imageUrl: null,
+                                  nutrition:
+                                      ing.nutrition != null
+                                          ? ProductNutrition(
+                                            energyKcal100g:
+                                                ing.nutrition!.calories,
+                                            proteins100g:
+                                                ing.nutrition!.protein,
+                                            carbohydrates100g:
+                                                ing.nutrition!.carbs,
+                                            fat100g: ing.nutrition!.fat,
+                                            fiber100g: ing.nutrition!.fiber,
+                                            sugars100g: ing.nutrition!.sugar,
+                                            sodium100g: ing.nutrition!.sodium,
+                                          )
+                                          : null,
+                                );
+                                widget.onProductSelected?.call(product);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  border: Border.all(
+                                    color: colorScheme.outline.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: colorScheme
+                                              .surfaceContainerHighest
+                                              .withValues(alpha: 0.3),
+                                          border: Border.all(
+                                            color: colorScheme.outline
+                                                .withValues(alpha: 0.3),
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.inventory_2,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              ing.name.toUpperCase(),
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 13,
+                                                  ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              '${ing.amount.toStringAsFixed(0)}${ing.unit}',
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color: colorScheme.primary,
+                                                    fontSize: 9,
+                                                  ),
+                                            ),
+                                            if (ing.nutrition != null) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${ing.nutrition!.calories.round()} KCAL | P:${ing.nutrition!.protein.toStringAsFixed(1)}G | C:${ing.nutrition!.carbs.toStringAsFixed(1)}G',
+                                                style: theme
+                                                    .textTheme
+                                                    .labelSmall
+                                                    ?.copyWith(
+                                                      color: colorScheme
+                                                          .onSurface
+                                                          .withValues(
+                                                            alpha: 0.7,
+                                                          ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.chevron_right,
+                                        color: colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                          ..._localDishes.map((dish) {
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                // Convert Dish to Product
+                                final product = Product(
+                                  name: dish.name,
+                                  brand: null,
+                                  barcode: null,
+                                  imageUrl: null,
+                                  nutrition: ProductNutrition(
+                                    energyKcal100g: dish.nutrition.calories,
+                                    proteins100g: dish.nutrition.protein,
+                                    carbohydrates100g: dish.nutrition.carbs,
+                                    fat100g: dish.nutrition.fat,
+                                    fiber100g: dish.nutrition.fiber,
+                                    sugars100g: dish.nutrition.sugar,
+                                    sodium100g: dish.nutrition.sodium,
+                                  ),
+                                );
+                                widget.onProductSelected?.call(product);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  border: Border.all(
+                                    color: colorScheme.outline.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: colorScheme
+                                              .surfaceContainerHighest
+                                              .withValues(alpha: 0.3),
+                                          border: Border.all(
+                                            color: colorScheme.outline
+                                                .withValues(alpha: 0.3),
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.restaurant,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dish.name.toUpperCase(),
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 13,
+                                                  ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              '${dish.ingredients.length} INGREDIENTS',
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color: colorScheme.primary,
+                                                    fontSize: 9,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${dish.nutrition.calories.round()} KCAL | P:${dish.nutrition.protein.toStringAsFixed(1)}G | C:${dish.nutrition.carbs.toStringAsFixed(1)}G',
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color: colorScheme.onSurface
+                                                        .withValues(alpha: 0.7),
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.chevron_right,
+                                        color: colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
                         ],
                         if (_searchResults.isNotEmpty) ...[
                           Padding(

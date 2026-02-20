@@ -2171,6 +2171,106 @@
   "screensSettingsContributorsHansRole": "AI Co-pilot & Resident Hacker",
   "screensSettingsContributorsHansDesc": "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.",
   "screensSettingsContributorsMrLappesRole": "Creator & Developer",
-  "screensSettingsContributorsMrLappesDesc": "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone."
+  "screensSettingsContributorsMrLappesDesc": "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.",
+
+  "screensSettingsHealthSettingsTitle": "HEALTH CONNECT //",
+  "screensSettingsHealthSettingsConnected": "Connected",
+  "screensSettingsHealthSettingsNotConnected": "Not Connected",
+  "screensSettingsHealthSettingsLastSynced": "Last synced: {time}",
+  "@screensSettingsHealthSettingsLastSynced": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "screensSettingsHealthSettingsNotAvailableOnDevice": "Health Connect is not available on this device.",
+  "screensSettingsHealthSettingsDisconnectTitle": "Disconnect Health",
+  "screensSettingsHealthSettingsDisconnectMessage": "This will stop syncing calories burned from Health Connect and stop writing meal data. Your existing data will be preserved.",
+  "screensSettingsHealthSettingsDisconnect": "Disconnect",
+  "screensSettingsHealthSettingsDataOverview": "DATA OVERVIEW",
+  "screensSettingsHealthSettingsTodaysBurned": "Today's Burned",
+  "screensSettingsHealthSettingsNoDataYet": "No data yet",
+  "screensSettingsHealthSettingsDaysCached": "{count} days of data cached",
+  "@screensSettingsHealthSettingsDaysCached": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "screensSettingsHealthSettingsSyncControls": "SYNC CONTROLS",
+  "screensSettingsHealthSettingsSyncDescription": "Pulls the latest calories burned data from Health Connect for the past 7 days.",
+  "screensSettingsHealthSettingsOpenHealthConnect": "Open Health Connect",
+  "screensSettingsHealthSettingsWriteBehavior": "WRITE BEHAVIOR",
+  "screensSettingsHealthSettingsWriteMeals": "Write meals to Health Connect",
+  "screensSettingsHealthSettingsWriteMealsDescription": "Automatically log nutrition when you save a meal",
+  "screensSettingsHealthSettingsTargetAnalysis": "TARGET ANALYSIS",
+  "screensSettingsHealthSettingsTargetAnalysisDescription": "Compare your calorie expenditure from Health Connect with your current calorie targets to see if adjustments are needed.",
+  "screensSettingsHealthSettingsCurrentTarget": "Current Target",
+  "screensSettingsHealthSettingsAvgExpenditure": "Avg. Expenditure",
+  "screensSettingsHealthSettingsSuggestedTarget": "Suggested Target",
+  "screensSettingsHealthSettingsDaysAnalyzed": "Days Analyzed",
+  "screensSettingsHealthSettingsApply": "Apply",
+  "screensSettingsHealthSettingsCalorieTargetUpdated": "Calorie target updated to {target} kcal",
+  "@screensSettingsHealthSettingsCalorieTargetUpdated": {
+    "placeholders": {
+      "target": { "type": "String" }
+    }
+  },
+  "screensSettingsHealthSettingsCalorieTargetUpdateFailed": "Failed to update calorie target",
+  "screensSettingsHealthSettingsAnalysisFailed": "Analysis failed: {error}",
+  "@screensSettingsHealthSettingsAnalysisFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "screensSettingsHealthSettingsAboutHealthConnect": "ABOUT HEALTH CONNECT",
+  "screensSettingsHealthSettingsAboutDescription": "Connect PlatePal to Health Connect (Google Fit) to:",
+  "screensSettingsHealthSettingsFeatureReadCalories": "Read your actual calories burned from fitness tracking",
+  "screensSettingsHealthSettingsFeatureWriteMeals": "Automatically write meal nutrition data to Health Connect",
+  "screensSettingsHealthSettingsFeatureNetBalance": "See accurate net calorie balance (consumed vs burned)",
+  "screensSettingsHealthSettingsFeatureRecommendations": "Get calorie target recommendations based on real expenditure",
+  "screensSettingsHealthSettingsAboutNote": "When connected, Health Connect becomes the single source of truth for calories burned — no estimated values.",
+  "screensSettingsHealthSettingsJustNow": "Just now",
+  "screensSettingsHealthSettingsMinutesAgo": "{minutes}m ago",
+  "@screensSettingsHealthSettingsMinutesAgo": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "screensSettingsHealthSettingsHoursAgo": "{hours}h ago",
+  "@screensSettingsHealthSettingsHoursAgo": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "screensSettingsHealthSettingsDaysAgo": "{days}d ago",
+  "@screensSettingsHealthSettingsDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "screensMenuHealthAndFitness": "Health & Fitness",
+  "screensMenuHealthConnect": "HEALTH CONNECT",
+  "screensMenuHealthConnectedSubtitle": "Connected — syncing with Google Fit",
+  "screensMenuHealthDisconnectedSubtitle": "Sync with Google Fit & Health Connect",
+  "componentsCalendarMacroSummaryBurned": "{calories} burned",
+  "@componentsCalendarMacroSummaryBurned": {
+    "placeholders": {
+      "calories": { "type": "String" }
+    }
+  },
+  "componentsCalendarMacroSummaryNetCalories": "Net: {value}",
+  "@componentsCalendarMacroSummaryNetCalories": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "componentsCalendarMacroSummaryNoBurnData": "No burn data for this day",
+  "screensCalendarHealthDeleteWarning": "The nutrition entry in Health Connect will not be removed. You can delete it manually in the Health Connect app.",
+  "screensSettingsProfileSettingsManageHealthConnect": "Manage Health Connect",
+  "screensSettingsProfileSettingsLastSynced": "Last synced: {time}",
+  "@screensSettingsProfileSettingsLastSynced": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  }
 }
 
