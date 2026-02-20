@@ -2039,4 +2039,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String screensSettingsProfileSettingsLastSynced(String time) {
     return 'Last synced: $time';
   }
+
+  @override
+  String get servicesChatAgentFallbackParsing =>
+      'I apologize, but I\'m having trouble processing your request right now. Could you please try rephrasing your question?';
+
+  @override
+  String get servicesChatAgentFallbackCritical =>
+      'I\'m experiencing some technical difficulties at the moment. Please try again in a few moments.';
+
+  @override
+  String get servicesChatAgentFallbackNetwork =>
+      'I\'m having trouble connecting to my knowledge base right now. Please check your internet connection and try again.';
+
+  @override
+  String get servicesChatAgentFallbackContext =>
+      'Your request contains a lot of information. Could you please break it down into smaller, more specific questions?';
+
+  @override
+  String get servicesChatAgentFallbackGeneric =>
+      'I apologize, but I encountered an unexpected issue. Please try again.';
+
+  @override
+  String get servicesChatAgentFallbackGenerateResponse =>
+      'I apologize, but I encountered an issue generating a response. Please try again.';
+
+  @override
+  String get servicesChatAgentFallbackTemporaryIssue =>
+      'I encountered a temporary issue processing your request. Please try again.';
+
+  @override
+  String get servicesChatAgentFallbackRephrase =>
+      'I apologize, but I\'m having trouble with that request. Could you try rephrasing it?';
+
+  @override
+  String get servicesChatAgentFallbackDishInfo =>
+      'Here is the dish information:';
 }

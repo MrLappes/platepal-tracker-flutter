@@ -85,6 +85,7 @@ class ChatAgentService {
     );
     _responseGenerationStep = ResponseGenerationStep(
       openaiService: _openaiService,
+      modificationTracker: _modificationTracker,
     );
     _autonomousVerificationStep = AutonomousVerificationStep(
       openaiService: _openaiService,
@@ -124,6 +125,11 @@ class ChatAgentService {
     String? imageUri,
     List<UserIngredient>? userIngredients,
     ThinkingStepCallback? onThinkingStep,
+
+    /// Pre-built localised fallback strings keyed by identifier.
+    /// Build from AppLocalizations in chat_provider and pass here so the
+    /// service layer can show translated error messages without BuildContext.
+    Map<String, String>? localizedFallbacks,
   }) async {
     _onThinkingStep = onThinkingStep;
 
@@ -141,6 +147,16 @@ class ChatAgentService {
     debugPrint('   Has image: ${imageUri != null}');
     debugPrint('   User ingredients: ${userIngredients?.length ?? 0}');
     debugPrint('   Deep search enabled: $_deepSearchEnabled');
+
+    // Read the current app locale so steps can localise the system prompt and
+    // fall-back error messages.  SharedPreferences is already loaded by
+    // initializeFromPreferences(), so this is essentially free.
+    String languageCode = 'en';
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      languageCode = prefs.getString('app_locale') ?? 'en';
+    } catch (_) {}
+    debugPrint('   Language code: $languageCode');
 
     // Get the appropriate pipeline configuration based on settings
     final pipelineConfig = getPipelineConfig();
@@ -160,6 +176,8 @@ class ChatAgentService {
         imageUri: imageUri,
         userIngredients: userIngredients,
         startTime: startTime,
+        languageCode: languageCode,
+        localizedFallbacks: localizedFallbacks,
       );
     }
 
@@ -172,6 +190,8 @@ class ChatAgentService {
       userIngredients: userIngredients,
       startTime: startTime,
       pipelineConfig: pipelineConfig,
+      languageCode: languageCode,
+      localizedFallbacks: localizedFallbacks,
     );
   }
 
@@ -183,6 +203,8 @@ class ChatAgentService {
     String? imageUri,
     List<UserIngredient>? userIngredients,
     required DateTime startTime,
+    String languageCode = 'en',
+    Map<String, String>? localizedFallbacks,
     String? enhancedContext,
     int restartCount = 0,
     List<ChatStepResult>? previousStepResults,
@@ -238,6 +260,10 @@ class ChatAgentService {
         // Ensure image and ingredient data are explicitly available via metadata
         'uploadedImageUri': imageUri,
         'userIngredients': userIngredients?.map((i) => i.toJson()).toList(),
+        // Language + localised fallbacks for translated error messages
+        'languageCode': languageCode,
+        if (localizedFallbacks != null)
+          'localizedFallbacks': localizedFallbacks,
       },
     );
 
@@ -426,6 +452,8 @@ class ChatAgentService {
                 previousThinkingSteps: thinkingSteps,
                 previousCompletedSteps: completedSteps,
                 previousTotalStepsExecuted: totalStepsExecuted,
+                languageCode: languageCode,
+                localizedFallbacks: localizedFallbacks,
               );
             } else {
               debugPrint(
@@ -597,6 +625,8 @@ class ChatAgentService {
     List<UserIngredient>? userIngredients,
     required DateTime startTime,
     required AgentPipelineConfig pipelineConfig,
+    String languageCode = 'en',
+    Map<String, String>? localizedFallbacks,
   }) async {
     final List<ChatStepResult> stepResults = [];
     final List<String> thinkingSteps = [];
@@ -615,6 +645,10 @@ class ChatAgentService {
         // Propagate image and ingredients to metadata so all steps can access them
         'uploadedImageUri': imageUri,
         'userIngredients': userIngredients?.map((i) => i.toJson()).toList(),
+        // Language + localised fallbacks for translated error messages
+        'languageCode': languageCode,
+        if (localizedFallbacks != null)
+          'localizedFallbacks': localizedFallbacks,
       },
     );
 
@@ -1158,7 +1192,7 @@ class ChatAgentService {
       replyText:
           failedResult.error?.retryable == true
               ? 'I encountered a temporary issue processing your request. Please try again.'
-              : 'I apologize, but I\'m having trouble with that request. Could you try rephrasing it?',
+              : "I apologize, but I'm having trouble with that request. Could you try rephrasing it?",
       dishes: [],
       metadata: {
         'error': failedResult.error?.message ?? 'Unknown error',

@@ -2161,5 +2161,15 @@
   "componentsCalendarMacroSummaryNoBurnData": "Keine Verbrauchsdaten für diesen Tag",
   "screensCalendarHealthDeleteWarning": "Der Ernährungseintrag in Health Connect wird nicht entfernt. Sie können ihn manuell in der Health Connect App löschen.",
   "screensSettingsProfileSettingsManageHealthConnect": "Health Connect verwalten",
-  "screensSettingsProfileSettingsLastSynced": "Zuletzt synchronisiert: {time}"
+  "screensSettingsProfileSettingsLastSynced": "Zuletzt synchronisiert: {time}",
+
+  "servicesChatAgentFallbackParsing": "Entschuldigung, ich habe Probleme, deine Anfrage zu verarbeiten. Könntest du sie bitte umformulieren?",
+  "servicesChatAgentFallbackCritical": "Ich erlebe gerade technische Schwierigkeiten. Bitte versuche es in einem Moment erneut.",
+  "servicesChatAgentFallbackNetwork": "Ich habe Verbindungsprobleme. Bitte überprüfe deine Internetverbindung und versuche es erneut.",
+  "servicesChatAgentFallbackContext": "Deine Anfrage enthält sehr viele Informationen. Könntest du sie in kleinere Fragen aufteilen?",
+  "servicesChatAgentFallbackGeneric": "Entschuldigung, ein unerwartetes Problem ist aufgetreten. Bitte versuche es erneut.",
+  "servicesChatAgentFallbackGenerateResponse": "Entschuldigung, beim Generieren einer Antwort ist ein Problem aufgetreten. Bitte versuche es erneut.",
+  "servicesChatAgentFallbackTemporaryIssue": "Es ist ein vorübergehendes Problem aufgetreten. Bitte versuche es erneut.",
+  "servicesChatAgentFallbackRephrase": "Entschuldigung, ich habe Schwierigkeiten mit dieser Anfrage. Könntest du sie umformulieren?",
+  "servicesChatAgentFallbackDishInfo": "Hier sind die Gerichte-Informationen:"
 }

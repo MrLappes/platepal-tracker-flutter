@@ -1,18 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:platepal_tracker/models/user_ingredient.dart';
+import 'package:uuid/uuid.dart';
 import '../../../models/chat_types.dart';
 import '../../../models/dish.dart';
 import '../openai_service.dart';
 import '../../chat/system_prompts.dart';
+import '../../chat/agent_tools.dart';
+import '../../chat/pipeline_modification_tracker.dart';
 import '../../../utils/image_utils.dart';
+
+const _uuid = Uuid();
 
 /// Generates the main AI response based on gathered context and user message
 class ResponseGenerationStep extends AgentStep {
   final OpenAIService _openaiService;
+  final PipelineModificationTracker? _modificationTracker;
 
-  ResponseGenerationStep({required OpenAIService openaiService})
-    : _openaiService = openaiService;
+  ResponseGenerationStep({
+    required OpenAIService openaiService,
+    PipelineModificationTracker? modificationTracker,
+  }) : _openaiService = openaiService,
+       _modificationTracker = modificationTracker;
 
   @override
   String get stepName => 'response_generation';
@@ -40,20 +49,15 @@ class ResponseGenerationStep extends AgentStep {
         );
       }
 
-      // Check if we should include conversation history based on thinking step analysis
-      bool includeConversationHistory = true; // Default to true for safety
-      if (input.thinkingResult?.contextRequirements.needsConversationHistory !=
-          null) {
-        includeConversationHistory =
-            input.thinkingResult!.contextRequirements.needsConversationHistory;
-        debugPrint(
-          '🤖 ResponseGenerationStep: Using thinking step decision for conversation history: $includeConversationHistory',
-        );
-      } else {
-        debugPrint(
-          '🤖 ResponseGenerationStep: No thinking result found, defaulting to include conversation history',
-        );
-      }
+      // Use the thinking step's explicit decision on conversation history.
+      // The normalizer in ThinkingStep now defaults to `true` (not false), so
+      // this value is safe to trust directly.
+      bool includeConversationHistory =
+          input.thinkingResult?.contextRequirements.needsConversationHistory ??
+          true; // Default true when no thinking result is available
+      debugPrint(
+        '🤖 ResponseGenerationStep: includeConversationHistory=$includeConversationHistory',
+      );
       final messages = await _buildConversationMessages(
         input.enhancedSystemPrompt ?? '',
         input.conversationHistory,
@@ -137,87 +141,105 @@ class ResponseGenerationStep extends AgentStep {
         '🤖 ResponseGenerationStep: Sending ${messages.length} messages to OpenAI',
       );
 
-      // Ensure we pass the uploaded image URI down to the transport so it can
-      // attach image bytes when available. Also pass along a response format
-      // hint to request structured JSON.
       final uploadedImageUri =
           input.imageUri ?? input.metadata?['uploadedImageUri'] as String?;
+
+      // Determine which tools to make available for this turn.
+      // Skip tool calling entirely when running against a custom
+      // OpenAI-compatible endpoint (compatibility mode) — most local LLM
+      // servers (Ollama, LM Studio, etc.) return a 400 when they see the
+      // `tools` field rather than ignoring it.  The fallback JSON-parsing
+      // path handles those endpoints transparently.
+      final isCompatMode = await _openaiService.getIsCompatibilityMode();
+      final tools =
+          isCompatMode
+              ? null
+              : AgentTools.toolsForContext(input.thinkingResult);
+      final toolChoice =
+          isCompatMode
+              ? null
+              : AgentTools.toolChoiceForContext(input.thinkingResult);
+
+      debugPrint(
+        '🤖 ResponseGenerationStep: isCompatMode=$isCompatMode, '
+        'tools=${tools?.length ?? 0}, toolChoice=$toolChoice',
+      );
+
       final chatCompletionResponse = await _openaiService.sendChatRequest(
         messages: messages,
         temperature: 0.7,
         maxTokens: 2000,
         imageUri: uploadedImageUri,
-      );
-      final openaiResponse =
-          chatCompletionResponse.choices.first.message.content ?? '';
-      debugPrint(
-        '🤖 ResponseGenerationStep: Received response: ${openaiResponse.length} characters',
+        tools: tools,
+        toolChoice: toolChoice,
       );
 
-      // Parse the JSON response from OpenAI
+      final choice = chatCompletionResponse.choices.first;
+
       String replyText;
       List<Dish>? dishes;
       String? recommendation;
 
-      try {
-        // Check if response looks like JSON (starts with { and ends with })
-        final trimmed = openaiResponse.trim();
-        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-          debugPrint('🤖 ResponseGenerationStep: Parsing JSON response');
-          final jsonResponse =
-              jsonDecode(openaiResponse) as Map<String, dynamic>;
+      if (choice.isToolCall) {
+        // ── Tool-call path (preferred) ────────────────────────────────────
+        debugPrint('🤖 ResponseGenerationStep: Received tool_calls response');
+        final result = _dispatchToolCalls(
+          choice.message.toolCalls ?? [],
+          uploadedImageUri,
+          dishInfoFallback:
+              (input.metadata?['localizedFallbacks']
+                      as Map<String, dynamic>?)?['dishInfo']
+                  as String?,
+        );
+        replyText = result['replyText'] as String? ?? '';
+        recommendation = result['recommendation'] as String?;
+        dishes = result['dishes'] as List<Dish>?;
+      } else {
+        // ── Fallback: plain-text / JSON content path ──────────────────────
+        // Some OpenAI-compatible endpoints may not support tool calling.
+        // We keep the original JSON parsing as a graceful fallback.
+        debugPrint(
+          '🤖 ResponseGenerationStep: Tool calls not used, falling back to JSON content parsing',
+        );
+        final openaiResponse = choice.message.content ?? '';
+        debugPrint(
+          '🤖 ResponseGenerationStep: Received response: ${openaiResponse.length} characters',
+        );
 
-          replyText =
-              jsonResponse['replyText'] as String? ?? 'No response text found.';
-          recommendation = jsonResponse['recommendation'] as String?;
+        try {
+          final trimmed = openaiResponse.trim();
+          if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+            final jsonResponse =
+                jsonDecode(openaiResponse) as Map<String, dynamic>;
+            replyText =
+                jsonResponse['replyText'] as String? ??
+                'No response text found.';
+            recommendation = jsonResponse['recommendation'] as String?;
 
-          // Parse dishes if present
-          final dishesJson = jsonResponse['dishes'] as List<dynamic>?;
-          if (dishesJson != null) {
-            final uploadedImageForDishes =
-                input.imageUri ??
-                input.metadata?['uploadedImageUri'] as String?;
-            final parsed = <Dish>[];
-            for (final dishData in dishesJson) {
-              final dishMap = dishData as Map<String, dynamic>;
-              final parsedDish = _createDishFromJson(dishMap);
-              if (parsedDish == null) continue;
-              if (uploadedImageForDishes != null &&
-                  (dishMap['imageUrl'] == null &&
-                      parsedDish.imageUrl == null)) {
-                parsed.add(
-                  parsedDish.copyWith(imageUrl: uploadedImageForDishes),
-                );
-              } else {
-                parsed.add(parsedDish);
+            final dishesJson = jsonResponse['dishes'] as List<dynamic>?;
+            if (dishesJson != null) {
+              final parsed = <Dish>[];
+              for (final dishData in dishesJson) {
+                final dishMap = dishData as Map<String, dynamic>;
+                final parsedDish = _createDishFromJson(dishMap);
+                if (parsedDish == null) continue;
+                if (uploadedImageUri != null && parsedDish.imageUrl == null) {
+                  parsed.add(parsedDish.copyWith(imageUrl: uploadedImageUri));
+                } else {
+                  parsed.add(parsedDish);
+                }
               }
+              dishes = parsed;
             }
-            dishes = parsed;
+          } else {
+            replyText = openaiResponse;
           }
-
+        } catch (e) {
           debugPrint(
-            '🤖 ResponseGenerationStep: Successfully parsed JSON response',
+            '⚠️ ResponseGenerationStep: Failed to parse JSON response: $e',
           );
-          debugPrint('   Reply text length: ${replyText.length}');
-          debugPrint('   Dishes count: ${dishes?.length ?? 0}');
-          debugPrint('   Has recommendation: ${recommendation != null}');
-        } else {
-          debugPrint(
-            '🤖 ResponseGenerationStep: Response is not JSON, using as plain text',
-          );
-          replyText = openaiResponse;
+          replyText = _extractReplyTextFromMalformedJson(openaiResponse);
         }
-      } catch (e) {
-        debugPrint(
-          '⚠️ ResponseGenerationStep: Failed to parse JSON response: $e',
-        );
-        debugPrint(
-          '   Raw response: ${openaiResponse.substring(0, openaiResponse.length > 200 ? 200 : openaiResponse.length)}...',
-        );
-
-        // Try to extract replyText from malformed JSON
-        replyText = _extractReplyTextFromMalformedJson(openaiResponse);
-        debugPrint('   Extracted reply text: ${replyText.length} characters');
       }
 
       final chatResponse = ChatResponse(
@@ -227,15 +249,31 @@ class ResponseGenerationStep extends AgentStep {
         metadata: {
           'modelUsed': _openaiService.selectedModel,
           'tokensUsed': chatCompletionResponse.usage?.totalTokens,
+          'usedToolCalling': choice.isToolCall,
         },
       );
       debugPrint('✅ ResponseGenerationStep: Successfully generated response');
+      debugPrint('   Reply text length: ${replyText.length}');
+      debugPrint('   Dishes count: ${dishes?.length ?? 0}');
       return ChatStepResult.success(
         stepName: stepName,
         data: {
           'chatResponse': chatResponse.toJson(),
-          'parsedResponse': openaiResponse,
+          'parsedResponse': choice.message.content ?? '[tool_calls]',
           'conversationHistoryIncluded': includeConversationHistory,
+          'usedToolCalling': choice.isToolCall,
+          if (choice.isToolCall &&
+              (choice.message.toolCalls?.isNotEmpty ?? false))
+            'toolCallDetails':
+                choice.message.toolCalls!
+                    .map(
+                      (tc) => {
+                        'id': tc.id,
+                        'tool': tc.functionName,
+                        'arguments': tc.functionArguments,
+                      },
+                    )
+                    .toList(),
         },
       );
     } catch (error) {
@@ -292,6 +330,247 @@ class ResponseGenerationStep extends AgentStep {
     return ChatStepVerificationResult.valid();
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Tool call dispatcher
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Parses an ordered list of OpenAI tool calls and builds the unified
+  /// [ChatResponse] fields. Handles multiple calls in a single response
+  /// (e.g. one `provide_chat_response` + one `create_new_dish`).
+  Map<String, dynamic> _dispatchToolCalls(
+    List<ToolCall> toolCalls,
+    String? uploadedImageUri, {
+    String? dishInfoFallback,
+  }) {
+    String replyText = '';
+    String? recommendation;
+    final dishes = <Dish>[];
+    final toolCallLog = <Map<String, dynamic>>[];
+
+    for (final call in toolCalls) {
+      final args = call.parseArguments();
+      debugPrint(
+        '\ud83e\udd16 Tool call: ${call.functionName} args=${call.functionArguments}',
+      );
+      toolCallLog.add({'tool': call.functionName, 'args': args});
+
+      switch (call.functionName) {
+        case 'provide_chat_response':
+          replyText = args['reply_text'] as String? ?? replyText;
+          recommendation = args['recommendation'] as String? ?? recommendation;
+
+        case 'ask_clarification':
+          final q = args['question'] as String? ?? '';
+          final ctx = args['context'] as String?;
+          replyText = ctx != null && ctx.isNotEmpty ? '$q\n\n($ctx)' : q;
+
+        case 'reference_existing_dish':
+          replyText = args['reply_text'] as String? ?? replyText;
+          recommendation = args['recommendation'] as String? ?? recommendation;
+          // Pass a minimal dish map downstream for DishProcessingStep to
+          // resolve from DB. The id comes from the AI's tool argument.
+          final dishId = args['dish_id'] as String?;
+          if (dishId != null && dishId.isNotEmpty) {
+            final refDish = Dish(
+              id: dishId,
+              name: args['dish_name'] as String? ?? dishId,
+              description: null,
+              ingredients: const [],
+              nutrition: const NutritionInfo(
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              ),
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+              isFavorite: false,
+            );
+            dishes.add(refDish);
+            _modificationTracker?.recordModification(
+              type: PipelineModificationType.contextModification,
+              severity: ModificationSeverity.medium,
+              stepName: stepName,
+              description:
+                  'AI referenced existing dish: ${args["dish_name"] ?? dishId}',
+              technicalDetails:
+                  'Tool: reference_existing_dish | DB ID: $dishId',
+              afterData: {'dishId': dishId, 'dishName': args['dish_name']},
+            );
+          }
+
+        case 'create_new_dish':
+          replyText = args['reply_text'] as String? ?? replyText;
+          recommendation = args['recommendation'] as String? ?? recommendation;
+          // Map tool args -> Dish for downstream DishProcessingStep
+          final newDish = _createDishFromToolArgs(args, uploadedImageUri);
+          if (newDish != null) {
+            dishes.add(newDish);
+            _modificationTracker?.recordModification(
+              type: PipelineModificationType.dataEnrichment,
+              severity: ModificationSeverity.high,
+              stepName: stepName,
+              description: 'AI created new dish: ${args["name"] ?? "unknown"}',
+              technicalDetails:
+                  'Tool: create_new_dish | Ingredients: ${(args["ingredients"] as List?)?.length ?? 0} | '
+                  'ID: ${newDish.id}',
+              afterData: {
+                'dishId': newDish.id,
+                'dishName': newDish.name,
+                'ingredientCount': newDish.ingredients.length,
+                'toolArgs': args,
+              },
+            );
+          }
+
+        default:
+          debugPrint('\u26a0\ufe0f Unknown tool call: ${call.functionName}');
+      }
+    }
+
+    // Record the full tool-call summary to the modification tracker
+    if (toolCallLog.isNotEmpty) {
+      _modificationTracker?.recordModification(
+        type: PipelineModificationType.aiValidation,
+        severity: ModificationSeverity.low,
+        stepName: stepName,
+        description:
+            'AI used tool calling (${toolCallLog.length} call${toolCallLog.length == 1 ? "" : "s"}): '
+            '${toolCallLog.map((t) => t["tool"]).join(", ")}',
+        technicalDetails: toolCallLog
+            .map((t) => '${t["tool"]}: ${t["args"]}')
+            .join('\n'),
+        afterData: {'toolCalls': toolCallLog},
+      );
+    }
+
+    if (replyText.isEmpty && dishes.isNotEmpty) {
+      replyText = dishInfoFallback ?? 'Here is the dish information:';
+    }
+
+    return {
+      'replyText': replyText,
+      'recommendation': recommendation,
+      'dishes': dishes.isEmpty ? null : dishes,
+    };
+  }
+
+  /// Converts `create_new_dish` tool call arguments to a [Dish] object.
+  Dish? _createDishFromToolArgs(
+    Map<String, dynamic> args,
+    String? uploadedImageUri,
+  ) {
+    try {
+      final name = args['name'] as String?;
+      if (name == null || name.trim().isEmpty) return null;
+
+      final rawIngredients =
+          (args['ingredients'] as List<dynamic>?) ?? const [];
+      final ingredients = <Ingredient>[];
+      double totalCalories = 0;
+      double totalProtein = 0;
+      double totalCarbs = 0;
+      double totalFat = 0;
+      double totalFiber = 0;
+
+      for (final raw in rawIngredients) {
+        if (raw is! Map<String, dynamic>) continue;
+        final ingName = raw['name'] as String? ?? 'Unknown';
+        final qty = _parseDouble(raw['quantity'] ?? raw['amount']);
+        final unit = raw['unit'] as String? ?? 'g';
+        final cal100 = _parseDouble(
+          raw['calories_per_100'] ?? raw['caloriesPer100'],
+        );
+        final pro100 = _parseDouble(
+          raw['protein_per_100'] ?? raw['proteinPer100'],
+        );
+        final carb100 = _parseDouble(
+          raw['carbs_per_100'] ?? raw['carbsPer100'],
+        );
+        final fat100 = _parseDouble(raw['fat_per_100'] ?? raw['fatPer100']);
+        final fib100 = _parseDouble(raw['fiber_per_100'] ?? raw['fiberPer100']);
+
+        final nutrition = NutritionInfo(
+          calories: cal100,
+          protein: pro100,
+          carbs: carb100,
+          fat: fat100,
+          fiber: fib100,
+        );
+
+        ingredients.add(
+          Ingredient(
+            id: _uuid.v4(),
+            name: ingName.trim(),
+            amount: qty,
+            unit: unit,
+            nutrition: nutrition,
+          ),
+        );
+
+        // Calculate totals from per-100g values × amount in grams
+        double inGrams;
+        switch (unit.toLowerCase()) {
+          case 'g':
+          case 'gram':
+          case 'grams':
+            inGrams = qty;
+          case 'kg':
+            inGrams = qty * 1000;
+          case 'ml':
+          case 'milliliter':
+          case 'milliliters':
+            inGrams = qty;
+          case 'l':
+          case 'liter':
+            inGrams = qty * 1000;
+          case 'oz':
+            inGrams = qty * 28.35;
+          case 'lb':
+            inGrams = qty * 453.592;
+          case 'cup':
+          case 'cups':
+            inGrams = qty * 240;
+          case 'tbsp':
+          case 'tablespoon':
+            inGrams = qty * 15;
+          case 'tsp':
+          case 'teaspoon':
+            inGrams = qty * 5;
+          default:
+            inGrams = qty * 100; // items/pieces
+        }
+        final mult = inGrams / 100;
+        totalCalories += cal100 * mult;
+        totalProtein += pro100 * mult;
+        totalCarbs += carb100 * mult;
+        totalFat += fat100 * mult;
+        totalFiber += fib100 * mult;
+      }
+
+      return Dish(
+        id: _uuid.v4(),
+        name: name.trim(),
+        description: args['description'] as String?,
+        ingredients: ingredients,
+        nutrition: NutritionInfo(
+          calories: totalCalories,
+          protein: totalProtein,
+          carbs: totalCarbs,
+          fat: totalFat,
+          fiber: totalFiber,
+        ),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isFavorite: false,
+        imageUrl: uploadedImageUri,
+      );
+    } catch (e) {
+      debugPrint('\u26a0\ufe0f _createDishFromToolArgs failed: $e');
+      return null;
+    }
+  }
+
   /// Builds the conversation messages for the OpenAI request
   Future<List<Map<String, dynamic>>> _buildConversationMessages(
     String systemPrompt,
@@ -322,6 +601,7 @@ class ResponseGenerationStep extends AgentStep {
       botPersonality: input.metadata?['botPersonality'] as String?,
       needsExistingDishes: needsExistingDishes,
       needsInfoOnDishCreation: needsInfoOnDishCreation,
+      useToolCalling: true,
       contextSections: {if (contextSummary != null) 'Context': contextSummary},
     );
 
@@ -553,7 +833,7 @@ class ResponseGenerationStep extends AgentStep {
             );
 
             final ingredient = Ingredient(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              id: _uuid.v4(),
               name: ingredientName.trim(),
               amount: quantity,
               unit: unit,
@@ -595,7 +875,7 @@ class ResponseGenerationStep extends AgentStep {
       );
 
       return Dish(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: _uuid.v4(),
         name: name.trim(),
         description: description?.trim() ?? '',
         ingredients: ingredients,

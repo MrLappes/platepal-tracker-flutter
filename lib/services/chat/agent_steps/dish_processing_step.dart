@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 import '../../../models/chat_types.dart';
 import '../../../models/dish_models.dart';
 import '../../../models/meal_type.dart';
 import '../../../models/user_ingredient.dart';
 import '../../../repositories/dish_repository.dart';
 import '../../../services/storage/dish_service.dart';
+
+const _uuid = Uuid();
 
 /// Processes and validates dishes from AI responses using new dish models
 class DishProcessingStep extends AgentStep {
@@ -107,10 +110,10 @@ class DishProcessingStep extends AgentStep {
           }
 
           processedDish ??= await _processSingleDish(
-              dishData,
-              uploadedImageUri,
-              userIngredients,
-            );
+            dishData,
+            uploadedImageUri,
+            userIngredients,
+          );
 
           if (processedDish != null) {
             validatedDishes.add(processedDish);
@@ -638,15 +641,11 @@ class DishProcessingStep extends AgentStep {
     return null;
   }
 
-  /// Generates a unique dish ID
-  String _generateDishId() {
-    return 'dish_${DateTime.now().millisecondsSinceEpoch}_${(1000 + (999 * DateTime.now().microsecond / 1000000)).round()}';
-  }
+  /// Generates a unique dish ID using UUID v4 (no timestamp collisions).
+  String _generateDishId() => _uuid.v4();
 
-  /// Generates a unique ingredient ID
-  String _generateIngredientId() {
-    return 'ingredient_${DateTime.now().millisecondsSinceEpoch}_${(1000 + (999 * DateTime.now().microsecond / 1000000)).round()}';
-  }
+  /// Generates a unique ingredient ID using UUID v4 (no timestamp collisions).
+  String _generateIngredientId() => _uuid.v4();
 
   /// Calculates total nutrition from all ingredients
   /// Ingredients store per-100g nutrition values, this method calculates actual totals
@@ -762,114 +761,52 @@ class DishProcessingStep extends AgentStep {
     }
   }
 
-  /// Attempts to load a dish from the database if the AI response includes a reference
-  /// (e.g., dish ID or minimal dish data). If successful, returns the dish as a ProcessedDish.
-  /// Returns null if no valid reference is found or if loading fails.
+  /// Attempts to load a dish from the database when the AI explicitly provided
+  /// a known database ID (via [referenceExistingDishTool]).
+  ///
+  /// IMPORTANT: This method NO LONGER falls back to name-matching. A DB lookup
+  /// is triggered only when the dish data contains an explicit, non-"random" id
+  /// that was verified to come from a `reference_existing_dish` tool call.
+  /// Removing name-based matching is the fix for Bug 1: a new dish with the
+  /// same name as an existing dish was silently replaced by the old record.
   Future<ProcessedDish?> _tryLoadDishFromDatabaseReference(
     Map<String, dynamic> dishData,
     String? uploadedImageUri,
     List<UserIngredient>? userIngredients,
   ) async {
     try {
-      // Look for common ID fields the AI may include
-      var referenceId =
-          dishData['id'] ??
-          dishData['dishId'] ??
-          dishData['dbId'] ??
-          dishData['db_id'];
+      // Only look at explicit id fields — never infer from name.
+      final rawId =
+          dishData['id']?.toString() ??
+          dishData['dishId']?.toString() ??
+          dishData['dbId']?.toString() ??
+          dishData['db_id']?.toString();
 
-      // Use injected DishService if provided, otherwise create a local instance
+      // If no id — or AI requested a random/new placeholder — this is not a
+      // DB reference. Return null so the caller creates a fresh dish.
+      if (rawId == null || rawId.isEmpty || rawId.toLowerCase() == 'random') {
+        debugPrint(
+          '🔍 _tryLoadDishFromDatabaseReference: No explicit id found, skipping DB lookup.',
+        );
+        return null;
+      }
+
       final ds = _dishService ?? DishService();
+      final storageDish = await ds.getDishById(rawId);
+
+      if (storageDish == null) {
+        debugPrint(
+          '🔍 _tryLoadDishFromDatabaseReference: id "$rawId" not found in DB. '
+          'Treating as new dish (no name-fallback).',
+        );
+        return null;
+      }
+
       debugPrint(
-        '🔍 _tryLoadDishFromDatabaseReference: Using DishService instance',
+        '🔍 _tryLoadDishFromDatabaseReference: Loaded DB dish: ${storageDish.name} (${storageDish.id})',
       );
 
-      // If AI explicitly requested a random/new id placeholder, don't treat as a reference
-      if (referenceId is String && referenceId.toLowerCase() == 'random') {
-        debugPrint(
-          '🔍 _tryLoadDishFromDatabaseReference: AI requested random id',
-        );
-        return null;
-      }
-
-      // If no id present, try to match by name in the database (user expects DB match sometimes)
-      if (referenceId == null) {
-        final nameRaw = (dishData['name'] ?? dishData['dishName'])?.toString();
-        if (nameRaw != null && nameRaw.trim().isNotEmpty) {
-          final queryName = _normalizeString(nameRaw);
-          debugPrint(
-            '🔍 _tryLoadDishFromDatabaseReference: No id provided, trying name match: "$nameRaw"',
-          );
-
-          try {
-            final all = await ds.getAllDishes();
-            for (final d in all) {
-              final dbNameNorm = _normalizeString(d.name);
-              // Exact normalized match
-              if (dbNameNorm == queryName) {
-                referenceId = d.id;
-                debugPrint(
-                  '🔍 _tryLoadDishFromDatabaseReference: Found DB dish by exact name: ${d.name} (ID: ${d.id})',
-                );
-                break;
-              }
-              // Loose matches: contains or startsWith
-              if (dbNameNorm.contains(queryName) ||
-                  queryName.contains(dbNameNorm) ||
-                  dbNameNorm.startsWith(queryName) ||
-                  queryName.startsWith(dbNameNorm)) {
-                referenceId = d.id;
-                debugPrint(
-                  '🔍 _tryLoadDishFromDatabaseReference: Found DB dish by loose name match: ${d.name} (ID: ${d.id})',
-                );
-                break;
-              }
-            }
-          } catch (e) {
-            debugPrint('⚠️ Error searching dishes by name: $e');
-          }
-        }
-      }
-
-      if (referenceId == null) return null;
-
-      var storageDish = await ds.getDishById(referenceId.toString());
-      if (storageDish == null) {
-        debugPrint(
-          '🔍 _tryLoadDishFromDatabaseReference: No storage dish found for id: $referenceId - attempting name fallback',
-        );
-
-        // Fallback: try matching by name if direct id lookup failed
-        final nameRaw = (dishData['name'] ?? dishData['dishName'])?.toString();
-        if (nameRaw != null && nameRaw.trim().isNotEmpty) {
-          try {
-            final all = await ds.getAllDishes();
-            final queryName = _normalizeString(nameRaw);
-            for (final d in all) {
-              final dbNameNorm = _normalizeString(d.name);
-              if (dbNameNorm == queryName ||
-                  dbNameNorm.contains(queryName) ||
-                  queryName.contains(dbNameNorm)) {
-                storageDish = d;
-                debugPrint(
-                  '🔍 _tryLoadDishFromDatabaseReference: Fallback found DB dish by name: ${d.name} (ID: ${d.id})',
-                );
-                break;
-              }
-            }
-          } catch (e) {
-            debugPrint('⚠️ Error during fallback name search: $e');
-          }
-        }
-      }
-      if (storageDish == null) {
-        debugPrint(
-          '🔍 _tryLoadDishFromDatabaseReference: Still no storage dish found after fallback',
-        );
-        return null;
-      }
-
-      // Convert storage Ingredient -> FoodIngredient
+      // Convert storage Ingredient → FoodIngredient
       final convertedIngredients = <FoodIngredient>[];
       for (final ing in storageDish.ingredients) {
         final nut = ing.nutrition;
@@ -885,7 +822,6 @@ class DishProcessingStep extends AgentStep {
             sodium: nut.sodium,
           );
         }
-
         convertedIngredients.add(
           FoodIngredient(
             id: ing.id,
@@ -899,7 +835,7 @@ class DishProcessingStep extends AgentStep {
         );
       }
 
-      // If user provided ingredients, merge them so the user's input takes precedence
+      // Merge user-provided ingredients if present
       final finalIngredients =
           userIngredients != null && userIngredients.isNotEmpty
               ? _mergeUserIngredientsIntoIngredients(
@@ -908,17 +844,12 @@ class DishProcessingStep extends AgentStep {
               )
               : convertedIngredients;
 
-      // Recalculate nutrition from the possibly merged ingredient list
       final recalculatedNutrition = _calculateNutritionFromIngredients(
         finalIngredients,
       );
 
-      // If no ingredients available but storage dish has nutrition, prefer storage nutrition
       BasicNutrition convertedDishNut;
       if (finalIngredients.isEmpty && storageDish.nutrition.calories > 0) {
-        debugPrint(
-          '🔁 _tryLoadDishFromDatabaseReference: No ingredients after merge, using storage-level nutrition',
-        );
         final sn = storageDish.nutrition;
         convertedDishNut = BasicNutrition(
           calories: sn.calories,
@@ -933,9 +864,6 @@ class DishProcessingStep extends AgentStep {
         convertedDishNut = recalculatedNutrition;
       }
 
-      debugPrint(
-        '🔁 _tryLoadDishFromDatabaseReference: Returning DB dish ${storageDish.name} with ${finalIngredients.length} ingredients (nutrition source: ${finalIngredients.isEmpty ? 'storage' : 'recalculated'})',
-      );
       return ProcessedDish(
         id: storageDish.id,
         name: storageDish.name,
@@ -944,7 +872,7 @@ class DishProcessingStep extends AgentStep {
         totalNutrition: convertedDishNut,
         servings: 1.0,
         imageUrl: storageDish.imageUrl ?? uploadedImageUri,
-        tags: <String>[],
+        tags: const <String>[],
         mealType: null,
         createdAt: storageDish.createdAt,
         updatedAt: storageDish.updatedAt,
@@ -953,13 +881,6 @@ class DishProcessingStep extends AgentStep {
     } catch (e) {
       debugPrint('⚠️ _tryLoadDishFromDatabaseReference failed: $e');
       return null;
-    } finally {
-      // debug context
     }
-  }
-
-  // Normalize a string for loose matching: lowercase, remove non-alphanumerics
-  String _normalizeString(String s) {
-    return s.toLowerCase().trim().replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 }

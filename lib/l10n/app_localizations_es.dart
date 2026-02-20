@@ -2090,4 +2090,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String screensSettingsProfileSettingsLastSynced(String time) {
     return 'Última sincronización: $time';
   }
+
+  @override
+  String get servicesChatAgentFallbackParsing =>
+      'Me disculpo, pero tengo problemas para procesar tu solicitud. ¿Podrías reformularla?';
+
+  @override
+  String get servicesChatAgentFallbackCritical =>
+      'Estoy experimentando dificultades técnicas. Por favor, inténtalo de nuevo en unos momentos.';
+
+  @override
+  String get servicesChatAgentFallbackNetwork =>
+      'Tengo problemas para conectarme. Por favor, comprueba tu conexión a internet e inténtalo de nuevo.';
+
+  @override
+  String get servicesChatAgentFallbackContext =>
+      'Tu solicitud contiene mucha información. ¿Podrías dividirla en preguntas más pequeñas?';
+
+  @override
+  String get servicesChatAgentFallbackGeneric =>
+      'Me disculpo, pero encontré un problema inesperado. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get servicesChatAgentFallbackGenerateResponse =>
+      'Me disculpo, pero encontré un problema al generar una respuesta. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get servicesChatAgentFallbackTemporaryIssue =>
+      'Encontré un problema temporal al procesar tu solicitud. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get servicesChatAgentFallbackRephrase =>
+      'Me disculpo, pero tengo dificultades con esa solicitud. ¿Podrías reformularla?';
+
+  @override
+  String get servicesChatAgentFallbackDishInfo =>
+      'Aquí está la información del plato:';
 }

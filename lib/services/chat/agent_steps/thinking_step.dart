@@ -54,9 +54,12 @@ class ThinkingStep extends AgentStep {
       ctx[key] = ctx[key] is bool ? ctx[key] : false;
     }
 
+    // needsConversationHistory defaults to TRUE — if the AI didn't emit it
+    // (old analysisPrompt without the field) we assume history is needed to be
+    // safe. This is the fix for Bug 2: history was silently forced to false.
     if (!ctx.containsKey('needsConversationHistory') ||
         ctx['needsConversationHistory'] == null) {
-      ctx['needsConversationHistory'] = false;
+      ctx['needsConversationHistory'] = true;
     }
     // Patch historicalMealPeriod to always be a string (never null)
     if (!ctx.containsKey('historicalMealPeriod') ||
@@ -120,9 +123,29 @@ class ThinkingStep extends AgentStep {
               : '',
         );
 
-    final messages = [
+    final messages = <Map<String, dynamic>>[
       {'role': 'system', 'content': prompt},
     ];
+
+    // Include recent conversation history so the model can detect when the
+    // user is referencing a prior turn (e.g. "you didn't create the dish I
+    // asked"). We cap at the last 8 turns to avoid blowing the context limit.
+    // This is the fix for Bug 2: the parameter was received but never used.
+    final recentHistory =
+        conversationHistory.length > 8
+            ? conversationHistory.sublist(conversationHistory.length - 8)
+            : conversationHistory;
+    for (final msg in recentHistory) {
+      if (msg.role == 'system' || msg.isLoading) continue;
+      messages.add({'role': msg.role, 'content': msg.content});
+    }
+
+    // Add the current user message last so the model analyses it with full
+    // history context visible.
+    if (recentHistory.isEmpty ||
+        recentHistory.last.content.trim() != userMessage.trim()) {
+      messages.add({'role': 'user', 'content': userMessage});
+    }
     debugPrint('🧠 ThinkingStep: Asking OpenAI for comprehensive analysis...');
     final response = await _openAIService.sendChatRequest(
       messages: messages,

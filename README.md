@@ -11,6 +11,7 @@ A comprehensive Flutter nutrition tracking application that helps users log meal
 - **AI Chat Assistant**: Get meal suggestions and nutrition advice through ChatGPT integration
 - **Calendar View**: Visual representation of your meal history and nutrition trends
 - **Goal Setting**: Set and track personalized fitness and nutrition goals
+- **Health Connect Integration**: Sync with Google Health Connect (Android) and Apple Health (iOS) for a complete activity + nutrition picture
 
 ### User Experience
 - **Multi-language Support**: Available in English, Spanish, and German
@@ -18,6 +19,26 @@ A comprehensive Flutter nutrition tracking application that helps users log meal
 - **Offline Support**: Continue tracking even without internet connection
 - **Data Export/Import**: Backup and restore your nutrition data
 - **Profile Management**: Customize your dietary preferences and restrictions
+
+### Health Connect & Apple Health
+PlatePal integrates with the platform health data layer to bridge nutrition and activity data:
+
+- **Read calories burned** from fitness tracking (active energy + total calories burned)
+- **Write meal nutrition data** automatically to Health Connect / Apple Health after logging
+- **Net calorie balance** displayed in the calendar — consumed vs. actually burned, no estimates
+- **Calorie target recommendations** derived from real energy expenditure
+- **On-demand sync** — data is refreshed on app launch and when visiting the health screen
+- **Connection managed** from Settings → Profile → Manage Health Connect, or via the dedicated Health Connect settings screen
+- When connected, Health Connect becomes the single source of truth for burned calories; estimated values are replaced by real sensor data
+
+**Permissions requested at runtime:**
+| Permission | Access |
+|---|---|
+| `ACTIVE_ENERGY_BURNED` | Read |
+| `TOTAL_CALORIES_BURNED` | Read |
+| `NUTRITION` | Read + Write |
+
+> Health Connect is available on Android 9+ (Play Store install required on Android 9–13; built-in from Android 14). On iOS the same `health` package bridges to Apple Health.
 
 ## Getting Started
 
@@ -105,6 +126,7 @@ lib/
 │       ├── chat_agent_settings_screen.dart
 │       ├── contributors_screen.dart
 │       ├── export_data_screen.dart
+│       ├── health_settings_screen.dart
 │       ├── import_data_screen.dart
 │       ├── import_profile_completion_screen.dart
 │       ├── macro_customization_screen.dart
@@ -114,6 +136,8 @@ lib/
 │   ├── api/             # API integration (GPT, nutrition databases)
 │   ├── auth/            # Authentication services
 │   ├── chat/            # AI chat functionality
+│   ├── health_service.dart          # Health Connect / Apple Health integration
+│   ├── calorie_expenditure_service.dart  # Net calorie calculations
 │   └── storage/         # Local data storage
 ├── themes/              # App theming and styling
 ├── types/               # Type definitions and interfaces
@@ -161,6 +185,11 @@ For full functionality, you'll need to configure API keys:
    - No API key required for basic usage
    - Website: [Open Food Facts](https://de.openfoodfacts.org/)
 
+3. **Health Connect / Apple Health** (for activity data)
+   - No API key required — permissions are granted by the user at runtime
+   - Android: Install [Health Connect](https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata) from the Play Store (pre-installed on Android 14+)
+   - iOS: Uses Apple HealthKit — no additional app required
+
 ### Environment Setup
 Create a `.env` file in the project root (not included in version control):
 ```
@@ -190,9 +219,9 @@ flutter test test/models/dish_test.dart
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| Android  | Full Support | Minimum SDK: API 21 (Android 5.0) |
-| iOS      | Full Support | Minimum Version: iOS 12.0 |
-| Web      | Limited | Basic functionality, some features may be limited |
+| Android  | Full Support | Minimum SDK: API 21 (Android 5.0); Health Connect requires Android 9+ |
+| iOS      | Full Support | Minimum Version: iOS 12.0; Apple Health integration via the `health` package |
+| Web      | Limited | Basic functionality; Health Connect not available |
 
 ## Contributing
 

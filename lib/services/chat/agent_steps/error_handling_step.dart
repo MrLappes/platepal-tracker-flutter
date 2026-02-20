@@ -330,6 +330,8 @@ class ErrorHandlingStep extends AgentStep {
     final fallbackResponse = _createFallbackResponse(
       fallbackType,
       originalError,
+      localizedFallbacks:
+          input.metadata?['localizedFallbacks'] as Map<String, dynamic>?,
     );
 
     return ErrorRecoveryResult(
@@ -376,39 +378,40 @@ class ErrorHandlingStep extends AgentStep {
   /// Creates a fallback response based on error type
   ChatResponse _createFallbackResponse(
     String fallbackType,
-    ChatAgentError originalError,
-  ) {
+    ChatAgentError originalError, {
+    Map<String, dynamic>? localizedFallbacks,
+  }) {
+    String? loc(String key) => localizedFallbacks?[key] as String?;
     switch (fallbackType) {
       case 'parsing':
         return ChatResponse(
           replyText:
-              "I apologize, but I'm having trouble processing your request right now. "
-              "Could you please try rephrasing your question?",
+              loc('parsing') ??
+              "I apologize, but I'm having trouble processing your request right now. Could you please try rephrasing your question?",
           metadata: {'fallbackReason': 'parsing_error'},
         );
 
       case 'critical':
         return ChatResponse(
           replyText:
-              "I'm experiencing some technical difficulties at the moment. "
-              "Please try again in a few moments. If the problem persists, "
-              "please contact support.",
+              loc('critical') ??
+              "I'm experiencing some technical difficulties at the moment. Please try again in a few moments.",
           metadata: {'fallbackReason': 'critical_error'},
         );
 
       case 'network':
         return ChatResponse(
           replyText:
-              "I'm having trouble connecting to my knowledge base right now. "
-              "Please check your internet connection and try again.",
+              loc('network') ??
+              "I'm having trouble connecting to my knowledge base right now. Please check your internet connection and try again.",
           metadata: {'fallbackReason': 'network_error'},
         );
 
       case 'context':
         return ChatResponse(
           replyText:
-              "Your request contains a lot of information. Could you please break it down "
-              "into smaller, more specific questions?",
+              loc('context') ??
+              'Your request contains a lot of information. Could you please break it down into smaller, more specific questions?',
           metadata: {'fallbackReason': 'context_length'},
         );
 
@@ -416,9 +419,8 @@ class ErrorHandlingStep extends AgentStep {
       default:
         return ChatResponse(
           replyText:
-              "I apologize, but I encountered an unexpected issue while processing "
-              "your request. Please try again, and if the problem continues, "
-              "let me know and I'll do my best to help in a different way.",
+              loc('generic') ??
+              'I apologize, but I encountered an unexpected issue. Please try again.',
           metadata: {'fallbackReason': 'generic_error'},
         );
     }

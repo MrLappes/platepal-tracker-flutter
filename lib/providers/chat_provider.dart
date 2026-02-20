@@ -292,6 +292,11 @@ class ChatProvider extends ChangeNotifier {
           content,
           imageUrl,
           userIngredients,
+          localizedFallbacks:
+              context != null
+                  // ignore: use_build_context_synchronously
+                  ? _buildLocalizedFallbacks(AppLocalizations.of(context))
+                  : null,
         );
         response = agentResponse['response'] as String;
         responseMetadata = agentResponse['metadata'] as Map<String, dynamic>?;
@@ -323,7 +328,9 @@ class ChatProvider extends ChangeNotifier {
         response =
             context != null
                 // ignore: use_build_context_synchronously
-                ? AppLocalizations.of(context).providersChatProviderTestChatResponse
+                ? AppLocalizations.of(
+                  context,
+                ).providersChatProviderTestChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
         await Future.delayed(const Duration(milliseconds: 1500));
         responseMetadata = null;
@@ -385,7 +392,9 @@ class ChatProvider extends ChangeNotifier {
         // Generate test response
         response =
             context != null
-                ? AppLocalizations.of(context).providersChatProviderTestChatResponse
+                ? AppLocalizations.of(
+                  context,
+                ).providersChatProviderTestChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
 
         // Add a small delay to simulate AI thinking
@@ -513,8 +522,9 @@ class ChatProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> _processWithAgentService(
     String content,
     String? imageUrl,
-    List<UserIngredient>? userIngredients,
-  ) async {
+    List<UserIngredient>? userIngredients, {
+    Map<String, String>? localizedFallbacks,
+  }) async {
     try {
       // Clear previous thinking steps
       _currentThinkingSteps.clear();
@@ -556,6 +566,7 @@ class ChatProvider extends ChangeNotifier {
         botConfig: botConfig,
         imageUri: imageUrl,
         userIngredients: userIngredients,
+        localizedFallbacks: localizedFallbacks,
         onThinkingStep: (step, details) {
           _currentAgentStep = step;
           _currentThinkingSteps.add(step);
@@ -590,4 +601,18 @@ class ChatProvider extends ChangeNotifier {
       return {'response': fallbackResponse, 'metadata': null};
     }
   }
+
+  /// Builds the map of localised fallback strings used by the agent pipeline
+  /// for translated error/status messages shown to the user.
+  Map<String, String> _buildLocalizedFallbacks(AppLocalizations l10n) => {
+    'parsing': l10n.servicesChatAgentFallbackParsing,
+    'critical': l10n.servicesChatAgentFallbackCritical,
+    'network': l10n.servicesChatAgentFallbackNetwork,
+    'context': l10n.servicesChatAgentFallbackContext,
+    'generic': l10n.servicesChatAgentFallbackGeneric,
+    'generateResponse': l10n.servicesChatAgentFallbackGenerateResponse,
+    'temporaryIssue': l10n.servicesChatAgentFallbackTemporaryIssue,
+    'rephrase': l10n.servicesChatAgentFallbackRephrase,
+    'dishInfo': l10n.servicesChatAgentFallbackDishInfo,
+  };
 }

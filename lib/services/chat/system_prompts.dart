@@ -378,11 +378,21 @@ STRICT OUTPUT FORMAT - Return this exact JSON structure:
     "needsExistingDishes": boolean,
     "needsInfoOnDishCreation": boolean,
     "needsNutritionAdvice": boolean,
+    "needsConversationHistory": boolean,
     "ingredientSearchTerms": string[],
     "dishSearchTerms": string[]
   },
   "responseRequirements": string[]
 }
+
+needsConversationHistory DETECTION RULES — set to TRUE when any apply:
+- User message references a previous AI action: "you", "that dish", "what you made", "the one you created"
+- User is giving feedback or correction: "didn't", "wrong", "not what I asked", "again", "instead"
+- User uses demonstrative pronouns without context: "it", "that", "this", "those"
+- User makes a compliment/complaint about a prior response
+- User says "like I said", "as I mentioned", "from before"
+- Message is ambiguous without prior context to resolve pronouns
+Set to FALSE only for clearly self-contained requests (e.g. "log 200g chicken", "show me high protein dishes").
 
 Response Requirements Options:
 - "recipe_suggestions": When suggesting existing recipes
@@ -778,6 +788,27 @@ No user profile information available.
     return result;
   }
 
+  /// System prompt when OpenAI tool calling is enabled.
+  /// Replaces the JSON-format instructions — the AI responds via tool calls
+  /// instead of free-form JSON, removing all format ambiguity.
+  static const String toolCallingBasePrompt =
+      '''You are a helpful nutrition assistant for the PlatePal food tracking app.
+
+You MUST respond by calling exactly one or more of the provided tools.
+NEVER return raw text or JSON — always use a tool call.
+
+Tool selection guide:
+- Use `create_new_dish` when the user wants a new meal/recipe created.
+- Use `reference_existing_dish` ONLY when you have an exact database ID from the provided context — never guess or fabricate an ID.
+- Use `provide_chat_response` for all other responses: nutrition advice, questions, tracking, etc.
+- Use `ask_clarification` only when a required detail is genuinely impossible to infer.
+
+When creating dishes:
+- ALL nutrition values must be PER 100g of the ingredient, not total amounts.
+- Use accurate, science-based nutrition values for common ingredients.
+- Prefer grams/ml for units to ensure precise calculations.
+- Never reference a dish_id unless it was explicitly provided in your context.''';
+
   /// Build the complete system prompt based on thinking step requirements
   static String buildEnhancedPrompt({
     String? botPersonality,
@@ -785,6 +816,8 @@ No user profile information available.
     int contextReductionLevel = 0,
     bool needsExistingDishes = false,
     bool needsInfoOnDishCreation = false,
+    bool useToolCalling = true,
+    String? languageCode,
   }) {
     final List<String> promptParts = [];
 
@@ -793,36 +826,51 @@ No user profile information available.
       promptParts.add(botPersonality);
     }
 
-    // Always add base format
-    promptParts.add(baseResponseFormat);
+    if (useToolCalling) {
+      // Tool-calling mode: use the clean tool prompt; no JSON format needed.
+      promptParts.add(toolCallingBasePrompt);
 
-    // Add dish-related instructions based on thinking step requirements
-    if (needsExistingDishes && needsInfoOnDishCreation) {
-      promptParts.add(
-        'DISHES ARRAY INSTRUCTIONS:\nYou can either reference existing dishes or create new ones based on what best serves the user\'s request.',
-      );
-      promptParts.add(existingDishesFormat);
-      promptParts.add(newDishFormat);
-    } else if (needsExistingDishes) {
-      promptParts.add(
-        'DISHES ARRAY INSTRUCTIONS:\nOnly reference existing dishes from the context. Do not create new dishes.',
-      );
-      promptParts.add(existingDishesFormat);
-    } else if (needsInfoOnDishCreation) {
-      promptParts.add(
-        'DISHES ARRAY INSTRUCTIONS:\nCreate new dishes according to the user\'s request.',
-      );
-      promptParts.add(newDishFormat);
+      // Add context sections (DB dishes provided, user profile, etc.)
+      for (final section in contextSections.values) {
+        promptParts.add(section);
+      }
     } else {
-      promptParts.add(noDishesFormat);
-    }
+      // Legacy JSON-in-prompt fallback (for incompatible endpoints)
+      promptParts.add(baseResponseFormat);
 
-    // Add context sections
-    for (final section in contextSections.values) {
-      promptParts.add(section);
+      if (needsExistingDishes && needsInfoOnDishCreation) {
+        promptParts.add(
+          'DISHES ARRAY INSTRUCTIONS:\nYou can either reference existing dishes or create new ones based on what best serves the user\'s request.',
+        );
+        promptParts.add(existingDishesFormat);
+        promptParts.add(newDishFormat);
+      } else if (needsExistingDishes) {
+        promptParts.add(
+          'DISHES ARRAY INSTRUCTIONS:\nOnly reference existing dishes from the context. Do not create new dishes.',
+        );
+        promptParts.add(existingDishesFormat);
+      } else if (needsInfoOnDishCreation) {
+        promptParts.add(
+          'DISHES ARRAY INSTRUCTIONS:\nCreate new dishes according to the user\'s request.',
+        );
+        promptParts.add(newDishFormat);
+      } else {
+        promptParts.add(noDishesFormat);
+      }
+
+      for (final section in contextSections.values) {
+        promptParts.add(section);
+      }
     }
 
     String prompt = promptParts.join('\n\n');
+
+    // Inject language instruction so the AI always replies in the user's language
+    if (languageCode != null && languageCode != 'en') {
+      final languageName =
+          const {'de': 'German', 'es': 'Spanish'}[languageCode] ?? 'English';
+      prompt = 'Always respond in $languageName.\n\n$prompt';
+    }
 
     // Apply context reduction if needed
     if (contextReductionLevel > 0) {

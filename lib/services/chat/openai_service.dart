@@ -82,12 +82,53 @@ class ChatChoice {
     required this.index,
   });
 
+  bool get isToolCall => finishReason == 'tool_calls';
+
   factory ChatChoice.fromJson(Map<String, dynamic> json) {
     return ChatChoice(
       message: OpenAiMessage.fromJson(json['message'] as Map<String, dynamic>),
-      finishReason: json['finish_reason'] as String,
+      finishReason: json['finish_reason'] as String? ?? 'stop',
       index: json['index'] as int,
     );
+  }
+}
+
+class ToolCall {
+  final String id;
+  final String type;
+  final String functionName;
+  final String functionArguments;
+
+  const ToolCall({
+    required this.id,
+    required this.type,
+    required this.functionName,
+    required this.functionArguments,
+  });
+
+  factory ToolCall.fromJson(Map<String, dynamic> json) {
+    final function = json['function'] as Map<String, dynamic>? ?? {};
+    return ToolCall(
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? 'function',
+      functionName: function['name'] as String? ?? '',
+      functionArguments: function['arguments'] as String? ?? '{}',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'type': type,
+    'function': {'name': functionName, 'arguments': functionArguments},
+  };
+
+  /// Parse the arguments as JSON. Returns an empty map on parse failure.
+  Map<String, dynamic> parseArguments() {
+    try {
+      return jsonDecode(functionArguments) as Map<String, dynamic>;
+    } catch (_) {
+      return {};
+    }
   }
 }
 
@@ -95,14 +136,39 @@ class OpenAiMessage {
   final String role;
   final String? content;
 
-  const OpenAiMessage({required this.role, this.content});
+  /// Non-null when finish_reason == "tool_calls".
+  final List<ToolCall>? toolCalls;
+
+  /// Non-null for role=="tool" reply messages.
+  final String? toolCallId;
+
+  const OpenAiMessage({
+    required this.role,
+    this.content,
+    this.toolCalls,
+    this.toolCallId,
+  });
 
   factory OpenAiMessage.fromJson(Map<String, dynamic> json) {
+    final rawToolCalls = json['tool_calls'] as List<dynamic>?;
     return OpenAiMessage(
       role: json['role'] as String,
       content: json['content'] as String?,
+      toolCallId: json['tool_call_id'] as String?,
+      toolCalls:
+          rawToolCalls
+              ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'role': role,
+    if (content != null) 'content': content,
+    if (toolCallId != null) 'tool_call_id': toolCallId,
+    if (toolCalls != null)
+      'tool_calls': toolCalls!.map((t) => t.toJson()).toList(),
+  };
 }
 
 class ChatUsage {
@@ -574,6 +640,14 @@ class OpenAIService {
     int? maxTokens,
     Map<String, dynamic>? responseFormat,
     String? imageUri,
+
+    /// OpenAI tool definitions. When provided, the model can call these tools.
+    List<Map<String, dynamic>>? tools,
+
+    /// Force the model to call a specific tool or 'auto'/'required'.
+    /// Pass a map like {'type': 'function', 'function': {'name': 'tool_name'}}
+    /// to force a specific tool, or use the string 'required' / 'auto'.
+    dynamic toolChoice,
   }) async {
     final apiKey = await _getApiKey();
     if (apiKey == null || apiKey.isEmpty) {
@@ -658,6 +732,12 @@ class OpenAIService {
     };
     if (responseFormat != null) {
       body['response_format'] = responseFormat;
+    }
+    if (tools != null && tools.isNotEmpty) {
+      body['tools'] = tools;
+      if (toolChoice != null) {
+        body['tool_choice'] = toolChoice;
+      }
     }
     try {
       final response = await http.post(

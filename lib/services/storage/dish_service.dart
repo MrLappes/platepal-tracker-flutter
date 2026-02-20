@@ -202,7 +202,9 @@ class DishService {
       );
       // Insert ingredients and their relationships
       for (final ingredient in dish.ingredients) {
-        // Insert ingredient if not exists
+        // Insert or replace ingredient record. With UUID-based IDs a collision
+        // is practically impossible, but using replace (not ignore) ensures the
+        // correct name/data wins if it ever does happen.
         await txn.insert(
           'ingredients',
           {
@@ -210,7 +212,7 @@ class DishService {
             'name': ingredient.name,
             'barcode': ingredient.barcode,
           },
-          conflictAlgorithm: ConflictAlgorithm.ignore,
+          conflictAlgorithm: ConflictAlgorithm.replace,
         ); // Insert ingredient nutrition if available
         if (ingredient.nutrition != null) {
           await txn.insert('ingredient_nutrition', {
@@ -280,7 +282,7 @@ class DishService {
 
       // Insert updated ingredients and relationships
       for (final ingredient in dish.ingredients) {
-        // Insert ingredient if not exists
+        // Insert or replace ingredient record (same fix as saveDish path).
         await txn.insert(
           'ingredients',
           {
@@ -288,7 +290,7 @@ class DishService {
             'name': ingredient.name,
             'barcode': ingredient.barcode,
           },
-          conflictAlgorithm: ConflictAlgorithm.ignore,
+          conflictAlgorithm: ConflictAlgorithm.replace,
         ); // Insert or update ingredient nutrition if available
         if (ingredient.nutrition != null) {
           await txn.insert('ingredient_nutrition', {
@@ -646,12 +648,12 @@ class DishService {
           if (ingredientData is Map<String, dynamic>) {
             final ingredientId = ingredientData['id'] ?? _generateId();
 
-            // Insert ingredient
+            // Insert or replace ingredient record
             await txn.insert('ingredients', {
               'id': ingredientId,
               'name': ingredientData['name'] ?? 'Unknown Ingredient',
               'barcode': ingredientData['barcode'],
-            }, conflictAlgorithm: ConflictAlgorithm.ignore);
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
 
             // Insert ingredient nutrition
             await txn.insert('ingredient_nutrition', {
