@@ -391,55 +391,52 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            RadioListTile<DuplicateHandling>(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                ).screensSettingsImportDataSkipDuplicates,
-              ),
-              subtitle: const Text(
-                'Keep existing data, skip imported duplicates',
-              ),
-              value: DuplicateHandling.skip,
+            RadioGroup<DuplicateHandling>(
               groupValue: _duplicateHandling,
               onChanged: (value) {
-                setState(() {
-                  _duplicateHandling = value!;
-                });
+                if (value != null) setState(() => _duplicateHandling = value);
               },
-              secondary: const Icon(Icons.skip_next, color: Colors.blue),
-            ),
-            RadioListTile<DuplicateHandling>(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                ).screensSettingsImportDataOverwriteDuplicates,
+              child: Column(
+                children: [
+                  RadioListTile<DuplicateHandling>(
+                    title: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsImportDataSkipDuplicates,
+                    ),
+                    subtitle: const Text(
+                      'Keep existing data, skip imported duplicates',
+                    ),
+                    value: DuplicateHandling.skip,
+                    secondary: const Icon(Icons.skip_next, color: Colors.blue),
+                  ),
+                  RadioListTile<DuplicateHandling>(
+                    title: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsImportDataOverwriteDuplicates,
+                    ),
+                    subtitle: const Text(
+                      'Replace existing data with imported data',
+                    ),
+                    value: DuplicateHandling.overwrite,
+                    secondary: const Icon(Icons.update, color: Colors.orange),
+                  ),
+                  RadioListTile<DuplicateHandling>(
+                    title: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsImportDataMergeDuplicates,
+                    ),
+                    subtitle: const Text('Merge data intelligently'),
+                    value: DuplicateHandling.merge,
+                    secondary: const Icon(
+                      Icons.call_merge,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
               ),
-              subtitle: const Text('Replace existing data with imported data'),
-              value: DuplicateHandling.overwrite,
-              groupValue: _duplicateHandling,
-              onChanged: (value) {
-                setState(() {
-                  _duplicateHandling = value!;
-                });
-              },
-              secondary: const Icon(Icons.update, color: Colors.orange),
-            ),
-            RadioListTile<DuplicateHandling>(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                ).screensSettingsImportDataMergeDuplicates,
-              ),
-              subtitle: const Text('Merge data intelligently'),
-              value: DuplicateHandling.merge,
-              groupValue: _duplicateHandling,
-              onChanged: (value) {
-                setState(() {
-                  _duplicateHandling = value!;
-                });
-              },
-              secondary: const Icon(Icons.call_merge, color: Colors.green),
             ),
           ],
         ),

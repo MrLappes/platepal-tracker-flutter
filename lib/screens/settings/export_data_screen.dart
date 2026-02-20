@@ -336,37 +336,42 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            RadioListTile<ExportFormat>(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                ).screensSettingsExportDataExportAsJson,
-              ),
-              subtitle: const Text('Structured data format, best for backup'),
-              value: ExportFormat.json,
+            RadioGroup<ExportFormat>(
               groupValue: _selectedFormat,
               onChanged: (value) {
-                setState(() {
-                  _selectedFormat = value!;
-                });
+                if (value != null) setState(() => _selectedFormat = value);
               },
-              secondary: const Icon(Icons.code, color: Colors.blue),
-            ),
-            RadioListTile<ExportFormat>(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                ).screensSettingsExportDataExportAsCsv,
+              child: Column(
+                children: [
+                  RadioListTile<ExportFormat>(
+                    title: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataExportAsJson,
+                    ),
+                    subtitle: const Text(
+                      'Structured data format, best for backup',
+                    ),
+                    value: ExportFormat.json,
+                    secondary: const Icon(Icons.code, color: Colors.blue),
+                  ),
+                  RadioListTile<ExportFormat>(
+                    title: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataExportAsCsv,
+                    ),
+                    subtitle: const Text(
+                      'Spreadsheet format, good for analysis',
+                    ),
+                    value: ExportFormat.csv,
+                    secondary: const Icon(
+                      Icons.table_chart,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
               ),
-              subtitle: const Text('Spreadsheet format, good for analysis'),
-              value: ExportFormat.csv,
-              groupValue: _selectedFormat,
-              onChanged: (value) {
-                setState(() {
-                  _selectedFormat = value!;
-                });
-              },
-              secondary: const Icon(Icons.table_chart, color: Colors.green),
             ),
           ],
         ),
