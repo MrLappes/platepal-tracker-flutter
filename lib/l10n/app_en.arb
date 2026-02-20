@@ -2271,6 +2271,43 @@
     "placeholders": {
       "time": { "type": "String" }
     }
+  },
+
+  "servicesChatAgentFallbackParsing": "I apologize, but I'm having trouble processing your request right now. Could you please try rephrasing your question?",
+  "@servicesChatAgentFallbackParsing": {
+    "description": "Fallback reply shown when the agent fails to parse the user request"
+  },
+  "servicesChatAgentFallbackCritical": "I'm experiencing some technical difficulties at the moment. Please try again in a few moments.",
+  "@servicesChatAgentFallbackCritical": {
+    "description": "Fallback reply shown on critical agent error"
+  },
+  "servicesChatAgentFallbackNetwork": "I'm having trouble connecting to my knowledge base right now. Please check your internet connection and try again.",
+  "@servicesChatAgentFallbackNetwork": {
+    "description": "Fallback reply shown on network error"
+  },
+  "servicesChatAgentFallbackContext": "Your request contains a lot of information. Could you please break it down into smaller, more specific questions?",
+  "@servicesChatAgentFallbackContext": {
+    "description": "Fallback reply shown when context is too long"
+  },
+  "servicesChatAgentFallbackGeneric": "I apologize, but I encountered an unexpected issue. Please try again.",
+  "@servicesChatAgentFallbackGeneric": {
+    "description": "Generic fallback reply for unknown agent errors"
+  },
+  "servicesChatAgentFallbackGenerateResponse": "I apologize, but I encountered an issue generating a response. Please try again.",
+  "@servicesChatAgentFallbackGenerateResponse": {
+    "description": "Fallback reply when response generation fails"
+  },
+  "servicesChatAgentFallbackTemporaryIssue": "I encountered a temporary issue processing your request. Please try again.",
+  "@servicesChatAgentFallbackTemporaryIssue": {
+    "description": "Fallback reply for transient agent step failure"
+  },
+  "servicesChatAgentFallbackRephrase": "I apologize, but I'm having trouble with that request. Could you try rephrasing it?",
+  "@servicesChatAgentFallbackRephrase": {
+    "description": "Fallback reply asking user to rephrase"
+  },
+  "servicesChatAgentFallbackDishInfo": "Here is the dish information:",
+  "@servicesChatAgentFallbackDishInfo": {
+    "description": "Prefix shown when the AI returns dish data without a reply text"
   }
 }
 

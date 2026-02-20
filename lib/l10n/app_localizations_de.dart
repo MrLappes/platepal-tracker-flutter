@@ -2088,4 +2088,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String screensSettingsProfileSettingsLastSynced(String time) {
     return 'Zuletzt synchronisiert: $time';
   }
+
+  @override
+  String get servicesChatAgentFallbackParsing =>
+      'Entschuldigung, ich habe Probleme, deine Anfrage zu verarbeiten. Könntest du sie bitte umformulieren?';
+
+  @override
+  String get servicesChatAgentFallbackCritical =>
+      'Ich erlebe gerade technische Schwierigkeiten. Bitte versuche es in einem Moment erneut.';
+
+  @override
+  String get servicesChatAgentFallbackNetwork =>
+      'Ich habe Verbindungsprobleme. Bitte überprüfe deine Internetverbindung und versuche es erneut.';
+
+  @override
+  String get servicesChatAgentFallbackContext =>
+      'Deine Anfrage enthält sehr viele Informationen. Könntest du sie in kleinere Fragen aufteilen?';
+
+  @override
+  String get servicesChatAgentFallbackGeneric =>
+      'Entschuldigung, ein unerwartetes Problem ist aufgetreten. Bitte versuche es erneut.';
+
+  @override
+  String get servicesChatAgentFallbackGenerateResponse =>
+      'Entschuldigung, beim Generieren einer Antwort ist ein Problem aufgetreten. Bitte versuche es erneut.';
+
+  @override
+  String get servicesChatAgentFallbackTemporaryIssue =>
+      'Es ist ein vorübergehendes Problem aufgetreten. Bitte versuche es erneut.';
+
+  @override
+  String get servicesChatAgentFallbackRephrase =>
+      'Entschuldigung, ich habe Schwierigkeiten mit dieser Anfrage. Könntest du sie umformulieren?';
+
+  @override
+  String get servicesChatAgentFallbackDishInfo =>
+      'Hier sind die Gerichte-Informationen:';
 }

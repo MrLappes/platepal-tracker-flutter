@@ -3552,6 +3552,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last synced: {time}'**
   String screensSettingsProfileSettingsLastSynced(String time);
+
+  /// Fallback reply shown when the agent fails to parse the user request
+  ///
+  /// In en, this message translates to:
+  /// **'I apologize, but I\'m having trouble processing your request right now. Could you please try rephrasing your question?'**
+  String get servicesChatAgentFallbackParsing;
+
+  /// Fallback reply shown on critical agent error
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m experiencing some technical difficulties at the moment. Please try again in a few moments.'**
+  String get servicesChatAgentFallbackCritical;
+
+  /// Fallback reply shown on network error
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m having trouble connecting to my knowledge base right now. Please check your internet connection and try again.'**
+  String get servicesChatAgentFallbackNetwork;
+
+  /// Fallback reply shown when context is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Your request contains a lot of information. Could you please break it down into smaller, more specific questions?'**
+  String get servicesChatAgentFallbackContext;
+
+  /// Generic fallback reply for unknown agent errors
+  ///
+  /// In en, this message translates to:
+  /// **'I apologize, but I encountered an unexpected issue. Please try again.'**
+  String get servicesChatAgentFallbackGeneric;
+
+  /// Fallback reply when response generation fails
+  ///
+  /// In en, this message translates to:
+  /// **'I apologize, but I encountered an issue generating a response. Please try again.'**
+  String get servicesChatAgentFallbackGenerateResponse;
+
+  /// Fallback reply for transient agent step failure
+  ///
+  /// In en, this message translates to:
+  /// **'I encountered a temporary issue processing your request. Please try again.'**
+  String get servicesChatAgentFallbackTemporaryIssue;
+
+  /// Fallback reply asking user to rephrase
+  ///
+  /// In en, this message translates to:
+  /// **'I apologize, but I\'m having trouble with that request. Could you try rephrasing it?'**
+  String get servicesChatAgentFallbackRephrase;
+
+  /// Prefix shown when the AI returns dish data without a reply text
+  ///
+  /// In en, this message translates to:
+  /// **'Here is the dish information:'**
+  String get servicesChatAgentFallbackDishInfo;
 }
 
 class _AppLocalizationsDelegate

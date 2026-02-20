@@ -2130,5 +2130,15 @@
   "componentsCalendarMacroSummaryNoBurnData": "Sin datos de gasto para este día",
   "screensCalendarHealthDeleteWarning": "La entrada de nutrición en Health Connect no se eliminará. Puede eliminarla manualmente en la aplicación Health Connect.",
   "screensSettingsProfileSettingsManageHealthConnect": "Gestionar Health Connect",
-  "screensSettingsProfileSettingsLastSynced": "Última sincronización: {time}"
+  "screensSettingsProfileSettingsLastSynced": "Última sincronización: {time}",
+
+  "servicesChatAgentFallbackParsing": "Me disculpo, pero tengo problemas para procesar tu solicitud. ¿Podrías reformularla?",
+  "servicesChatAgentFallbackCritical": "Estoy experimentando dificultades técnicas. Por favor, inténtalo de nuevo en unos momentos.",
+  "servicesChatAgentFallbackNetwork": "Tengo problemas para conectarme. Por favor, comprueba tu conexión a internet e inténtalo de nuevo.",
+  "servicesChatAgentFallbackContext": "Tu solicitud contiene mucha información. ¿Podrías dividirla en preguntas más pequeñas?",
+  "servicesChatAgentFallbackGeneric": "Me disculpo, pero encontré un problema inesperado. Por favor, inténtalo de nuevo.",
+  "servicesChatAgentFallbackGenerateResponse": "Me disculpo, pero encontré un problema al generar una respuesta. Por favor, inténtalo de nuevo.",
+  "servicesChatAgentFallbackTemporaryIssue": "Encontré un problema temporal al procesar tu solicitud. Por favor, inténtalo de nuevo.",
+  "servicesChatAgentFallbackRephrase": "Me disculpo, pero tengo dificultades con esa solicitud. ¿Podrías reformularla?",
+  "servicesChatAgentFallbackDishInfo": "Aquí está la información del plato:"
 }
