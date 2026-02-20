@@ -105,21 +105,24 @@ class CalorieExpenditureService {
         }
       }
 
-      // For historical dates without data, estimate based on user profile
-      final estimatedCalories = await _estimateCaloriesBurned(date);
+      // Health is connected but no data available for this date
+      // Do NOT fall back to estimation – Health Connect is the single source of truth
       developer.log(
-        'Using estimated calories: $estimatedCalories',
+        'Health connected but no data for $dateStr – returning null',
         name: 'CalorieExpenditureService',
       );
-      return (estimatedCalories, true); // true = estimated
+      return (null, false);
     } catch (e) {
       developer.log(
         'Error getting calories burned for date: $e',
         name: 'CalorieExpenditureService',
       );
-      // Return estimated calories as final fallback
-      final estimatedCalories = await _estimateCaloriesBurned(date);
-      return (estimatedCalories, true); // true = estimated
+      // Only fall back to estimation if health is not connected
+      if (!_healthService.isConnected) {
+        final estimatedCalories = await _estimateCaloriesBurned(date);
+        return (estimatedCalories, true); // true = estimated
+      }
+      return (null, false);
     }
   }
 

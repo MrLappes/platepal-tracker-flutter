@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
+import 'package:go_router/go_router.dart';
 import '../../models/user_profile.dart';
 import '../../utils/service_extensions.dart';
 import '../../services/health_service.dart';
-import '../../services/calorie_expenditure_service.dart';
+
 import '../../services/user_session_service.dart';
 import 'macro_customization_screen.dart';
 
@@ -39,13 +38,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   // Health service integration
   final HealthService _healthService = HealthService();
-  bool _isHealthAvailable = false;
-  bool _isHealthSyncing = false;
-  StreamSubscription<bool>? _healthConnectionSubscription;
-
-  // Add the calorie expenditure service
-  final CalorieExpenditureService _calorieExpenditureService =
-      CalorieExpenditureService();
 
   // Activity levels with their descriptions
   final Map<String, String> _activityLevels = {
@@ -79,7 +71,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     _weightController.dispose();
     _targetWeightController.dispose();
     _bodyFatController.dispose();
-    _healthConnectionSubscription?.cancel();
     super.dispose();
   }
 
@@ -206,102 +197,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   // Health service initialization
   Future<void> _initializeHealthService() async {
     await _healthService.loadConnectionStatus();
-    final available = await _healthService.isHealthDataAvailable();
-    setState(() {
-      _isHealthAvailable = available;
-    });
-
-    // Subscribe to health connection status changes
-    _healthConnectionSubscription = _healthService.connectionStatusStream
-        .listen((isConnected) {
-          setState(() {
-            // Update health availability when connection status changes
-          });
-        });
-  } // Connect to health data
-
-  Future<void> _connectToHealth() async {
-    setState(() => _isHealthSyncing = true);
-
-    try {
-      // Show info about permission request
-      final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Requesting health permissions...'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      final result = await _healthService.connectToHealthWithDetails();
-
-      if (result.success) {
-        await _syncHealthData();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.screensSettingsProfileSettingsHealthConnected),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          // Show appropriate dialog based on error type
-          switch (result.error) {
-            case HealthConnectionError.permissionDenied:
-              await _showHealthPermissionDeniedDialog();
-              break;
-            case HealthConnectionError.platformNotSupported:
-              await _showHealthErrorDialog(result.message);
-              break;
-            case HealthConnectionError.unknown:
-            default:
-              await _showHealthErrorDialog(result.message);
-              break;
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        await _showHealthErrorDialog(e.toString());
-      }
-    } finally {
-      setState(() => _isHealthSyncing = false);
-    }
-  }
-
-  // Sync health data – refreshes the calorie-burn cache
-  Future<void> _syncHealthData() async {
-    if (!_healthService.isConnected) return;
-
-    setState(() => _isHealthSyncing = true);
-
-    try {
-      await _healthService.refreshCaloriesBurnedCache();
-
-      if (mounted) {
-        final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.screensSettingsProfileSettingsHealthSyncSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.screensSettingsProfileSettingsHealthSyncFailed),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      setState(() => _isHealthSyncing = false);
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadProfile() async {
@@ -834,23 +730,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               l10n.screensSettingsImportProfileCompletionPreferences,
             ),
             _buildPreferencesCard(l10n),
-            const SizedBox(
-              height: 24,
-            ), // Health Data Sync Section (only show when health is available AND connected)
-            if (_isHealthAvailable && _healthService.isConnected) ...[
-              _buildSectionHeader(
-                l10n.screensSettingsProfileSettingsHealthDataSync,
-              ),
-              _buildHealthSyncCard(l10n),
-              const SizedBox(height: 24),
-            ] else if (_isHealthAvailable) ...[
-              // Show connection option when available but not connected
-              _buildSectionHeader(
-                l10n.screensSettingsProfileSettingsHealthDataSync,
-              ),
-              _buildHealthSyncCard(l10n),
-              const SizedBox(height: 24),
-            ],
+            const SizedBox(height: 24), // Health Data Sync Section
+            _buildSectionHeader(
+              l10n.screensSettingsProfileSettingsHealthDataSync,
+            ),
+            _buildHealthSyncCard(l10n),
+            const SizedBox(height: 24),
 
             // Current Stats Section (Read-only)
             if (_originalProfile != null) ...[
@@ -1151,138 +1036,45 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       if (_healthService.isConnected &&
                           _healthService.lastSyncDate != null)
                         Text(
-                          'Last synced: ${_formatLastSyncDate(_healthService.lastSyncDate!)}',
+                          AppLocalizations.of(
+                            context,
+                          ).screensSettingsProfileSettingsLastSynced(
+                            _formatLastSyncDate(_healthService.lastSyncDate!),
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                     ],
                   ),
                 ),
+                // Status dot
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        _healthService.isConnected ? Colors.green : Colors.grey,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            if (!_healthService.isConnected) ...[
-              // Connect to Health button for disconnected state
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isHealthSyncing ? null : _connectToHealth,
-                  icon:
-                      _isHealthSyncing
-                          ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : const Icon(Icons.add_link),
-                  label: Text(
-                    l10n.screensSettingsProfileSettingsConnectToHealth,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ] else ...[
-              // Full-width buttons for connected state
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isHealthSyncing ? null : _syncHealthData,
-                  icon:
-                      _isHealthSyncing
-                          ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : const Icon(Icons.sync),
-                  label: Text(
-                    l10n.screensSettingsProfileSettingsSyncHealthData,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isHealthSyncing ? null : _analyzeCalorieTargets,
-                  icon: const Icon(Icons.analytics),
-                  label: Text(
-                    l10n.screensSettingsProfileSettingsAnalyzeTargets,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Disconnect button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed:
-                      _isHealthSyncing
-                          ? null
-                          : () async {
-                            await _healthService.disconnectFromHealth();
-                            setState(() {});
-                          },
-                  icon: const Icon(Icons.link_off),
-                  label: Text(
-                    l10n.screensSettingsProfileSettingsDisconnectHealth,
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                ),
-              ),
-            ],
-            if (!_healthService.isConnected) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await context.push('/settings/health');
+                  // Refresh health status when returning
+                  _initializeHealthService();
+                },
+                icon: const Icon(Icons.settings, size: 16),
+                label: Text(
+                  AppLocalizations.of(
                     context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.info_outline, size: 16, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Connect to Health Data',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Sync your daily burned calories from Health Connect and automatically write your PlatePal meal nutrition data back. Tap "Connect to Health" to grant permissions.',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                    ),
-                  ],
+                  ).screensSettingsProfileSettingsManageHealthConnect,
                 ),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -1294,13 +1086,19 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     final difference = now.difference(date);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return AppLocalizations.of(context).screensSettingsHealthSettingsJustNow;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
+      return AppLocalizations.of(
+        context,
+      ).screensSettingsHealthSettingsMinutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
+      return AppLocalizations.of(
+        context,
+      ).screensSettingsHealthSettingsHoursAgo(difference.inHours);
     } else {
-      return '${difference.inDays}d ago';
+      return AppLocalizations.of(
+        context,
+      ).screensSettingsHealthSettingsDaysAgo(difference.inDays);
     }
   }
 
@@ -1656,293 +1454,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           ),
         );
       }
-    }
-  }
-
-  // Show health permission denied dialog
-  Future<void> _showHealthPermissionDeniedDialog() async {
-    final l10n = AppLocalizations.of(context);
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            l10n.screensSettingsProfileSettingsHealthPermissionDenied,
-          ),
-          content: Text(
-            l10n.screensSettingsProfileSettingsHealthPermissionDeniedMessage,
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                l10n.componentsChatBotProfileCustomizationDialogCancel,
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text(l10n.componentsScannerBarcodeScannerOpenSettings),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _openHealthSettings();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Show health error dialog
-  Future<void> _showHealthErrorDialog(String error) async {
-    final l10n = AppLocalizations.of(context);
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(l10n.screensSettingsProfileSettingsHealthNotAvailable),
-          content: Text(
-            l10n.screensSettingsProfileSettingsHealthNotAvailableMessage,
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                l10n.componentsChatBotProfileCustomizationDialogCancel,
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text(l10n.componentsScannerBarcodeScannerOpenSettings),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _openHealthSettings();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Open device health settings
-  Future<void> _openHealthSettings() async {
-    try {
-      // For Android, try Health Connect first
-      bool launched = await launchUrl(
-        Uri.parse('android-app://com.google.android.apps.healthdata/'),
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        // Fallback to general app settings
-        launched = await launchUrl(
-          Uri.parse('app-settings:'),
-          mode: LaunchMode.externalApplication,
-        );
-      }
-
-      if (!launched) {
-        // Final fallback to device settings
-        launched = await launchUrl(
-          Uri.parse('android.settings.APPLICATION_SETTINGS'),
-          mode: LaunchMode.externalApplication,
-        );
-      }
-    } catch (e) {
-      // Show error if unable to open settings
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Unable to open settings. Please go to your device settings manually.',
-            ),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-    }
-  }
-
-  // Analyze calorie targets and show recommendations
-  Future<void> _analyzeCalorieTargets() async {
-    setState(() => _isHealthSyncing = true);
-
-    try {
-      final analysis = await _calorieExpenditureService.syncAndAnalyze();
-
-      if (mounted) {
-        await _showCalorieAnalysisDialog(analysis);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error analyzing calorie targets: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      setState(() => _isHealthSyncing = false);
-    }
-  }
-
-  // Show calorie analysis dialog
-  Future<void> _showCalorieAnalysisDialog(
-    CalorieTargetAnalysis analysis,
-  ) async {
-    final l10n = AppLocalizations.of(context);
-
-    return showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Row(
-              children: [
-                Icon(
-                  Icons.analytics,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text('Calorie Target Analysis'),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    analysis.analysisMessage,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Analysis details
-                  if (analysis.daysAnalyzed > 0) ...[
-                    _buildAnalysisRow(
-                      'Days Analyzed',
-                      '${analysis.daysAnalyzed}',
-                    ),
-                    _buildAnalysisRow(
-                      'Current Target',
-                      '${analysis.currentTarget.toStringAsFixed(0)} cal',
-                    ),
-                    _buildAnalysisRow(
-                      'Average Expenditure',
-                      '${analysis.averageExpenditure.toStringAsFixed(0)} cal',
-                    ),
-
-                    if (analysis.needsAdjustment) ...[
-                      const SizedBox(height: 8),
-                      _buildAnalysisRow(
-                        'Suggested Target',
-                        '${analysis.suggestedTarget.toStringAsFixed(0)} cal',
-                        isHighlighted: true,
-                      ),
-                    ],
-                  ],
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  l10n.componentsChatBotProfileCustomizationDialogCancel,
-                ),
-              ),
-              if (analysis.needsAdjustment)
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    await _applyCalorieTargetAdjustment(
-                      analysis.suggestedTarget,
-                    );
-                  },
-                  child: Text('Apply Suggestion'),
-                ),
-            ],
-          ),
-    );
-  }
-
-  Widget _buildAnalysisRow(
-    String label,
-    String value, {
-    bool isHighlighted = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color:
-                  isHighlighted ? Theme.of(context).colorScheme.primary : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Apply calorie target adjustment
-  Future<void> _applyCalorieTargetAdjustment(double newTarget) async {
-    setState(() => _isSaving = true);
-
-    try {
-      final success = await _calorieExpenditureService.updateCalorieTargets(
-        newTarget,
-      );
-
-      if (success && mounted) {
-        // Reload the profile to reflect changes
-        await _loadProfile();
-
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Calorie targets updated successfully!'),
-            // ignore: use_build_context_synchronously
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update calorie targets'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error updating calorie targets: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      setState(() => _isSaving = false);
     }
   }
 }

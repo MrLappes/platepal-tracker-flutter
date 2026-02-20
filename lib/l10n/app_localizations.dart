@@ -3258,6 +3258,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.'**
   String get screensSettingsContributorsMrLappesDesc;
+
+  /// No description provided for @screensSettingsHealthSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HEALTH CONNECT //'**
+  String get screensSettingsHealthSettingsTitle;
+
+  /// No description provided for @screensSettingsHealthSettingsConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get screensSettingsHealthSettingsConnected;
+
+  /// No description provided for @screensSettingsHealthSettingsNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Connected'**
+  String get screensSettingsHealthSettingsNotConnected;
+
+  /// No description provided for @screensSettingsHealthSettingsLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced: {time}'**
+  String screensSettingsHealthSettingsLastSynced(String time);
+
+  /// No description provided for @screensSettingsHealthSettingsNotAvailableOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect is not available on this device.'**
+  String get screensSettingsHealthSettingsNotAvailableOnDevice;
+
+  /// No description provided for @screensSettingsHealthSettingsDisconnectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect Health'**
+  String get screensSettingsHealthSettingsDisconnectTitle;
+
+  /// No description provided for @screensSettingsHealthSettingsDisconnectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will stop syncing calories burned from Health Connect and stop writing meal data. Your existing data will be preserved.'**
+  String get screensSettingsHealthSettingsDisconnectMessage;
+
+  /// No description provided for @screensSettingsHealthSettingsDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get screensSettingsHealthSettingsDisconnect;
+
+  /// No description provided for @screensSettingsHealthSettingsDataOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'DATA OVERVIEW'**
+  String get screensSettingsHealthSettingsDataOverview;
+
+  /// No description provided for @screensSettingsHealthSettingsTodaysBurned.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Burned'**
+  String get screensSettingsHealthSettingsTodaysBurned;
+
+  /// No description provided for @screensSettingsHealthSettingsNoDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get screensSettingsHealthSettingsNoDataYet;
+
+  /// No description provided for @screensSettingsHealthSettingsDaysCached.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days of data cached'**
+  String screensSettingsHealthSettingsDaysCached(int count);
+
+  /// No description provided for @screensSettingsHealthSettingsSyncControls.
+  ///
+  /// In en, this message translates to:
+  /// **'SYNC CONTROLS'**
+  String get screensSettingsHealthSettingsSyncControls;
+
+  /// No description provided for @screensSettingsHealthSettingsSyncDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pulls the latest calories burned data from Health Connect for the past 7 days.'**
+  String get screensSettingsHealthSettingsSyncDescription;
+
+  /// No description provided for @screensSettingsHealthSettingsOpenHealthConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Health Connect'**
+  String get screensSettingsHealthSettingsOpenHealthConnect;
+
+  /// No description provided for @screensSettingsHealthSettingsWriteBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'WRITE BEHAVIOR'**
+  String get screensSettingsHealthSettingsWriteBehavior;
+
+  /// No description provided for @screensSettingsHealthSettingsWriteMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Write meals to Health Connect'**
+  String get screensSettingsHealthSettingsWriteMeals;
+
+  /// No description provided for @screensSettingsHealthSettingsWriteMealsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically log nutrition when you save a meal'**
+  String get screensSettingsHealthSettingsWriteMealsDescription;
+
+  /// No description provided for @screensSettingsHealthSettingsTargetAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'TARGET ANALYSIS'**
+  String get screensSettingsHealthSettingsTargetAnalysis;
+
+  /// No description provided for @screensSettingsHealthSettingsTargetAnalysisDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare your calorie expenditure from Health Connect with your current calorie targets to see if adjustments are needed.'**
+  String get screensSettingsHealthSettingsTargetAnalysisDescription;
+
+  /// No description provided for @screensSettingsHealthSettingsCurrentTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Target'**
+  String get screensSettingsHealthSettingsCurrentTarget;
+
+  /// No description provided for @screensSettingsHealthSettingsAvgExpenditure.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Expenditure'**
+  String get screensSettingsHealthSettingsAvgExpenditure;
+
+  /// No description provided for @screensSettingsHealthSettingsSuggestedTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested Target'**
+  String get screensSettingsHealthSettingsSuggestedTarget;
+
+  /// No description provided for @screensSettingsHealthSettingsDaysAnalyzed.
+  ///
+  /// In en, this message translates to:
+  /// **'Days Analyzed'**
+  String get screensSettingsHealthSettingsDaysAnalyzed;
+
+  /// No description provided for @screensSettingsHealthSettingsApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get screensSettingsHealthSettingsApply;
+
+  /// No description provided for @screensSettingsHealthSettingsCalorieTargetUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie target updated to {target} kcal'**
+  String screensSettingsHealthSettingsCalorieTargetUpdated(String target);
+
+  /// No description provided for @screensSettingsHealthSettingsCalorieTargetUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update calorie target'**
+  String get screensSettingsHealthSettingsCalorieTargetUpdateFailed;
+
+  /// No description provided for @screensSettingsHealthSettingsAnalysisFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis failed: {error}'**
+  String screensSettingsHealthSettingsAnalysisFailed(String error);
+
+  /// No description provided for @screensSettingsHealthSettingsAboutHealthConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'ABOUT HEALTH CONNECT'**
+  String get screensSettingsHealthSettingsAboutHealthConnect;
+
+  /// No description provided for @screensSettingsHealthSettingsAboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect PlatePal to Health Connect (Google Fit) to:'**
+  String get screensSettingsHealthSettingsAboutDescription;
+
+  /// No description provided for @screensSettingsHealthSettingsFeatureReadCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Read your actual calories burned from fitness tracking'**
+  String get screensSettingsHealthSettingsFeatureReadCalories;
+
+  /// No description provided for @screensSettingsHealthSettingsFeatureWriteMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically write meal nutrition data to Health Connect'**
+  String get screensSettingsHealthSettingsFeatureWriteMeals;
+
+  /// No description provided for @screensSettingsHealthSettingsFeatureNetBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'See accurate net calorie balance (consumed vs burned)'**
+  String get screensSettingsHealthSettingsFeatureNetBalance;
+
+  /// No description provided for @screensSettingsHealthSettingsFeatureRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Get calorie target recommendations based on real expenditure'**
+  String get screensSettingsHealthSettingsFeatureRecommendations;
+
+  /// No description provided for @screensSettingsHealthSettingsAboutNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When connected, Health Connect becomes the single source of truth for calories burned — no estimated values.'**
+  String get screensSettingsHealthSettingsAboutNote;
+
+  /// No description provided for @screensSettingsHealthSettingsJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get screensSettingsHealthSettingsJustNow;
+
+  /// No description provided for @screensSettingsHealthSettingsMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String screensSettingsHealthSettingsMinutesAgo(int minutes);
+
+  /// No description provided for @screensSettingsHealthSettingsHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String screensSettingsHealthSettingsHoursAgo(int hours);
+
+  /// No description provided for @screensSettingsHealthSettingsDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String screensSettingsHealthSettingsDaysAgo(int days);
+
+  /// No description provided for @screensMenuHealthAndFitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Fitness'**
+  String get screensMenuHealthAndFitness;
+
+  /// No description provided for @screensMenuHealthConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'HEALTH CONNECT'**
+  String get screensMenuHealthConnect;
+
+  /// No description provided for @screensMenuHealthConnectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected — syncing with Google Fit'**
+  String get screensMenuHealthConnectedSubtitle;
+
+  /// No description provided for @screensMenuHealthDisconnectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync with Google Fit & Health Connect'**
+  String get screensMenuHealthDisconnectedSubtitle;
+
+  /// No description provided for @componentsCalendarMacroSummaryBurned.
+  ///
+  /// In en, this message translates to:
+  /// **'{calories} burned'**
+  String componentsCalendarMacroSummaryBurned(String calories);
+
+  /// No description provided for @componentsCalendarMacroSummaryNetCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Net: {value}'**
+  String componentsCalendarMacroSummaryNetCalories(String value);
+
+  /// No description provided for @componentsCalendarMacroSummaryNoBurnData.
+  ///
+  /// In en, this message translates to:
+  /// **'No burn data for this day'**
+  String get componentsCalendarMacroSummaryNoBurnData;
+
+  /// No description provided for @screensCalendarHealthDeleteWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The nutrition entry in Health Connect will not be removed. You can delete it manually in the Health Connect app.'**
+  String get screensCalendarHealthDeleteWarning;
+
+  /// No description provided for @screensSettingsProfileSettingsManageHealthConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Health Connect'**
+  String get screensSettingsProfileSettingsManageHealthConnect;
+
+  /// No description provided for @screensSettingsProfileSettingsLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced: {time}'**
+  String screensSettingsProfileSettingsLastSynced(String time);
 }
 
 class _AppLocalizationsDelegate

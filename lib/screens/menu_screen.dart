@@ -4,6 +4,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/theme_provider.dart';
 import '../providers/locale_provider.dart';
+import '../services/health_service.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -119,6 +120,12 @@ class MenuScreen extends StatelessWidget {
           ),
           _buildSettingsSection(
             context,
+            title: AppLocalizations.of(context).screensMenuHealthAndFitness,
+            icon: Icons.health_and_safety,
+            children: [_buildHealthTile(context)],
+          ),
+          _buildSettingsSection(
+            context,
             title: AppLocalizations.of(context).screensMenuInformation,
             icon: Icons.info,
             children: [
@@ -141,6 +148,91 @@ class MenuScreen extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHealthTile(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isConnected = HealthService().isConnected;
+
+    return InkWell(
+      onTap: () => context.push('/settings/health'),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: colorScheme.outline.withValues(alpha: 0.2),
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                Icon(
+                  Icons.health_and_safety,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+                if (isConnected)
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                        border: Border.all(
+                          color: colorScheme.surface,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).screensMenuHealthConnect,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isConnected
+                        ? AppLocalizations.of(
+                          context,
+                        ).screensMenuHealthConnectedSubtitle
+                        : AppLocalizations.of(
+                          context,
+                        ).screensMenuHealthDisconnectedSubtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward,
+              size: 14,
+              color: colorScheme.primary.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
       ),
     );
   }
