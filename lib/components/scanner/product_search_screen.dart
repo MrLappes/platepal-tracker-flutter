@@ -182,11 +182,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       if (nutMaps.isNotEmpty) {
         final m = nutMaps.first;
         nut = NutritionInfo(
-          calories: m['calories'] as double,
-          protein: m['protein'] as double,
-          carbs: m['carbs'] as double,
-          fat: m['fat'] as double,
-          fiber: m['fiber'] as double,
+          calories: (m['calories'] as num?)?.toDouble() ?? 0.0,
+          protein: (m['protein'] as num?)?.toDouble() ?? 0.0,
+          carbs: (m['carbs'] as num?)?.toDouble() ?? 0.0,
+          fat: (m['fat'] as num?)?.toDouble() ?? 0.0,
+          fiber: (m['fiber'] as num?)?.toDouble() ?? 0.0,
           sugar: 0.0,
           sodium: 0.0,
         );

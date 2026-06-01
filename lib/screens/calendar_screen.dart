@@ -774,6 +774,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   isCollapsible: true,
                                   initiallyExpanded: _isMacroSummaryExpanded,
                                   onAiTipPressed: _getAiTip,
+                                  isAiTipLoading: _isGeneratingTip,
                                   selectedDate: _selectedDate,
                                 ),
 

@@ -19,6 +19,7 @@ class MacroSummary extends StatefulWidget {
   final bool isCollapsible;
   final bool initiallyExpanded;
   final VoidCallback? onAiTipPressed;
+  final bool isAiTipLoading;
   final DateTime? selectedDate; // Add selected date parameter
 
   const MacroSummary({
@@ -39,6 +40,7 @@ class MacroSummary extends StatefulWidget {
     this.isCollapsible = false,
     this.initiallyExpanded = true,
     this.onAiTipPressed,
+    this.isAiTipLoading = false,
     this.selectedDate,
   });
 
@@ -460,7 +462,10 @@ class _MacroSummaryState extends State<MacroSummary> {
                     // AI Tip button
                     if (widget.onAiTipPressed != null) ...[
                       GestureDetector(
-                        onTap: widget.onAiTipPressed,
+                        onTap:
+                            widget.isAiTipLoading
+                                ? null
+                                : widget.onAiTipPressed,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -473,11 +478,23 @@ class _MacroSummaryState extends State<MacroSummary> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                size: 12,
-                                color: colorScheme.onPrimaryContainer,
-                              ),
+                              if (widget.isAiTipLoading)
+                                SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                )
+                              else
+                                Icon(
+                                  Icons.auto_awesome,
+                                  size: 12,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
                               const SizedBox(width: 4),
                               Text(
                                 l10n.componentsCalendarMacroSummaryGetAiTip,

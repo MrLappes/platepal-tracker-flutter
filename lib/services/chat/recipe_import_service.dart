@@ -182,8 +182,7 @@ class RecipeImportService {
     if (normalized.length >= 2) {
       final first = normalized[0];
       final last = normalized[normalized.length - 1];
-      if ((first == '"' && last == '"') ||
-          (first == '\'' && last == '\'')) {
+      if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
         normalized = normalized.substring(1, normalized.length - 1).trim();
       }
     }
