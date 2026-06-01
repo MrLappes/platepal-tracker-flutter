@@ -287,10 +287,7 @@ class ResponseGenerationStep extends AgentStep {
         debugPrint(
           '↩️ ResponseGenerationStep: Reusing previous successful response after provider error',
         );
-        return ChatStepResult.success(
-          stepName: stepName,
-          data: fallbackResult,
-        );
+        return ChatStepResult.success(stepName: stepName, data: fallbackResult);
       }
 
       return ChatStepResult.failure(
@@ -388,13 +385,15 @@ class ResponseGenerationStep extends AgentStep {
 
       switch (call.functionName) {
         case 'provide_chat_response':
-          final rawReplyText = (args['reply_text'] ?? args['response_text']) as String?;
+          final rawReplyText =
+              (args['reply_text'] ?? args['response_text']) as String?;
           if (rawReplyText != null) {
             replyText = _sanitizeToolString(rawReplyText) ?? replyText;
           }
           final rawRecommendation = args['recommendation'] as String?;
           if (rawRecommendation != null) {
-            recommendation = _sanitizeToolString(rawRecommendation) ?? recommendation;
+            recommendation =
+                _sanitizeToolString(rawRecommendation) ?? recommendation;
           }
           break;
 
@@ -555,8 +554,7 @@ class ResponseGenerationStep extends AgentStep {
     while (normalized.length >= 2) {
       final first = normalized[0];
       final last = normalized[normalized.length - 1];
-      if ((first == '"' && last == '"') ||
-          (first == '\'' && last == '\'')) {
+      if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
         normalized = normalized.substring(1, normalized.length - 1).trim();
         continue;
       }

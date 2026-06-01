@@ -1751,7 +1751,9 @@ class ChatAgentService {
 
   bool _didUseRecipeImportTool(List<ChatStepResult> stepResults) {
     final responseResult =
-        stepResults.where((r) => r.stepName == 'response_generation').lastOrNull;
+        stepResults
+            .where((r) => r.stepName == 'response_generation')
+            .lastOrNull;
     final toolCallDetails = responseResult?.data?['toolCallDetails'] as List?;
     if (toolCallDetails == null) return false;
 
