@@ -108,6 +108,41 @@ class AgentTools {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Tool: import_recipe_from_url
+  // ─────────────────────────────────────────────────────────────────────────
+  /// Use this tool when the user shares an online recipe URL and asks to
+  /// import/analyze it as a new dish.
+  static const Map<String, dynamic> importRecipeFromUrlTool = {
+    'type': 'function',
+    'function': {
+      'name': 'import_recipe_from_url',
+      'description':
+          'Imports a recipe from a public URL and converts it into a new dish draft. '
+          'Use when the user explicitly provides an online recipe link.',
+      'parameters': {
+        'type': 'object',
+        'properties': {
+          'url': {
+            'type': 'string',
+            'description': 'The public recipe page URL (http/https).',
+          },
+          'meal_type': {
+            'type': 'string',
+            'enum': ['breakfast', 'lunch', 'dinner', 'snack'],
+            'description': 'Optional preferred meal category.',
+          },
+          'reply_text': {
+            'type': 'string',
+            'description':
+                'Optional conversational reply to the user after import.',
+          },
+        },
+        'required': ['url'],
+      },
+    },
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Tool: reference_existing_dish
   // ─────────────────────────────────────────────────────────────────────────
   /// Use this tool ONLY when the user wants to log or view a dish that is
@@ -214,6 +249,7 @@ class AgentTools {
   // ─────────────────────────────────────────────────────────────────────────
   static const List<Map<String, dynamic>> allTools = [
     createNewDishTool,
+    importRecipeFromUrlTool,
     referenceExistingDishTool,
     provideChatResponseTool,
     askClarificationTool,
@@ -236,6 +272,7 @@ class AgentTools {
     // Always include the base chat response and clarification tools
     tools.add(provideChatResponseTool);
     tools.add(askClarificationTool);
+    tools.add(importRecipeFromUrlTool);
 
     // Dish creation requested
     if (ctx.needsInfoOnDishCreation) {

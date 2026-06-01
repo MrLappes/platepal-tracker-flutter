@@ -799,6 +799,7 @@ NEVER return raw text or JSON — always use a tool call.
 
 Tool selection guide:
 - Use `create_new_dish` when the user wants a new meal/recipe created.
+- Use `import_recipe_from_url` when the user provides a recipe webpage URL and wants it imported as a dish.
 - Use `reference_existing_dish` ONLY when you have an exact database ID from the provided context — never guess or fabricate an ID.
 - Use `provide_chat_response` for all other responses: nutrition advice, questions, tracking, etc.
 - Use `ask_clarification` only when a required detail is genuinely impossible to infer.
@@ -807,7 +808,8 @@ When creating dishes:
 - ALL nutrition values must be PER 100g of the ingredient, not total amounts.
 - Use accurate, science-based nutrition values for common ingredients.
 - Prefer grams/ml for units to ensure precise calculations.
-- Never reference a dish_id unless it was explicitly provided in your context.''';
+- Never reference a dish_id unless it was explicitly provided in your context.
+- For URL recipe import, pass the exact user URL and do not fabricate content from non-recipe pages.''';
 
   /// Build the complete system prompt based on thinking step requirements
   static String buildEnhancedPrompt({

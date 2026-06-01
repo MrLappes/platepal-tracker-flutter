@@ -15,6 +15,7 @@ class ChatAgentSettingsScreen extends StatefulWidget {
 class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
   late bool agentModeEnabled;
   late bool deepSearchEnabled;
+  bool recipeUrlConsentGranted = false;
   bool loading = false;
 
   @override
@@ -23,6 +24,14 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     agentModeEnabled = chatProvider.isAgentModeEnabled;
     deepSearchEnabled = chatProvider.isDeepSearchEnabled;
+    _loadRecipeUrlConsentStatus();
+  }
+
+  Future<void> _loadRecipeUrlConsentStatus() async {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    final hasConsent = await chatProvider.hasRecipeUrlConsent();
+    if (!mounted) return;
+    setState(() => recipeUrlConsentGranted = hasConsent);
   }
 
   Future<void> _saveSettings() async {
@@ -57,6 +66,41 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _confirmAndResetRecipeUrlConsent() async {
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Reset URL Access Consent?'),
+          content: const Text(
+            'This will make the app ask for your approval again the next time a recipe URL is opened.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldReset != true) return;
+
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    await chatProvider.resetRecipeUrlConsent();
+    if (!mounted) return;
+
+    setState(() => recipeUrlConsentGranted = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Recipe URL consent has been reset.')),
+    );
   }
 
   @override
@@ -121,6 +165,40 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
                     : Icon(Icons.save),
             label: Text(
               localizations.componentsChatBotProfileCustomizationDialogSave,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Card(
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Recipe URL Access Consent',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    recipeUrlConsentGranted
+                        ? 'Consent is currently granted. You can reset it to be asked again.'
+                        : 'Consent is not granted yet. You will be asked when opening a recipe URL.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed:
+                        recipeUrlConsentGranted
+                            ? _confirmAndResetRecipeUrlConsent
+                            : null,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Reset URL Consent'),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 32),

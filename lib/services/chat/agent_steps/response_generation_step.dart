@@ -8,6 +8,7 @@ import '../openai_service.dart';
 import '../../chat/system_prompts.dart';
 import '../../chat/agent_tools.dart';
 import '../../chat/pipeline_modification_tracker.dart';
+import '../../chat/recipe_import_service.dart';
 import '../../../utils/image_utils.dart';
 
 const _uuid = Uuid();
@@ -15,12 +16,14 @@ const _uuid = Uuid();
 /// Generates the main AI response based on gathered context and user message
 class ResponseGenerationStep extends AgentStep {
   final OpenAIService _openaiService;
+  final RecipeImportService _recipeImportService;
   final PipelineModificationTracker? _modificationTracker;
 
   ResponseGenerationStep({
     required OpenAIService openaiService,
     PipelineModificationTracker? modificationTracker,
   }) : _openaiService = openaiService,
+       _recipeImportService = RecipeImportService(openAIService: openaiService),
        _modificationTracker = modificationTracker;
 
   @override
@@ -183,7 +186,7 @@ class ResponseGenerationStep extends AgentStep {
       if (choice.isToolCall) {
         // ── Tool-call path (preferred) ────────────────────────────────────
         debugPrint('🤖 ResponseGenerationStep: Received tool_calls response');
-        final result = _dispatchToolCalls(
+        final result = await _dispatchToolCalls(
           choice.message.toolCalls ?? [],
           uploadedImageUri,
           dishInfoFallback:
@@ -278,6 +281,18 @@ class ResponseGenerationStep extends AgentStep {
       );
     } catch (error) {
       debugPrint('❌ ResponseGenerationStep: Error during execution: $error');
+
+      final fallbackResult = _recoverPreviousResponse(input);
+      if (fallbackResult != null) {
+        debugPrint(
+          '↩️ ResponseGenerationStep: Reusing previous successful response after provider error',
+        );
+        return ChatStepResult.success(
+          stepName: stepName,
+          data: fallbackResult,
+        );
+      }
+
       return ChatStepResult.failure(
         stepName: stepName,
         error: ChatAgentError(
@@ -288,6 +303,23 @@ class ResponseGenerationStep extends AgentStep {
         ),
       );
     }
+  }
+
+  Map<String, dynamic>? _recoverPreviousResponse(ChatStepInput input) {
+    final rawStepResults = input.metadata?['stepResults'];
+    if (rawStepResults is! List) return null;
+
+    for (final result in rawStepResults.reversed) {
+      if (result is! Map<String, dynamic>) continue;
+      if (result['stepName'] != 'response_generation') continue;
+
+      final data = result['data'];
+      if (data is Map<String, dynamic> && data['chatResponse'] is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+    }
+
+    return null;
   }
 
   @override
@@ -337,11 +369,11 @@ class ResponseGenerationStep extends AgentStep {
   /// Parses an ordered list of OpenAI tool calls and builds the unified
   /// [ChatResponse] fields. Handles multiple calls in a single response
   /// (e.g. one `provide_chat_response` + one `create_new_dish`).
-  Map<String, dynamic> _dispatchToolCalls(
+  Future<Map<String, dynamic>> _dispatchToolCalls(
     List<ToolCall> toolCalls,
     String? uploadedImageUri, {
     String? dishInfoFallback,
-  }) {
+  }) async {
     String replyText = '';
     String? recommendation;
     final dishes = <Dish>[];
@@ -356,13 +388,21 @@ class ResponseGenerationStep extends AgentStep {
 
       switch (call.functionName) {
         case 'provide_chat_response':
-          replyText = args['reply_text'] as String? ?? replyText;
-          recommendation = args['recommendation'] as String? ?? recommendation;
+          final rawReplyText = (args['reply_text'] ?? args['response_text']) as String?;
+          if (rawReplyText != null) {
+            replyText = _sanitizeToolString(rawReplyText) ?? replyText;
+          }
+          final rawRecommendation = args['recommendation'] as String?;
+          if (rawRecommendation != null) {
+            recommendation = _sanitizeToolString(rawRecommendation) ?? recommendation;
+          }
+          break;
 
         case 'ask_clarification':
           final q = args['question'] as String? ?? '';
           final ctx = args['context'] as String?;
           replyText = ctx != null && ctx.isNotEmpty ? '$q\n\n($ctx)' : q;
+          break;
 
         case 'reference_existing_dish':
           replyText = args['reply_text'] as String? ?? replyText;
@@ -398,6 +438,7 @@ class ResponseGenerationStep extends AgentStep {
               afterData: {'dishId': dishId, 'dishName': args['dish_name']},
             );
           }
+          break;
 
         case 'create_new_dish':
           replyText = args['reply_text'] as String? ?? replyText;
@@ -422,9 +463,57 @@ class ResponseGenerationStep extends AgentStep {
               },
             );
           }
+          break;
+
+        case 'import_recipe_from_url':
+          final recipeUrl = _sanitizeToolString(args['url'] as String?);
+          if (recipeUrl == null || recipeUrl.isEmpty) {
+            replyText = 'Please provide a valid recipe URL to import.';
+            break;
+          }
+
+          final importResult = await _recipeImportService.importRecipeFromUrl(
+            recipeUrl: recipeUrl,
+            requestedMealType: args['meal_type'] as String?,
+            fallbackReplyText: args['reply_text'] as String?,
+          );
+
+          replyText = importResult.replyText;
+          recommendation = importResult.recommendation ?? recommendation;
+          if (importResult.success && importResult.dish != null) {
+            dishes.add(importResult.dish!);
+            _modificationTracker?.recordModification(
+              type: PipelineModificationType.dataEnrichment,
+              severity: ModificationSeverity.high,
+              stepName: stepName,
+              description:
+                  'Recipe imported from URL as new dish: ${importResult.dish!.name}',
+              technicalDetails:
+                  'Tool: import_recipe_from_url | URL: $recipeUrl | '
+                  'Ingredients: ${importResult.dish!.ingredients.length}',
+              afterData: {
+                'dishId': importResult.dish!.id,
+                'dishName': importResult.dish!.name,
+                'recipeUrl': recipeUrl,
+              },
+            );
+          } else {
+            _modificationTracker?.recordModification(
+              type: PipelineModificationType.contextModification,
+              severity: ModificationSeverity.medium,
+              stepName: stepName,
+              description: 'Recipe URL import blocked or failed safely.',
+              technicalDetails:
+                  'Tool: import_recipe_from_url | URL: $recipeUrl | '
+                  'Reply: ${importResult.replyText}',
+              afterData: {'recipeUrl': recipeUrl, 'success': false},
+            );
+          }
+          break;
 
         default:
           debugPrint('\u26a0\ufe0f Unknown tool call: ${call.functionName}');
+          break;
       }
     }
 
@@ -453,6 +542,28 @@ class ResponseGenerationStep extends AgentStep {
       'recommendation': recommendation,
       'dishes': dishes.isEmpty ? null : dishes,
     };
+  }
+
+  String? _sanitizeToolString(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+
+    var normalized = trimmed;
+
+    while (normalized.length >= 2) {
+      final first = normalized[0];
+      final last = normalized[normalized.length - 1];
+      if ((first == '"' && last == '"') ||
+          (first == '\'' && last == '\'')) {
+        normalized = normalized.substring(1, normalized.length - 1).trim();
+        continue;
+      }
+      break;
+    }
+
+    return normalized;
   }
 
   /// Converts `create_new_dish` tool call arguments to a [Dish] object.
