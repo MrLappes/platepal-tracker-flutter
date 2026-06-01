@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/chat_types.dart';
+import '../../models/dish.dart';
+import '../../models/dish_models.dart';
 import '../../models/user_ingredient.dart';
 import '../../repositories/dish_repository.dart';
 import '../../repositories/meal_repository.dart';
@@ -599,7 +601,7 @@ class ChatAgentService {
       }
 
       // Step 6: Return final response
-      return _buildFinalResponse(
+      return await _buildFinalResponse(
         stepResults,
         thinkingSteps,
         startTime,
@@ -1625,12 +1627,12 @@ class ChatAgentService {
   // Future<PhaseResult> _executePhaseWithCheckpoint({
 
   /// Build final response from step results
-  ChatResponse _buildFinalResponse(
+  Future<ChatResponse> _buildFinalResponse(
     List<ChatStepResult> stepResults,
     List<String> thinkingSteps,
     DateTime startTime,
     BotConfiguration botConfig,
-  ) {
+  ) async {
     // Find the response generation result
     final responseResult =
         stepResults
@@ -1673,6 +1675,11 @@ class ChatAgentService {
     }
 
     final duration = DateTime.now().difference(startTime);
+
+    final importedRecipeDetected = _didUseRecipeImportTool(stepResults);
+    if (importedRecipeDetected && extractedDishes.isNotEmpty) {
+      await _persistImportedDishes(extractedDishes);
+    }
 
     // Collect emergency override information for transparency
     final emergencyOverrides = <String>[];
@@ -1739,6 +1746,85 @@ class ChatAgentService {
         'modificationSummary':
             _modificationTracker.generateUserFriendlySummary(),
       },
+    );
+  }
+
+  bool _didUseRecipeImportTool(List<ChatStepResult> stepResults) {
+    final responseResult =
+        stepResults.where((r) => r.stepName == 'response_generation').lastOrNull;
+    final toolCallDetails = responseResult?.data?['toolCallDetails'] as List?;
+    if (toolCallDetails == null) return false;
+
+    return toolCallDetails.any((toolCall) {
+      if (toolCall is! Map<String, dynamic>) return false;
+      return toolCall['tool'] == 'import_recipe_from_url';
+    });
+  }
+
+  Future<void> _persistImportedDishes(List<dynamic> dishes) async {
+    for (final dish in dishes) {
+      try {
+        if (dish is ProcessedDish) {
+          final storageDish = _toStorageDish(dish);
+          await _dishService.saveDish(storageDish);
+          debugPrint(
+            '🍽️ ChatAgentService: Saved imported dish to database: ${storageDish.name}',
+          );
+        } else if (dish is Dish) {
+          await _dishService.saveDish(dish);
+          debugPrint(
+            '🍽️ ChatAgentService: Saved imported dish to database: ${dish.name}',
+          );
+        }
+      } catch (e) {
+        debugPrint('⚠️ ChatAgentService: Failed to save imported dish: $e');
+      }
+    }
+  }
+
+  Dish _toStorageDish(ProcessedDish dish) {
+    return Dish(
+      id: dish.id,
+      name: dish.name,
+      description: dish.description,
+      imageUrl: dish.imageUrl,
+      ingredients:
+          dish.ingredients
+              .map(
+                (ingredient) => Ingredient(
+                  id: ingredient.id,
+                  name: ingredient.name,
+                  amount: ingredient.amount,
+                  unit: ingredient.unit,
+                  nutrition:
+                      ingredient.nutrition == null
+                          ? null
+                          : NutritionInfo(
+                            calories: ingredient.nutrition!.calories,
+                            protein: ingredient.nutrition!.protein,
+                            carbs: ingredient.nutrition!.carbs,
+                            fat: ingredient.nutrition!.fat,
+                            fiber: ingredient.nutrition!.fiber,
+                            sugar: ingredient.nutrition!.sugar,
+                            sodium: ingredient.nutrition!.sodium,
+                          ),
+                  barcode: ingredient.barcode,
+                ),
+              )
+              .toList(),
+      nutrition: NutritionInfo(
+        calories: dish.totalNutrition.calories,
+        protein: dish.totalNutrition.protein,
+        carbs: dish.totalNutrition.carbs,
+        fat: dish.totalNutrition.fat,
+        fiber: dish.totalNutrition.fiber,
+        sugar: dish.totalNutrition.sugar,
+        sodium: dish.totalNutrition.sodium,
+      ),
+      createdAt: dish.createdAt,
+      updatedAt: dish.updatedAt,
+      isFavorite: dish.isFavorite,
+      category: dish.mealType?.toJsonValue(),
     );
   }
 

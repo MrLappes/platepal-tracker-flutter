@@ -18,6 +18,8 @@ import '../services/storage/storage_service_provider.dart';
 import '../services/user_session_service.dart';
 
 class ChatProvider extends ChangeNotifier {
+  static const String _recipeUrlConsentKey = 'recipe_url_open_consent_v1';
+
   final OpenAIService _openAIService = OpenAIService();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
@@ -247,7 +249,15 @@ class ChatProvider extends ChangeNotifier {
     // Ensure agent service is initialized if agent mode is enabled
     if (_agentModeEnabled && _chatAgentService == null) {
       await _initializeAgentService();
-    } // Create user message
+    }
+
+    // On first URL-based recipe import attempt, ask for explicit consent.
+    final canProceed = await _ensureRecipeUrlConsentIfNeeded(content, context);
+    if (!canProceed) {
+      return;
+    }
+
+    // Create user message
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: content,
@@ -445,6 +455,19 @@ class ChatProvider extends ChangeNotifier {
     await _loadAgentSettings();
   }
 
+  /// Returns whether the user already granted recipe URL opening consent.
+  Future<bool> hasRecipeUrlConsent() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_recipeUrlConsentKey) ?? false;
+  }
+
+  /// Clears stored recipe URL consent so the next URL import asks again.
+  Future<void> resetRecipeUrlConsent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_recipeUrlConsentKey);
+    notifyListeners();
+  }
+
   /// Load profiles from storage
   Future<void> _loadProfiles() async {
     try {
@@ -615,4 +638,98 @@ class ChatProvider extends ChangeNotifier {
     'rephrase': l10n.servicesChatAgentFallbackRephrase,
     'dishInfo': l10n.servicesChatAgentFallbackDishInfo,
   };
+
+  Future<bool> _ensureRecipeUrlConsentIfNeeded(
+    String content,
+    BuildContext? context,
+  ) async {
+    // Consent is relevant only when the full agent pipeline can use tools.
+    if (!_isApiKeyConfigured || !_agentModeEnabled) {
+      return true;
+    }
+
+    final recipeUrl = _extractFirstHttpUrl(content);
+    if (recipeUrl == null) {
+      return true;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final hasConsent = prefs.getBool(_recipeUrlConsentKey) ?? false;
+    if (hasConsent) {
+      return true;
+    }
+
+    if (context == null) {
+      debugPrint('⚠️ URL consent required but no BuildContext provided.');
+      return false;
+    }
+
+    // ignore: use_build_context_synchronously
+    final approved = await _showUrlConsentDialog(context, recipeUrl);
+    if (approved) {
+      await prefs.setBool(_recipeUrlConsentKey, true);
+      return true;
+    }
+
+    return false;
+  }
+
+  String? _extractFirstHttpUrl(String text) {
+    final match = RegExp(
+      r'https?://[^\s<>"]+',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (match == null) {
+      return null;
+    }
+
+    final raw = match.group(0)?.trim();
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+
+    final sanitized = raw.replaceFirst(RegExp(r'[\.,;:!\?\)\]]+$'), '');
+    return sanitized.isEmpty ? null : sanitized;
+  }
+
+  Future<bool> _showUrlConsentDialog(BuildContext context, String url) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Allow URL Access?'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'The assistant wants to open this URL to analyze an online recipe:',
+                ),
+                const SizedBox(height: 12),
+                SelectableText(url),
+                const SizedBox(height: 12),
+                const Text(
+                  'By tapping OK, you agree that opening this URL is your responsibility.',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
+  }
 }
