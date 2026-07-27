@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import '../../models/dish.dart';
 import '../../services/data/import_export_service.dart';
+import '../../services/storage/dish_service.dart';
 
 class ImportDataScreen extends StatefulWidget {
   const ImportDataScreen({super.key});
@@ -12,6 +16,7 @@ class ImportDataScreen extends StatefulWidget {
 
 class _ImportDataScreenState extends State<ImportDataScreen> {
   final ImportExportService _importExportService = ImportExportService();
+  final DishService _dishService = DishService();
   bool _isImporting = false;
   bool _isRestoring = false;
   bool _hasBackupAvailable = false;
@@ -24,10 +29,22 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
   ImportDetailedResults? _lastResults;
   bool _showAdvancedOptions = false;
 
+  // Import from PlatePal wiki link
+  final TextEditingController _urlController = TextEditingController();
+  bool _isImportingUrl = false;
+  String? _urlError;
+  String _urlPortion = 'serving';
+
   // Progress tracking
   int _currentProgress = 0;
   int _totalItems = 0;
   String _currentType = '';
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -144,6 +161,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           ],
           _buildFileSelectionCard(),
           const SizedBox(height: 16),
+          _buildUrlImportCard(),
+          const SizedBox(height: 16),
           _buildDataTypeSelectionCard(),
           const SizedBox(height: 16),
           _buildDuplicateHandlingCard(),
@@ -162,6 +181,193 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildUrlImportCard() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.link, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Import from PlatePal Link',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Paste a recipe link from the PlatePal wiki to add it as a dish.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _urlController,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              enabled: !_isImportingUrl,
+              decoration: InputDecoration(
+                labelText: 'Recipe link',
+                hintText: 'https://plate-pal.de/wiki/recipes/…',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.public),
+                errorText: _urlError,
+              ),
+              onChanged: (_) {
+                if (_urlError != null) setState(() => _urlError = null);
+              },
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment<String>(
+                  value: 'serving',
+                  label: Text('Per serving'),
+                  icon: Icon(Icons.restaurant),
+                ),
+                ButtonSegment<String>(
+                  value: 'whole',
+                  label: Text('Whole recipe'),
+                  icon: Icon(Icons.dinner_dining),
+                ),
+              ],
+              selected: {_urlPortion},
+              onSelectionChanged:
+                  _isImportingUrl
+                      ? null
+                      : (selection) =>
+                          setState(() => _urlPortion = selection.first),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isImportingUrl ? null : _importFromUrl,
+                icon:
+                    _isImportingUrl
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Icon(Icons.cloud_download),
+                label: Text(_isImportingUrl ? 'Importing…' : 'Import from Link'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Resolve the app locale to a wiki locale code (the wiki uses `jp` for
+  /// Japanese where Flutter uses `ja`).
+  String _wikiLocale() {
+    final code = Localizations.localeOf(context).languageCode.toLowerCase();
+    const supported = {'en', 'de', 'cs', 'jp'};
+    if (code == 'ja') return 'jp';
+    return supported.contains(code) ? code : 'en';
+  }
+
+  /// Build the wiki export API URL from a user-provided recipe link.
+  ///
+  /// Accepts links such as `https://plate-pal.de/wiki/recipes/{slug}` or the
+  /// raw export endpoint `https://plate-pal.de/wiki-api/recipes/{slug}/export`.
+  Uri? _buildExportUri(String input) {
+    final trimmed = input.trim();
+    if (trimmed.isEmpty) return null;
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
+      return null;
+    }
+    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    final recipesIndex = segments.indexOf('recipes');
+    if (recipesIndex == -1 || recipesIndex + 1 >= segments.length) return null;
+    final slug = segments[recipesIndex + 1];
+    if (slug.isEmpty || slug == 'export') return null;
+    return uri.replace(
+      pathSegments: ['wiki-api', 'recipes', slug, 'export'],
+      queryParameters: {'locale': _wikiLocale(), 'portion': _urlPortion},
+    );
+  }
+
+  Future<void> _importFromUrl() async {
+    final exportUri = _buildExportUri(_urlController.text);
+    if (exportUri == null) {
+      setState(
+        () =>
+            _urlError =
+                'Enter a valid PlatePal recipe link, e.g. '
+                'https://plate-pal.de/wiki/recipes/your-recipe',
+      );
+      return;
+    }
+
+    setState(() {
+      _isImportingUrl = true;
+      _urlError = null;
+    });
+
+    try {
+      final response = await http.get(
+        exportUri,
+        headers: const {'Accept': 'application/json'},
+      );
+      if (response.statusCode == 404) {
+        throw Exception('Recipe not found at that link.');
+      }
+      if (response.statusCode != 200) {
+        throw Exception('Server returned status ${response.statusCode}.');
+      }
+
+      final decoded = json.decode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Unexpected response format.');
+      }
+
+      final dish = Dish.fromJson(decoded);
+      final existing = await _dishService.getDishById(dish.id);
+      if (existing != null) {
+        await _dishService.updateDish(dish);
+      } else {
+        await _dishService.saveDish(dish);
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _isImportingUrl = false;
+        _urlController.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Imported "${dish.name}"'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) Navigator.of(context).pop(true);
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isImportingUrl = false;
+        _urlError = 'Import failed: $e';
+      });
+    }
   }
 
   Widget _buildFileSelectionCard() {
