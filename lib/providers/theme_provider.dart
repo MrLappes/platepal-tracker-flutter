@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,18 +5,24 @@ import '../themes/app_theme.dart';
 
 enum ThemePreference { dark, light, system }
 
-class ThemeProvider extends ChangeNotifier {
+class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const String _themePrefKey = 'theme_preference';
   static const String _themeNameKey = 'theme_name';
+  final SharedPreferences? _prefs;
 
   ThemePreference _themePreference = ThemePreference.dark;
   String _currentThemeName = AppThemes.dark.name;
   AppTheme _currentTheme = AppThemes.dark;
   bool _isDark = true;
+  bool _observingBrightness = false;
 
-  ThemeProvider() {
-    _loadThemePreference();
-    _updateSystemBrightness();
+  ThemeProvider({SharedPreferences? prefs}) : _prefs = prefs {
+    if (prefs == null) {
+      _loadThemePreference();
+      _updateSystemBrightness();
+    } else {
+      _restoreThemePreference(prefs);
+    }
   }
 
   // Getters
@@ -26,38 +31,38 @@ class ThemeProvider extends ChangeNotifier {
   AppTheme get currentTheme => _currentTheme;
   bool get isDark => _isDark;
   ThemeData get materialTheme => _currentTheme.materialTheme;
+  ThemeData get lightTheme =>
+      AppThemes.getThemeByName(_currentThemeName).toLight().materialTheme;
+  ThemeData get darkTheme =>
+      AppThemes.getThemeByName(_currentThemeName).toDark().materialTheme;
 
   // Load saved theme preference from storage
   Future<void> _loadThemePreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      // Load theme preference
-      final savedPreference = prefs.getString(_themePrefKey);
-      if (savedPreference != null) {
-        _themePreference = ThemePreference.values.firstWhere(
-          (e) => e.name == savedPreference,
-          orElse: () => ThemePreference.dark,
-        );
-      }
-
-      final savedThemeName = prefs.getString(_themeNameKey);
-      if (savedThemeName != null) {
-        _currentThemeName = savedThemeName;
-      } else {
-        _currentThemeName = AppThemes.dark.name;
-      }
-
-      _updateTheme();
+      _restoreThemePreference(prefs);
     } catch (error) {
       debugPrint('Failed to load theme preference: $error');
     }
   }
 
+  void _restoreThemePreference(SharedPreferences prefs) {
+    final savedPreference = prefs.getString(_themePrefKey);
+    if (savedPreference != null) {
+      _themePreference = ThemePreference.values.firstWhere(
+        (preference) => preference.name == savedPreference,
+        orElse: () => ThemePreference.dark,
+      );
+    }
+
+    _currentThemeName = prefs.getString(_themeNameKey) ?? AppThemes.dark.name;
+    _updateTheme();
+  }
+
   // Save theme preference to storage
   Future<void> _saveThemePreference() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = _prefs ?? await SharedPreferences.getInstance();
       await prefs.setString(_themePrefKey, _themePreference.name);
       await prefs.setString(_themeNameKey, _currentThemeName);
     } catch (error) {
@@ -67,6 +72,15 @@ class ThemeProvider extends ChangeNotifier {
 
   // Update the current theme based on preference and system brightness
   void _updateTheme() {
+    if (_themePreference == ThemePreference.system && !_observingBrightness) {
+      WidgetsBinding.instance.addObserver(this);
+      _observingBrightness = true;
+    } else if (_themePreference != ThemePreference.system &&
+        _observingBrightness) {
+      WidgetsBinding.instance.removeObserver(this);
+      _observingBrightness = false;
+    }
+
     // Determine if we should use dark mode
     bool useDark;
     switch (_themePreference) {
@@ -77,7 +91,8 @@ class ThemeProvider extends ChangeNotifier {
         useDark = false;
         break;
       case ThemePreference.system:
-        final brightness = PlatformDispatcher.instance.platformBrightness;
+        final brightness =
+            WidgetsBinding.instance.platformDispatcher.platformBrightness;
         useDark = brightness == Brightness.dark;
         break;
     }
@@ -90,6 +105,21 @@ class ThemeProvider extends ChangeNotifier {
 
     _updateSystemBrightness();
     notifyListeners();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    if (_themePreference == ThemePreference.system) {
+      _updateTheme();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_observingBrightness) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+    super.dispose();
   }
 
   // Update system UI overlay style based on current theme

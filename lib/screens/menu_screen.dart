@@ -444,7 +444,10 @@ class MenuScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          themeProvider.currentThemeName,
+                          _localizedThemeName(
+                            context,
+                            themeProvider.currentThemeName,
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                             fontSize: 11,
@@ -528,7 +531,10 @@ class MenuScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                themeName.toUpperCase(),
+                                _localizedThemeName(
+                                  context,
+                                  themeName,
+                                ).toUpperCase(),
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color:
                                       isSelected
@@ -551,6 +557,18 @@ class MenuScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _localizedThemeName(BuildContext context, String themeName) {
+    final l10n = AppLocalizations.of(context);
+    return switch (themeName) {
+      'Light' => l10n.screensMenuLight,
+      'Dark' => l10n.screensMenuDark,
+      'Oceanic' => l10n.screensMenuOceanic,
+      'Forest' => l10n.screensMenuForest,
+      'PlatePal' => l10n.screensMenuPlatePal,
+      _ => themeName,
+    };
   }
 
   Widget _buildThemeModeButton(
@@ -628,7 +646,13 @@ class MenuScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _getLanguageName(localeProvider.locale.languageCode),
+                      localeProvider.selectedLocale == null
+                          ? AppLocalizations.of(
+                            context,
+                          ).screensMenuSystemDefault
+                          : _getLanguageName(
+                            localeProvider.selectedLocale!.languageCode,
+                          ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 11,
@@ -649,21 +673,37 @@ class MenuScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: DropdownButton<String>(
-                  value: localeProvider.locale.languageCode,
+                  value:
+                      localeProvider.selectedLocale?.languageCode ?? 'system',
                   underline: const SizedBox(),
                   isDense: true,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                     fontSize: 10,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'en', child: Text('EN')),
-                    DropdownMenuItem(value: 'es', child: Text('ES')),
-                    DropdownMenuItem(value: 'de', child: Text('DE')),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text(
+                        AppLocalizations.of(context).screensMenuSystemDefault,
+                      ),
+                    ),
+                    const DropdownMenuItem(value: 'en', child: Text('EN')),
+                    const DropdownMenuItem(value: 'es', child: Text('ES')),
+                    const DropdownMenuItem(value: 'de', child: Text('DE')),
                   ],
+                  selectedItemBuilder:
+                      (context) => [
+                        Text(AppLocalizations.of(context).screensMenuSystem),
+                        const Text('EN'),
+                        const Text('ES'),
+                        const Text('DE'),
+                      ],
                   onChanged: (String? languageCode) {
                     if (languageCode != null) {
-                      localeProvider.setLocale(Locale(languageCode));
+                      localeProvider.setLocale(
+                        languageCode == 'system' ? null : Locale(languageCode),
+                      );
                     }
                   },
                 ),

@@ -1102,6 +1102,14 @@
   "@screensHomeAppTitle": {
     "description": "The title of the application"
   },
+  "providersStorageError": "Unable to load your data.",
+  "@providersStorageError": {
+    "description": "Message when local data storage fails to initialize"
+  },
+  "providersStorageRetry": "Retry",
+  "@providersStorageRetry": {
+    "description": "Button to retry initializing local data storage"
+  },
   "screensHomeWelcomeToPlatePalTracker": "Welcome to PlatePal Tracker",
   "@screensHomeWelcomeToPlatePalTracker": {
     "description": "Welcome message for PlatePal Tracker"
@@ -1252,6 +1260,10 @@
   "@screensMenuLanguage": {
     "description": "Language selector label"
   },
+  "screensMenuSystemDefault": "System default",
+  "@screensMenuSystemDefault": {
+    "description": "Language choice that follows the device language"
+  },
   "screensMenuLearnMorePlatePal": "Learn more about PlatePal",
   "@screensMenuLearnMorePlatePal": {
     "description": "Subtitle for about option"
@@ -1267,6 +1279,18 @@
   "screensMenuNutritionGoals": "Nutrition Goals",
   "@screensMenuNutritionGoals": {
     "description": "Nutrition goals settings"
+  },
+  "screensMenuOceanic": "Oceanic",
+  "@screensMenuOceanic": {
+    "description": "Display name of the Oceanic color theme"
+  },
+  "screensMenuForest": "Forest",
+  "@screensMenuForest": {
+    "description": "Display name of the Forest color theme"
+  },
+  "screensMenuPlatePal": "PlatePal",
+  "@screensMenuPlatePal": {
+    "description": "Display name of the PlatePal color theme"
   },
   "screensMenuProfile": "Profile",
   "@screensMenuProfile": {

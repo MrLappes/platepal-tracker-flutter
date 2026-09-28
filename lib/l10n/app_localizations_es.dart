@@ -951,6 +951,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensHomeAppTitle => 'PlatePal Tracker';
 
   @override
+  String get providersStorageError => 'No se pudieron cargar tus datos.';
+
+  @override
+  String get providersStorageRetry => 'Reintentar';
+
+  @override
   String get screensHomeWelcomeToPlatePalTracker =>
       'Bienvenido a PlatePal Tracker';
 
@@ -1067,6 +1073,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensMenuLanguage => 'Idioma';
 
   @override
+  String get screensMenuSystemDefault => 'Predeterminado del sistema';
+
+  @override
   String get screensMenuLearnMorePlatePal => 'Aprende más sobre PlatePal';
 
   @override
@@ -1077,6 +1086,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensMenuNutritionGoals => 'Objetivos Nutricionales';
+
+  @override
+  String get screensMenuOceanic => 'Oceánico';
+
+  @override
+  String get screensMenuForest => 'Bosque';
+
+  @override
+  String get screensMenuPlatePal => 'PlatePal';
 
   @override
   String get screensMenuProfile => 'Perfil';
