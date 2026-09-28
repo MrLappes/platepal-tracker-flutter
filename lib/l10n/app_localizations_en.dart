@@ -928,6 +928,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensHomeAppTitle => 'PlatePal Tracker';
 
   @override
+  String get providersStorageError => 'Unable to load your data.';
+
+  @override
+  String get providersStorageRetry => 'Retry';
+
+  @override
   String get screensHomeWelcomeToPlatePalTracker =>
       'Welcome to PlatePal Tracker';
 
@@ -1042,6 +1048,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensMenuLanguage => 'Language';
 
   @override
+  String get screensMenuSystemDefault => 'System default';
+
+  @override
   String get screensMenuLearnMorePlatePal => 'Learn more about PlatePal';
 
   @override
@@ -1052,6 +1061,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensMenuNutritionGoals => 'Nutrition Goals';
+
+  @override
+  String get screensMenuOceanic => 'Oceanic';
+
+  @override
+  String get screensMenuForest => 'Forest';
+
+  @override
+  String get screensMenuPlatePal => 'PlatePal';
 
   @override
   String get screensMenuProfile => 'Profile';

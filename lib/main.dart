@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'services/health_service.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
@@ -26,16 +27,17 @@ import 'providers/chat_provider.dart';
 import 'providers/storage_provider.dart';
 import 'providers/app_state_provider.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
   _initHealthOnLaunch(); // fire-and-forget
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(prefs: prefs)),
         ChangeNotifierProvider(create: (_) => MealProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider(prefs: prefs)),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AppStateProvider()),
       ],
@@ -64,11 +66,22 @@ class PlatePalApp extends StatelessWidget {
     return Consumer2<LocaleProvider, ThemeProvider>(
       builder: (context, localeProvider, themeProvider, child) {
         return MaterialApp.router(
-          title: 'PlatePal Tracker',
-          theme: themeProvider.materialTheme,
-          darkTheme: themeProvider.materialTheme,
+          onGenerateTitle:
+              (context) => AppLocalizations.of(context).screensHomeAppTitle,
+          theme: themeProvider.lightTheme,
+          darkTheme: themeProvider.darkTheme,
           themeMode: _getThemeMode(themeProvider.themePreference),
-          locale: localeProvider.locale,
+          locale: localeProvider.selectedLocale,
+          localeResolutionCallback: (locale, supportedLocales) {
+            if (locale != null) {
+              for (final supportedLocale in supportedLocales) {
+                if (supportedLocale.languageCode == locale.languageCode) {
+                  return supportedLocale;
+                }
+              }
+            }
+            return const Locale('en');
+          },
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,

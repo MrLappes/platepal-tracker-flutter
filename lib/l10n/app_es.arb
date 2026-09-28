@@ -1014,6 +1014,8 @@
   "@screensHomeAppTitle": {
     "description": "PlatePal Tracker"
   },
+  "providersStorageError": "No se pudieron cargar tus datos.",
+  "providersStorageRetry": "Reintentar",
   "screensHomeWelcomeToPlatePalTracker": "Bienvenido a PlatePal Tracker",
   "@screensHomeWelcomeToPlatePalTracker": {
     "description": "Welcome message for PlatePal Tracker"
@@ -1163,6 +1165,7 @@
   "@screensMenuLanguage": {
     "description": "Idioma"
   },
+  "screensMenuSystemDefault": "Predeterminado del sistema",
   "screensMenuLearnMorePlatePal": "Aprende más sobre PlatePal",
   "@screensMenuLearnMorePlatePal": {
     "description": "Aprende más sobre PlatePal"
@@ -1179,6 +1182,9 @@
   "@screensMenuNutritionGoals": {
     "description": "Objetivos Nutricionales"
   },
+  "screensMenuOceanic": "Oceánico",
+  "screensMenuForest": "Bosque",
+  "screensMenuPlatePal": "PlatePal",
   "screensMenuProfile": "Perfil",
   "@screensMenuProfile": {
     "description": "Perfil"

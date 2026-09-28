@@ -1669,6 +1669,18 @@ abstract class AppLocalizations {
   /// **'PlatePal Tracker'**
   String get screensHomeAppTitle;
 
+  /// Message when local data storage fails to initialize
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load your data.'**
+  String get providersStorageError;
+
+  /// Button to retry initializing local data storage
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get providersStorageRetry;
+
   /// Welcome message for PlatePal Tracker
   ///
   /// In en, this message translates to:
@@ -1885,6 +1897,12 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get screensMenuLanguage;
 
+  /// Language choice that follows the device language
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get screensMenuSystemDefault;
+
   /// Subtitle for about option
   ///
   /// In en, this message translates to:
@@ -1908,6 +1926,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nutrition Goals'**
   String get screensMenuNutritionGoals;
+
+  /// Display name of the Oceanic color theme
+  ///
+  /// In en, this message translates to:
+  /// **'Oceanic'**
+  String get screensMenuOceanic;
+
+  /// Display name of the Forest color theme
+  ///
+  /// In en, this message translates to:
+  /// **'Forest'**
+  String get screensMenuForest;
+
+  /// Display name of the PlatePal color theme
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal'**
+  String get screensMenuPlatePal;
 
   /// Profile label
   ///
