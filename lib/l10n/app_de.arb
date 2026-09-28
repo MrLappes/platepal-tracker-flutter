@@ -1,5 +1,6 @@
-﻿{
+{
   "@@locale": "de",
+  "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Mahlzeiten konnten nicht geladen werden",
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "Keine Mahlzeiten für diesen Tag protokolliert",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {
     "description": "Keine Mahlzeiten für diesen Tag protokolliert"
@@ -203,9 +204,11 @@
   "componentsChatAgentStepsModalSummaryLabel": "Zusammenfassung: {summary}",
   "@componentsChatAgentStepsModalSummaryLabel": {
     "description": "Zusammenfassungs-Label mit Platzhalter",
-    "placeholders": { "summary": {
-      "type": "String"
-    } }
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
   },
   "componentsChatAgentStepsModalEnhancedSystemPrompt": "🤖 Verbesserter System-Prompt",
   "@componentsChatAgentStepsModalEnhancedSystemPrompt": {
@@ -218,9 +221,11 @@
   "componentsChatAgentStepsModalLengthLabel": "Länge: {count} Zeichen",
   "@componentsChatAgentStepsModalLengthLabel": {
     "description": "Längen-Label mit Platzhalter",
-    "placeholders": { "count": {
-      "type": "int"
-    } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "componentsChatAgentStepsModalTechnicalDetails": "Technische Details",
   "@componentsChatAgentStepsModalTechnicalDetails": {
@@ -273,7 +278,11 @@
   "componentsChatAgentStepsModalTotalModifications": "Gesamtänderungen: {count}",
   "@componentsChatAgentStepsModalTotalModifications": {
     "description": "Gesamtänderungen Text mit Platzhalter",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "componentsChatAgentStepsModalSkipDetails": "⏭️ Details überspringen",
   "@componentsChatAgentStepsModalSkipDetails": {
@@ -298,12 +307,20 @@
   "componentsChatAgentStepsModalIdLabel": "ID: {id}",
   "@componentsChatAgentStepsModalIdLabel": {
     "description": "ID-Label mit Platzhalter",
-    "placeholders": { "id": { "type": "String" } }
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   },
   "componentsChatAgentStepsModalTimeLabel": "Zeit: {time}",
   "@componentsChatAgentStepsModalTimeLabel": {
     "description": "Zeit-Label mit Platzhalter",
-    "placeholders": { "time": { "type": "String" } }
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "componentsCommonCopyToClipboard": "In die Zwischenablage kopieren",
   "@componentsCommonCopyToClipboard": {
@@ -382,19 +399,33 @@
     "description": "Sehr wütender Bro Persönlichkeitstyp"
   },
   "componentsChatBotPersonalityDescriptionNutritionist": "Professionell & Evidenzbasiert",
-  "@componentsChatBotPersonalityDescriptionNutritionist": { "description": "Personality description for nutritionist bot" },
+  "@componentsChatBotPersonalityDescriptionNutritionist": {
+    "description": "Personality description for nutritionist bot"
+  },
   "componentsChatBotPersonalityDescriptionCasualGymbro": "Lässig & Motivierend",
-  "@componentsChatBotPersonalityDescriptionCasualGymbro": { "description": "Personality description for casual gymbro" },
+  "@componentsChatBotPersonalityDescriptionCasualGymbro": {
+    "description": "Personality description for casual gymbro"
+  },
   "componentsChatBotPersonalityDescriptionAngryGreg": "Intensiv & Supplement-fokussiert",
-  "@componentsChatBotPersonalityDescriptionAngryGreg": { "description": "Personality description for angry Greg" },
+  "@componentsChatBotPersonalityDescriptionAngryGreg": {
+    "description": "Personality description for angry Greg"
+  },
   "componentsChatBotPersonalityDescriptionVeryAngryBro": "Extrem Intensiv",
-  "@componentsChatBotPersonalityDescriptionVeryAngryBro": { "description": "Personality description for very angry bro" },
+  "@componentsChatBotPersonalityDescriptionVeryAngryBro": {
+    "description": "Personality description for very angry bro"
+  },
   "componentsChatBotPersonalityDescriptionFitnessCoach": "Ermutigend & Unterstützend",
-  "@componentsChatBotPersonalityDescriptionFitnessCoach": { "description": "Personality description for fitness coach" },
+  "@componentsChatBotPersonalityDescriptionFitnessCoach": {
+    "description": "Personality description for fitness coach"
+  },
   "componentsChatBotPersonalityDescriptionNice": "Freundlich & Hilfsbereit",
-  "@componentsChatBotPersonalityDescriptionNice": { "description": "Personality description for nice bot" },
+  "@componentsChatBotPersonalityDescriptionNice": {
+    "description": "Personality description for nice bot"
+  },
   "componentsChatEditBotProfileTooltip": "Bot-Profil bearbeiten",
-  "@componentsChatEditBotProfileTooltip": { "description": "Tooltip for edit bot profile button" },
+  "@componentsChatEditBotProfileTooltip": {
+    "description": "Tooltip for edit bot profile button"
+  },
   "componentsChatChatInputErrorPickingImage": "Fehler beim Auswählen des Bildes: {error}",
   "@componentsChatChatInputErrorPickingImage": {
     "description": "Fehler beim Bild auswählen",
@@ -403,22 +434,34 @@
         "type": "Object",
         "description": "The error message"
       }
-    }  
+    }
   },
   "componentsChatMessageBubbleModificationEmergency": "{count} Notfallkorrekturen angewendet",
   "componentsChatMessageBubbleModificationAi": "{count} KI-Verbesserungen angewendet",
   "componentsChatMessageBubbleModificationAutomatic": "{count} automatische Verbesserungen angewendet",
   "@componentsChatMessageBubbleModificationEmergency": {
     "description": "Hinweis für Notfall-Modifikationen im Nachrichten-Bubble",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "@componentsChatMessageBubbleModificationAi": {
     "description": "Hinweis für KI-Modifikationen im Nachrichten-Bubble",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "@componentsChatMessageBubbleModificationAutomatic": {
     "description": "Hinweis für automatische Modifikationen im Nachrichten-Bubble",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "componentsChatMessageBubbleYou": "Du",
   "@componentsChatMessageBubbleYou": {
@@ -513,54 +556,93 @@
     "description": "Wobei kann ich Ihnen helfen?"
   },
   "componentsChatChatWelcomeSuggestMealSubtitle": "Erhalte personalisierte Mahlzeitenempfehlungen",
-  "@componentsChatChatWelcomeSuggestMealSubtitle": { "description": "Untertitel für Vorschlag einer Mahlzeit" },
+  "@componentsChatChatWelcomeSuggestMealSubtitle": {
+    "description": "Untertitel für Vorschlag einer Mahlzeit"
+  },
   "componentsChatChatWelcomeSuggestMealMessage": "Schlag mir eine gesunde Mahlzeit vor, basierend auf meinen Fitnesszielen",
-  "@componentsChatChatWelcomeSuggestMealMessage": { "description": "Nachricht beim Tippen auf Mahlzeit vorschlagen" },
-
+  "@componentsChatChatWelcomeSuggestMealMessage": {
+    "description": "Nachricht beim Tippen auf Mahlzeit vorschlagen"
+  },
   "componentsChatChatWelcomeAnalyzeNutritionSubtitle": "Analysiere die Nährwerte deiner Mahlzeiten",
-  "@componentsChatChatWelcomeAnalyzeNutritionSubtitle": { "description": "Untertitel für Nährwertanalyse" },
+  "@componentsChatChatWelcomeAnalyzeNutritionSubtitle": {
+    "description": "Untertitel für Nährwertanalyse"
+  },
   "componentsChatChatWelcomeAnalyzeNutritionMessage": "Hilf mir, die Nährwerte in meiner Mahlzeit zu analysieren",
-  "@componentsChatChatWelcomeAnalyzeNutritionMessage": { "description": "Nachricht beim Tippen auf Nährwertanalyse" },
-
+  "@componentsChatChatWelcomeAnalyzeNutritionMessage": {
+    "description": "Nachricht beim Tippen auf Nährwertanalyse"
+  },
   "componentsChatChatWelcomeFindAlternativesSubtitle": "Entdecke gesunde Lebensmittelalternativen",
-  "@componentsChatChatWelcomeFindAlternativesSubtitle": { "description": "Untertitel für Alternativen finden" },
+  "@componentsChatChatWelcomeFindAlternativesSubtitle": {
+    "description": "Untertitel für Alternativen finden"
+  },
   "componentsChatChatWelcomeFindAlternativesMessage": "Finde gesunde Alternativen zu meiner aktuellen Mahlzeit",
-  "@componentsChatChatWelcomeFindAlternativesMessage": { "description": "Nachricht beim Tippen auf Alternativen finden" },
-
+  "@componentsChatChatWelcomeFindAlternativesMessage": {
+    "description": "Nachricht beim Tippen auf Alternativen finden"
+  },
   "componentsChatChatWelcomeCalculateMacrosSubtitle": "Berechne Makros für deine Mahlzeiten",
-  "@componentsChatChatWelcomeCalculateMacrosSubtitle": { "description": "Untertitel für Makros berechnen" },
+  "@componentsChatChatWelcomeCalculateMacrosSubtitle": {
+    "description": "Untertitel für Makros berechnen"
+  },
   "componentsChatChatWelcomeCalculateMacrosMessage": "Hilf mir, die Makros für meine Mahlzeiten zu berechnen",
-  "@componentsChatChatWelcomeCalculateMacrosMessage": { "description": "Nachricht beim Tippen auf Makros berechnen" },
-
+  "@componentsChatChatWelcomeCalculateMacrosMessage": {
+    "description": "Nachricht beim Tippen auf Makros berechnen"
+  },
   "componentsChatChatWelcomeMealPlanSubtitle": "Erstelle wöchentliche Essenspläne",
-  "@componentsChatChatWelcomeMealPlanSubtitle": { "description": "Untertitel für Ernährungsplan" },
+  "@componentsChatChatWelcomeMealPlanSubtitle": {
+    "description": "Untertitel für Ernährungsplan"
+  },
   "componentsChatChatWelcomeMealPlanMessage": "Hilf mir, einen wöchentlichen Ernährungsplan zu erstellen",
-  "@componentsChatChatWelcomeMealPlanMessage": { "description": "Nachricht beim Tippen auf Ernährungsplan" },
-
+  "@componentsChatChatWelcomeMealPlanMessage": {
+    "description": "Nachricht beim Tippen auf Ernährungsplan"
+  },
   "componentsChatChatWelcomeIngredientInfoSubtitle": "Erfahre mehr über Zutaten und deren Vorteile",
-  "@componentsChatChatWelcomeIngredientInfoSubtitle": { "description": "Untertitel für Zutateninfo" },
+  "@componentsChatChatWelcomeIngredientInfoSubtitle": {
+    "description": "Untertitel für Zutateninfo"
+  },
   "componentsChatChatWelcomeIngredientInfoMessage": "Erzähl mir von den ernährungsphysiologischen Vorteilen von Zutaten",
-  "@componentsChatChatWelcomeIngredientInfoMessage": { "description": "Nachricht beim Tippen auf Zutateninfo" },
-    "componentsChatDishSuggestionCardHighProtein": "Proteinreiches Gericht",
-    "@componentsChatDishSuggestionCardHighProtein": { "description": "Titel für proteinreiches Gericht" },
-    "componentsChatDishSuggestionCardHighCarb": "Kohlenhydratreiches Gericht",
-    "@componentsChatDishSuggestionCardHighCarb": { "description": "Titel für kohlenhydratreiches Gericht" },
-    "componentsChatDishSuggestionCardHighFat": "Fettreiches Gericht",
-    "@componentsChatDishSuggestionCardHighFat": { "description": "Titel für fettreiches Gericht" },
-    "componentsChatDishSuggestionCardBalanced": "Ausgewogenes Gericht",
-    "@componentsChatDishSuggestionCardBalanced": { "description": "Titel für ausgewogenes Gericht" },
-    "componentsChatDishSuggestionCardUnbalanced": "Unausgewogenes Gericht",
-    "@componentsChatDishSuggestionCardUnbalanced": { "description": "Titel für unausgewogenes Gericht" },
-    "componentsChatDishSuggestionCardProtein": "Protein",
-    "@componentsChatDishSuggestionCardProtein": { "description": "Proteinlabel für Nährwertbalken" },
-    "componentsChatDishSuggestionCardCarbs": "Kohlenhydrate",
-    "@componentsChatDishSuggestionCardCarbs": { "description": "Kohlenhydratlabel für Nährwertbalken" },
-    "componentsChatDishSuggestionCardFat": "Fett",
-    "@componentsChatDishSuggestionCardFat": { "description": "Fettlabel für Nährwertbalken" },
-    "componentsChatDishSuggestionCardCalories": "Kalorien",
-    "@componentsChatDishSuggestionCardCalories": { "description": "Kalorienlabel für Nährwertbalken" },
-    "componentsChatDishSuggestionCardInspect": "Details",
-    "@componentsChatDishSuggestionCardInspect": { "description": "Buttontext für Details eines Gerichts" },
+  "@componentsChatChatWelcomeIngredientInfoMessage": {
+    "description": "Nachricht beim Tippen auf Zutateninfo"
+  },
+  "componentsChatDishSuggestionCardHighProtein": "Proteinreiches Gericht",
+  "@componentsChatDishSuggestionCardHighProtein": {
+    "description": "Titel für proteinreiches Gericht"
+  },
+  "componentsChatDishSuggestionCardHighCarb": "Kohlenhydratreiches Gericht",
+  "@componentsChatDishSuggestionCardHighCarb": {
+    "description": "Titel für kohlenhydratreiches Gericht"
+  },
+  "componentsChatDishSuggestionCardHighFat": "Fettreiches Gericht",
+  "@componentsChatDishSuggestionCardHighFat": {
+    "description": "Titel für fettreiches Gericht"
+  },
+  "componentsChatDishSuggestionCardBalanced": "Ausgewogenes Gericht",
+  "@componentsChatDishSuggestionCardBalanced": {
+    "description": "Titel für ausgewogenes Gericht"
+  },
+  "componentsChatDishSuggestionCardUnbalanced": "Unausgewogenes Gericht",
+  "@componentsChatDishSuggestionCardUnbalanced": {
+    "description": "Titel für unausgewogenes Gericht"
+  },
+  "componentsChatDishSuggestionCardProtein": "Protein",
+  "@componentsChatDishSuggestionCardProtein": {
+    "description": "Proteinlabel für Nährwertbalken"
+  },
+  "componentsChatDishSuggestionCardCarbs": "Kohlenhydrate",
+  "@componentsChatDishSuggestionCardCarbs": {
+    "description": "Kohlenhydratlabel für Nährwertbalken"
+  },
+  "componentsChatDishSuggestionCardFat": "Fett",
+  "@componentsChatDishSuggestionCardFat": {
+    "description": "Fettlabel für Nährwertbalken"
+  },
+  "componentsChatDishSuggestionCardCalories": "Kalorien",
+  "@componentsChatDishSuggestionCardCalories": {
+    "description": "Kalorienlabel für Nährwertbalken"
+  },
+  "componentsChatDishSuggestionCardInspect": "Details",
+  "@componentsChatDishSuggestionCardInspect": {
+    "description": "Buttontext für Details eines Gerichts"
+  },
   "componentsChatDishSuggestionCardDetails": "Details",
   "@componentsChatDishSuggestionCardDetails": {
     "description": "Details"
@@ -755,6 +837,7 @@
   "@componentsModalsDishLogModalSelectMealType": {
     "description": "Mahlzeitentyp auswählen"
   },
+  "componentsModalsDishLogModalSelectTime": "Uhrzeit auswählen",
   "componentsModalsDishLogModalSnack": "Snack",
   "@componentsModalsDishLogModalSnack": {
     "description": "Snack"
@@ -1047,7 +1130,7 @@
   },
   "screensMealsDeleteDishConfirmation": "Sind Sie sicher, dass Sie \"{dishName}\" löschen möchten?",
   "@screensMealsDeleteDishConfirmation": {
-    "description": "Sind Sie sicher, dass Sie \"{dishName}\" löschen möchten?",  
+    "description": "Sind Sie sicher, dass Sie \"{dishName}\" löschen möchten?",
     "placeholders": {
       "dishName": {
         "type": "String"
@@ -1078,6 +1161,7 @@
   "@screensMealsNoDishesFound": {
     "description": "Keine Gerichte gefunden"
   },
+  "screensMealsOtherCategory": "Sonstiges",
   "screensMealsRemovedFromFavorites": "Aus Favoriten entfernt",
   "@screensMealsRemovedFromFavorites": {
     "description": "Aus Favoriten entfernt"
@@ -1501,7 +1585,7 @@
   },
   "screensSettingsImportDataImportedItemsCount": "{count} Elemente importiert",
   "@screensSettingsImportDataImportedItemsCount": {
-    "description": "{count} Elemente importiert",  
+    "description": "{count} Elemente importiert",
     "placeholders": {
       "count": {
         "type": "int"
@@ -2118,7 +2202,6 @@
   "screensSettingsContributorsHansDesc": "Automatisiert den Grind und hält die Telemetrie scharf. Cyber-Minimalismus-Architekt.",
   "screensSettingsContributorsMrLappesRole": "Schöpfer & Entwickler",
   "screensSettingsContributorsMrLappesDesc": "Hat PlatePal Tracker mit der Vision geschaffen, eine kostenlose, datenschutzorientierte Ernährungs-App für alle zu entwickeln.",
-
   "screensSettingsHealthSettingsTitle": "HEALTH CONNECT //",
   "screensSettingsHealthSettingsConnected": "Verbunden",
   "screensSettingsHealthSettingsNotConnected": "Nicht verbunden",
@@ -2168,7 +2251,6 @@
   "screensCalendarHealthDeleteWarning": "Der Ernährungseintrag in Health Connect wird nicht entfernt. Sie können ihn manuell in der Health Connect App löschen.",
   "screensSettingsProfileSettingsManageHealthConnect": "Health Connect verwalten",
   "screensSettingsProfileSettingsLastSynced": "Zuletzt synchronisiert: {time}",
-
   "servicesChatAgentFallbackParsing": "Entschuldigung, ich habe Probleme, deine Anfrage zu verarbeiten. Könntest du sie bitte umformulieren?",
   "servicesChatAgentFallbackCritical": "Ich erlebe gerade technische Schwierigkeiten. Bitte versuche es in einem Moment erneut.",
   "servicesChatAgentFallbackNetwork": "Ich habe Verbindungsprobleme. Bitte überprüfe deine Internetverbindung und versuche es erneut.",
@@ -2177,5 +2259,27 @@
   "servicesChatAgentFallbackGenerateResponse": "Entschuldigung, beim Generieren einer Antwort ist ein Problem aufgetreten. Bitte versuche es erneut.",
   "servicesChatAgentFallbackTemporaryIssue": "Es ist ein vorübergehendes Problem aufgetreten. Bitte versuche es erneut.",
   "servicesChatAgentFallbackRephrase": "Entschuldigung, ich habe Schwierigkeiten mit dieser Anfrage. Könntest du sie umformulieren?",
-  "servicesChatAgentFallbackDishInfo": "Hier sind die Gerichte-Informationen:"
+  "servicesChatAgentFallbackDishInfo": "Hier sind die Gerichte-Informationen:",
+  "screensDishCreateImage": "Bild",
+  "screensDishCreateNoImageSelected": "Kein Bild ausgewählt",
+  "screensDishCreateChangeImage": "Bild ändern",
+  "screensDishCreateAddImage": "Bild hinzufügen",
+  "screensDishCreateConfirmDiscardChanges": "Ungespeicherte Änderungen verwerfen?",
+  "screensDishCreateProteinAbbreviation": "E",
+  "screensDishCreateCarbsAbbreviation": "K",
+  "screensDishCreateFatAbbreviation": "F",
+  "componentsDishesDishFormIngredientFormModalUnit": "Einheit",
+  "componentsDishesDishFormIngredientFormModalNutritionPerPiece": "Nährwerte pro Stück",
+  "componentsDishesDishFormIngredientFormModalNutritionPerSlice": "Nährwerte pro Scheibe",
+  "componentsDishesDishFormIngredientFormModalProductInformationLoaded": "Produktinformationen geladen. Menge anpassen und speichern.",
+  "componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients": "Aus Zutaten neu berechnen",
+  "componentsDishesDishFormSmartNutritionCardHighProtein": "Proteinreich",
+  "componentsDishesDishFormSmartNutritionCardHighCarb": "Kohlenhydratreich",
+  "componentsDishesDishFormSmartNutritionCardHighFat": "Fettreich",
+  "componentsDishesDishFormSmartNutritionCardWellBalanced": "Ausgewogen",
+  "componentsDishesDishFormSmartNutritionCardHighProteinFeedback": "Ausgezeichnet! Der hohe Proteingehalt unterstützt Muskelaufbau und Sättigung.",
+  "componentsDishesDishFormSmartNutritionCardHighCarbFeedback": "Gute Energiequelle! Ideal vor dem Training oder an aktiven Tagen.",
+  "componentsDishesDishFormSmartNutritionCardHighFatFeedback": "Hoher Fettgehalt. In Maßen genießen und mit ausgewogenen Mahlzeiten ergänzen.",
+  "componentsDishesDishFormSmartNutritionCardBalancedFeedback": "Gut ausgewogen! Dieses Gericht bietet eine vielseitige Nährstoffkombination.",
+  "componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": "Nährwerte eingeben, um die Analyse und Empfehlungen zu sehen."
 }

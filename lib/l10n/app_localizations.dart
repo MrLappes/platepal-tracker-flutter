@@ -100,6 +100,12 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
+  /// Error shown when the selected day's meal logs cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load meals for this day'**
+  String get componentsCalendarCalendarDayDetailErrorLoadingMeals;
+
   /// Message shown when no meals are logged for selected day
   ///
   /// In en, this message translates to:
@@ -1279,6 +1285,12 @@ abstract class AppLocalizations {
   /// **'Select Meal Type'**
   String get componentsModalsDishLogModalSelectMealType;
 
+  /// Label for selecting the time of a dish log
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get componentsModalsDishLogModalSelectTime;
+
   /// Snack meal type
   ///
   /// In en, this message translates to:
@@ -1764,6 +1776,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No dishes found'**
   String get screensMealsNoDishesFound;
+
+  /// Dish category shown when no meal category is assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get screensMealsOtherCategory;
 
   /// Success message when dish removed from favorites
   ///
@@ -3642,6 +3660,140 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Here is the dish information:'**
   String get servicesChatAgentFallbackDishInfo;
+
+  /// Title of the dish image section
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get screensDishCreateImage;
+
+  /// Placeholder for a dish without an image
+  ///
+  /// In en, this message translates to:
+  /// **'No image selected'**
+  String get screensDishCreateNoImageSelected;
+
+  /// Button for replacing a dish image
+  ///
+  /// In en, this message translates to:
+  /// **'Change image'**
+  String get screensDishCreateChangeImage;
+
+  /// Button for choosing a dish image
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get screensDishCreateAddImage;
+
+  /// Confirmation before leaving an edited dish
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your unsaved changes?'**
+  String get screensDishCreateConfirmDiscardChanges;
+
+  /// Compact protein label on an ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'P'**
+  String get screensDishCreateProteinAbbreviation;
+
+  /// Compact carbohydrate label on an ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'C'**
+  String get screensDishCreateCarbsAbbreviation;
+
+  /// Compact fat label on an ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get screensDishCreateFatAbbreviation;
+
+  /// Label for an ingredient unit selector
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get componentsDishesDishFormIngredientFormModalUnit;
+
+  /// Nutrition basis for ingredients counted in pieces
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition per piece'**
+  String get componentsDishesDishFormIngredientFormModalNutritionPerPiece;
+
+  /// Nutrition basis for ingredients counted in slices
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition per slice'**
+  String get componentsDishesDishFormIngredientFormModalNutritionPerSlice;
+
+  /// Confirmation after filling the ingredient form from a product
+  ///
+  /// In en, this message translates to:
+  /// **'Product information loaded. Adjust quantity and save.'**
+  String
+  get componentsDishesDishFormIngredientFormModalProductInformationLoaded;
+
+  /// Tooltip for dish nutrition recalculation
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate from ingredients'**
+  String
+  get componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients;
+
+  /// Title for a protein-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High Protein'**
+  String get componentsDishesDishFormSmartNutritionCardHighProtein;
+
+  /// Title for a carbohydrate-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High Carb'**
+  String get componentsDishesDishFormSmartNutritionCardHighCarb;
+
+  /// Title for a fat-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High Fat'**
+  String get componentsDishesDishFormSmartNutritionCardHighFat;
+
+  /// Title for a balanced dish
+  ///
+  /// In en, this message translates to:
+  /// **'Well Balanced'**
+  String get componentsDishesDishFormSmartNutritionCardWellBalanced;
+
+  /// Feedback for a protein-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent! High protein content supports muscle building and satiety.'**
+  String get componentsDishesDishFormSmartNutritionCardHighProteinFeedback;
+
+  /// Feedback for a carbohydrate-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'Great for energy! Perfect pre-workout or active days.'**
+  String get componentsDishesDishFormSmartNutritionCardHighCarbFeedback;
+
+  /// Feedback for a fat-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High in fats. Enjoy in moderation and balance with other meals.'**
+  String get componentsDishesDishFormSmartNutritionCardHighFatFeedback;
+
+  /// Feedback for a balanced dish
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect balance! This dish provides well-rounded nutrition.'**
+  String get componentsDishesDishFormSmartNutritionCardBalancedFeedback;
+
+  /// Feedback when dish nutrition needs more data
+  ///
+  /// In en, this message translates to:
+  /// **'Enter nutrition values to see smart analysis and recommendations.'**
+  String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback;
 }
 
 class _AppLocalizationsDelegate

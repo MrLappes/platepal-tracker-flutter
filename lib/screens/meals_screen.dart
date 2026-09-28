@@ -8,7 +8,10 @@ import '../services/storage/dish_service.dart';
 import 'dish_create_screen.dart';
 
 class MealsScreen extends StatefulWidget {
-  const MealsScreen({super.key});
+  /// Dish source, defaulting to the app's local storage service.
+  final DishService? dishService;
+
+  const MealsScreen({super.key, this.dishService});
 
   @override
   State<MealsScreen> createState() => _MealsScreenState();
@@ -20,7 +23,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   List<Dish> _dishes = [];
   bool _isLoading = false;
   String? _error;
-  final DishService _dishService = DishService();
+  late final DishService _dishService = widget.dishService ?? DishService();
 
   @override
   void initState() {
@@ -61,6 +64,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadDishes() async {
+    if (!mounted) return;
     debugPrint('🔄 MealsScreen: Loading dishes...');
     setState(() {
       _isLoading = true;
@@ -69,6 +73,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
     try {
       final dishes = await _dishService.getAllDishes();
+      if (!mounted) return;
       debugPrint(
         '🔄 MealsScreen: Loaded ${dishes.length} dishes from database',
       );
@@ -78,6 +83,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       debugPrint('❌ MealsScreen: Error loading dishes: $e');
       setState(() {
         _error = e.toString();
@@ -124,22 +130,6 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         title: Text(
           '${localizations.componentsUiCustomTabBarMeals.toUpperCase()} //',
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _createNewDish,
-            tooltip: localizations.screensMealsAddMeal,
-          ),
-          // Add a refresh button for manual refresh
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              debugPrint('🔄 MealsScreen: Manual refresh triggered');
-              _loadDishes();
-            },
-            tooltip: 'Refresh dishes',
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadDishes,
@@ -224,11 +214,12 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         heroTag: "meals_fab", // Unique hero tag to avoid conflicts
         onPressed: _createNewDish,
         tooltip: localizations.screensDishCreateCreateDish,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: Text(localizations.screensDishCreateCreateDish),
       ),
     );
   }
@@ -265,12 +256,14 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
     if (_isLoading) {
       return CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [SliverFillRemaining(child: const LoadingWidget())],
       );
     }
 
     if (_error != null) {
       return CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverFillRemaining(
             child: Center(
@@ -315,6 +308,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
     if (filteredDishes.isEmpty) {
       if (_dishes.isEmpty) {
         return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverFillRemaining(
               child: EmptyStateWidget(
@@ -329,6 +323,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
         );
       } else {
         return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverFillRemaining(
               child: Center(
@@ -355,6 +350,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       }
     }
     return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(16),
@@ -375,6 +371,18 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
   Widget _buildDishCard(Dish dish) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final localizations = AppLocalizations.of(context);
+    final categoryLabel = switch (dish.category?.trim().toLowerCase()) {
+      null ||
+      '' ||
+      'misc' ||
+      'other' => localizations.screensMealsOtherCategory,
+      'breakfast' => localizations.componentsModalsDishLogModalBreakfast,
+      'lunch' => localizations.componentsModalsDishLogModalLunch,
+      'dinner' => localizations.componentsModalsDishLogModalDinner,
+      'snack' => localizations.componentsModalsDishLogModalSnack,
+      _ => dish.category!,
+    };
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -410,7 +418,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                       ),
                     ),
                     child: Text(
-                      (dish.category ?? 'MISC').toUpperCase(),
+                      categoryLabel.toUpperCase(),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.w900,
@@ -440,67 +448,70 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                           break;
                       }
                     },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: colorScheme.onSurface,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              ).componentsDishesDishCardEdit,
-                            ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'favorite',
-                        child: Row(
-                          children: [
-                            Icon(
-                              dish.isFavorite ? Icons.star : Icons.star_border,
-                              size: 18,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              dish.isFavorite
-                                  ? AppLocalizations.of(
+                    itemBuilder:
+                        (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: colorScheme.onSurface,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  AppLocalizations.of(
                                     context,
-                                  ).screensMealsRemoveFromFavorites
-                                  : AppLocalizations.of(
+                                  ).componentsDishesDishCardEdit,
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'favorite',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  dish.isFavorite
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  size: 18,
+                                  color: Colors.amber,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  dish.isFavorite
+                                      ? AppLocalizations.of(
+                                        context,
+                                      ).screensMealsRemoveFromFavorites
+                                      : AppLocalizations.of(
+                                        context,
+                                      ).screensMealsAddToFavorites,
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete,
+                                  size: 18,
+                                  color: colorScheme.error,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  AppLocalizations.of(
                                     context,
-                                  ).screensMealsAddToFavorites,
+                                  ).componentsDishesDishCardDelete,
+                                  style: TextStyle(color: colorScheme.error),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete,
-                              size: 18,
-                              color: colorScheme.error,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              ).componentsDishesDishCardDelete,
-                              style: TextStyle(color: colorScheme.error),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        ],
                   ),
                 ],
               ),
@@ -530,22 +541,22 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                   _buildTelemetryItem(
                     theme,
                     '${dish.nutrition.calories.round()}',
-                    'KCAL',
+                    localizations.componentsCalendarMacroSummaryCompactCalories,
                   ),
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.protein.round()}G',
-                    'PRO',
+                    '${dish.nutrition.protein.round()}g',
+                    localizations.componentsCalendarMacroSummaryCompactProtein,
                   ),
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.carbs.round()}G',
-                    'CHO',
+                    '${dish.nutrition.carbs.round()}g',
+                    localizations.componentsCalendarMacroSummaryCompactCarbs,
                   ),
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.fat.round()}G',
-                    'FAT',
+                    '${dish.nutrition.fat.round()}g',
+                    localizations.componentsCalendarMacroSummaryCompactFat,
                   ),
                 ],
               ),
@@ -636,32 +647,28 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       );
 
       await _dishService.saveDish(updatedDish);
+      if (!mounted) return;
       _loadDishes(); // Refresh the list
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              dish.isFavorite
-                  ? AppLocalizations.of(
-                    context,
-                  ).screensMealsRemovedFromFavorites
-                  : AppLocalizations.of(context).screensMealsAddedToFavorites,
-            ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            dish.isFavorite
+                ? AppLocalizations.of(context).screensMealsRemovedFromFavorites
+                : AppLocalizations.of(context).screensMealsAddedToFavorites,
           ),
-        );
-      }
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context).screensMealsErrorUpdatingDish,
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).screensMealsErrorUpdatingDish,
           ),
-        );
-      }
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     }
   }
 
@@ -698,33 +705,30 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           ),
     );
 
+    if (!mounted) return;
     if (confirmed == true) {
       try {
         await _dishService.deleteDish(dish.id);
+        if (!mounted) return;
         _loadDishes(); // Refresh the list
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(
-                  context,
-                ).screensMealsDishDeletedSuccessfully,
-              ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).screensMealsDishDeletedSuccessfully,
             ),
-          );
-        }
+          ),
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context).screensMealsFailedToDeleteDish,
-              ),
-              backgroundColor: Theme.of(context).colorScheme.error,
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).screensMealsFailedToDeleteDish,
             ),
-          );
-        }
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
   }

@@ -17,6 +17,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
   final DishService _dishService = DishService();
   List<DishLog> _logs = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -33,10 +34,14 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+    final date = widget.date;
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
 
     try {
-      final logs = await _dishService.getDishLogsForDate(widget.date);
+      final logs = await _dishService.getDishLogsForDate(date);
 
       // Fetch dish details for each log
       final logsWithDishes = <DishLog>[];
@@ -50,12 +55,19 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
         }
       }
 
+      if (!mounted) return;
+      if (widget.date != date) return;
       setState(() {
         _logs = logsWithDishes;
         _isLoading = false;
       });
     } catch (error) {
-      setState(() => _isLoading = false);
+      if (!mounted) return;
+      if (widget.date != date) return;
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
     }
   }
 
@@ -76,7 +88,8 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            log.dish?.name ?? l10n.componentsCalendarCalendarDayDetailUnknownDish,
+            log.dish?.name ??
+                l10n.componentsCalendarCalendarDayDetailUnknownDish,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -104,6 +117,33 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
         child: Padding(
           padding: EdgeInsets.all(16),
           child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, color: colorScheme.error),
+              const SizedBox(height: 8),
+              Text(
+                l10n.componentsCalendarCalendarDayDetailErrorLoadingMeals,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: _loadData,
+                child: Text(l10n.componentsSharedErrorDisplayRetry),
+              ),
+            ],
+          ),
         ),
       );
     }

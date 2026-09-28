@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../models/dish.dart';
+import '../../models/meal_type.dart';
 import '../../services/storage/dish_service.dart';
 import '../../services/health_service.dart';
+
+/// Combines a local calendar date with a selected meal time.
+DateTime combineMealDateAndTime(DateTime date, TimeOfDay time) {
+  return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+}
 
 class DishLogModal extends StatefulWidget {
   final Dish dish;
@@ -18,8 +24,8 @@ class _DishLogModalState extends State<DishLogModal> {
   final HealthService _healthService = HealthService();
   final TextEditingController _notesController = TextEditingController();
 
-  DateTime _selectedDate = DateTime.now();
-  String _selectedMealType = 'breakfast';
+  late DateTime _selectedDate;
+  late String _selectedMealType;
   double _portionSize = 1.0;
   bool _isLoading = false;
 
@@ -29,6 +35,13 @@ class _DishLogModalState extends State<DishLogModal> {
     {'type': 'dinner', 'icon': Icons.nightlight_round, 'color': Colors.purple},
     {'type': 'snack', 'icon': Icons.local_cafe, 'color': Colors.green},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = DateTime.now();
+    _selectedMealType = defaultMealTypeForTime(_selectedDate).toJsonValue();
+  }
 
   @override
   void dispose() {
@@ -43,26 +56,27 @@ class _DishLogModalState extends State<DishLogModal> {
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 30)),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (!mounted) return;
+    if (picked != null) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = combineMealDateAndTime(
+          picked,
+          TimeOfDay.fromDateTime(_selectedDate),
+        );
       });
     }
   }
 
-  String _getMealTypeDisplayName(String mealType) {
-    final localizations = AppLocalizations.of(context);
-    switch (mealType) {
-      case 'breakfast':
-        return localizations.componentsModalsDishLogModalBreakfast;
-      case 'lunch':
-        return localizations.componentsModalsDishLogModalLunch;
-      case 'dinner':
-        return localizations.componentsModalsDishLogModalDinner;
-      case 'snack':
-        return localizations.componentsModalsDishLogModalSnack;
-      default:
-        return mealType;
+  Future<void> _selectTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDate),
+    );
+    if (!mounted) return;
+    if (picked != null) {
+      setState(() {
+        _selectedDate = combineMealDateAndTime(_selectedDate, picked);
+      });
     }
   }
 
@@ -79,50 +93,46 @@ class _DishLogModalState extends State<DishLogModal> {
         servingSize: _portionSize,
       );
 
-      if (mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    AppLocalizations.of(
-                      context,
-                    ).componentsModalsDishLogModalDishLoggedSuccessfully,
-                  ),
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).componentsModalsDishLogModalDishLoggedSuccessfully,
                 ),
-                if (_healthService.isConnected)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
-                    child: Icon(Icons.sync, color: Colors.white, size: 16),
-                  ),
-              ],
-            ),
-            backgroundColor: Colors.green,
+              ),
+              if (_healthService.isConnected)
+                const Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: Icon(Icons.sync, color: Colors.white, size: 16),
+                ),
+            ],
           ),
-        );
-      }
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              ).componentsModalsDishLogModalErrorLoggingDish,
-            ),
-            backgroundColor: Colors.red,
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).componentsModalsDishLogModalErrorLoggingDish,
           ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -231,43 +241,103 @@ class _DishLogModalState extends State<DishLogModal> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Date Selection
-                        _buildSectionTitle(
-                          localizations.componentsModalsDishLogModalSelectDate,
-                        ),
-                        const SizedBox(height: 8),
-                        InkWell(
-                          onTap: _selectDate,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: theme.colorScheme.outline.withValues(
-                                  alpha: 0.5,
-                                ),
+                        // Date and time selection
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSectionTitle(
+                                    localizations
+                                        .componentsModalsDishLogModalSelectDate,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  InkWell(
+                                    onTap: _selectDate,
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: theme.colorScheme.outline
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              MaterialLocalizations.of(
+                                                context,
+                                              ).formatCompactDate(
+                                                _selectedDate,
+                                              ),
+                                              style: theme.textTheme.bodyMedium,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  color: theme.colorScheme.primary,
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSectionTitle(
+                                    localizations
+                                        .componentsModalsDishLogModalSelectTime,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  InkWell(
+                                    onTap: _selectTime,
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: theme.colorScheme.outline
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.access_time,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              TimeOfDay.fromDateTime(
+                                                _selectedDate,
+                                              ).format(context),
+                                              style: theme.textTheme.bodyMedium,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
 
                         const SizedBox(height: 20),
@@ -331,8 +401,10 @@ class _DishLogModalState extends State<DishLogModal> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              _getMealTypeDisplayName(
+                                              MealType.fromString(
                                                 mealType['type'],
+                                              ).localizedDisplayName(
+                                                localizations,
                                               ),
                                               style: theme.textTheme.bodySmall
                                                   ?.copyWith(
@@ -415,8 +487,10 @@ class _DishLogModalState extends State<DishLogModal> {
                             color: theme.colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceAround,
+                            spacing: 12,
+                            runSpacing: 12,
                             children: [
                               _buildNutritionItem(
                                 localizations
