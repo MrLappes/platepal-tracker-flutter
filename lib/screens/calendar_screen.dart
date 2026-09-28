@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../models/dish.dart';
@@ -41,9 +40,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeServices();
     _initializeCalendar();
-    _fetchCalendarData();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _initializeServices();
+    if (!mounted) return;
+    await _fetchCalendarData();
   }
 
   Future<void> _initializeServices() async {

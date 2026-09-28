@@ -9,6 +9,10 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
+      'No se pudieron cargar las comidas de este día';
+
+  @override
   String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay =>
       'No hay comidas registradas para este día';
 
@@ -73,13 +77,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsCalendarMacroSummaryCompactCalories => 'Cal';
 
   @override
-  String get componentsCalendarMacroSummaryCompactProtein => 'Protein';
+  String get componentsCalendarMacroSummaryCompactProtein => 'Proteína';
 
   @override
-  String get componentsCalendarMacroSummaryCompactCarbs => 'Carbs';
+  String get componentsCalendarMacroSummaryCompactCarbs => 'Carb.';
 
   @override
-  String get componentsCalendarMacroSummaryCompactFat => 'Fat';
+  String get componentsCalendarMacroSummaryCompactFat => 'Grasa';
 
   @override
   String get componentsCommonOk => 'Aceptar';
@@ -725,6 +729,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Seleccionar Tipo de Comida';
 
   @override
+  String get componentsModalsDishLogModalSelectTime => 'Seleccionar hora';
+
+  @override
   String get componentsModalsDishLogModalSnack => 'Merienda';
 
   @override
@@ -1002,6 +1009,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensMealsNoDishesFound => 'No se encontraron platos';
+
+  @override
+  String get screensMealsOtherCategory => 'Otros';
 
   @override
   String get screensMealsRemovedFromFavorites => 'Removido de favoritos';
@@ -2144,4 +2154,87 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get servicesChatAgentFallbackDishInfo =>
       'Aquí está la información del plato:';
+
+  @override
+  String get screensDishCreateImage => 'Imagen';
+
+  @override
+  String get screensDishCreateNoImageSelected =>
+      'No se ha seleccionado ninguna imagen';
+
+  @override
+  String get screensDishCreateChangeImage => 'Cambiar imagen';
+
+  @override
+  String get screensDishCreateAddImage => 'Añadir imagen';
+
+  @override
+  String get screensDishCreateConfirmDiscardChanges =>
+      '¿Descartar los cambios sin guardar?';
+
+  @override
+  String get screensDishCreateProteinAbbreviation => 'P';
+
+  @override
+  String get screensDishCreateCarbsAbbreviation => 'C';
+
+  @override
+  String get screensDishCreateFatAbbreviation => 'G';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalUnit => 'Unidad';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerPiece =>
+      'Valores nutricionales por pieza';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerSlice =>
+      'Valores nutricionales por rebanada';
+
+  @override
+  String
+  get componentsDishesDishFormIngredientFormModalProductInformationLoaded =>
+      'Datos del producto cargados. Ajusta la cantidad y guarda.';
+
+  @override
+  String
+  get componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients =>
+      'Recalcular a partir de los ingredientes';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProtein =>
+      'Alto en proteínas';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarb =>
+      'Alto en carbohidratos';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFat =>
+      'Alto en grasas';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardWellBalanced =>
+      'Bien equilibrado';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProteinFeedback =>
+      '¡Excelente! Su alto contenido de proteínas favorece el desarrollo muscular y la saciedad.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarbFeedback =>
+      '¡Una buena fuente de energía! Ideal antes de entrenar o en días de mucha actividad.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFatFeedback =>
+      'Alto contenido de grasas. Disfrútalo con moderación y acompáñalo con comidas equilibradas.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardBalancedFeedback =>
+      '¡Muy equilibrado! Este plato aporta una combinación variada de nutrientes.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback =>
+      'Introduce los valores nutricionales para ver el análisis y las recomendaciones.';
 }

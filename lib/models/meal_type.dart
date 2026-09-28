@@ -1,3 +1,7 @@
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:platepal_tracker/l10n/app_localizations.dart';
+
 /// Represents the type of meal
 enum MealType {
   breakfast,
@@ -5,17 +9,28 @@ enum MealType {
   dinner,
   snack;
 
-  /// Display name for the meal type
+  /// Display name using the current intl locale for callers without context.
   String get displayName {
+    final locale = intl.Intl.getCurrentLocale().split(RegExp('[_-]')).first;
+    final supportedLocale = switch (locale) {
+      'es' => const Locale('es'),
+      'de' => const Locale('de'),
+      _ => const Locale('en'),
+    };
+    return localizedDisplayName(lookupAppLocalizations(supportedLocale));
+  }
+
+  /// Display name using the active widget localization.
+  String localizedDisplayName(AppLocalizations localizations) {
     switch (this) {
       case MealType.breakfast:
-        return 'Breakfast';
+        return localizations.componentsModalsDishLogModalBreakfast;
       case MealType.lunch:
-        return 'Lunch';
+        return localizations.componentsModalsDishLogModalLunch;
       case MealType.dinner:
-        return 'Dinner';
+        return localizations.componentsModalsDishLogModalDinner;
       case MealType.snack:
-        return 'Snack';
+        return localizations.componentsModalsDishLogModalSnack;
     }
   }
 
@@ -65,4 +80,13 @@ enum MealType {
   String toJsonValue() {
     return name;
   }
+}
+
+/// Chooses the meal type for a local date and time.
+MealType defaultMealTypeForTime(DateTime dateTime) {
+  final minutesSinceMidnight = dateTime.hour * 60 + dateTime.minute;
+  if (minutesSinceMidnight < 10 * 60 + 30) return MealType.breakfast;
+  if (minutesSinceMidnight < 15 * 60) return MealType.lunch;
+  if (minutesSinceMidnight < 21 * 60) return MealType.dinner;
+  return MealType.snack;
 }

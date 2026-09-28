@@ -9,6 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
+      'Could not load meals for this day';
+
+  @override
   String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay =>
       'No meals logged for this day';
 
@@ -707,6 +711,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsModalsDishLogModalSelectMealType => 'Select Meal Type';
 
   @override
+  String get componentsModalsDishLogModalSelectTime => 'Select Time';
+
+  @override
   String get componentsModalsDishLogModalSnack => 'Snack';
 
   @override
@@ -978,6 +985,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensMealsNoDishesFound => 'No dishes found';
+
+  @override
+  String get screensMealsOtherCategory => 'Other';
 
   @override
   String get screensMealsRemovedFromFavorites => 'Removed from favorites';
@@ -2093,4 +2103,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get servicesChatAgentFallbackDishInfo =>
       'Here is the dish information:';
+
+  @override
+  String get screensDishCreateImage => 'Image';
+
+  @override
+  String get screensDishCreateNoImageSelected => 'No image selected';
+
+  @override
+  String get screensDishCreateChangeImage => 'Change image';
+
+  @override
+  String get screensDishCreateAddImage => 'Add image';
+
+  @override
+  String get screensDishCreateConfirmDiscardChanges =>
+      'Discard your unsaved changes?';
+
+  @override
+  String get screensDishCreateProteinAbbreviation => 'P';
+
+  @override
+  String get screensDishCreateCarbsAbbreviation => 'C';
+
+  @override
+  String get screensDishCreateFatAbbreviation => 'F';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalUnit => 'Unit';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerPiece =>
+      'Nutrition per piece';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerSlice =>
+      'Nutrition per slice';
+
+  @override
+  String
+  get componentsDishesDishFormIngredientFormModalProductInformationLoaded =>
+      'Product information loaded. Adjust quantity and save.';
+
+  @override
+  String
+  get componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients =>
+      'Recalculate from ingredients';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProtein =>
+      'High Protein';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarb => 'High Carb';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFat => 'High Fat';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardWellBalanced =>
+      'Well Balanced';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProteinFeedback =>
+      'Excellent! High protein content supports muscle building and satiety.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarbFeedback =>
+      'Great for energy! Perfect pre-workout or active days.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFatFeedback =>
+      'High in fats. Enjoy in moderation and balance with other meals.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardBalancedFeedback =>
+      'Perfect balance! This dish provides well-rounded nutrition.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback =>
+      'Enter nutrition values to see smart analysis and recommendations.';
 }

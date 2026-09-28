@@ -1,5 +1,9 @@
 {
   "@@locale": "en",
+  "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Could not load meals for this day",
+  "@componentsCalendarCalendarDayDetailErrorLoadingMeals": {
+    "description": "Error shown when the selected day's meal logs cannot be loaded"
+  },
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "No meals logged for this day",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {
     "description": "Message shown when no meals are logged for selected day"
@@ -830,6 +834,10 @@
   "@componentsModalsDishLogModalSelectMealType": {
     "description": "Label for meal type selection"
   },
+  "componentsModalsDishLogModalSelectTime": "Select Time",
+  "@componentsModalsDishLogModalSelectTime": {
+    "description": "Label for selecting the time of a dish log"
+  },
   "componentsModalsDishLogModalSnack": "Snack",
   "@componentsModalsDishLogModalSnack": {
     "description": "Snack meal type"
@@ -1171,6 +1179,10 @@
   "screensMealsNoDishesFound": "No dishes found",
   "@screensMealsNoDishesFound": {
     "description": "Message when search returns no results"
+  },
+  "screensMealsOtherCategory": "Other",
+  "@screensMealsOtherCategory": {
+    "description": "Dish category shown when no meal category is assigned"
   },
   "screensMealsRemovedFromFavorites": "Removed from favorites",
   "@screensMealsRemovedFromFavorites": {
@@ -2196,14 +2208,15 @@
   "screensSettingsContributorsHansDesc": "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.",
   "screensSettingsContributorsMrLappesRole": "Creator & Developer",
   "screensSettingsContributorsMrLappesDesc": "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.",
-
   "screensSettingsHealthSettingsTitle": "HEALTH CONNECT //",
   "screensSettingsHealthSettingsConnected": "Connected",
   "screensSettingsHealthSettingsNotConnected": "Not Connected",
   "screensSettingsHealthSettingsLastSynced": "Last synced: {time}",
   "@screensSettingsHealthSettingsLastSynced": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "screensSettingsHealthSettingsNotAvailableOnDevice": "Health Connect is not available on this device.",
@@ -2216,7 +2229,9 @@
   "screensSettingsHealthSettingsDaysCached": "{count} days of data cached",
   "@screensSettingsHealthSettingsDaysCached": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "screensSettingsHealthSettingsSyncControls": "SYNC CONTROLS",
@@ -2235,14 +2250,18 @@
   "screensSettingsHealthSettingsCalorieTargetUpdated": "Calorie target updated to {target} kcal",
   "@screensSettingsHealthSettingsCalorieTargetUpdated": {
     "placeholders": {
-      "target": { "type": "String" }
+      "target": {
+        "type": "String"
+      }
     }
   },
   "screensSettingsHealthSettingsCalorieTargetUpdateFailed": "Failed to update calorie target",
   "screensSettingsHealthSettingsAnalysisFailed": "Analysis failed: {error}",
   "@screensSettingsHealthSettingsAnalysisFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "screensSettingsHealthSettingsAboutHealthConnect": "ABOUT HEALTH CONNECT",
@@ -2256,19 +2275,25 @@
   "screensSettingsHealthSettingsMinutesAgo": "{minutes}m ago",
   "@screensSettingsHealthSettingsMinutesAgo": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "screensSettingsHealthSettingsHoursAgo": "{hours}h ago",
   "@screensSettingsHealthSettingsHoursAgo": {
     "placeholders": {
-      "hours": { "type": "int" }
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "screensSettingsHealthSettingsDaysAgo": "{days}d ago",
   "@screensSettingsHealthSettingsDaysAgo": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "screensMenuHealthAndFitness": "Health & Fitness",
@@ -2278,13 +2303,17 @@
   "componentsCalendarMacroSummaryBurned": "{calories} burned",
   "@componentsCalendarMacroSummaryBurned": {
     "placeholders": {
-      "calories": { "type": "String" }
+      "calories": {
+        "type": "String"
+      }
     }
   },
   "componentsCalendarMacroSummaryNetCalories": "Net: {value}",
   "@componentsCalendarMacroSummaryNetCalories": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "componentsCalendarMacroSummaryNoBurnData": "No burn data for this day",
@@ -2293,10 +2322,11 @@
   "screensSettingsProfileSettingsLastSynced": "Last synced: {time}",
   "@screensSettingsProfileSettingsLastSynced": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
-
   "servicesChatAgentFallbackParsing": "I apologize, but I'm having trouble processing your request right now. Could you please try rephrasing your question?",
   "@servicesChatAgentFallbackParsing": {
     "description": "Fallback reply shown when the agent fails to parse the user request"
@@ -2332,6 +2362,93 @@
   "servicesChatAgentFallbackDishInfo": "Here is the dish information:",
   "@servicesChatAgentFallbackDishInfo": {
     "description": "Prefix shown when the AI returns dish data without a reply text"
+  },
+  "screensDishCreateImage": "Image",
+  "@screensDishCreateImage": {
+    "description": "Title of the dish image section"
+  },
+  "screensDishCreateNoImageSelected": "No image selected",
+  "@screensDishCreateNoImageSelected": {
+    "description": "Placeholder for a dish without an image"
+  },
+  "screensDishCreateChangeImage": "Change image",
+  "@screensDishCreateChangeImage": {
+    "description": "Button for replacing a dish image"
+  },
+  "screensDishCreateAddImage": "Add image",
+  "@screensDishCreateAddImage": {
+    "description": "Button for choosing a dish image"
+  },
+  "screensDishCreateConfirmDiscardChanges": "Discard your unsaved changes?",
+  "@screensDishCreateConfirmDiscardChanges": {
+    "description": "Confirmation before leaving an edited dish"
+  },
+  "screensDishCreateProteinAbbreviation": "P",
+  "@screensDishCreateProteinAbbreviation": {
+    "description": "Compact protein label on an ingredient"
+  },
+  "screensDishCreateCarbsAbbreviation": "C",
+  "@screensDishCreateCarbsAbbreviation": {
+    "description": "Compact carbohydrate label on an ingredient"
+  },
+  "screensDishCreateFatAbbreviation": "F",
+  "@screensDishCreateFatAbbreviation": {
+    "description": "Compact fat label on an ingredient"
+  },
+  "componentsDishesDishFormIngredientFormModalUnit": "Unit",
+  "@componentsDishesDishFormIngredientFormModalUnit": {
+    "description": "Label for an ingredient unit selector"
+  },
+  "componentsDishesDishFormIngredientFormModalNutritionPerPiece": "Nutrition per piece",
+  "@componentsDishesDishFormIngredientFormModalNutritionPerPiece": {
+    "description": "Nutrition basis for ingredients counted in pieces"
+  },
+  "componentsDishesDishFormIngredientFormModalNutritionPerSlice": "Nutrition per slice",
+  "@componentsDishesDishFormIngredientFormModalNutritionPerSlice": {
+    "description": "Nutrition basis for ingredients counted in slices"
+  },
+  "componentsDishesDishFormIngredientFormModalProductInformationLoaded": "Product information loaded. Adjust quantity and save.",
+  "@componentsDishesDishFormIngredientFormModalProductInformationLoaded": {
+    "description": "Confirmation after filling the ingredient form from a product"
+  },
+  "componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients": "Recalculate from ingredients",
+  "@componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients": {
+    "description": "Tooltip for dish nutrition recalculation"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighProtein": "High Protein",
+  "@componentsDishesDishFormSmartNutritionCardHighProtein": {
+    "description": "Title for a protein-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighCarb": "High Carb",
+  "@componentsDishesDishFormSmartNutritionCardHighCarb": {
+    "description": "Title for a carbohydrate-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighFat": "High Fat",
+  "@componentsDishesDishFormSmartNutritionCardHighFat": {
+    "description": "Title for a fat-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardWellBalanced": "Well Balanced",
+  "@componentsDishesDishFormSmartNutritionCardWellBalanced": {
+    "description": "Title for a balanced dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighProteinFeedback": "Excellent! High protein content supports muscle building and satiety.",
+  "@componentsDishesDishFormSmartNutritionCardHighProteinFeedback": {
+    "description": "Feedback for a protein-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighCarbFeedback": "Great for energy! Perfect pre-workout or active days.",
+  "@componentsDishesDishFormSmartNutritionCardHighCarbFeedback": {
+    "description": "Feedback for a carbohydrate-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighFatFeedback": "High in fats. Enjoy in moderation and balance with other meals.",
+  "@componentsDishesDishFormSmartNutritionCardHighFatFeedback": {
+    "description": "Feedback for a fat-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardBalancedFeedback": "Perfect balance! This dish provides well-rounded nutrition.",
+  "@componentsDishesDishFormSmartNutritionCardBalancedFeedback": {
+    "description": "Feedback for a balanced dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": "Enter nutrition values to see smart analysis and recommendations.",
+  "@componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": {
+    "description": "Feedback when dish nutrition needs more data"
   }
 }
-

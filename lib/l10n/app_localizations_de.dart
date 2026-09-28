@@ -9,6 +9,10 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
+      'Mahlzeiten konnten nicht geladen werden';
+
+  @override
   String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay =>
       'Keine Mahlzeiten für diesen Tag protokolliert';
 
@@ -726,6 +730,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Mahlzeitentyp auswählen';
 
   @override
+  String get componentsModalsDishLogModalSelectTime => 'Uhrzeit auswählen';
+
+  @override
   String get componentsModalsDishLogModalSnack => 'Snack';
 
   @override
@@ -1000,6 +1007,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensMealsNoDishesFound => 'Keine Gerichte gefunden';
+
+  @override
+  String get screensMealsOtherCategory => 'Sonstiges';
 
   @override
   String get screensMealsRemovedFromFavorites => 'Aus Favoriten entfernt';
@@ -2143,4 +2153,85 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get servicesChatAgentFallbackDishInfo =>
       'Hier sind die Gerichte-Informationen:';
+
+  @override
+  String get screensDishCreateImage => 'Bild';
+
+  @override
+  String get screensDishCreateNoImageSelected => 'Kein Bild ausgewählt';
+
+  @override
+  String get screensDishCreateChangeImage => 'Bild ändern';
+
+  @override
+  String get screensDishCreateAddImage => 'Bild hinzufügen';
+
+  @override
+  String get screensDishCreateConfirmDiscardChanges =>
+      'Ungespeicherte Änderungen verwerfen?';
+
+  @override
+  String get screensDishCreateProteinAbbreviation => 'E';
+
+  @override
+  String get screensDishCreateCarbsAbbreviation => 'K';
+
+  @override
+  String get screensDishCreateFatAbbreviation => 'F';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalUnit => 'Einheit';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerPiece =>
+      'Nährwerte pro Stück';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerSlice =>
+      'Nährwerte pro Scheibe';
+
+  @override
+  String
+  get componentsDishesDishFormIngredientFormModalProductInformationLoaded =>
+      'Produktinformationen geladen. Menge anpassen und speichern.';
+
+  @override
+  String
+  get componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients =>
+      'Aus Zutaten neu berechnen';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProtein =>
+      'Proteinreich';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarb =>
+      'Kohlenhydratreich';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFat => 'Fettreich';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardWellBalanced =>
+      'Ausgewogen';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProteinFeedback =>
+      'Ausgezeichnet! Der hohe Proteingehalt unterstützt Muskelaufbau und Sättigung.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarbFeedback =>
+      'Gute Energiequelle! Ideal vor dem Training oder an aktiven Tagen.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFatFeedback =>
+      'Hoher Fettgehalt. In Maßen genießen und mit ausgewogenen Mahlzeiten ergänzen.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardBalancedFeedback =>
+      'Gut ausgewogen! Dieses Gericht bietet eine vielseitige Nährstoffkombination.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback =>
+      'Nährwerte eingeben, um die Analyse und Empfehlungen zu sehen.';
 }
