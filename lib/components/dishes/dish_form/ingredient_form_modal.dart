@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../../models/dish.dart';
 import '../../../models/product.dart';
+import '../../../utils/number_parsing.dart';
 import '../../scanner/barcode_scanner_screen.dart';
 import '../../scanner/product_search_screen.dart';
 
@@ -111,14 +112,14 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
             widget.ingredient?.id ??
             DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
-        amount: double.tryParse(_quantityController.text) ?? 0,
+        amount: parseLocalizedDouble(_quantityController.text)!,
         unit: _selectedUnit,
         nutrition: NutritionInfo(
-          calories: double.tryParse(_caloriesController.text) ?? 0,
-          protein: double.tryParse(_proteinController.text) ?? 0,
-          carbs: double.tryParse(_carbsController.text) ?? 0,
-          fat: double.tryParse(_fatController.text) ?? 0,
-          fiber: double.tryParse(_fiberController.text) ?? 0,
+          calories: parseLocalizedDouble(_caloriesController.text) ?? 0,
+          protein: parseLocalizedDouble(_proteinController.text) ?? 0,
+          carbs: parseLocalizedDouble(_carbsController.text) ?? 0,
+          fat: parseLocalizedDouble(_fatController.text) ?? 0,
+          fiber: parseLocalizedDouble(_fiberController.text) ?? 0,
         ),
       );
       widget.onSave(ingredient);
@@ -276,17 +277,14 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d*\.?\d*'),
-                              ),
-                            ],
+                            inputFormatters: [decimalInputFormatter],
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return l10n
                                     .componentsDishesDishFormIngredientFormModalPleaseEnterQuantity;
                               }
-                              if (double.tryParse(value) == null) {
+                              final quantity = parseLocalizedDouble(value);
+                              if (quantity == null || quantity <= 0) {
                                 return l10n
                                     .componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber;
                               }
@@ -311,7 +309,14 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      l10n.componentsDishesDishFormIngredientFormModalNutritionPer100g,
+                      switch (_selectedUnit) {
+                        'piece' =>
+                          l10n.componentsDishesDishFormIngredientFormModalNutritionPerPiece,
+                        'slice' =>
+                          l10n.componentsDishesDishFormIngredientFormModalNutritionPerSlice,
+                        _ =>
+                          l10n.componentsDishesDishFormIngredientFormModalNutritionPer100g,
+                      },
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant.withValues(
                           alpha: 0.7,
@@ -590,9 +595,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
         TextFormField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-          ],
+          inputFormatters: [decimalInputFormatter],
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
@@ -624,8 +627,10 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
           validator: (value) {
             if (value != null &&
                 value.isNotEmpty &&
-                double.tryParse(value) == null) {
-              return 'Please enter a valid number';
+                parseLocalizedDouble(value) == null) {
+              return AppLocalizations.of(
+                context,
+              ).componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber;
             }
             return null;
           },
@@ -717,7 +722,9 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Unit',
+          AppLocalizations.of(
+            context,
+          ).componentsDishesDishFormIngredientFormModalUnit,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurfaceVariant,
@@ -841,7 +848,9 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Product information loaded. Adjust quantity and save.',
+            AppLocalizations.of(
+              context,
+            ).componentsDishesDishFormIngredientFormModalProductInformationLoaded,
           ),
           backgroundColor: Colors.green,
         ),

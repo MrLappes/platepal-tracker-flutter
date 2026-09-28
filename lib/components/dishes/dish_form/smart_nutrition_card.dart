@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import '../../../utils/number_parsing.dart';
 
 class SmartNutritionCard extends StatefulWidget {
   final TextEditingController caloriesController;
@@ -70,18 +70,22 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
 
   @override
   void dispose() {
+    widget.caloriesController.removeListener(_analyzeNutrition);
+    widget.proteinController.removeListener(_analyzeNutrition);
+    widget.carbsController.removeListener(_analyzeNutrition);
+    widget.fatController.removeListener(_analyzeNutrition);
     _pulseController.dispose();
     _shakeController.dispose();
     super.dispose();
   }
 
   void _analyzeNutrition() {
-    final calories = double.tryParse(widget.caloriesController.text) ?? 0;
-    final protein = double.tryParse(widget.proteinController.text) ?? 0;
-    final carbs = double.tryParse(widget.carbsController.text) ?? 0;
-    final fat = double.tryParse(widget.fatController.text) ?? 0;
+    final calories = parseLocalizedDouble(widget.caloriesController.text) ?? 0;
+    final protein = parseLocalizedDouble(widget.proteinController.text) ?? 0;
+    final carbs = parseLocalizedDouble(widget.carbsController.text) ?? 0;
+    final fat = parseLocalizedDouble(widget.fatController.text) ?? 0;
     final fiber =
-        double.tryParse(widget.fiberController.text) ??
+        parseLocalizedDouble(widget.fiberController.text) ??
         0; // Count filled nutrition fields (excluding calories)
     final filledFields =
         [protein, carbs, fat, fiber].where((value) => value > 0).length;
@@ -150,16 +154,18 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
   }
 
   void _triggerNeutralAnimation() {
-    _pulseController.forward().then((_) => _pulseController.reverse());
+    _pulseController.forward().then((_) {
+      if (mounted) _pulseController.reverse();
+    });
   }
 
   bool _shouldShowAnalysis() {
-    final calories = double.tryParse(widget.caloriesController.text) ?? 0;
-    final protein = double.tryParse(widget.proteinController.text) ?? 0;
-    final carbs = double.tryParse(widget.carbsController.text) ?? 0;
-    final fat = double.tryParse(widget.fatController.text) ?? 0;
+    final calories = parseLocalizedDouble(widget.caloriesController.text) ?? 0;
+    final protein = parseLocalizedDouble(widget.proteinController.text) ?? 0;
+    final carbs = parseLocalizedDouble(widget.carbsController.text) ?? 0;
+    final fat = parseLocalizedDouble(widget.fatController.text) ?? 0;
     final fiber =
-        double.tryParse(widget.fiberController.text) ??
+        parseLocalizedDouble(widget.fiberController.text) ??
         0; // Count filled nutrition fields (excluding calories)
     final filledFields =
         [protein, carbs, fat, fiber].where((value) => value > 0).length;
@@ -265,7 +271,8 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                               IconButton(
                                 onPressed: widget.onRecalculate,
                                 icon: const Icon(Icons.calculate_outlined),
-                                tooltip: 'Recalculate from ingredients',
+                                tooltip:
+                                    l10n.componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients,
                                 style: IconButton.styleFrom(
                                   backgroundColor: colorScheme.surfaceContainer,
                                   foregroundColor: colorScheme.primary,
@@ -485,9 +492,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
         TextFormField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-          ],
+          inputFormatters: [decimalInputFormatter],
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
@@ -577,30 +582,32 @@ enum NutritionProfile {
   String getTitle(AppLocalizations l10n) {
     switch (this) {
       case NutritionProfile.highProtein:
-        return 'High Protein';
+        return l10n.componentsDishesDishFormSmartNutritionCardHighProtein;
       case NutritionProfile.highCarb:
-        return 'High Carb';
+        return l10n.componentsDishesDishFormSmartNutritionCardHighCarb;
       case NutritionProfile.highFat:
-        return 'High Fat';
+        return l10n.componentsDishesDishFormSmartNutritionCardHighFat;
       case NutritionProfile.balanced:
-        return 'Well Balanced';
+        return l10n.componentsDishesDishFormSmartNutritionCardWellBalanced;
       case NutritionProfile.unbalanced:
-        return 'Nutrition Analysis';
+        return l10n.componentsChatNutritionAnalysisCardNutritionAnalysis;
     }
   }
 
   String getFeedback(AppLocalizations l10n) {
     switch (this) {
       case NutritionProfile.highProtein:
-        return 'Excellent! High protein content supports muscle building and satiety.';
+        return l10n
+            .componentsDishesDishFormSmartNutritionCardHighProteinFeedback;
       case NutritionProfile.highCarb:
-        return 'Great for energy! Perfect pre-workout or active days.';
+        return l10n.componentsDishesDishFormSmartNutritionCardHighCarbFeedback;
       case NutritionProfile.highFat:
-        return 'High in fats. Enjoy in moderation and balance with other meals.';
+        return l10n.componentsDishesDishFormSmartNutritionCardHighFatFeedback;
       case NutritionProfile.balanced:
-        return 'Perfect balance! This dish provides well-rounded nutrition.';
+        return l10n.componentsDishesDishFormSmartNutritionCardBalancedFeedback;
       case NutritionProfile.unbalanced:
-        return 'Enter nutrition values to see smart analysis and recommendations.';
+        return l10n
+            .componentsDishesDishFormSmartNutritionCardUnbalancedFeedback;
     }
   }
 }

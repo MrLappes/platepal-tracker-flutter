@@ -1,21 +1,74 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 import '../models/dish.dart';
 import '../models/product.dart';
 import '../services/storage/dish_service.dart';
+import '../utils/number_parsing.dart';
+import '../utils/unit_conversion.dart';
 import '../components/dishes/dish_form/ingredient_form_modal.dart';
 import '../components/dishes/dish_form/smart_nutrition_card.dart';
+
+/// Copies a selected image into app documents so it outlives picker temp files.
+Future<String> persistDishImage(
+  File source, {
+  required Directory documentsDirectory,
+}) async {
+  final imagesDirectory = Directory(
+    path.join(documentsDirectory.path, 'dish_images'),
+  );
+  await imagesDirectory.create(recursive: true);
+  final extension = path.extension(source.path).toLowerCase();
+  final destination = File(
+    path.join(imagesDirectory.path, '${const Uuid().v4()}$extension'),
+  );
+  await source.copy(destination.path);
+  return destination.path;
+}
+
+/// Returns null if a product image fails to load or exceeds 5 MB.
+Future<File?> downloadProductImage(
+  Uri url, {
+  required Directory temporaryDirectory,
+  required http.Client client,
+}) async {
+  const maxBytes = 5 * 1024 * 1024;
+  final response = await client.send(http.Request('GET', url));
+  if (response.statusCode != 200 ||
+      (response.contentLength != null && response.contentLength! > maxBytes)) {
+    return null;
+  }
+
+  final bytes = BytesBuilder(copy: false);
+  await for (final chunk in response.stream) {
+    if (bytes.length + chunk.length > maxBytes) return null;
+    bytes.add(chunk);
+  }
+  await temporaryDirectory.create(recursive: true);
+  final extension = path.extension(url.path).toLowerCase();
+  final imageExtension =
+      {'.png', '.jpg', '.jpeg', '.webp'}.contains(extension)
+          ? extension
+          : '.jpg';
+  final file = File(
+    path.join(temporaryDirectory.path, '${const Uuid().v4()}$imageExtension'),
+  );
+  await file.writeAsBytes(bytes.takeBytes());
+  return file;
+}
 
 class DishCreateScreenAdvanced extends StatefulWidget {
   final Dish? dish;
   final bool isFullScreen;
   final Function(Dish)? onDishCreated;
   final String? heroTag;
+  final DishService? dishService;
 
   const DishCreateScreenAdvanced({
     super.key,
@@ -23,6 +76,7 @@ class DishCreateScreenAdvanced extends StatefulWidget {
     this.isFullScreen = false,
     this.onDishCreated,
     this.heroTag,
+    this.dishService,
   });
 
   @override
@@ -32,7 +86,7 @@ class DishCreateScreenAdvanced extends StatefulWidget {
 
 class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     with TickerProviderStateMixin {
-  final DishService _dishService = DishService();
+  late final DishService _dishService = widget.dishService ?? DishService();
   final ImagePicker _imagePicker = ImagePicker(); // Form controllers
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -44,11 +98,18 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
   // State variables
   bool _isLoading = false;
+  bool _isDirty = false;
   bool _isFavorite = false;
   String _selectedCategory = 'breakfast';
   List<Ingredient> _ingredients = [];
   File? _selectedImage;
+  bool _removeExistingImage = false;
   bool _justRecalculated = false;
+
+  String? get _existingImageUrl =>
+      _removeExistingImage || widget.dish?.imageUrl?.isEmpty == true
+          ? null
+          : widget.dish?.imageUrl;
 
   // Animation controllers
   late AnimationController _recalculatedAnimationController;
@@ -69,6 +130,17 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     );
 
     _loadDishData();
+    for (final controller in [
+      _nameController,
+      _descriptionController,
+      _caloriesController,
+      _proteinController,
+      _carbsController,
+      _fatController,
+      _fiberController,
+    ]) {
+      controller.addListener(_markDirty);
+    }
   }
 
   @override
@@ -100,6 +172,40 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
   }
 
+  void _markDirty() {
+    if (mounted && !_isDirty) setState(() => _isDirty = true);
+  }
+
+  Future<void> _confirmDiscardChanges() async {
+    final l10n = AppLocalizations.of(context);
+    final discard = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Text(l10n.screensSettingsMacroCustomizationUnsavedChanges),
+            content: Text(l10n.screensDishCreateConfirmDiscardChanges),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(
+                  l10n.componentsChatBotProfileCustomizationDialogCancel,
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(
+                  l10n.screensSettingsMacroCustomizationDiscardChanges,
+                ),
+              ),
+            ],
+          ),
+    );
+    if (discard == true && mounted) {
+      setState(() => _isDirty = false);
+      Navigator.of(context).pop();
+    }
+  }
+
   /// Determines if the dish should be updated (exists in DB) or created as new
   Future<bool> _shouldUpdateDish(String dishId) async {
     try {
@@ -123,12 +229,20 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     setState(() => _isLoading = true);
 
     try {
+      final imageUrl =
+          _selectedImage == null
+              ? _existingImageUrl
+              : await persistDishImage(
+                _selectedImage!,
+                documentsDirectory: await getApplicationDocumentsDirectory(),
+              );
+      if (!mounted) return;
       final nutrition = NutritionInfo(
-        calories: double.tryParse(_caloriesController.text) ?? 0.0,
-        protein: double.tryParse(_proteinController.text) ?? 0.0,
-        carbs: double.tryParse(_carbsController.text) ?? 0.0,
-        fat: double.tryParse(_fatController.text) ?? 0.0,
-        fiber: double.tryParse(_fiberController.text) ?? 0.0,
+        calories: parseLocalizedDouble(_caloriesController.text) ?? 0.0,
+        protein: parseLocalizedDouble(_proteinController.text) ?? 0.0,
+        carbs: parseLocalizedDouble(_carbsController.text) ?? 0.0,
+        fat: parseLocalizedDouble(_fatController.text) ?? 0.0,
+        fiber: parseLocalizedDouble(_fiberController.text) ?? 0.0,
       );
 
       final dishData = Dish(
@@ -138,7 +252,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
             _descriptionController.text.trim().isEmpty
                 ? null
                 : _descriptionController.text.trim(),
-        imageUrl: _selectedImage?.path,
+        imageUrl: imageUrl,
         ingredients: _ingredients,
         nutrition: nutrition,
         createdAt: widget.dish?.createdAt ?? DateTime.now(),
@@ -152,6 +266,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         '🍽️ Dish nutrition: ${dishData.nutrition.calories} kcal',
       ); // Determine if this is an update or create operation
       final isUpdate = await _shouldUpdateDish(dishData.id);
+      if (!mounted) return;
 
       if (isUpdate) {
         debugPrint('🍽️ Updating existing dish...');
@@ -177,6 +292,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
       debugPrint('🍽️ Dish saved successfully! Calling callback...');
       // Call the callback if provided
+      if (!mounted) return;
+      _isDirty = false;
       widget.onDishCreated?.call(dishData);
 
       if (mounted) {
@@ -191,7 +308,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -223,9 +340,11 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         maxHeight: 1024,
         imageQuality: 80,
       );
-      if (pickedFile != null) {
+      if (pickedFile != null && mounted) {
         setState(() {
           _selectedImage = File(pickedFile.path);
+          _removeExistingImage = false;
+          _isDirty = true;
         });
       }
     } catch (e) {
@@ -271,7 +390,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     _pickImage(ImageSource.gallery);
                   },
                 ),
-                if (_selectedImage != null)
+                if (_selectedImage != null || _existingImageUrl != null)
                   ListTile(
                     leading: const Icon(Icons.delete, color: Colors.red),
                     title: Text(
@@ -282,6 +401,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       Navigator.pop(context);
                       setState(() {
                         _selectedImage = null;
+                        _removeExistingImage = true;
+                        _isDirty = true;
                       });
                     },
                   ),
@@ -298,6 +419,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       onSave: (ingredient) {
         setState(() {
           _ingredients.add(ingredient);
+          _isDirty = true;
           _recalculateNutrition();
         });
         _showSuccessSnackBar(
@@ -320,6 +442,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       onSave: (ingredient) {
         setState(() {
           _ingredients.add(ingredient);
+          _isDirty = true;
           _recalculateNutrition();
         });
         _showSuccessSnackBar(
@@ -345,49 +468,42 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
 
     // Auto-set dish image if not already set and product has image
-    if (_selectedImage == null && product.imageUrl != null) {
+    if (_selectedImage == null &&
+        _existingImageUrl == null &&
+        !_removeExistingImage &&
+        product.imageUrl != null) {
       _downloadAndSetProductImage(product.imageUrl!);
     }
   }
 
   /// Download product image and set it as dish image
   Future<void> _downloadAndSetProductImage(String imageUrl) async {
+    final client = http.Client();
     try {
       debugPrint('📸 Downloading product image: $imageUrl');
-
-      // Download the image
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode == 200) {
-        // Get the app's temporary directory
-        final tempDir = await getTemporaryDirectory();
-
-        // Create a unique filename
-        final fileName =
-            'product_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final filePath = path.join(tempDir.path, fileName);
-
-        // Write the image data to file
-        final file = File(filePath);
-        await file.writeAsBytes(response.bodyBytes);
-
-        // Set the downloaded image as the dish image
-        if (mounted) {
-          setState(() {
-            _selectedImage = file;
-          });
-          debugPrint('✅ Product image downloaded and set successfully');
-        }
-      } else {
-        debugPrint('❌ Failed to download image: HTTP ${response.statusCode}');
+      final file = await downloadProductImage(
+        Uri.parse(imageUrl),
+        temporaryDirectory: await getTemporaryDirectory(),
+        client: client,
+      );
+      if (file != null &&
+          mounted &&
+          _selectedImage == null &&
+          !_removeExistingImage) {
+        setState(() {
+          _selectedImage = file;
+          _isDirty = true;
+        });
       }
     } catch (e) {
       debugPrint('❌ Error downloading product image: $e');
       // Don't show error to user as this is a nice-to-have feature
+    } finally {
+      client.close();
     }
   }
 
   void _recalculateNutrition() {
-    if (_ingredients.isEmpty) return;
     double totalCalories = 0;
     double totalProtein = 0;
     double totalCarbs = 0;
@@ -396,8 +512,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
     for (final ingredient in _ingredients) {
       if (ingredient.nutrition != null) {
-        final multiplier =
-            ingredient.amount / 100; // Assuming nutrition is per 100g
+        final multiplier = nutritionMultiplier(
+          ingredient.amount,
+          ingredient.unit,
+        );
         totalCalories += ingredient.nutrition!.calories * multiplier;
         totalProtein += ingredient.nutrition!.protein * multiplier;
         totalCarbs += ingredient.nutrition!.carbs * multiplier;
@@ -416,6 +534,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     });
 
     _recalculatedAnimationController.forward().then((_) {
+      if (!mounted) return;
       _recalculatedAnimationController.reverse();
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
@@ -435,6 +554,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       onSave: (ingredient) {
         setState(() {
           _ingredients.add(ingredient);
+          _isDirty = true;
           _recalculateNutrition();
         });
       },
@@ -448,6 +568,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       onSave: (ingredient) {
         setState(() {
           _ingredients[index] = ingredient;
+          _isDirty = true;
           _recalculateNutrition();
         });
       },
@@ -480,6 +601,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 onPressed: () {
                   setState(() {
                     _ingredients.removeAt(index);
+                    _isDirty = true;
+                    _recalculateNutrition();
                   });
                   Navigator.pop(context);
                   _showSuccessSnackBar(
@@ -501,12 +624,14 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   Widget _buildImageSelector() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final existingImageUrl = _existingImageUrl;
+    final hasImage = _selectedImage != null || existingImageUrl != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'IMAGE',
+          AppLocalizations.of(context).screensDishCreateImage.toUpperCase(),
           style: theme.textTheme.labelSmall?.copyWith(
             color: colorScheme.primary,
             fontWeight: FontWeight.w900,
@@ -526,7 +651,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_selectedImage != null)
+              if (hasImage)
                 Container(
                   height: 200,
                   width: double.infinity,
@@ -538,7 +663,16 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
-                    child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                    child:
+                        _selectedImage != null
+                            ? Image.file(_selectedImage!, fit: BoxFit.cover)
+                            : existingImageUrl!.startsWith('http://') ||
+                                existingImageUrl.startsWith('https://')
+                            ? Image.network(existingImageUrl, fit: BoxFit.cover)
+                            : Image.file(
+                              File(existingImageUrl),
+                              fit: BoxFit.cover,
+                            ),
                   ),
                 )
               else
@@ -563,7 +697,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'No image selected',
+                        AppLocalizations.of(
+                          context,
+                        ).screensDishCreateNoImageSelected,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -578,7 +714,14 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   onPressed: _showImageSourceSelector,
                   icon: const Icon(Icons.add_a_photo, size: 16),
                   label: Text(
-                    (_selectedImage != null ? 'CHANGE IMAGE' : 'ADD IMAGE'),
+                    (hasImage
+                            ? AppLocalizations.of(
+                              context,
+                            ).screensDishCreateChangeImage
+                            : AppLocalizations.of(
+                              context,
+                            ).screensDishCreateAddImage)
+                        .toUpperCase(),
                   ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -600,7 +743,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'QUICK ACTIONS',
+          AppLocalizations.of(
+            context,
+          ).componentsChatQuickActionsQuickActions.toUpperCase(),
           style: theme.textTheme.labelSmall?.copyWith(
             color: colorScheme.primary,
             fontWeight: FontWeight.w900,
@@ -766,7 +911,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 ],
                 onChanged: (value) {
                   if (value != null) {
-                    setState(() => _selectedCategory = value);
+                    setState(() {
+                      _selectedCategory = value;
+                      _isDirty = true;
+                    });
                   }
                 },
               ),
@@ -910,26 +1058,35 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           ),
           child: Column(
             children: [
-              SwitchListTile(
-                title: Text(
-                  AppLocalizations.of(
-                    context,
-                  ).screensDishCreateFavorite.toUpperCase(),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  title: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).screensDishCreateFavorite.toUpperCase(),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  AppLocalizations.of(context).screensDishCreateMarkAsFavorite,
-                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
-                ),
-                value: _isFavorite,
-                onChanged: (value) => setState(() => _isFavorite = value),
-                secondary: Icon(
-                  _isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: _isFavorite ? colorScheme.error : null,
-                  size: 20,
+                  subtitle: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).screensDishCreateMarkAsFavorite,
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                  ),
+                  value: _isFavorite,
+                  onChanged:
+                      (value) => setState(() {
+                        _isFavorite = value;
+                        _isDirty = true;
+                      }),
+                  secondary: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: _isFavorite ? colorScheme.error : null,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
@@ -1080,7 +1237,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Calories: ',
+                        '${AppLocalizations.of(context).componentsCalendarMacroSummaryCalories}: ',
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
@@ -1101,17 +1258,17 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildNutritionChip(
-                        'P: ${ingredient.nutrition!.protein.toStringAsFixed(1)}g',
+                        '${AppLocalizations.of(context).screensDishCreateProteinAbbreviation}: ${ingredient.nutrition!.protein.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
                         Colors.blue,
                         theme,
                       ),
                       _buildNutritionChip(
-                        'C: ${ingredient.nutrition!.carbs.toStringAsFixed(1)}g',
+                        '${AppLocalizations.of(context).screensDishCreateCarbsAbbreviation}: ${ingredient.nutrition!.carbs.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
                         Colors.amber,
                         theme,
                       ),
                       _buildNutritionChip(
-                        'F: ${ingredient.nutrition!.fat.toStringAsFixed(1)}g',
+                        '${AppLocalizations.of(context).screensDishCreateFatAbbreviation}: ${ingredient.nutrition!.fat.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
                         Colors.teal,
                         theme,
                       ),
@@ -1147,75 +1304,83 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.dish != null
-              ? '${AppLocalizations.of(context).screensDishCreateEditDish.toUpperCase()} //'
-              : '${AppLocalizations.of(context).screensDishCreateCreateDish.toUpperCase()} //',
-        ),
-        actions: [
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: _saveDish,
-              child: Text(
-                AppLocalizations.of(
-                  context,
-                ).componentsChatBotProfileCustomizationDialogSave,
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
+    return PopScope<Object?>(
+      canPop: !_isDirty && !_isLoading,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _isDirty && !_isLoading) {
+          _confirmDiscardChanges();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.dish != null
+                ? '${AppLocalizations.of(context).screensDishCreateEditDish.toUpperCase()} //'
+                : '${AppLocalizations.of(context).screensDishCreateCreateDish.toUpperCase()} //',
+          ),
+          actions: [
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else
+              TextButton(
+                onPressed: _saveDish,
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatBotProfileCustomizationDialogSave,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildImageSelector(),
-            const SizedBox(height: 16),
-            _buildQuickActions(),
-            const SizedBox(height: 16),
-            _buildBasicInformation(),
-            const SizedBox(height: 16),
-            _buildNutritionInputs(),
-            const SizedBox(height: 16), _buildIngredientsSection(),
-            const SizedBox(height: 16),
-            _buildOptionsSection(),
-            const SizedBox(
-              height: 100,
-            ), // Extra space for floating action button
           ],
         ),
-      ),
-      floatingActionButton:
-          _isLoading
-              ? null
-              : FloatingActionButton.extended(
-                heroTag:
-                    widget.heroTag ??
-                    "dish_create_fab_${DateTime.now().millisecondsSinceEpoch}",
-                onPressed: _saveDish,
-                icon: const Icon(Icons.save),
-                label: Text(
-                  widget.dish != null
-                      ? AppLocalizations.of(context).screensDishCreateSaveDish
-                      : AppLocalizations.of(
-                        context,
-                      ).screensDishCreateCreateDish,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildImageSelector(),
+              const SizedBox(height: 16),
+              _buildQuickActions(),
+              const SizedBox(height: 16),
+              _buildBasicInformation(),
+              const SizedBox(height: 16),
+              _buildNutritionInputs(),
+              const SizedBox(height: 16), _buildIngredientsSection(),
+              const SizedBox(height: 16),
+              _buildOptionsSection(),
+              const SizedBox(
+                height: 100,
+              ), // Extra space for floating action button
+            ],
+          ),
+        ),
+        floatingActionButton:
+            _isLoading
+                ? null
+                : FloatingActionButton.extended(
+                  heroTag:
+                      widget.heroTag ??
+                      "dish_create_fab_${DateTime.now().millisecondsSinceEpoch}",
+                  onPressed: _saveDish,
+                  icon: const Icon(Icons.save),
+                  label: Text(
+                    widget.dish != null
+                        ? AppLocalizations.of(context).screensDishCreateSaveDish
+                        : AppLocalizations.of(
+                          context,
+                        ).screensDishCreateCreateDish,
+                  ),
                 ),
-              ),
+      ),
     );
   }
 }
