@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
@@ -241,9 +242,41 @@ class OpenAIService {
     OpenAIModel(id: 'gpt-4o-mini', displayName: 'GPT-4O Mini'),
   ];
 
+  static const Duration chatRequestTimeout = Duration(seconds: 60);
+  static const Duration visionRequestTimeout = Duration(seconds: 120);
+  static const Duration _apiKeyTestTimeout = Duration(seconds: 30);
+  static const Duration _modelListTimeout = Duration(seconds: 20);
+
+  final http.Client? _httpClient;
+
+  /// [httpClient] is optional; by default a short-lived client is used per request.
+  OpenAIService({http.Client? httpClient}) : _httpClient = httpClient;
+
   /// Get the currently selected model
   String get selectedModel => _selectedModelCache ?? 'gpt-4o';
   String? _selectedModelCache;
+
+  Future<http.Response> _post(
+    Uri url,
+    Map<String, String> headers,
+    Object body,
+    Duration timeout,
+  ) {
+    final client = _httpClient;
+    final request =
+        client != null
+            ? client.post(url, headers: headers, body: body)
+            : http.post(url, headers: headers, body: body);
+    return request.timeout(
+      timeout,
+      onTimeout:
+          () =>
+              throw TimeoutException(
+                'OpenAI request timed out after ${timeout.inSeconds}s',
+                timeout,
+              ),
+    );
+  }
 
   Future<String?> _getApiKey() async {
     final prefs = await SharedPreferences.getInstance();
@@ -393,10 +426,11 @@ class OpenAIService {
         },
         if (!omitTemperature) 'temperature': 0.7,
       };
-      final response = await http.post(
+      final response = await _post(
         url,
-        headers: headers,
-        body: jsonEncode(body),
+        headers,
+        jsonEncode(body),
+        _apiKeyTestTimeout,
       );
       if (response.body.trim().isEmpty) {
         return const ApiKeyTestResult(
@@ -410,7 +444,8 @@ class OpenAIService {
         final content = data['choices']?[0]?['message']?['content'] ?? '';
         if (content.isEmpty) {
           debugPrint(
-            'OpenAI API returned an empty response for model $model with API key $apiKey, Response: ${response.body}',
+            'OpenAI API returned empty content for model $model '
+            '(status ${response.statusCode}, ${response.body.length} bytes)',
           );
           return const ApiKeyTestResult(
             success: false,
@@ -426,11 +461,12 @@ class OpenAIService {
         try {
           final errorData = jsonDecode(response.body);
           errorMessage = errorData['error']?['message'] ?? errorMessage;
-          debugPrint(
-            'OpenAI API error: ${errorData['error']?['message']}, '
-            'status code: ${response.statusCode}',
-          );
         } catch (_) {}
+        // The error message can echo parts of the key, so only log metadata.
+        debugPrint(
+          'OpenAI API key test failed: status ${response.statusCode}, '
+          '${response.body.length} bytes',
+        );
         if (response.statusCode == 400) {
           errorMessage =
               'Invalid request. Please check the model and parameters used.';
@@ -501,9 +537,7 @@ class OpenAIService {
           base64String,
           imagePath: imageUrl,
         );
-        debugPrint(
-          'imageDataUrl (first 100 chars): ${imageDataUrl.substring(0, imageDataUrl.length > 100 ? 100 : imageDataUrl.length)}',
-        );
+        debugPrint('Encoded image data URL: ${imageDataUrl.length} chars');
       } catch (e) {
         throw Exception('Failed to process image file: $e');
       }
@@ -543,10 +577,11 @@ class OpenAIService {
       if (!omitTemperature) 'temperature': 0.7,
     };
     try {
-      final response = await http.post(
+      final response = await _post(
         url,
-        headers: headers,
-        body: jsonEncode(body),
+        headers,
+        jsonEncode(body),
+        imageUrl != null ? visionRequestTimeout : chatRequestTimeout,
       );
       if (response.body.trim().isEmpty) {
         throw Exception(
@@ -575,6 +610,8 @@ class OpenAIService {
         } catch (_) {}
         throw Exception(errorMessage);
       }
+    } on TimeoutException {
+      rethrow;
     } catch (e) {
       throw Exception('Failed to send message: $e');
     }
@@ -594,7 +631,11 @@ class OpenAIService {
       final baseUrl = customBaseUrl ?? 'https://api.openai.com/v1';
       final url = Uri.parse('$baseUrl/models');
       final headers = {'Authorization': 'Bearer $cleanedApiKey'};
-      final response = await http.get(url, headers: headers);
+      final client = _httpClient;
+      final response = await (client != null
+              ? client.get(url, headers: headers)
+              : http.get(url, headers: headers))
+          .timeout(_modelListTimeout);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final models = (data['data'] as List<dynamic>?) ?? [];
@@ -739,11 +780,18 @@ class OpenAIService {
         body['tool_choice'] = toolChoice;
       }
     }
+    final hasImage = messages.any((m) {
+      final content = m['content'];
+      return (content is List &&
+              content.any((i) => i is Map && i['type'] == 'image_url')) ||
+          (content is String && content.contains('data:image'));
+    });
     try {
-      final response = await http.post(
+      final response = await _post(
         url,
-        headers: headers,
-        body: jsonEncode(body),
+        headers,
+        jsonEncode(body),
+        hasImage ? visionRequestTimeout : chatRequestTimeout,
       );
       if (response.body.trim().isEmpty) {
         throw Exception(
@@ -761,6 +809,8 @@ class OpenAIService {
         } catch (_) {}
         throw Exception(errorMessage);
       }
+    } on TimeoutException {
+      rethrow;
     } catch (e) {
       throw Exception('Failed to send chat request: $e');
     }

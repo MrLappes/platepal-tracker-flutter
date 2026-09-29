@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show Locale, PlatformDispatcher;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/chat_types.dart';
@@ -117,6 +118,16 @@ class ChatAgentService {
   /// Get deep search verification status
   bool get isDeepSearchEnabled => _deepSearchEnabled;
 
+  static const _supportedLanguages = ['en', 'es', 'de'];
+
+  /// Mirrors LocaleProvider: saved preference, else supported device language, else English.
+  @visibleForTesting
+  static String resolveLanguageCode(String? savedCode, Locale deviceLocale) {
+    if (_supportedLanguages.contains(savedCode)) return savedCode!;
+    final deviceCode = deviceLocale.languageCode;
+    return _supportedLanguages.contains(deviceCode) ? deviceCode : 'en';
+  }
+
   /// Main entry point for processing chat messages with full agent pipeline
   Future<ChatResponse> processMessage({
     required String userMessage,
@@ -154,7 +165,10 @@ class ChatAgentService {
     String languageCode = 'en';
     try {
       final prefs = await SharedPreferences.getInstance();
-      languageCode = prefs.getString('app_locale') ?? 'en';
+      languageCode = resolveLanguageCode(
+        prefs.getString('app_locale'),
+        PlatformDispatcher.instance.locale,
+      );
     } catch (_) {}
     debugPrint('   Language code: $languageCode');
 
@@ -364,6 +378,10 @@ class ChatAgentService {
 
       // Update current input with context results
       currentInput = currentInput.copyWith(
+        enhancedSystemPrompt:
+            () =>
+                _enhancedPromptFrom(contextResult) ??
+                currentInput.enhancedSystemPrompt,
         metadata: {...currentInput.metadata!, ...contextResult.data ?? {}},
       );
 
@@ -439,7 +457,7 @@ class ChatAgentService {
                 currentInput,
               );
 
-              return _processWithAutonomousVerification(
+              return await _processWithAutonomousVerification(
                 userMessage: userMessage,
                 conversationHistory: conversationHistory,
                 botConfig: botConfig,
@@ -474,6 +492,10 @@ class ChatAgentService {
               totalStepsExecuted++;
               if (retryContextResult.success) {
                 currentInput = currentInput.copyWith(
+                  enhancedSystemPrompt:
+                      () =>
+                          _enhancedPromptFrom(retryContextResult) ??
+                          currentInput.enhancedSystemPrompt,
                   metadata: {
                     ...currentInput.metadata!,
                     ...retryContextResult.data ?? {},
@@ -671,6 +693,9 @@ class ChatAgentService {
         continue;
       }
 
+      // Dishes only exist once a response is generated; they are processed after the loop.
+      if (stepName == 'dish_processing') continue;
+
       // Show appropriate thinking step message for UI
       final stepEmoji = _getStepEmoji(stepName);
       final stepDescription = _getStepDescription(stepName);
@@ -842,6 +867,10 @@ class ChatAgentService {
 
                 // Update current input with updated context results
                 currentInput = currentInput.copyWith(
+                  enhancedSystemPrompt:
+                      () =>
+                          _enhancedPromptFrom(updatedContextResult) ??
+                          currentInput.enhancedSystemPrompt,
                   metadata: {
                     ...currentInput.metadata!,
                     'contextGatheringResult': updatedContextResult.data,
@@ -969,20 +998,13 @@ class ChatAgentService {
           // Keep the context gathering results for next steps
           if (stepResult.success) {
             currentInput = currentInput.copyWith(
+              enhancedSystemPrompt:
+                  () =>
+                      _enhancedPromptFrom(stepResult) ??
+                      currentInput.enhancedSystemPrompt,
               metadata: {
                 ...currentInput.metadata!,
                 'contextGatheringResult': stepResult.data,
-              },
-            );
-          }
-          break;
-        case 'dish_processing':
-          stepResult = await _dishProcessingStep.execute(currentInput);
-          if (stepResult.success) {
-            currentInput = currentInput.copyWith(
-              metadata: {
-                ...currentInput.metadata!,
-                'dishProcessingResult': stepResult.data,
               },
             );
           }
@@ -1012,57 +1034,61 @@ class ChatAgentService {
       }
     }
 
-    // Always finish with a final response generation step, regardless of pipeline retries or deep search verification
-    debugPrint('✍️ Ensuring final response generation step is executed...');
-    final responseStepText = '✍️ Crafting your personalized response...';
-    thinkingSteps.add(responseStepText);
-    _onThinkingStep?.call(
-      responseStepText,
-      'Combining all information to create a helpful and personalized answer',
-    );
+    // Response generation normally ran in the loop; only generate here if it did not.
+    var responseResult =
+        stepResults
+            .where((r) => r.stepName == 'response_generation')
+            .lastOrNull;
+    if (responseResult == null) {
+      debugPrint('✍️ Running final response generation step...');
+      final responseStepText = '✍️ Crafting your personalized response...';
+      thinkingSteps.add(responseStepText);
+      _onThinkingStep?.call(
+        responseStepText,
+        'Combining all information to create a helpful and personalized answer',
+      );
 
-    // Extract enhanced system prompt from last context gathering result
-    final lastContextResult = _findStepResult(stepResults, 'context_gathering');
-    String? enhancedSystemPrompt;
-    if (lastContextResult != null && lastContextResult.data != null) {
-      try {
-        final contextGatheringResultJson =
-            lastContextResult.data?['contextGatheringResult']
-                as Map<String, dynamic>?;
-        if (contextGatheringResultJson != null) {
-          final contextGatheringResponse =
-              ContextGatheringStepResponse.fromJson(contextGatheringResultJson);
-          enhancedSystemPrompt = contextGatheringResponse.enhancedSystemPrompt;
-          debugPrint(
-            '✅ Extracted enhanced system prompt: ${enhancedSystemPrompt?.length ?? 0} characters',
-          );
-        }
-      } catch (e) {
-        debugPrint('⚠️ Failed to extract enhanced system prompt: $e');
-      }
+      final lastContextResult = _findStepResult(
+        stepResults,
+        'context_gathering',
+      );
+      final responseInput = currentInput.copyWith(
+        enhancedSystemPrompt:
+            () =>
+                _enhancedPromptFrom(lastContextResult) ??
+                currentInput.enhancedSystemPrompt,
+        metadata: <String, dynamic>{
+          ...currentInput.metadata ?? {},
+          ...?lastContextResult?.data,
+        },
+      );
+      responseResult = await _responseGenerationStep.execute(responseInput);
+      stepResults.add(responseResult);
     }
-    final responseInput = currentInput.copyWith(
-      enhancedSystemPrompt: () => enhancedSystemPrompt,
-      metadata: <String, dynamic>{
-        ...currentInput.metadata ?? {},
-        ...?lastContextResult?.data,
-      },
-    );
-    final responseResult = await _responseGenerationStep.execute(responseInput);
-    stepResults.add(responseResult);
 
     // Always extract all relevant metadata and return a comprehensive ChatResponse
     ChatStepResult? dishResult;
     List extractedDishes = [];
     if (responseResult.success) {
       try {
-        // Get the raw AI response that might contain dishes array in JSON format
+        Map<String, dynamic>? aiResponse;
+        // Tool-call dishes arrive structured; parsedResponse is then just '[tool_calls]'.
+        final structuredDishes =
+            (responseResult.data?['chatResponse']
+                    as Map<String, dynamic>?)?['dishes']
+                as List<dynamic>?;
+        if (structuredDishes != null && structuredDishes.isNotEmpty) {
+          aiResponse = {'dishes': structuredDishes};
+        }
+
+        // Legacy fallback: the raw AI response might contain a dishes array in JSON format
         final parsedResponse =
             responseResult.data?['parsedResponse'] as String?;
-        Map<String, dynamic>? aiResponse;
 
         // Try to parse the response as JSON to look for dishes
-        if (parsedResponse != null && parsedResponse.trim().isNotEmpty) {
+        if (aiResponse == null &&
+            parsedResponse != null &&
+            parsedResponse.trim().isNotEmpty) {
           try {
             // Check if response looks like JSON (starts with { and ends with })
             final trimmed = parsedResponse.trim();
@@ -1286,6 +1312,13 @@ class ChatAgentService {
       }
     }
     return null;
+  }
+
+  /// Enhanced system prompt built by a context gathering step result, if any.
+  String? _enhancedPromptFrom(ChatStepResult? contextResult) {
+    final json = contextResult?.data?['contextGatheringResult'];
+    if (json is! Map<String, dynamic>) return null;
+    return ContextGatheringStepResponse.fromJson(json).enhancedSystemPrompt;
   }
 
   /// Builds a summary of previous steps and context changes for the next thinking step
