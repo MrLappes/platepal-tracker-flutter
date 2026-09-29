@@ -100,6 +100,24 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
+  /// Appended to a calendar day's accessible date when meals are logged
+  ///
+  /// In en, this message translates to:
+  /// **'has meals logged'**
+  String get screensCalendarHasMealsLogged;
+
+  /// Error loading meal markers for the visible week
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load calendar dates'**
+  String get screensCalendarFailedToLoadDates;
+
+  /// Error loading the selected day's nutrition summary
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load nutrition summary'**
+  String get screensCalendarFailedToLoadSummary;
+
   /// Error shown when the selected day's meal logs cannot be loaded
   ///
   /// In en, this message translates to:

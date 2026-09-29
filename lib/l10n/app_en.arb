@@ -1,5 +1,11 @@
 {
   "@@locale": "en",
+  "screensCalendarHasMealsLogged": "has meals logged",
+  "@screensCalendarHasMealsLogged": {"description": "Appended to a calendar day's accessible date when meals are logged"},
+  "screensCalendarFailedToLoadDates": "Could not load calendar dates",
+  "@screensCalendarFailedToLoadDates": {"description": "Error loading meal markers for the visible week"},
+  "screensCalendarFailedToLoadSummary": "Could not load nutrition summary",
+  "@screensCalendarFailedToLoadSummary": {"description": "Error loading the selected day's nutrition summary"},
   "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Could not load meals for this day",
   "@componentsCalendarCalendarDayDetailErrorLoadingMeals": {
     "description": "Error shown when the selected day's meal logs cannot be loaded"

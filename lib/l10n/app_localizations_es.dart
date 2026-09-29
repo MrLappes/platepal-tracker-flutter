@@ -9,6 +9,17 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get screensCalendarHasMealsLogged => 'tiene comidas registradas';
+
+  @override
+  String get screensCalendarFailedToLoadDates =>
+      'No se pudieron cargar las fechas del calendario';
+
+  @override
+  String get screensCalendarFailedToLoadSummary =>
+      'No se pudo cargar el resumen nutricional';
+
+  @override
   String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
       'No se pudieron cargar las comidas de este día';
 
