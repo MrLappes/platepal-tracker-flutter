@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/models/dish.dart';
@@ -406,6 +407,285 @@ void main() {
       expect(await _ledger(), hasLength(2));
       expect(await dishService.getAllDishes(), hasLength(2));
     });
+
+    test('a failed restore puts the current data back', () async {
+      await logTwo();
+      expect(await service.createBackupBeforeImport(), isTrue);
+      final prefs = await SharedPreferences.getInstance();
+      final path = prefs.getString('last_backup_path')!;
+      final backup =
+          json.decode(await File(path).readAsString()) as Map<String, dynamic>;
+      (backup['mealLogs'] as List).add(
+        _dishLogEntry('b', 'boom', 'lunch', '2026-09-21T12:00:00.000'),
+      );
+      await File(path).writeAsString(json.encode(backup));
+      // Made after the backup: a failed restore must not lose it.
+      await dishService.saveDish(_dish('rice', 'Rice', 150));
+      await dishService.logDish(
+        dishId: 'rice',
+        loggedAt: DateTime(2026, 9, 22, 12),
+        mealType: 'lunch',
+        servingSize: 1,
+      );
+      final before = await _ledger();
+      final db = await DatabaseService.instance.database;
+      await db.execute('''
+        CREATE TRIGGER fail_boom BEFORE INSERT ON dish_logs
+        WHEN NEW.dish_id = 'boom' BEGIN SELECT RAISE(ABORT, 'boom'); END
+      ''');
+
+      final result = await service.restoreFromLastBackup();
+
+      expect(result.success, isFalse);
+      expect(_withoutId(await _ledger()), _withoutId(before));
+      final dishes = await dishService.getAllDishes();
+      expect(dishes.map((d) => d.id), unorderedEquals(['oats', 'soup', 'rice']));
+      expect(prefs.getString('last_backup_path'), path);
+    });
+
+    test('a successful restore leaves no safety snapshot behind', () async {
+      await logTwo();
+      expect(await service.createBackupBeforeImport(), isTrue);
+
+      final result = await service.restoreFromLastBackup();
+
+      expect(result.success, isTrue, reason: result.message);
+      final backups = Directory('${tempDir.path}/backups').listSync();
+      expect(backups, hasLength(1));
+    });
+  });
+
+  group('backups', () {
+    test('only the newest 5 app backups are kept', () async {
+      final dir = Directory('${tempDir.path}/backups')..createSync();
+      for (var i = 1; i <= 6; i++) {
+        File('${dir.path}/platepal_backup_$i.json').writeAsStringSync('{}');
+      }
+      File('${dir.path}/notes.json').writeAsStringSync('{}');
+      File('${dir.path}/platepal_backup_old.json').writeAsStringSync('{}');
+
+      expect(await service.createBackupBeforeImport(), isTrue);
+
+      final names = dir.listSync().map((f) => f.uri.pathSegments.last).toSet();
+      final prefs = await SharedPreferences.getInstance();
+      final newest = File(prefs.getString('last_backup_path')!);
+      expect(names, {
+        newest.uri.pathSegments.last,
+        'platepal_backup_6.json',
+        'platepal_backup_5.json',
+        'platepal_backup_4.json',
+        'platepal_backup_3.json',
+        'notes.json',
+        'platepal_backup_old.json',
+      });
+    });
+  });
+
+  group('legacy profiles', () {
+    Future<UserProfile?> importLegacy(Map<String, dynamic> profile) async {
+      final result = await service.importData(
+        filePath: '',
+        jsonData: {'userProfile': profile},
+        dataTypes: [DataType.userProfiles],
+        duplicateHandling: DuplicateHandling.overwrite,
+      );
+      expect(result.errors, isEmpty, reason: result.message);
+      expect(result.itemsProcessed, 1);
+      return UserProfileService().getUserProfile(profile['id'].toString());
+    }
+
+    test('imports with its targets and an age from dateOfBirth', () async {
+      final now = DateTime.now();
+      final profile = await importLegacy({
+        'id': 7,
+        'name': 'Legacy',
+        'email': 'legacy@example.com',
+        'dateOfBirth': DateTime(now.year - 30, 1, 1).toIso8601String(),
+        'gender': 'female',
+        'height': 165,
+        'weight': 60,
+        'targetWeight': 55,
+        'activityLevel': 'moderatelyActive',
+        'fitnessGoal': 'loseWeight',
+        'useMetricSystem': true,
+        'dailyCalorieTarget': 1800,
+        'dailyProteinTarget': 120,
+        'dailyCarbsTarget': 180,
+        'dailyFatTarget': 60,
+        'dailyFiberTarget': 30,
+        'createdAt': '2024-01-01T00:00:00.000Z',
+      });
+
+      expect(profile, isNotNull);
+      expect(profile!.age, 30);
+      expect(profile.activityLevel, 'moderately_active');
+      expect(profile.preferredUnit, 'metric');
+      expect(profile.goals.goal, 'lose_weight');
+      expect(profile.goals.targetWeight, 55);
+      expect(profile.goals.targetCalories, 1800);
+      expect(profile.goals.targetProtein, 120);
+      expect(profile.goals.targetCarbs, 180);
+      expect(profile.goals.targetFat, 60);
+      expect(profile.goals.targetFiber, 30);
+    });
+
+    test('still accepts an integer age', () async {
+      final profile = await importLegacy({'id': 'p1', 'dateOfBirth': 41});
+      expect(profile!.age, 41);
+      expect(profile.goals.targetCalories, 2000);
+    });
+  });
+
+  group('import validation', () {
+    Map<String, dynamic> rice() => _dish('rice', 'Rice', 150).toJson();
+
+    Future<ImportExportResult> importAll(Map<String, dynamic> data) =>
+        service.importData(
+          filePath: '',
+          jsonData: data,
+          dataTypes: [DataType.allData],
+          duplicateHandling: DuplicateHandling.overwrite,
+        );
+
+    test('too many items fails without writing anything', () async {
+      final result = await importAll({
+        'dishes': [rice()],
+        'mealLogs': List.generate(
+          ImportExportService.maxItemsPerSection + 1,
+          (i) => _dishLogEntry('$i', 'oats', 'lunch', '2026-09-20T12:00:00.000'),
+        ),
+      });
+
+      expect(result.success, isFalse);
+      expect(result.errors.join(), contains('too many items'));
+      expect(await dishService.getDishById('rice'), isNull);
+      expect(await _ledger(), isEmpty);
+    });
+
+    test('a section of the wrong type fails without writing', () async {
+      final result = await importAll({
+        'dishes': [rice()],
+        'mealLogs': 'nope',
+      });
+
+      expect(result.success, isFalse);
+      expect(await dishService.getDishById('rice'), isNull);
+    });
+
+    test('a file that is not a JSON object fails', () async {
+      final file = File('${tempDir.path}/list.json')..writeAsStringSync('[1]');
+      final result = await service.importData(
+        filePath: file.path,
+        dataTypes: [DataType.allData],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+      expect(result.success, isFalse);
+      expect(result.message, contains('JSON object'));
+    });
+
+    test('an oversized file is rejected before reading', () async {
+      final file = File('${tempDir.path}/big.json');
+      file.openSync(mode: FileMode.write)
+        ..truncateSync(ImportExportService.maxImportBytes + 1)
+        ..closeSync();
+      final result = await service.importData(
+        filePath: file.path,
+        dataTypes: [DataType.allData],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+      expect(result.success, isFalse);
+      expect(result.message, contains('too large'));
+    });
+
+    test('skipped rows are reported as a partial import', () async {
+      final result = await importAll({
+        'dishes': [
+          rice(),
+          {'id': 'x', 'name': ''},
+        ],
+      });
+
+      expect(result.success, isTrue, reason: result.message);
+      expect(result.itemsProcessed, 1);
+      expect(result.itemsSkipped, 1);
+      expect(result.isPartial, isTrue);
+      expect(result.message, contains('skipped 1'));
+    });
+  });
+
+  test('a legacy dish without ID overwrites the same-named dish', () async {
+    final result = await service.importData(
+      filePath: '',
+      jsonData: {'name': 'Oats', 'calories': 250, 'protein': 8},
+      dataTypes: [DataType.dishes],
+      duplicateHandling: DuplicateHandling.overwrite,
+    );
+
+    expect(result.errors, isEmpty, reason: result.message);
+    final oats = (await dishService.getAllDishes()).where(
+      (d) => d.name.toLowerCase() == 'oats',
+    );
+    expect(oats.map((d) => d.id), ['oats']);
+    expect(oats.single.nutrition.calories, 250);
+  });
+
+  test('all-data export fails when a section cannot be read', () async {
+    final db = await DatabaseService.instance.database;
+    await db.execute('DROP TABLE fitness_goals');
+
+    final result = await service.exportData(
+      dataTypes: [DataType.allData],
+      format: ExportFormat.json,
+    );
+
+    expect(result.success, isFalse);
+    expect(result.failedSections, ['fitnessGoals']);
+    expect(tempDir.listSync().whereType<File>(), isEmpty);
+    expect(await service.createBackupBeforeImport(), isFalse);
+  });
+
+  test('logs never contain imported personal data', () async {
+    final logs = <String>[];
+    final original = debugPrint;
+    debugPrint = (message, {wrapWidth}) => logs.add(message ?? '');
+    addTearDown(() => debugPrint = original);
+
+    await service.importData(
+      filePath: '',
+      jsonData: {
+        'dishes': [
+          // Fails conversion; a saved dish would hit DishService's own logs.
+          {'id': 'd2', 'name': 'Secret Stew', 'ingredients': 'Secret'},
+        ],
+        'userProfiles': [
+          {
+            'id': 'u',
+            'name': 'Jane Secret',
+            'email': 'jane@secret.test',
+            'age': 30,
+            'gender': 'female',
+            'height': 165,
+            'weight': 60,
+            'activityLevel': 'sedentary',
+            'goals': {
+              'goal': 'maintain_weight',
+              'targetWeight': 60,
+              'targetCalories': 2000,
+              'targetProtein': 100,
+              'targetCarbs': 200,
+              'targetFat': 60,
+            },
+            'createdAt': 'Secret date',
+            'updatedAt': 'Secret date',
+          },
+        ],
+      },
+      dataTypes: [DataType.dishes, DataType.userProfiles],
+      duplicateHandling: DuplicateHandling.overwrite,
+    );
+
+    expect(logs, isNotEmpty);
+    expect(logs.where((l) => l.toLowerCase().contains('secret')), isEmpty);
   });
 
   group('deleteUserProfile', () {
