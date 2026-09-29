@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -9,31 +10,31 @@ import '../models/product.dart';
 
 /// A curated list of top-level Open Food Facts categories (en: taxonomy tags).
 class OFFCategory {
-  final String label; // human-readable
+  final String id;
   final String tag; // e.g. "en:fruits"
   final String emoji;
 
-  const OFFCategory(this.label, this.tag, this.emoji);
+  const OFFCategory(this.id, this.tag, this.emoji);
 
   static const List<OFFCategory> all = [
-    OFFCategory('All', '', '🌍'),
-    OFFCategory('Fruits', 'en:fruits', '🍎'),
-    OFFCategory('Vegetables', 'en:vegetables', '🥦'),
-    OFFCategory('Dairy', 'en:dairies', '🧀'),
-    OFFCategory('Meat', 'en:meats', '🥩'),
-    OFFCategory('Seafood', 'en:seafood', '🐟'),
-    OFFCategory('Beverages', 'en:beverages', '🥤'),
-    OFFCategory('Cereals', 'en:cereals-and-potatoes', '🌾'),
-    OFFCategory('Breads', 'en:breads', '🍞'),
-    OFFCategory('Snacks', 'en:snacks', '🍿'),
-    OFFCategory('Sweets', 'en:confectioneries', '🍬'),
-    OFFCategory('Legumes', 'en:legumes', '🫘'),
-    OFFCategory('Nuts', 'en:nuts', '🥜'),
-    OFFCategory('Condiments', 'en:condiments', '🫙'),
-    OFFCategory('Oils & Fats', 'en:fats', '🫒'),
-    OFFCategory('Frozen', 'en:frozen-foods', '🧊'),
-    OFFCategory('Ready Meals', 'en:meals', '🍱'),
-    OFFCategory('Baby Foods', 'en:baby-foods', '👶'),
+    OFFCategory('all', '', '🌍'),
+    OFFCategory('fruits', 'en:fruits', '🍎'),
+    OFFCategory('vegetables', 'en:vegetables', '🥦'),
+    OFFCategory('dairy', 'en:dairies', '🧀'),
+    OFFCategory('meat', 'en:meats', '🥩'),
+    OFFCategory('seafood', 'en:seafood', '🐟'),
+    OFFCategory('beverages', 'en:beverages', '🥤'),
+    OFFCategory('cereals', 'en:cereals-and-potatoes', '🌾'),
+    OFFCategory('breads', 'en:breads', '🍞'),
+    OFFCategory('snacks', 'en:snacks', '🍿'),
+    OFFCategory('sweets', 'en:confectioneries', '🍬'),
+    OFFCategory('legumes', 'en:legumes', '🫘'),
+    OFFCategory('nuts', 'en:nuts', '🥜'),
+    OFFCategory('condiments', 'en:condiments', '🫙'),
+    OFFCategory('oilsAndFats', 'en:fats', '🫒'),
+    OFFCategory('frozen', 'en:frozen-foods', '🧊'),
+    OFFCategory('readyMeals', 'en:meals', '🍱'),
+    OFFCategory('babyFoods', 'en:baby-foods', '👶'),
   ];
 }
 
@@ -57,19 +58,6 @@ extension OFFSortByExt on OFFSortBy {
         return 'completeness';
     }
   }
-
-  String get label {
-    switch (this) {
-      case OFFSortBy.popularity:
-        return 'Most Popular';
-      case OFFSortBy.productName:
-        return 'Name A–Z';
-      case OFFSortBy.lastModified:
-        return 'Newest';
-      case OFFSortBy.completeness:
-        return 'Most Complete';
-    }
-  }
 }
 
 /// Nutri-Score grade filter (a–e).
@@ -91,7 +79,13 @@ extension NutriScoreGradeExt on NutriScoreGrade {
 ///  - v2 search (`/api/v2/search`) supports facet filters but NO full-text.
 ///  - Rate limit: 10 req/min for search queries.
 class OpenFoodFactsService {
+  final http.Client? _client;
+
+  /// The caller owns an injected client; default requests manage their own.
+  const OpenFoodFactsService({http.Client? client}) : _client = client;
+
   static const String _baseUrl = 'https://world.openfoodfacts.org';
+  static const Duration _requestTimeout = Duration(seconds: 15);
   static const Map<String, String> _headers = {
     'User-Agent':
         'PlatePalTracker/1.0 (android; https://github.com/MrLappes/platepal-tracker-flutter)',
@@ -99,7 +93,7 @@ class OpenFoodFactsService {
 
   static const Map<String, String> _countryTagMap = {
     'de': 'germany',
-    'en': 'united-states',
+    'us': 'united-states',
     'es': 'spain',
     'fr': 'france',
     'it': 'italy',
@@ -125,12 +119,12 @@ class OpenFoodFactsService {
     OFFSortBy sortBy = OFFSortBy.popularity,
   }) async {
     final lc = languageCode ?? 'en';
-    final cc = countryCode ?? 'en';
     int tagIndex = 0;
     final tagParams = StringBuffer();
 
     // — Country filter (only applies when not "world")
-    final countryTag = _countryTagMap[cc];
+    final countryTag =
+        countryCode == null ? null : _countryTagMap[countryCode.toLowerCase()];
     if (countryTag != null) {
       tagParams.write(
         '&tagtype_$tagIndex=countries'
@@ -213,7 +207,7 @@ class OpenFoodFactsService {
         'image_front_url,quantity,nutriments,nutrition_grades,categories_tags_en'
         '&lc=$lc&nocache=1';
 
-    debugPrint('📂 OFF browse "${category.label}" (page $page): $url');
+    debugPrint('📂 OFF browse "${category.id}" (page $page): $url');
     return _fetchAndParse(url);
   }
 
@@ -224,12 +218,20 @@ class OpenFoodFactsService {
         '?fields=code,product_name,brands,image_url,image_front_url,'
         'quantity,nutriments,nutrition_grades,categories_tags_en';
 
-    final response = await http.get(Uri.parse(url), headers: _headers);
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      if (data['status'] == 1) return _parseProduct(data['product']);
+    final uri = Uri.parse(url);
+    final response = await _get(uri);
+    if (response.statusCode == 404) return null;
+    if (response.statusCode != 200) {
+      throw http.ClientException('HTTP ${response.statusCode}', uri);
     }
-    return null;
+
+    final data = json.decode(response.body) as Map<String, dynamic>;
+    if (data['status'] == 0) return null;
+    if (data['status'] != 1) {
+      throw const FormatException('Unexpected product status');
+    }
+    return _parseProduct(data['product']) ??
+        (throw const FormatException('Invalid product data'));
   }
 
   /// Autocomplete category suggestions from the OFF taxonomy.
@@ -239,15 +241,21 @@ class OpenFoodFactsService {
       final encoded = Uri.encodeComponent(term.trim());
       final url =
           '$_baseUrl/cgi/suggest.pl?tagtype=categories&term=$encoded&lc=en';
-      final response = await http.get(Uri.parse(url), headers: _headers);
+      final response = await _get(Uri.parse(url));
       if (response.statusCode == 200) {
         return (json.decode(response.body) as List<dynamic>).cast<String>();
       }
+    } on TimeoutException {
+      rethrow;
     } catch (_) {}
     return [];
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
+
+  Future<http.Response> _get(Uri uri) =>
+      (_client?.get(uri, headers: _headers) ?? http.get(uri, headers: _headers))
+          .timeout(_requestTimeout);
 
   Future<List<Product>> _fetchPopularProducts({
     int page = 1,
@@ -274,7 +282,7 @@ class OpenFoodFactsService {
 
   Future<List<Product>> _fetchAndParse(String url, {bool v2 = false}) async {
     try {
-      final response = await http.get(Uri.parse(url), headers: _headers);
+      final response = await _get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final products = data['products'] as List<dynamic>? ?? [];
@@ -286,6 +294,8 @@ class OpenFoodFactsService {
             .toList();
       }
       throw Exception('HTTP ${response.statusCode}');
+    } on TimeoutException {
+      rethrow;
     } catch (e) {
       debugPrint('❌ Fetch error: $e');
       throw Exception('Error fetching products: $e');
