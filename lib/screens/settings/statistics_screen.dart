@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/nutrition_calculator.dart';
 import '../../utils/service_extensions.dart';
 import '../../models/user_profile.dart';
 import '../../services/user_session_service.dart';
@@ -363,24 +364,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   // Calculate BMR using Mifflin-St Jeor equation
-  double _calculateBMR(double weight, double height, int age, String gender) {
-    if (gender == 'male') {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-    }
-  } // Calculate TDEE (Total Daily Energy Expenditure)
+  double _calculateBMR(double weight, double height, int age, String gender) =>
+      mifflinStJeorBmr(
+        weightKg: weight,
+        heightCm: height,
+        age: age,
+        gender: gender,
+      );
 
-  double _calculateTDEE(double bmr, String activityLevel) {
-    final multipliers = {
-      'sedentary': 1.2,
-      'lightly_active': 1.375,
-      'moderately_active': 1.55,
-      'very_active': 1.725,
-      'extra_active': 1.9,
-    };
-    return bmr * (multipliers[activityLevel] ?? 1.55);
-  }
+  double _calculateTDEE(double bmr, String activityLevel) =>
+      totalDailyEnergyExpenditure(bmr, activityLevel);
 
   // Generate test data for development/demo purposes (temporary, not saved to DB)
   Future<void> _generateTestData() async {
