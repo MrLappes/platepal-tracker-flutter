@@ -91,6 +91,7 @@ class _DishLogModalState extends State<DishLogModal> {
         loggedAt: _selectedDate,
         mealType: _selectedMealType,
         servingSize: _portionSize,
+        notes: _notesController.text,
       );
 
       if (!mounted) return;

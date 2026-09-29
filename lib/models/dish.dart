@@ -202,6 +202,10 @@ class DishLog {
   final double fat;
   final double fiber;
 
+  /// Dish name at logging time; survives renaming or deleting the dish.
+  final String? dishName;
+  final String? notes;
+
   const DishLog({
     required this.id,
     required this.dishId,
@@ -214,6 +218,8 @@ class DishLog {
     required this.carbs,
     required this.fat,
     this.fiber = 0.0,
+    this.dishName,
+    this.notes,
   });
   factory DishLog.fromJson(Map<String, dynamic> json) {
     return DishLog(
@@ -236,6 +242,8 @@ class DishLog {
       carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
       fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
       fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
+      dishName: (json['dishName'] ?? json['dish_name']) as String?,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -252,6 +260,8 @@ class DishLog {
       'carbs': carbs,
       'fat': fat,
       'fiber': fiber,
+      'dishName': dishName,
+      'notes': notes,
     };
   }
 
@@ -267,6 +277,8 @@ class DishLog {
     double? carbs,
     double? fat,
     double? fiber,
+    String? dishName,
+    String? notes,
   }) {
     return DishLog(
       id: id ?? this.id,
@@ -280,6 +292,8 @@ class DishLog {
       carbs: carbs ?? this.carbs,
       fat: fat ?? this.fat,
       fiber: fiber ?? this.fiber,
+      dishName: dishName ?? this.dishName,
+      notes: notes ?? this.notes,
     );
   }
 }

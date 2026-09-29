@@ -1,15 +1,17 @@
 import '../../models/dish.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../health_service.dart';
 import 'database_service.dart';
 import 'dish_service.dart';
 
+/// Meal-log API used by statistics and chat context.
+///
+/// Backed by the canonical `dish_logs` ledger (the legacy `meal_logs` table is
+/// no longer read or written). The ledger is single-user, so `userId`
+/// arguments are accepted for compatibility but do not filter.
 class MealLogService {
   final DatabaseService _databaseService = DatabaseService.instance;
   final DishService _dishService = DishService();
-  final HealthService _healthService = HealthService();
 
-  // Log a meal
+  // Log a meal; returns the dish_logs rowid.
   Future<int> logMeal({
     required String userId,
     required String dishId,
@@ -17,108 +19,78 @@ class MealLogService {
     required String mealType, // breakfast, lunch, dinner, snack
     DateTime? loggedAt,
   }) async {
-    final db = await _databaseService.database;
-    final now = loggedAt ?? DateTime.now();
-
-    final int id = await db.insert('meal_logs', {
-      'user_id': userId,
-      'dish_id': dishId,
-      'serving_size': servingSize,
-      'meal_type': mealType,
-      'logged_at': now.toIso8601String(),
-    });
-
-    // Write nutrition record to Health Connect (fire-and-forget)
-    _writeNutritionToHealth(
+    final logId = await _dishService.logDish(
       dishId: dishId,
-      servingSize: servingSize,
+      loggedAt: loggedAt ?? DateTime.now(),
       mealType: mealType,
-      loggedAt: now,
+      servingSize: servingSize,
     );
-
-    return id;
+    final db = await _databaseService.database;
+    final rows = await db.rawQuery(
+      'SELECT rowid AS row_id FROM dish_logs WHERE id = ?',
+      [logId],
+    );
+    return rows.first['row_id'] as int;
   }
 
-  /// Write the dish's nutrition data to Health Connect / Apple Health.
-  /// Non-blocking – errors are logged but do not affect the meal log.
-  Future<void> _writeNutritionToHealth({
-    required String dishId,
-    required double servingSize,
-    required String mealType,
-    required DateTime loggedAt,
-  }) async {
-    try {
-      if (!_healthService.isConnected) return;
-
-      // Check if write-meals preference is enabled
-      final prefs = await SharedPreferences.getInstance();
-      final writeMealsEnabled =
-          prefs.getBool('health_write_meals_enabled') ?? true;
-      if (!writeMealsEnabled) return;
-
-      final dish = await _dishService.getDishById(dishId);
-      if (dish == null) return;
-
-      final nutrition = dish.nutrition;
-      // Scale nutrition values by serving size (1.0 = 100%)
-      final scale = servingSize;
-
-      await _healthService.writeMealToHealth(
-        name: dish.name,
-        mealType: mealType,
-        calories: nutrition.calories * scale,
-        protein: nutrition.protein * scale,
-        carbs: nutrition.carbs * scale,
-        fat: nutrition.fat * scale,
-        fiber: nutrition.fiber > 0 ? nutrition.fiber * scale : null,
-        sugar: nutrition.sugar > 0 ? nutrition.sugar * scale : null,
-        sodium: nutrition.sodium > 0 ? nutrition.sodium * scale : null,
-        startTime: loggedAt,
-      );
-    } catch (e) {
-      // Silently log – don't let health write failures break meal logging
-      // ignore: avoid_print
-      print('HealthService nutrition write failed: $e');
-    }
-  }
-
-  // Get meals by date range
+  /// Logs with `startDate <= logged_at < endDate` (local time), newest first.
   Future<List<MealLog>> getMealsByDateRange({
     required String userId,
     required DateTime startDate,
     required DateTime endDate,
   }) async {
+    final rows = await _queryRange(startDate, endDate);
+    return rows.map((row) => _mealLogFromRow(row, userId)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _queryRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     final db = await _databaseService.database;
-
-    final List<Map<String, dynamic>> mealMaps = await db.query(
-      'meal_logs',
-      where: 'user_id = ? AND logged_at >= ? AND logged_at <= ?',
-      whereArgs: [
-        userId,
-        startDate.toIso8601String(),
-        endDate.toIso8601String(),
+    return db.rawQuery(
+      '''
+      SELECT rowid AS row_id, * FROM dish_logs
+      WHERE logged_at >= ? AND logged_at < ?
+      ORDER BY logged_at DESC
+      ''',
+      [
+        startDate.toLocal().toIso8601String(),
+        endDate.toLocal().toIso8601String(),
       ],
-      orderBy: 'logged_at DESC',
     );
+  }
 
-    return Future.wait(
-      mealMaps.map((mealMap) async {
-        final String dishId = mealMap['dish_id'] as String;
-        final Dish? dish = await _dishService.getDishById(dishId);
+  /// Builds a [MealLog] purely from the snapshot; the dish may be gone.
+  MealLog _mealLogFromRow(Map<String, dynamic> row, String userId) {
+    final servingSize = (row['serving_size'] as num).toDouble();
+    // Snapshot is stored per log; MealLog consumers multiply by servingSize.
+    double perServing(String column) {
+      final total = (row[column] as num?)?.toDouble() ?? 0.0;
+      return servingSize > 0 ? total / servingSize : total;
+    }
 
-        if (dish == null) {
-          throw Exception('Dish not found for meal log');
-        }
-
-        return MealLog(
-          id: mealMap['id'] as int,
-          userId: mealMap['user_id'] as String,
-          dish: dish,
-          servingSize: mealMap['serving_size'] as double,
-          mealType: mealMap['meal_type'] as String,
-          loggedAt: DateTime.parse(mealMap['logged_at'] as String),
-        );
-      }),
+    final loggedAt = DateTime.parse(row['logged_at'] as String);
+    return MealLog(
+      id: row['row_id'] as int,
+      userId: userId,
+      dish: Dish(
+        id: row['dish_id'] as String,
+        name: (row['dish_name'] as String?) ?? 'Unknown dish',
+        ingredients: const [],
+        nutrition: NutritionInfo(
+          calories: perServing('calories'),
+          protein: perServing('protein'),
+          carbs: perServing('carbs'),
+          fat: perServing('fat'),
+          fiber: perServing('fiber'),
+        ),
+        createdAt: loggedAt,
+        updatedAt: loggedAt,
+      ),
+      servingSize: servingSize,
+      mealType: row['meal_type'] as String,
+      loggedAt: loggedAt,
     );
   }
 
@@ -128,7 +100,7 @@ class MealLogService {
     required DateTime date,
   }) async {
     final startDate = DateTime(date.year, date.month, date.day);
-    final endDate = startDate.add(const Duration(days: 1));
+    final endDate = DateTime(date.year, date.month, date.day + 1);
 
     return getMealsByDateRange(
       userId: userId,
@@ -137,24 +109,20 @@ class MealLogService {
     );
   }
 
-  // Delete meal log
+  // Delete meal log by the rowid exposed as MealLog.id
   Future<void> deleteMealLog(int id) async {
     final db = await _databaseService.database;
 
-    await db.delete('meal_logs', where: 'id = ?', whereArgs: [id]);
+    await db.delete('dish_logs', where: 'rowid = ?', whereArgs: [id]);
   }
 
-  // Get nutrition summary for a date range
+  // Get nutrition summary for a date range (half-open, see getMealsByDateRange)
   Future<NutritionSummary> getNutritionSummary({
     required String userId,
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    final mealLogs = await getMealsByDateRange(
-      userId: userId,
-      startDate: startDate,
-      endDate: endDate,
-    );
+    final rows = await _queryRange(startDate, endDate);
 
     double totalCalories = 0;
     double totalProtein = 0;
@@ -162,6 +130,7 @@ class MealLogService {
     double totalFat = 0;
     double totalFiber = 0;
 
+    final List<MealLog> mealLogs = [];
     final Map<String, List<MealLog>> mealsByType = {
       'breakfast': [],
       'lunch': [],
@@ -169,14 +138,15 @@ class MealLogService {
       'snack': [],
     };
 
-    for (final mealLog in mealLogs) {
-      final servingMultiplier = mealLog.servingSize;
-      totalCalories += mealLog.dish.nutrition.calories * servingMultiplier;
-      totalProtein += mealLog.dish.nutrition.protein * servingMultiplier;
-      totalCarbs += mealLog.dish.nutrition.carbs * servingMultiplier;
-      totalFat += mealLog.dish.nutrition.fat * servingMultiplier;
-      totalFiber += mealLog.dish.nutrition.fiber * servingMultiplier;
+    for (final row in rows) {
+      totalCalories += (row['calories'] as num?)?.toDouble() ?? 0;
+      totalProtein += (row['protein'] as num?)?.toDouble() ?? 0;
+      totalCarbs += (row['carbs'] as num?)?.toDouble() ?? 0;
+      totalFat += (row['fat'] as num?)?.toDouble() ?? 0;
+      totalFiber += (row['fiber'] as num?)?.toDouble() ?? 0;
 
+      final mealLog = _mealLogFromRow(row, userId);
+      mealLogs.add(mealLog);
       final type = mealLog.mealType.toLowerCase();
       if (mealsByType.containsKey(type)) {
         mealsByType[type]!.add(mealLog);

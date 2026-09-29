@@ -1,16 +1,24 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// Owns the app's SQLite database.
+///
+/// Foreign-key enforcement is intentionally left OFF (SQLite default): the
+/// declared cascades are not relied on, child rows are cleaned up explicitly,
+/// and `dish_logs` is a self-contained ledger that must outlive its dish.
 class DatabaseService {
   static const String _databaseName = 'platepal.db';
-  static const int _databaseVersion = 3;
+  static const int _databaseVersion = 4;
 
   // Private constructor for singleton pattern
   DatabaseService._();
   static final DatabaseService instance = DatabaseService._();
 
   static Database? _database;
+  static DatabaseFactory? _testFactory;
+  static String? _testPath;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -18,16 +26,32 @@ class DatabaseService {
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
-    final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, _databaseName);
+  /// Makes [database] open [path] through [factory] (e.g. sqflite ffi).
+  @visibleForTesting
+  static Future<void> useFactoryForTesting(
+    DatabaseFactory factory, {
+    String path = inMemoryDatabasePath,
+  }) async {
+    await _database?.close();
+    _database = null;
+    _testFactory = factory;
+    _testPath = path;
+  }
 
-    return await openDatabase(
-      path,
+  Future<Database> _initDatabase() async {
+    final options = OpenDatabaseOptions(
       version: _databaseVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+    final testFactory = _testFactory;
+    if (testFactory != null) {
+      return testFactory.openDatabase(_testPath!, options: options);
+    }
+
+    final databasesPath = await getDatabasesPath();
+    final path = join(databasesPath, _databaseName);
+    return databaseFactory.openDatabase(path, options: options);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -199,22 +223,8 @@ class DatabaseService {
       )
     ''');
 
-    // Dish logs table for calendar tracking
-    await db.execute('''
-      CREATE TABLE dish_logs (
-        id TEXT PRIMARY KEY,
-        dish_id TEXT NOT NULL,
-        logged_at TEXT NOT NULL,
-        meal_type TEXT NOT NULL,
-        serving_size REAL NOT NULL,
-        calories REAL NOT NULL,
-        protein REAL NOT NULL,
-        carbs REAL NOT NULL,
-        fat REAL NOT NULL,
-        fiber REAL NOT NULL DEFAULT 0,
-        FOREIGN KEY (dish_id) REFERENCES dishes (id)
-      )
-    ''');
+    // Canonical meal-log ledger (meal_logs above is legacy, kept for rollback)
+    await db.execute(_createDishLogsV4Sql('dish_logs'));
 
     // Create indexes for better query performance
     await db.execute(
@@ -273,6 +283,103 @@ class DatabaseService {
         ADD COLUMN target_fiber REAL NOT NULL DEFAULT 25.0
       ''');
     }
+
+    if (oldVersion < 4) {
+      await _migrateToV4(db);
+    }
+  }
+
+  /// v4 dish_logs: name/notes snapshot and no FK to dishes, so a log keeps
+  /// its values after the dish is edited or deleted.
+  static String _createDishLogsV4Sql(String table) => '''
+      CREATE TABLE $table (
+        id TEXT PRIMARY KEY,
+        dish_id TEXT NOT NULL,
+        dish_name TEXT,
+        logged_at TEXT NOT NULL,
+        meal_type TEXT NOT NULL,
+        serving_size REAL NOT NULL,
+        calories REAL NOT NULL,
+        protein REAL NOT NULL,
+        carbs REAL NOT NULL,
+        fat REAL NOT NULL,
+        fiber REAL NOT NULL DEFAULT 0,
+        notes TEXT
+      )
+    ''';
+
+  Future<void> _migrateToV4(Database db) async {
+    // 1. Rebuild dish_logs without the FK and with the snapshot columns.
+    await db.execute(_createDishLogsV4Sql('dish_logs_v4'));
+    await db.execute('''
+      INSERT INTO dish_logs_v4 (id, dish_id, dish_name, logged_at, meal_type,
+        serving_size, calories, protein, carbs, fat, fiber, notes)
+      SELECT dl.id, dl.dish_id, d.name, dl.logged_at, dl.meal_type,
+        dl.serving_size, dl.calories, dl.protein, dl.carbs, dl.fat, dl.fiber,
+        NULL
+      FROM dish_logs dl LEFT JOIN dishes d ON d.id = dl.dish_id
+    ''');
+    await db.execute('DROP TABLE dish_logs');
+    await db.execute('ALTER TABLE dish_logs_v4 RENAME TO dish_logs');
+    await db.execute(
+      'CREATE INDEX idx_dish_logs_logged_at ON dish_logs (logged_at)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_dish_logs_dish_id ON dish_logs (dish_id)',
+    );
+
+    // 2. Copy legacy meal_logs into the ledger. Import wrote each entry to
+    // both tables, so rows already present in dish_logs are skipped. Rows
+    // whose dish is gone are skipped too: without a dish there is no
+    // snapshot, and they remain in meal_logs.
+    await db.execute('''
+      INSERT INTO dish_logs (id, dish_id, dish_name, logged_at, meal_type,
+        serving_size, calories, protein, carbs, fat, fiber, notes)
+      SELECT 'meal_log_' || ml.id, ml.dish_id, d.name, ml.logged_at,
+        ml.meal_type, ml.serving_size,
+        COALESCE(n.calories, 0) * ml.serving_size,
+        COALESCE(n.protein, 0) * ml.serving_size,
+        COALESCE(n.carbs, 0) * ml.serving_size,
+        COALESCE(n.fat, 0) * ml.serving_size,
+        COALESCE(n.fiber, 0) * ml.serving_size,
+        NULL
+      FROM meal_logs ml
+      JOIN dishes d ON d.id = ml.dish_id
+      LEFT JOIN dish_nutrition n ON n.dish_id = ml.dish_id
+      WHERE NOT EXISTS (
+        SELECT 1 FROM dish_logs dl
+        WHERE dl.dish_id = ml.dish_id
+          AND dl.logged_at = ml.logged_at
+          AND dl.meal_type = ml.meal_type
+      )
+    ''');
+
+    // 3. Imported rows were stored as UTC ('...Z'); the day-range queries
+    // compare against local ISO strings, so store every row as local time.
+    final utcRows = await db.rawQuery(
+      "SELECT id, logged_at FROM dish_logs WHERE logged_at LIKE '%Z'",
+    );
+    final batch = db.batch();
+    for (final row in utcRows) {
+      final parsed = DateTime.tryParse(row['logged_at'] as String);
+      if (parsed == null) continue;
+      batch.update(
+        'dish_logs',
+        {'logged_at': parsed.toLocal().toIso8601String()},
+        where: 'id = ?',
+        whereArgs: [row['id']],
+      );
+    }
+    await batch.commit(noResult: true);
+
+    // 4. Remove ingredient links duplicated by the old saveDish (F4-01).
+    await db.execute('''
+      DELETE FROM dish_ingredients
+      WHERE id NOT IN (
+        SELECT MIN(id) FROM dish_ingredients
+        GROUP BY dish_id, ingredient_id, amount, unit
+      )
+    ''');
   }
 
   Future<void> close() async {
@@ -322,8 +429,8 @@ class DatabaseService {
         await db.delete(tableName);
       }
 
-      // Re-enable foreign key constraints
-      await db.execute('PRAGMA foreign_keys = ON');
+      // Stay on the default (OFF); see class doc.
+      await db.execute('PRAGMA foreign_keys = OFF');
     } catch (e) {
       throw Exception('Failed to clear database data: $e');
     }

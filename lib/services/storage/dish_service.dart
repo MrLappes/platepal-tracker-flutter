@@ -7,10 +7,13 @@ import '../health_service.dart';
 import 'database_service.dart';
 
 class DishService {
+  DishService({HealthService? healthService})
+    : _healthService = healthService ?? HealthService();
+
   final DatabaseService _databaseService = DatabaseService.instance;
   final CalorieExpenditureService _calorieExpenditureService =
       CalorieExpenditureService();
-  final HealthService _healthService = HealthService();
+  final HealthService _healthService;
   // Get all dishes
   Future<List<Dish>> getAllDishes() async {
     debugPrint('🔍 DishService: Getting all dishes from database...');
@@ -200,6 +203,12 @@ class DishService {
       debugPrint(
         '🍽️ DishService: Inserting ${dish.ingredients.length} ingredients...',
       );
+      // Replace (not append) the ingredient links so saving twice is a no-op.
+      await txn.delete(
+        'dish_ingredients',
+        where: 'dish_id = ?',
+        whereArgs: [dish.id],
+      );
       // Insert ingredients and their relationships
       for (final ingredient in dish.ingredients) {
         // Insert or replace ingredient record. With UUID-based IDs a collision
@@ -317,25 +326,30 @@ class DishService {
     return dish;
   }
 
-  // Delete a dish
+  // Delete a dish. Its logs in dish_logs are kept (they carry a snapshot).
   Future<void> deleteDish(String id) async {
     final db = await _databaseService.database;
 
-    await db.delete('dishes', where: 'id = ?', whereArgs: [id]);
+    await db.transaction((txn) async {
+      await txn.delete('dish_nutrition', where: 'dish_id = ?', whereArgs: [id]);
+      await txn.delete(
+        'dish_ingredients',
+        where: 'dish_id = ?',
+        whereArgs: [id],
+      );
+      await txn.delete('dishes', where: 'id = ?', whereArgs: [id]);
+    });
   }
 
-  // Toggle dish favorite status
-  Future<void> toggleFavorite(String id, bool isFavorite) async {
+  /// Updates only the favorite flag of a dish.
+  Future<void> setFavorite(String dishId, bool isFavorite) async {
     final db = await _databaseService.database;
 
     await db.update(
       'dishes',
-      {
-        'is_favorite': isFavorite ? 1 : 0,
-        'updated_at': DateTime.now().toIso8601String(),
-      },
+      {'is_favorite': isFavorite ? 1 : 0},
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [dishId],
     );
   }
 
@@ -429,41 +443,37 @@ class DishService {
   }
 
   // Meal logging methods
+  static int _logSequence = 0;
+
+  /// Logs [servingSize] servings of a dish into `dish_logs`, storing a
+  /// snapshot of its name and scaled nutrition, and mirrors the meal to
+  /// Health Connect. Returns the log id.
   Future<String> logDish({
     required String dishId,
     required DateTime loggedAt,
     required String mealType,
     required double servingSize,
+    String? notes,
   }) async {
-    final db = await _databaseService.database;
-
-    // Get the dish to calculate nutrition values
     final dish = await getDishById(dishId);
     if (dish == null) {
       throw Exception('Dish not found');
     }
 
-    // Calculate nutrition values based on serving size
-    final calories = dish.nutrition.calories * servingSize;
-    final protein = dish.nutrition.protein * servingSize;
-    final carbs = dish.nutrition.carbs * servingSize;
-    final fat = dish.nutrition.fat * servingSize;
-    final fiber = dish.nutrition.fiber * servingSize;
-
-    final logId = DateTime.now().millisecondsSinceEpoch.toString();
-
-    await db.insert('dish_logs', {
-      'id': logId,
-      'dish_id': dishId,
-      'logged_at': loggedAt.toIso8601String(),
-      'meal_type': mealType,
-      'serving_size': servingSize,
-      'calories': calories,
-      'protein': protein,
-      'carbs': carbs,
-      'fat': fat,
-      'fiber': fiber,
-    });
+    final nutrition = dish.nutrition;
+    final logId = await insertDishLogSnapshot(
+      dishId: dishId,
+      dishName: dish.name,
+      loggedAt: loggedAt,
+      mealType: mealType,
+      servingSize: servingSize,
+      calories: nutrition.calories * servingSize,
+      protein: nutrition.protein * servingSize,
+      carbs: nutrition.carbs * servingSize,
+      fat: nutrition.fat * servingSize,
+      fiber: nutrition.fiber * servingSize,
+      notes: notes,
+    );
 
     // Write nutrition to Health Connect (fire-and-forget)
     _writeNutritionToHealth(
@@ -472,6 +482,48 @@ class DishService {
       mealType: mealType,
       loggedAt: loggedAt,
     );
+
+    return logId;
+  }
+
+  /// Inserts a `dish_logs` row with an explicit snapshot (values already
+  /// scaled by [servingSize]). Never writes to Health Connect, so restoring
+  /// historical logs (import/backup) does not re-publish them. Pass
+  /// [executor] to write inside a caller's transaction.
+  Future<String> insertDishLogSnapshot({
+    required String dishId,
+    String? dishName,
+    required DateTime loggedAt,
+    required String mealType,
+    required double servingSize,
+    required double calories,
+    required double protein,
+    required double carbs,
+    required double fat,
+    double fiber = 0.0,
+    String? notes,
+    DatabaseExecutor? executor,
+  }) async {
+    final db = executor ?? await _databaseService.database;
+    final logId = '${DateTime.now().microsecondsSinceEpoch}-${_logSequence++}';
+    final trimmedNotes = notes?.trim();
+
+    await db.insert('dish_logs', {
+      'id': logId,
+      'dish_id': dishId,
+      'dish_name': dishName,
+      // Local time, matching the local day bounds used by every range query.
+      'logged_at': loggedAt.toLocal().toIso8601String(),
+      'meal_type': mealType,
+      'serving_size': servingSize,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'fiber': fiber,
+      'notes':
+          trimmedNotes == null || trimmedNotes.isEmpty ? null : trimmedNotes,
+    });
 
     return logId;
   }
@@ -516,7 +568,8 @@ class DishService {
   Future<List<DishLog>> getDishLogsForDate(DateTime date) async {
     final db = await _databaseService.database;
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    // Next local midnight; a DST day is 23 or 25 hours long.
+    final endOfDay = DateTime(date.year, date.month, date.day + 1);
 
     final List<Map<String, dynamic>> logMaps = await db.query(
       'dish_logs',
@@ -551,7 +604,7 @@ class DishService {
   Future<DailyMacroSummary> getMacroSummaryForDate(DateTime date) async {
     final db = await _databaseService.database;
     final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final endOfDay = DateTime(date.year, date.month, date.day + 1);
 
     final List<Map<String, dynamic>> result = await db.rawQuery(
       '''
@@ -644,6 +697,12 @@ class DishService {
 
         // Insert ingredients with safe parsing
         final ingredients = dishData['ingredients'] as List<dynamic>? ?? [];
+        // Re-importing a dish replaces its links instead of duplicating them.
+        await txn.delete(
+          'dish_ingredients',
+          where: 'dish_id = ?',
+          whereArgs: [dishData['id']],
+        );
         for (final ingredientData in ingredients) {
           if (ingredientData is Map<String, dynamic>) {
             final ingredientId = ingredientData['id'] ?? _generateId();
