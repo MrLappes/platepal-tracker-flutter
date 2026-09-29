@@ -5,9 +5,15 @@ import '../../services/storage/dish_service.dart';
 
 class CalendarDayDetail extends StatefulWidget {
   final DateTime date;
+  final List<DishLog>? logs;
   final Widget Function(BuildContext, DishLog)? renderLogItem;
 
-  const CalendarDayDetail({super.key, required this.date, this.renderLogItem});
+  const CalendarDayDetail({
+    super.key,
+    required this.date,
+    this.logs,
+    this.renderLogItem,
+  });
 
   @override
   State<CalendarDayDetail> createState() => _CalendarDayDetailState();
@@ -22,13 +28,14 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    if (widget.logs == null) _loadData();
   }
 
   @override
   void didUpdateWidget(CalendarDayDetail oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.date != widget.date) {
+    if (widget.logs == null &&
+        (oldWidget.date != widget.date || oldWidget.logs != null)) {
       _loadData();
     }
   }
@@ -43,27 +50,15 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
     try {
       final logs = await _dishService.getDishLogsForDate(date);
 
-      // Fetch dish details for each log
-      final logsWithDishes = <DishLog>[];
-      for (final log in logs) {
-        try {
-          final dish = await _dishService.getDish(log.dishId);
-          logsWithDishes.add(log.copyWith(dish: dish));
-        } catch (error) {
-          // If dish not found, add log without dish
-          logsWithDishes.add(log);
-        }
-      }
-
       if (!mounted) return;
-      if (widget.date != date) return;
+      if (widget.date != date || widget.logs != null) return;
       setState(() {
-        _logs = logsWithDishes;
+        _logs = logs;
         _isLoading = false;
       });
     } catch (error) {
       if (!mounted) return;
-      if (widget.date != date) return;
+      if (widget.date != date || widget.logs != null) return;
       setState(() {
         _hasError = true;
         _isLoading = false;
@@ -89,6 +84,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
         children: [
           Text(
             log.dish?.name ??
+                log.dishName ??
                 l10n.componentsCalendarCalendarDayDetailUnknownDish,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
@@ -111,8 +107,9 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final logs = widget.logs ?? _logs;
 
-    if (_isLoading) {
+    if (widget.logs == null && _isLoading) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16),
@@ -121,7 +118,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
       );
     }
 
-    if (_hasError) {
+    if (widget.logs == null && _hasError) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -148,7 +145,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
       );
     }
 
-    if (_logs.isEmpty) {
+    if (logs.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -164,7 +161,7 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
 
     return Column(
       children:
-          _logs.map((log) {
+          logs.map((log) {
             return widget.renderLogItem?.call(context, log) ??
                 _defaultRenderItem(context, log);
           }).toList(),

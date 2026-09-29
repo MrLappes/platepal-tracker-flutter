@@ -246,9 +246,11 @@ class _MacroSummaryState extends State<MacroSummary> {
             if (widget.caloriesBurned != null &&
                 !widget.isCaloriesBurnedEstimated) ...[
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => _showHealthDataInfo(context),
-                child: Icon(
+              IconButton(
+                tooltip: l10n.componentsCalendarMacroSummaryHealthDataTitle,
+                onPressed: () => _showHealthDataInfo(context),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                icon: Icon(
                   Icons.info_outline,
                   size: 16,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

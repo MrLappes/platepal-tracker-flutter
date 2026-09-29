@@ -1,5 +1,8 @@
 ﻿{
   "@@locale": "de",
+  "screensCalendarHasMealsLogged": "Mahlzeiten eingetragen",
+  "screensCalendarFailedToLoadDates": "Kalenderdaten konnten nicht geladen werden",
+  "screensCalendarFailedToLoadSummary": "Ernährungsübersicht konnte nicht geladen werden",
   "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Mahlzeiten konnten nicht geladen werden",
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "Keine Mahlzeiten für diesen Tag protokolliert",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {

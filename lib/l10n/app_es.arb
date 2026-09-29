@@ -1,5 +1,8 @@
 {
   "@@locale": "es",
+  "screensCalendarHasMealsLogged": "tiene comidas registradas",
+  "screensCalendarFailedToLoadDates": "No se pudieron cargar las fechas del calendario",
+  "screensCalendarFailedToLoadSummary": "No se pudo cargar el resumen nutricional",
   "componentsCalendarCalendarDayDetailErrorLoadingMeals": "No se pudieron cargar las comidas de este día",
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "No hay comidas registradas para este día",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {
