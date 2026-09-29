@@ -51,6 +51,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   late TextEditingController _carbsController;
   late TextEditingController _fatController;
   late TextEditingController _fiberController;
+  String? _barcode;
 
   String _selectedUnit = 'g';
   final List<String> _commonUnits = [
@@ -68,6 +69,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   void initState() {
     super.initState();
     final ingredient = widget.ingredient;
+    _barcode = ingredient?.barcode;
     _nameController = TextEditingController(text: ingredient?.name ?? '');
     _quantityController = TextEditingController(
       text: ingredient?.amount.toString() ?? '',
@@ -114,6 +116,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
         name: _nameController.text.trim(),
         amount: parseLocalizedDouble(_quantityController.text)!,
         unit: _selectedUnit,
+        barcode: _barcode,
         nutrition: NutritionInfo(
           calories: parseLocalizedDouble(_caloriesController.text) ?? 0,
           protein: parseLocalizedDouble(_proteinController.text) ?? 0,
@@ -823,23 +826,37 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
     widget.onProductScanned?.call(product);
 
     setState(() {
+      _barcode = product.barcode;
       // Set ingredient name from product
       if (product.name != null) {
         _nameController.text = product.name!;
       }
 
-      // Set default quantity to 100g
-      _quantityController.text = '100';
-      _selectedUnit = 'g';
+      final servingNutrition = product.servingNutrition;
+      _quantityController.text = servingNutrition == null ? '100' : '1';
+      _selectedUnit = servingNutrition == null ? 'g' : 'piece';
 
       // Set nutrition data if available
-      if (product.hasNutrition) {
-        final nutrition = product.nutrition!;
-        _caloriesController.text = nutrition.calories.toStringAsFixed(1);
-        _proteinController.text = nutrition.protein.toStringAsFixed(1);
-        _carbsController.text = nutrition.carbs.toStringAsFixed(1);
-        _fatController.text = nutrition.fat.toStringAsFixed(1);
-        _fiberController.text = nutrition.fiber.toStringAsFixed(1);
+      if (servingNutrition != null || product.hasNutrition) {
+        final nutrition = product.nutrition;
+        _caloriesController.text = (servingNutrition?.calories ??
+                nutrition?.calories ??
+                0)
+            .toStringAsFixed(1);
+        _proteinController.text = (servingNutrition?.protein ??
+                nutrition?.protein ??
+                0)
+            .toStringAsFixed(1);
+        _carbsController.text = (servingNutrition?.carbs ??
+                nutrition?.carbs ??
+                0)
+            .toStringAsFixed(1);
+        _fatController.text = (servingNutrition?.fat ?? nutrition?.fat ?? 0)
+            .toStringAsFixed(1);
+        _fiberController.text = (servingNutrition?.fiber ??
+                nutrition?.fiber ??
+                0)
+            .toStringAsFixed(1);
       }
     });
 

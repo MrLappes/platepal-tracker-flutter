@@ -760,8 +760,30 @@ class AppLocalizationsEs extends AppLocalizations {
       'Escaneando código de barras...';
 
   @override
+  String get componentsScannerBarcodeScannerClose => 'Cerrar';
+
+  @override
+  String get componentsScannerBarcodeScannerPermissionHint =>
+      'Permite el acceso a la cámara para esta aplicación en los ajustes del sistema.';
+
+  @override
+  String componentsScannerBarcodeScannerScannerError(String errorCode) {
+    return 'Error del escáner: $errorCode';
+  }
+
+  @override
+  String get componentsScannerBarcodeScannerServiceUnavailable =>
+      'El servicio de alimentos no está disponible. Inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerBarcodeScannerTorchOn => 'Encender la linterna';
+
+  @override
+  String get componentsScannerBarcodeScannerTorchOff => 'Apagar la linterna';
+
+  @override
   String componentsScannerProductSearchErrorSearchingProduct(String error) {
-    return 'Error al buscar el producto';
+    return 'Error al buscar el producto: $error';
   }
 
   @override
@@ -784,6 +806,155 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get componentsScannerProductSearchSearchProducts => 'Buscar productos';
+
+  @override
+  String get componentsScannerProductSearchFiltersAndSort => 'Filtros y orden';
+
+  @override
+  String get componentsScannerProductSearchNutriScore => 'NUTRI-SCORE';
+
+  @override
+  String get componentsScannerProductSearchAny => 'Cualquiera';
+
+  @override
+  String get componentsScannerProductSearchSortBy => 'Ordenar por';
+
+  @override
+  String get componentsScannerProductSearchPopular => 'Populares';
+
+  @override
+  String componentsScannerProductSearchResultsFor(String query) {
+    return 'Resultados para \"$query\"';
+  }
+
+  @override
+  String get componentsScannerProductSearchMyDatabase => 'Mi base de datos';
+
+  @override
+  String get componentsScannerProductSearchGlobalFeed => 'Catálogo global';
+
+  @override
+  String get componentsScannerProductSearchEndOfResults =>
+      'Fin de los resultados';
+
+  @override
+  String get componentsScannerProductSearchSelectCategoryOrSearch =>
+      'Elige una categoría o escribe para buscar';
+
+  @override
+  String componentsScannerProductSearchNoResultsFor(String query) {
+    return 'Sin resultados para \"$query\"';
+  }
+
+  @override
+  String get componentsScannerProductSearchUnknown => 'Desconocido';
+
+  @override
+  String get componentsScannerProductSearchKcal => 'kcal';
+
+  @override
+  String get componentsScannerProductSearchProteinAbbreviation => 'P:';
+
+  @override
+  String get componentsScannerProductSearchCarbsAbbreviation => 'C:';
+
+  @override
+  String get componentsScannerProductSearchFatAbbreviation => 'G:';
+
+  @override
+  String get componentsScannerProductSearchGramsAbbreviation => 'g';
+
+  @override
+  String get componentsScannerProductSearchIngredient => 'Ingrediente';
+
+  @override
+  String componentsScannerProductSearchDishIngredients(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredientes — plato',
+      one: '1 ingrediente — plato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get componentsScannerProductSearchBrowseUnavailable =>
+      'No se pueden cargar los productos. Inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerProductSearchUnknownProduct =>
+      'Producto desconocido';
+
+  @override
+  String get componentsScannerProductSearchCategoryAll => 'Todos';
+
+  @override
+  String get componentsScannerProductSearchCategoryFruits => 'Frutas';
+
+  @override
+  String get componentsScannerProductSearchCategoryVegetables => 'Verduras';
+
+  @override
+  String get componentsScannerProductSearchCategoryDairy => 'Lácteos';
+
+  @override
+  String get componentsScannerProductSearchCategoryMeat => 'Carnes';
+
+  @override
+  String get componentsScannerProductSearchCategorySeafood =>
+      'Pescados y mariscos';
+
+  @override
+  String get componentsScannerProductSearchCategoryBeverages => 'Bebidas';
+
+  @override
+  String get componentsScannerProductSearchCategoryCereals => 'Cereales';
+
+  @override
+  String get componentsScannerProductSearchCategoryBreads => 'Panes';
+
+  @override
+  String get componentsScannerProductSearchCategorySnacks => 'Aperitivos';
+
+  @override
+  String get componentsScannerProductSearchCategorySweets => 'Dulces';
+
+  @override
+  String get componentsScannerProductSearchCategoryLegumes => 'Legumbres';
+
+  @override
+  String get componentsScannerProductSearchCategoryNuts => 'Frutos secos';
+
+  @override
+  String get componentsScannerProductSearchCategoryCondiments => 'Condimentos';
+
+  @override
+  String get componentsScannerProductSearchCategoryOilsAndFats =>
+      'Aceites y grasas';
+
+  @override
+  String get componentsScannerProductSearchCategoryFrozen => 'Congelados';
+
+  @override
+  String get componentsScannerProductSearchCategoryReadyMeals =>
+      'Platos preparados';
+
+  @override
+  String get componentsScannerProductSearchCategoryBabyFoods =>
+      'Alimentos infantiles';
+
+  @override
+  String get componentsScannerProductSearchSortPopularity => 'Más populares';
+
+  @override
+  String get componentsScannerProductSearchSortName => 'Nombre A–Z';
+
+  @override
+  String get componentsScannerProductSearchSortNewest => 'Más recientes';
+
+  @override
+  String get componentsScannerProductSearchSortCompleteness => 'Más completos';
 
   @override
   String get componentsSharedErrorDisplayRetry => 'Reintentar';

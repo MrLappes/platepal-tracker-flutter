@@ -1333,6 +1333,42 @@ abstract class AppLocalizations {
   /// **'Scanning barcode...'**
   String get componentsScannerBarcodeScannerScanningBarcode;
 
+  /// Close scanner after camera permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get componentsScannerBarcodeScannerClose;
+
+  /// Instructions when camera permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera access for this app in system settings.'**
+  String get componentsScannerBarcodeScannerPermissionHint;
+
+  /// Camera scanner error
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner error: {errorCode}'**
+  String componentsScannerBarcodeScannerScannerError(String errorCode);
+
+  /// Barcode product service failed
+  ///
+  /// In en, this message translates to:
+  /// **'Food data is unavailable. Try again.'**
+  String get componentsScannerBarcodeScannerServiceUnavailable;
+
+  /// Turn on the scanner flashlight
+  ///
+  /// In en, this message translates to:
+  /// **'Turn flashlight on'**
+  String get componentsScannerBarcodeScannerTorchOn;
+
+  /// Turn off the scanner flashlight
+  ///
+  /// In en, this message translates to:
+  /// **'Turn flashlight off'**
+  String get componentsScannerBarcodeScannerTorchOff;
+
   /// Error message for product search
   ///
   /// In en, this message translates to:
@@ -1374,6 +1410,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search products...'**
   String get componentsScannerProductSearchSearchProducts;
+
+  /// Open product filters and sorting
+  ///
+  /// In en, this message translates to:
+  /// **'Filters & Sort'**
+  String get componentsScannerProductSearchFiltersAndSort;
+
+  /// Nutrition grade filter heading
+  ///
+  /// In en, this message translates to:
+  /// **'NUTRI-SCORE'**
+  String get componentsScannerProductSearchNutriScore;
+
+  /// Any nutrition grade
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get componentsScannerProductSearchAny;
+
+  /// Sorting heading
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get componentsScannerProductSearchSortBy;
+
+  /// Popular products section
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get componentsScannerProductSearchPopular;
+
+  /// Search results heading
+  ///
+  /// In en, this message translates to:
+  /// **'Results for \"{query}\"'**
+  String componentsScannerProductSearchResultsFor(String query);
+
+  /// Locally saved items section
+  ///
+  /// In en, this message translates to:
+  /// **'My database'**
+  String get componentsScannerProductSearchMyDatabase;
+
+  /// Open Food Facts products section
+  ///
+  /// In en, this message translates to:
+  /// **'Global feed'**
+  String get componentsScannerProductSearchGlobalFeed;
+
+  /// Last page of search results
+  ///
+  /// In en, this message translates to:
+  /// **'End of results'**
+  String get componentsScannerProductSearchEndOfResults;
+
+  /// Empty browse screen prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category or type to search'**
+  String get componentsScannerProductSearchSelectCategoryOrSearch;
+
+  /// Empty search results prompt
+  ///
+  /// In en, this message translates to:
+  /// **'No results for \"{query}\"'**
+  String componentsScannerProductSearchNoResultsFor(String query);
+
+  /// Unnamed product
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get componentsScannerProductSearchUnknown;
+
+  /// Calories unit
+  ///
+  /// In en, this message translates to:
+  /// **'kcal'**
+  String get componentsScannerProductSearchKcal;
+
+  /// Protein abbreviation in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'P:'**
+  String get componentsScannerProductSearchProteinAbbreviation;
+
+  /// Carbohydrate abbreviation in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'C:'**
+  String get componentsScannerProductSearchCarbsAbbreviation;
+
+  /// Fat abbreviation in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'F:'**
+  String get componentsScannerProductSearchFatAbbreviation;
+
+  /// Gram unit in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get componentsScannerProductSearchGramsAbbreviation;
+
+  /// Local ingredient result type
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient'**
+  String get componentsScannerProductSearchIngredient;
+
+  /// Number of ingredients in a local dish result
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ingredient — dish} other{{count} ingredients — dish}}'**
+  String componentsScannerProductSearchDishIngredients(int count);
+
+  /// Failed to load browse results
+  ///
+  /// In en, this message translates to:
+  /// **'Products are unavailable. Try again.'**
+  String get componentsScannerProductSearchBrowseUnavailable;
+
+  /// Name of a product with no identifying data
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown product'**
+  String get componentsScannerProductSearchUnknownProduct;
+
+  /// All product categories
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get componentsScannerProductSearchCategoryAll;
+
+  /// Fruit category
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get componentsScannerProductSearchCategoryFruits;
+
+  /// Vegetable category
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables'**
+  String get componentsScannerProductSearchCategoryVegetables;
+
+  /// Dairy category
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get componentsScannerProductSearchCategoryDairy;
+
+  /// Meat category
+  ///
+  /// In en, this message translates to:
+  /// **'Meat'**
+  String get componentsScannerProductSearchCategoryMeat;
+
+  /// Seafood category
+  ///
+  /// In en, this message translates to:
+  /// **'Seafood'**
+  String get componentsScannerProductSearchCategorySeafood;
+
+  /// Beverage category
+  ///
+  /// In en, this message translates to:
+  /// **'Beverages'**
+  String get componentsScannerProductSearchCategoryBeverages;
+
+  /// Cereal category
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals'**
+  String get componentsScannerProductSearchCategoryCereals;
+
+  /// Bread category
+  ///
+  /// In en, this message translates to:
+  /// **'Breads'**
+  String get componentsScannerProductSearchCategoryBreads;
+
+  /// Snack category
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get componentsScannerProductSearchCategorySnacks;
+
+  /// Sweets category
+  ///
+  /// In en, this message translates to:
+  /// **'Sweets'**
+  String get componentsScannerProductSearchCategorySweets;
+
+  /// Legume category
+  ///
+  /// In en, this message translates to:
+  /// **'Legumes'**
+  String get componentsScannerProductSearchCategoryLegumes;
+
+  /// Nut category
+  ///
+  /// In en, this message translates to:
+  /// **'Nuts'**
+  String get componentsScannerProductSearchCategoryNuts;
+
+  /// Condiment category
+  ///
+  /// In en, this message translates to:
+  /// **'Condiments'**
+  String get componentsScannerProductSearchCategoryCondiments;
+
+  /// Oil and fat category
+  ///
+  /// In en, this message translates to:
+  /// **'Oils & Fats'**
+  String get componentsScannerProductSearchCategoryOilsAndFats;
+
+  /// Frozen foods category
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get componentsScannerProductSearchCategoryFrozen;
+
+  /// Prepared meals category
+  ///
+  /// In en, this message translates to:
+  /// **'Ready Meals'**
+  String get componentsScannerProductSearchCategoryReadyMeals;
+
+  /// Baby food category
+  ///
+  /// In en, this message translates to:
+  /// **'Baby Foods'**
+  String get componentsScannerProductSearchCategoryBabyFoods;
+
+  /// Sort by popularity
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular'**
+  String get componentsScannerProductSearchSortPopularity;
+
+  /// Sort by name
+  ///
+  /// In en, this message translates to:
+  /// **'Name A–Z'**
+  String get componentsScannerProductSearchSortName;
+
+  /// Sort by date
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get componentsScannerProductSearchSortNewest;
+
+  /// Sort by completeness
+  ///
+  /// In en, this message translates to:
+  /// **'Most Complete'**
+  String get componentsScannerProductSearchSortCompleteness;
 
   /// Retry button text
   ///

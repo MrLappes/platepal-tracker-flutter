@@ -872,6 +872,33 @@
   "@componentsScannerBarcodeScannerScanningBarcode": {
     "description": "Status message while scanning"
   },
+  "componentsScannerBarcodeScannerClose": "Close",
+  "@componentsScannerBarcodeScannerClose": {
+    "description": "Close scanner after camera permission is denied"
+  },
+  "componentsScannerBarcodeScannerPermissionHint": "Allow camera access for this app in system settings.",
+  "@componentsScannerBarcodeScannerPermissionHint": {
+    "description": "Instructions when camera permission is denied"
+  },
+  "componentsScannerBarcodeScannerScannerError": "Scanner error: {errorCode}",
+  "@componentsScannerBarcodeScannerScannerError": {
+    "description": "Camera scanner error",
+    "placeholders": {
+      "errorCode": {"type": "String"}
+    }
+  },
+  "componentsScannerBarcodeScannerServiceUnavailable": "Food data is unavailable. Try again.",
+  "@componentsScannerBarcodeScannerServiceUnavailable": {
+    "description": "Barcode product service failed"
+  },
+  "componentsScannerBarcodeScannerTorchOn": "Turn flashlight on",
+  "@componentsScannerBarcodeScannerTorchOn": {
+    "description": "Turn on the scanner flashlight"
+  },
+  "componentsScannerBarcodeScannerTorchOff": "Turn flashlight off",
+  "@componentsScannerBarcodeScannerTorchOff": {
+    "description": "Turn off the scanner flashlight"
+  },
   "componentsScannerProductSearchErrorSearchingProduct": "Error searching for product: {error}",
   "@componentsScannerProductSearchErrorSearchingProduct": {
     "description": "Error message for product search",
@@ -906,6 +933,101 @@
   "@componentsScannerProductSearchSearchProducts": {
     "description": "Placeholder text for product search"
   },
+  "componentsScannerProductSearchFiltersAndSort": "Filters & Sort",
+  "@componentsScannerProductSearchFiltersAndSort": {"description": "Open product filters and sorting"},
+  "componentsScannerProductSearchNutriScore": "NUTRI-SCORE",
+  "@componentsScannerProductSearchNutriScore": {"description": "Nutrition grade filter heading"},
+  "componentsScannerProductSearchAny": "Any",
+  "@componentsScannerProductSearchAny": {"description": "Any nutrition grade"},
+  "componentsScannerProductSearchSortBy": "Sort by",
+  "@componentsScannerProductSearchSortBy": {"description": "Sorting heading"},
+  "componentsScannerProductSearchPopular": "Popular",
+  "@componentsScannerProductSearchPopular": {"description": "Popular products section"},
+  "componentsScannerProductSearchResultsFor": "Results for \"{query}\"",
+  "@componentsScannerProductSearchResultsFor": {
+    "description": "Search results heading",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "componentsScannerProductSearchMyDatabase": "My database",
+  "@componentsScannerProductSearchMyDatabase": {"description": "Locally saved items section"},
+  "componentsScannerProductSearchGlobalFeed": "Global feed",
+  "@componentsScannerProductSearchGlobalFeed": {"description": "Open Food Facts products section"},
+  "componentsScannerProductSearchEndOfResults": "End of results",
+  "@componentsScannerProductSearchEndOfResults": {"description": "Last page of search results"},
+  "componentsScannerProductSearchSelectCategoryOrSearch": "Select a category or type to search",
+  "@componentsScannerProductSearchSelectCategoryOrSearch": {"description": "Empty browse screen prompt"},
+  "componentsScannerProductSearchNoResultsFor": "No results for \"{query}\"",
+  "@componentsScannerProductSearchNoResultsFor": {
+    "description": "Empty search results prompt",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "componentsScannerProductSearchUnknown": "Unknown",
+  "@componentsScannerProductSearchUnknown": {"description": "Unnamed product"},
+  "componentsScannerProductSearchKcal": "kcal",
+  "@componentsScannerProductSearchKcal": {"description": "Calories unit"},
+  "componentsScannerProductSearchProteinAbbreviation": "P:",
+  "@componentsScannerProductSearchProteinAbbreviation": {"description": "Protein abbreviation in result summaries"},
+  "componentsScannerProductSearchCarbsAbbreviation": "C:",
+  "@componentsScannerProductSearchCarbsAbbreviation": {"description": "Carbohydrate abbreviation in result summaries"},
+  "componentsScannerProductSearchFatAbbreviation": "F:",
+  "@componentsScannerProductSearchFatAbbreviation": {"description": "Fat abbreviation in result summaries"},
+  "componentsScannerProductSearchGramsAbbreviation": "g",
+  "@componentsScannerProductSearchGramsAbbreviation": {"description": "Gram unit in result summaries"},
+  "componentsScannerProductSearchIngredient": "Ingredient",
+  "@componentsScannerProductSearchIngredient": {"description": "Local ingredient result type"},
+  "componentsScannerProductSearchDishIngredients": "{count, plural, =1{1 ingredient — dish} other{{count} ingredients — dish}}",
+  "@componentsScannerProductSearchDishIngredients": {
+    "description": "Number of ingredients in a local dish result",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsScannerProductSearchBrowseUnavailable": "Products are unavailable. Try again.",
+  "@componentsScannerProductSearchBrowseUnavailable": {"description": "Failed to load browse results"},
+  "componentsScannerProductSearchUnknownProduct": "Unknown product",
+  "@componentsScannerProductSearchUnknownProduct": {"description": "Name of a product with no identifying data"},
+  "componentsScannerProductSearchCategoryAll": "All",
+  "@componentsScannerProductSearchCategoryAll": {"description": "All product categories"},
+  "componentsScannerProductSearchCategoryFruits": "Fruits",
+  "@componentsScannerProductSearchCategoryFruits": {"description": "Fruit category"},
+  "componentsScannerProductSearchCategoryVegetables": "Vegetables",
+  "@componentsScannerProductSearchCategoryVegetables": {"description": "Vegetable category"},
+  "componentsScannerProductSearchCategoryDairy": "Dairy",
+  "@componentsScannerProductSearchCategoryDairy": {"description": "Dairy category"},
+  "componentsScannerProductSearchCategoryMeat": "Meat",
+  "@componentsScannerProductSearchCategoryMeat": {"description": "Meat category"},
+  "componentsScannerProductSearchCategorySeafood": "Seafood",
+  "@componentsScannerProductSearchCategorySeafood": {"description": "Seafood category"},
+  "componentsScannerProductSearchCategoryBeverages": "Beverages",
+  "@componentsScannerProductSearchCategoryBeverages": {"description": "Beverage category"},
+  "componentsScannerProductSearchCategoryCereals": "Cereals",
+  "@componentsScannerProductSearchCategoryCereals": {"description": "Cereal category"},
+  "componentsScannerProductSearchCategoryBreads": "Breads",
+  "@componentsScannerProductSearchCategoryBreads": {"description": "Bread category"},
+  "componentsScannerProductSearchCategorySnacks": "Snacks",
+  "@componentsScannerProductSearchCategorySnacks": {"description": "Snack category"},
+  "componentsScannerProductSearchCategorySweets": "Sweets",
+  "@componentsScannerProductSearchCategorySweets": {"description": "Sweets category"},
+  "componentsScannerProductSearchCategoryLegumes": "Legumes",
+  "@componentsScannerProductSearchCategoryLegumes": {"description": "Legume category"},
+  "componentsScannerProductSearchCategoryNuts": "Nuts",
+  "@componentsScannerProductSearchCategoryNuts": {"description": "Nut category"},
+  "componentsScannerProductSearchCategoryCondiments": "Condiments",
+  "@componentsScannerProductSearchCategoryCondiments": {"description": "Condiment category"},
+  "componentsScannerProductSearchCategoryOilsAndFats": "Oils & Fats",
+  "@componentsScannerProductSearchCategoryOilsAndFats": {"description": "Oil and fat category"},
+  "componentsScannerProductSearchCategoryFrozen": "Frozen",
+  "@componentsScannerProductSearchCategoryFrozen": {"description": "Frozen foods category"},
+  "componentsScannerProductSearchCategoryReadyMeals": "Ready Meals",
+  "@componentsScannerProductSearchCategoryReadyMeals": {"description": "Prepared meals category"},
+  "componentsScannerProductSearchCategoryBabyFoods": "Baby Foods",
+  "@componentsScannerProductSearchCategoryBabyFoods": {"description": "Baby food category"},
+  "componentsScannerProductSearchSortPopularity": "Most Popular",
+  "@componentsScannerProductSearchSortPopularity": {"description": "Sort by popularity"},
+  "componentsScannerProductSearchSortName": "Name A–Z",
+  "@componentsScannerProductSearchSortName": {"description": "Sort by name"},
+  "componentsScannerProductSearchSortNewest": "Newest",
+  "@componentsScannerProductSearchSortNewest": {"description": "Sort by date"},
+  "componentsScannerProductSearchSortCompleteness": "Most Complete",
+  "@componentsScannerProductSearchSortCompleteness": {"description": "Sort by completeness"},
   "componentsSharedErrorDisplayRetry": "Retry",
   "@componentsSharedErrorDisplayRetry": {
     "description": "Retry button text"
