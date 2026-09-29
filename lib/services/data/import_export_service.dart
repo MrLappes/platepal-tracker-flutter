@@ -25,6 +25,22 @@ enum ExportFormat { json, csv }
 
 enum DuplicateHandling { skip, overwrite, merge }
 
+// Top-level so compute() can run them on a background isolate.
+Object? _decodeJson(String source) => json.decode(source);
+String _encodeJson(Object? data) => json.encode(data);
+String _encodeJsonPretty(Object? data) =>
+    const JsonEncoder.withIndent('  ').convert(data);
+
+/// Thrown when some sections of an "all data" export could not be read.
+class _SectionExportException implements Exception {
+  const _SectionExportException(this.sections);
+
+  final List<String> sections;
+
+  @override
+  String toString() => 'Could not read ${sections.join(', ')}';
+}
+
 class ImportExportService {
   ImportExportService({DishService? dishService})
     : _dishService = dishService ?? DishService();
@@ -38,6 +54,28 @@ class ImportExportService {
   static const int _maxDateLength = 64;
   static const int _maxDishNameLength = 200;
   static const int _maxNotesLength = 1000;
+
+  /// Import files above this size are rejected before reading.
+  static const int maxImportBytes = 50 * 1024 * 1024;
+
+  /// Sections with more rows are rejected as a whole.
+  static const int maxItemsPerSection = 100000;
+
+  static const int _backupsToKeep = 5;
+  static final RegExp _backupName = RegExp(r'^platepal_backup_(\d+)\.json$');
+
+  /// Top-level keys the importer reads, incl. legacy ones.
+  static const List<String> _knownSections = [
+    'userProfiles',
+    'dishes',
+    'mealLogs',
+    'ingredients',
+    'supplements',
+    'fitnessGoals',
+    'dishLogs',
+    'dish_logs',
+    'user_profile',
+  ];
 
   /// What "all data" imports. fitnessGoals is left out: profiles carry their
   /// goals, and the goals importer appends a row per item.
@@ -76,13 +114,16 @@ class ImportExportService {
             }
           }
         } catch (e) {
-          debugPrint('Error exporting ${type.name}: $e');
+          debugPrint('Error exporting ${type.name}: ${_logError(e)}');
+          final failed =
+              e is _SectionExportException ? e.sections : [type.name];
           return ImportExportResult(
             success: false,
-            message: 'Failed to export ${type.name}: $e',
+            message: 'Failed to export ${failed.join(', ')}: $e',
             itemsProcessed: 0,
             duplicatesFound: 0,
-            errors: ['Export error for ${type.name}: $e'],
+            errors: ['Export error for ${failed.join(', ')}: $e'],
+            failedSections: failed,
           );
         }
       }
@@ -93,9 +134,7 @@ class ImportExportService {
       final file = File('${directory.path}/$filename');
 
       if (format == ExportFormat.json) {
-        await file.writeAsString(
-          const JsonEncoder.withIndent('  ').convert(exportData),
-        );
+        await file.writeAsString(await compute(_encodeJsonPretty, exportData));
       } else {
         final csvData = _convertToCSV(exportData);
         await file.writeAsString(csvData);
@@ -110,7 +149,7 @@ class ImportExportService {
         errors: [],
       );
     } catch (e) {
-      debugPrint('Export failed: $e');
+      debugPrint('Export failed: ${_logError(e)}');
       return ImportExportResult(
         success: false,
         message: 'Export failed: $e',
@@ -139,6 +178,13 @@ class ImportExportService {
         if (!await file.exists()) {
           throw Exception('File not found');
         }
+        final size = await file.length();
+        if (size > maxImportBytes) {
+          throw Exception(
+            'File is too large (${size ~/ (1024 * 1024)} MB, '
+            'max ${maxImportBytes ~/ (1024 * 1024)} MB)',
+          );
+        }
 
         final content = await file.readAsString();
         detailedResults.setFileInfo(
@@ -150,8 +196,9 @@ class ImportExportService {
         );
 
         if (filePath.endsWith('.json')) {
+          final Object? decoded;
           try {
-            importData = json.decode(content) as Map<String, dynamic>;
+            decoded = await compute(_decodeJson, content);
           } catch (e) {
             detailedResults.parsingErrors.add(
               ParsingError(
@@ -166,6 +213,10 @@ class ImportExportService {
             );
             throw Exception('JSON parsing failed: $e');
           }
+          if (decoded is! Map<String, dynamic>) {
+            throw Exception('The file must contain a JSON object');
+          }
+          importData = decoded;
         } else if (filePath.endsWith('.csv')) {
           final csvResult = _convertFromCSVWithErrors(content);
           importData = csvResult.data;
@@ -175,22 +226,31 @@ class ImportExportService {
         }
       }
 
-      // Validate data integrity
-      final validationResult = _validateImportData(importData);
+      // Transform data for backward compatibility
+      importData = _transformBackwardCompatibility(importData);
+
+      // Shape and size problems fail the import before anything is written.
+      final validationResult = await _validateImportData(importData);
+      detailedResults.validationErrors.addAll(
+        [...validationResult.errors, ...validationResult.warnings].map(
+          (error) => ValidationError(field: 'general', error: error, value: ''),
+        ),
+      );
       if (!validationResult.isValid) {
-        detailedResults.validationErrors.addAll(
-          validationResult.errors.map(
-            (error) =>
-                ValidationError(field: 'general', error: error, value: ''),
-          ),
+        return ImportExportResult(
+          success: false,
+          message: 'Import failed: ${validationResult.errors.join('; ')}',
+          itemsProcessed: 0,
+          duplicatesFound: 0,
+          errors: validationResult.errors,
+          detailedResults: detailedResults,
         );
       }
 
-      // Transform data for backward compatibility
-      importData = _transformBackwardCompatibility(importData);
       int totalProcessed = 0;
       int totalDuplicates = 0;
       final errors = <String>[];
+      final failedSections = <String>[];
 
       // Sort data types by dependency order to ensure dishes are imported before meal logs
       final sortedDataTypes = _sortDataTypesByDependency(
@@ -215,18 +275,31 @@ class ImportExportService {
         totalProcessed += result.itemsProcessed;
         totalDuplicates += result.duplicatesFound;
         errors.addAll(result.errors);
+        if (result.errors.isNotEmpty && result.itemsProcessed == 0) {
+          failedSections.add(type.name);
+        }
 
         currentProgress += result.itemsProcessed;
         onProgress?.call(currentProgress, totalItems, type.name);
       }
 
+      final skipped = detailedResults.summary.values.fold<int>(
+        0,
+        (sum, s) => sum + max(0, s.total - s.processed - s.duplicates),
+      );
       return ImportExportResult(
         success: errors.isEmpty && detailedResults.parsingErrors.isEmpty,
-        message: 'Import completed. Processed $totalProcessed items.',
+        message:
+            skipped == 0
+                ? 'Import completed. Processed $totalProcessed items.'
+                : 'Import completed. Imported $totalProcessed items, '
+                    'skipped $skipped.',
         itemsProcessed: totalProcessed,
         duplicatesFound: totalDuplicates,
         errors: errors,
         detailedResults: detailedResults,
+        itemsSkipped: skipped,
+        failedSections: failedSections,
       );
     } catch (e) {
       return ImportExportResult(
@@ -254,6 +327,7 @@ class ImportExportService {
         itemsProcessed: result.itemsProcessed,
         duplicatesFound: result.duplicatesFound,
         errors: result.errors,
+        itemsSkipped: result.itemsSkipped,
       );
     } catch (e) {
       return ImportResult(
@@ -374,7 +448,7 @@ class ImportExportService {
               item: identifier,
             ),
           );
-          debugPrint('❌ $errorMsg');
+          debugPrint('❌ $typeName item $index failed: ${_logError(e)}');
         }
       }
     }
@@ -424,7 +498,9 @@ class ImportExportService {
             item: '${toInsert.length} meal logs',
           ),
         );
-        debugPrint('❌ $errorMsg');
+        debugPrint(
+          '❌ Writing ${toInsert.length} $typeName failed: ${_logError(e)}',
+        );
       }
     }
 
@@ -679,17 +755,22 @@ class ImportExportService {
           }
         case DataType.allData:
           final allData = <String, dynamic>{};
+          final failed = <String>[];
           for (final dataType in DataType.values) {
             if (dataType != DataType.allData) {
               try {
                 final data = await _exportDataType(dataType);
                 allData[dataType.name] = data;
               } catch (e) {
-                // Continue with other data types even if one fails
-                allData[dataType.name] = <Map<String, dynamic>>[];
+                debugPrint(
+                  '❌ Export of ${dataType.name} failed: ${_logError(e)}',
+                );
+                failed.add(dataType.name);
               }
             }
           }
+          // A backup missing a section would wipe it on restore.
+          if (failed.isNotEmpty) throw _SectionExportException(failed);
           return allData;
       }
     } catch (e) {
@@ -728,28 +809,49 @@ class ImportExportService {
     return context;
   }
 
-  DataValidationResult _validateImportData(Map<String, dynamic> data) {
+  Future<DataValidationResult> _validateImportData(
+    Map<String, dynamic> data,
+  ) async {
     final errors = <String>[];
+    var hasData = false;
+    for (final name in _knownSections) {
+      if (!data.containsKey(name)) continue;
+      hasData = true;
+      final value = data[name];
+      // Old React Native exports store tables as {"data": [...]}.
+      final items =
+          value is List
+              ? value
+              : value is Map && value['data'] is List
+              ? value['data'] as List
+              : null;
+      if (items == null) {
+        errors.add('$name must be a list');
+      } else if (items.length > maxItemsPerSection) {
+        errors.add(
+          '$name contains too many items (${items.length}, '
+          'max $maxItemsPerSection)',
+        );
+      }
+    }
+    if (!hasData) errors.add('No importable data found');
+    if (errors.isNotEmpty) {
+      return DataValidationResult(isValid: false, errors: errors);
+    }
 
-    // Check for malicious patterns
-    final jsonString = json.encode(data);
+    final warnings = <String>[];
+    final jsonString = await compute(_encodeJson, data);
     if (jsonString.contains('<script>') ||
         jsonString.contains('javascript:') ||
         jsonString.contains('eval(')) {
-      errors.add('Potentially malicious content detected');
+      warnings.add('Potentially malicious content detected');
     }
 
-    // Validate data structure
-    for (final entry in data.entries) {
-      if (entry.value is List) {
-        final list = entry.value as List;
-        if (list.length > 10000) {
-          errors.add('${entry.key} contains too many items (${list.length})');
-        }
-      }
-    }
-
-    return DataValidationResult(isValid: errors.isEmpty, errors: errors);
+    return DataValidationResult(
+      isValid: true,
+      errors: const [],
+      warnings: warnings,
+    );
   }
 
   Map<String, dynamic> _transformBackwardCompatibility(
@@ -837,13 +939,20 @@ class ImportExportService {
       final errors = <String>[];
 
       for (int index = 0; index < items.length; index++) {
-        final item = items[index];
+        var item = items[index];
         try {
           final itemValidation = _validateItem(type, item, index);
           if (itemValidation.isNotEmpty) {
             detailedResults.validationErrors.addAll(itemValidation);
             skipped++;
             continue;
+          }
+
+          // Reuse the local ID of a same-named dish, or overwrite would add
+          // a second dish under a new ID.
+          if (type == DataType.dishes && item['id'] == null) {
+            final localId = await _localDishIdByName(item['name']);
+            if (localId != null) item = <String, dynamic>{...item, 'id': localId};
           }
 
           final exists = await _checkIfExists(type, item);
@@ -906,7 +1015,7 @@ class ImportExportService {
         errors: errors,
       );
     } catch (e) {
-      debugPrint('❌ Error importing ${type.name}: $e');
+      debugPrint('❌ Error importing ${type.name}: ${_logError(e)}');
       return ImportExportResult(
         success: false,
         message: 'Failed to import ${type.name}: $e',
@@ -1062,51 +1171,74 @@ class ImportExportService {
   Map<String, dynamic> _convertOldUserProfileFormat(dynamic oldProfile) {
     if (oldProfile is! Map<String, dynamic>) return {};
 
+    final weight = _safeParseDouble(oldProfile['weight']) ?? 70.0;
+    final now = DateTime.now().toIso8601String();
+    String timestamp(dynamic value) =>
+        value is String && DateTime.tryParse(value) != null ? value : now;
+    final metric = _safeParseBool(
+      oldProfile['useMetricSystem'] ?? oldProfile['use_metric_system'],
+    );
+
     return {
-      'id': oldProfile['id'] ?? _generateId(),
-      'name': oldProfile['name'] ?? 'User',
-      'email': oldProfile['email'] ?? 'imported.user@platepal.local',
-      'age':
-          _safeParseInt(oldProfile['age'] ?? oldProfile['dateOfBirth']) ?? 25,
-      'gender': oldProfile['gender'] ?? 'other',
+      'id': oldProfile['id']?.toString() ?? _generateId(),
+      'name': oldProfile['name']?.toString() ?? 'User',
+      'email': oldProfile['email']?.toString() ?? 'imported.user@platepal.local',
+      'age': _legacyAge(oldProfile['age'] ?? oldProfile['dateOfBirth']) ?? 25,
+      'gender': oldProfile['gender']?.toString() ?? 'other',
       'height': _safeParseDouble(oldProfile['height']) ?? 170.0,
-      'weight': _safeParseDouble(oldProfile['weight']) ?? 70.0,
-      'targetWeight': _safeParseDouble(oldProfile['targetWeight']),
-      'activityLevel':
-          oldProfile['activityLevel'] ??
-          oldProfile['activity_level'] ??
-          'sedentary',
-      'fitnessGoal':
+      'weight': weight,
+      'activityLevel': _snakeCase(
+        oldProfile['activityLevel'] ??
+            oldProfile['activity_level'] ??
+            'sedentary',
+      ),
+      'preferredUnit': metric == false ? 'imperial' : 'metric',
+      'createdAt': timestamp(oldProfile['createdAt'] ?? oldProfile['created_at']),
+      'updatedAt': timestamp(oldProfile['updatedAt'] ?? oldProfile['updated_at']),
+      'goals': {
+        'goal': _snakeCase(
           oldProfile['fitnessGoal'] ??
-          oldProfile['fitness_goal'] ??
-          'maintainWeight',
-      'unitSystem':
-          (oldProfile['useMetricSystem'] ?? oldProfile['use_metric_system']) ==
-                  true
-              ? 'metric'
-              : 'imperial',
-      'createdAt':
-          oldProfile['createdAt'] ??
-          oldProfile['created_at'] ??
-          DateTime.now().toIso8601String(),
-      'updatedAt':
-          oldProfile['updatedAt'] ??
-          oldProfile['updated_at'] ??
-          DateTime.now().toIso8601String(),
-      'nutritionTargets': {
-        'calories':
+              oldProfile['fitness_goal'] ??
+              'maintain_weight',
+        ),
+        'targetWeight':
+            _safeParseDouble(
+              oldProfile['targetWeight'] ?? oldProfile['target_weight'],
+            ) ??
+            weight,
+        'targetCalories':
             _safeParseDouble(oldProfile['dailyCalorieTarget']) ?? 2000.0,
-        'protein': _safeParseDouble(oldProfile['dailyProteinTarget']) ?? 150.0,
-        'carbs': _safeParseDouble(oldProfile['dailyCarbsTarget']) ?? 250.0,
-        'fat': _safeParseDouble(oldProfile['dailyFatTarget']) ?? 65.0,
-        'fiber': _safeParseDouble(oldProfile['dailyFiberTarget']) ?? 25.0,
+        'targetProtein':
+            _safeParseDouble(oldProfile['dailyProteinTarget']) ?? 150.0,
+        'targetCarbs': _safeParseDouble(oldProfile['dailyCarbsTarget']) ?? 250.0,
+        'targetFat': _safeParseDouble(oldProfile['dailyFatTarget']) ?? 65.0,
+        'targetFiber': _safeParseDouble(oldProfile['dailyFiberTarget']) ?? 25.0,
       },
     };
   }
 
+  /// Legacy files hold either an age or an ISO date of birth.
+  int? _legacyAge(dynamic value) {
+    final birth = value is String ? DateTime.tryParse(value) : null;
+    if (birth == null) return _safeParseInt(value);
+    final now = DateTime.now();
+    final hadBirthday =
+        now.month > birth.month ||
+        (now.month == birth.month && now.day >= birth.day);
+    final age = now.year - birth.year - (hadBirthday ? 0 : 1);
+    return age >= 0 && age <= 150 ? age : null;
+  }
+
+  /// `moderatelyActive` -> `moderately_active`; snake_case stays as is.
+  String _snakeCase(dynamic value) => value.toString().replaceAllMapped(
+    RegExp('[A-Z]'),
+    (m) => '_${m[0]!.toLowerCase()}',
+  );
+
   Map<String, dynamic> _convertOldDishFormat(Map<String, dynamic> oldDish) {
     return {
-      'id': oldDish['id'] ?? _generateId(),
+      // Left null when missing so a same-named local dish can be matched.
+      'id': oldDish['id']?.toString(),
       'name': oldDish['name'] ?? 'Imported Dish',
       'description': oldDish['description'] ?? '',
       'imageUrl': oldDish['imageUri'] ?? oldDish['image_url'] ?? '',
@@ -1145,7 +1277,7 @@ class ImportExportService {
 
     for (final row in ingredientRows) {
       if (row is Map<String, dynamic>) {
-        final dishId = row['dishId'] ?? row['dish_id'];
+        final dishId = (row['dishId'] ?? row['dish_id'])?.toString();
         if (dishId != null) {
           ingredientsByDish.putIfAbsent(dishId, () => []).add({
             'id': row['id'] ?? _generateId(),
@@ -1178,6 +1310,14 @@ class ImportExportService {
   }
 
   // Safe parsing helper methods
+
+  /// Error description for logs. Messages are left out: DB and parse errors
+  /// can echo the imported values.
+  static String _logError(Object e) =>
+      e is DatabaseException
+          ? 'DatabaseException(${e.getResultCode()})'
+          : e.runtimeType.toString();
+
   double? _safeParseDouble(dynamic value) {
     if (value == null) return null;
 
@@ -1340,7 +1480,7 @@ class ImportExportService {
 
     switch (type) {
       case DataType.dishes:
-        final id = item['id'] as String?;
+        final id = item['id']?.toString();
         if (id != null) {
           final dish = await _dishService.getDishById(id);
           return dish != null;
@@ -1356,7 +1496,7 @@ class ImportExportService {
         }
         return false;
       case DataType.userProfiles:
-        final id = item['id'] as String?;
+        final id = item['id']?.toString();
         if (id != null) {
           final profile = await _userProfileService.getUserProfile(id);
           return profile != null;
@@ -1403,16 +1543,23 @@ class ImportExportService {
     }
   }
 
+  /// ID of the local dish with this name (case-insensitive), if any.
+  Future<String?> _localDishIdByName(dynamic name) async {
+    if (name is! String) return null;
+    final lower = name.toLowerCase();
+    final dishes = await _dishService.getAllDishes();
+    for (final dish in dishes) {
+      if (dish.name.toLowerCase() == lower) return dish.id;
+    }
+    return null;
+  }
+
   /// Save an item to the database based on its type
   Future<void> _saveItem(
     DataType type,
     dynamic item,
     DuplicateHandling duplicateHandling,
   ) async {
-    debugPrint(
-      '💾 Saving ${type.name} item: ${_getItemIdentifier(type, item)}',
-    );
-
     switch (type) {
       case DataType.dishes:
         await _saveDishItem(item as Map<String, dynamic>, duplicateHandling);
@@ -1463,24 +1610,20 @@ class ImportExportService {
       if (existingDish != null) {
         switch (duplicateHandling) {
           case DuplicateHandling.skip:
-            debugPrint('⏭️ Skipping duplicate dish: ${dish.name}');
             return;
           case DuplicateHandling.overwrite:
-            // Updating existing dish: ${dish.name}
             await _dishService.updateDish(dish);
             break;
           case DuplicateHandling.merge:
-            debugPrint('🔀 Merging dish data: ${dish.name}');
             // For now, treat merge as overwrite
             await _dishService.updateDish(dish);
             break;
         }
       } else {
-        debugPrint('✨ Creating new dish: ${dish.name}');
         await _dishService.saveDish(dish);
       }
     } catch (e) {
-      debugPrint('❌ Error saving dish: $e');
+      debugPrint('❌ Error saving dish: ${_logError(e)}');
       rethrow;
     }
   }
@@ -1488,18 +1631,18 @@ class ImportExportService {
   /// Convert import data to a Dish object
   Dish _convertToDishObject(Map<String, dynamic> dishData) {
     try {
+      final withId =
+          dishData['id'] == null ? {...dishData, 'id': _generateId()} : dishData;
       // Handle direct Dish JSON format
-      if (dishData.containsKey('ingredients') &&
-          dishData['ingredients'] is List) {
-        return Dish.fromJson(dishData);
+      if (withId['ingredients'] is List) {
+        return Dish.fromJson(withId);
       }
 
       // Handle old format conversion - convert to new format then create Dish object
-      final convertedData = _convertOldDishFormat(dishData);
+      final convertedData = _convertOldDishFormat(withId);
       return Dish.fromJson(convertedData);
     } catch (e) {
-      debugPrint('❌ Error converting dish data: $e');
-      debugPrint('❌ Dish data: $dishData');
+      debugPrint('❌ Error converting dish data: ${_logError(e)}');
       rethrow;
     }
   }
@@ -1519,20 +1662,17 @@ class ImportExportService {
       if (existingProfile != null) {
         switch (duplicateHandling) {
           case DuplicateHandling.skip:
-            debugPrint('⏭️ Skipping duplicate user profile: ${profile.name}');
             return;
           case DuplicateHandling.overwrite:
           case DuplicateHandling.merge:
-            debugPrint('🔄 Updating user profile: ${profile.name}');
             await _userProfileService.saveUserProfile(profile);
             break;
         }
       } else {
-        debugPrint('✨ Creating new user profile: ${profile.name}');
         await _userProfileService.saveUserProfile(profile);
       }
     } catch (e) {
-      debugPrint('❌ Error saving user profile: $e');
+      debugPrint('❌ Error saving user profile: ${_logError(e)}');
       rethrow;
     }
   }
@@ -1556,7 +1696,6 @@ class ImportExportService {
       );
 
       if (existing.isNotEmpty && duplicateHandling == DuplicateHandling.skip) {
-        debugPrint('⏭️ Skipping duplicate ingredient: $name');
         return;
       }
 
@@ -1592,10 +1731,8 @@ class ImportExportService {
               : ConflictAlgorithm.replace,
         );
       }
-
-      debugPrint('✅ Saved ingredient: $name');
     } catch (e) {
-      debugPrint('❌ Error saving ingredient: $e');
+      debugPrint('❌ Error saving ingredient: ${_logError(e)}');
       rethrow;
     }
   }
@@ -1619,7 +1756,6 @@ class ImportExportService {
         );
 
         if (existing.isNotEmpty && duplicateHandling == DuplicateHandling.skip) {
-          debugPrint('⏭️ Skipping duplicate fitness goal for user: $userId');
           return;
         }
       }
@@ -1643,10 +1779,8 @@ class ImportExportService {
             ? ConflictAlgorithm.ignore
             : ConflictAlgorithm.replace,
       );
-
-      debugPrint('✅ Saved fitness goal for user: $userId');
     } catch (e) {
-      debugPrint('❌ Error saving fitness goal: $e');
+      debugPrint('❌ Error saving fitness goal: ${_logError(e)}');
       rethrow;
     }
   }
@@ -1663,8 +1797,7 @@ class ImportExportService {
       final convertedData = _convertOldUserProfileFormat(profileData);
       return UserProfile.fromJson(convertedData);
     } catch (e) {
-      debugPrint('❌ Error converting user profile data: $e');
-      debugPrint('❌ Profile data: $profileData');
+      debugPrint('❌ Error converting user profile data: ${_logError(e)}');
       rethrow;
     }
   }
@@ -1933,50 +2066,79 @@ class ImportExportService {
   /// Create automatic backup of current data
   Future<bool> createBackupBeforeImport() async {
     try {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final backupFileName = 'platepal_backup_$timestamp.json';
-
-      // Get platform-specific directory
-      String backupPath;
-      if (Platform.isAndroid) {
-        final directory = await getExternalStorageDirectory();
-        backupPath = '${directory?.path}/PlatePal/backups/$backupFileName';
-      } else if (Platform.isIOS) {
-        final directory = await getApplicationDocumentsDirectory();
-        backupPath = '${directory.path}/backups/$backupFileName';
-      } else {
-        final directory = await getApplicationDocumentsDirectory();
-        backupPath = '${directory.path}/backups/$backupFileName';
-      }
-
-      // Create backup directory if it doesn't exist
-      final backupDir = Directory(backupPath).parent;
-      if (!await backupDir.exists()) {
-        await backupDir.create(recursive: true);
-      }
-
-      // Get all data directly without using exportData
       final exportData = await _exportDataType(DataType.allData);
-
-      // Write the exported data to file
-      final file = File(backupPath);
-      await file.writeAsString(
-        const JsonEncoder.withIndent('  ').convert(exportData),
+      final (backupPath, timestamp) = await _writeBackup(
+        await compute(_encodeJsonPretty, exportData),
       );
 
       // Store backup path in SharedPreferences for "go back" functionality
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('last_backup_path', backupPath);
       await prefs.setInt('last_backup_timestamp', timestamp);
-      // Backup created successfully: $backupPath
+      await _pruneBackups(File(backupPath).parent, keep: backupPath);
       return true;
     } catch (e) {
-      debugPrint('❌ Failed to create backup: $e');
+      debugPrint('❌ Failed to create backup: ${_logError(e)}');
       return false;
     }
   }
 
+  Future<Directory> _backupDirectory() async {
+    if (Platform.isAndroid) {
+      final directory = await getExternalStorageDirectory();
+      if (directory != null) {
+        return Directory('${directory.path}/PlatePal/backups');
+      }
+    }
+    final directory = await getApplicationDocumentsDirectory();
+    return Directory('${directory.path}/backups');
+  }
+
+  /// Writes [encoded] to a new backup file; returns its path and timestamp.
+  Future<(String, int)> _writeBackup(String encoded) async {
+    final dir = await _backupDirectory();
+    await dir.create(recursive: true);
+    var timestamp = DateTime.now().millisecondsSinceEpoch;
+    // Two backups in the same millisecond must not overwrite each other.
+    while (await File('${dir.path}/platepal_backup_$timestamp.json').exists()) {
+      timestamp++;
+    }
+    final path = '${dir.path}/platepal_backup_$timestamp.json';
+    await File(path).writeAsString(encoded);
+    return (path, timestamp);
+  }
+
+  /// Deletes all but the newest [_backupsToKeep] app backups in [dir],
+  /// never [keep].
+  Future<void> _pruneBackups(Directory dir, {required String keep}) async {
+    try {
+      final backups = <(int, File)>[];
+      await for (final entity in dir.list()) {
+        if (entity is! File) continue;
+        final match = _backupName.firstMatch(entity.uri.pathSegments.last);
+        final timestamp = match == null ? null : int.tryParse(match[1]!);
+        if (timestamp != null) backups.add((timestamp, entity));
+      }
+      backups.sort((a, b) => b.$1.compareTo(a.$1));
+      for (final (_, file) in backups.skip(_backupsToKeep)) {
+        if (file.path != keep) await file.delete();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Could not prune old backups: ${_logError(e)}');
+    }
+  }
+
+  Future<void> _deleteQuietly(String path) async {
+    try {
+      await File(path).delete();
+    } catch (_) {}
+  }
+
   /// Restore from the last backup (the "ah shit go back" functionality)
+  ///
+  /// Profiles and dishes are saved through services that open their own
+  /// transactions, so clear + import cannot be one transaction. Instead the
+  /// current data is snapshotted first and re-imported if the restore fails.
   Future<ImportExportResult> restoreFromLastBackup() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -1995,9 +2157,14 @@ class ImportExportService {
       // Read the backup before clearing anything, so a bad file loses nothing.
       final Map<String, dynamic> backup;
       try {
-        backup =
-            json.decode(await File(lastBackupPath).readAsString())
-                as Map<String, dynamic>;
+        final decoded = await compute(
+          _decodeJson,
+          await File(lastBackupPath).readAsString(),
+        );
+        if (decoded is! Map<String, dynamic>) {
+          throw const FormatException('Backup is not a JSON object');
+        }
+        backup = decoded;
       } catch (e) {
         return ImportExportResult(
           success: false,
@@ -2008,24 +2175,94 @@ class ImportExportService {
         );
       }
 
-      // Clear current data before restore
-      await _clearAllData();
+      final String snapshotJson;
+      final String snapshotPath;
+      try {
+        snapshotJson = await compute(
+          _encodeJsonPretty,
+          await _exportDataType(DataType.allData),
+        );
+        snapshotPath = (await _writeBackup(snapshotJson)).$1;
+      } catch (e) {
+        return ImportExportResult(
+          success: false,
+          message: 'Could not save the current data, nothing was changed: $e',
+          itemsProcessed: 0,
+          duplicatesFound: 0,
+          errors: [e.toString()],
+        );
+      }
 
-      // Import from backup
-      final result = await importData(
-        filePath: lastBackupPath,
-        jsonData: backup,
-        dataTypes: [DataType.allData],
-        duplicateHandling: DuplicateHandling.overwrite,
-      );
+      ImportExportResult result;
+      try {
+        await _clearAllData();
+        result = await importData(
+          filePath: lastBackupPath,
+          jsonData: backup,
+          dataTypes: [DataType.allData],
+          duplicateHandling: DuplicateHandling.overwrite,
+        );
+      } catch (e) {
+        result = ImportExportResult(
+          success: false,
+          message: 'Restore failed: $e',
+          itemsProcessed: 0,
+          duplicatesFound: 0,
+          errors: [e.toString()],
+        );
+      }
 
       if (result.success) {
         // Clear the backup reference since we've restored
         await prefs.remove('last_backup_path');
         await prefs.remove('last_backup_timestamp');
+        await _deleteQuietly(snapshotPath);
+        return result;
       }
 
-      return result;
+      debugPrint('❌ Restore failed, putting the previous data back');
+      ImportExportResult rollback;
+      try {
+        await _clearAllData();
+        rollback = await importData(
+          filePath: snapshotPath,
+          jsonData: await compute(_decodeJson, snapshotJson) as Map<String, dynamic>,
+          dataTypes: [DataType.allData],
+          duplicateHandling: DuplicateHandling.overwrite,
+        );
+      } catch (e) {
+        rollback = ImportExportResult(
+          success: false,
+          message: e.toString(),
+          itemsProcessed: 0,
+          duplicatesFound: 0,
+          errors: [e.toString()],
+        );
+      }
+
+      if (rollback.success) {
+        await _deleteQuietly(snapshotPath);
+        return ImportExportResult(
+          success: false,
+          message:
+              'Restore failed, your data was left unchanged: ${result.message}',
+          itemsProcessed: 0,
+          duplicatesFound: 0,
+          errors: result.errors,
+          detailedResults: result.detailedResults,
+          failedSections: result.failedSections,
+        );
+      }
+      debugPrint('❌ Putting the previous data back failed');
+      return ImportExportResult(
+        success: false,
+        message:
+            'Restore failed and the previous data could not be fully put '
+            'back. A copy is saved at $snapshotPath',
+        itemsProcessed: 0,
+        duplicatesFound: 0,
+        errors: [...result.errors, ...rollback.errors],
+      );
     } catch (e) {
       return ImportExportResult(
         success: false,
@@ -2189,6 +2426,12 @@ class ImportExportResult {
   final List<String> errors;
   final ImportDetailedResults? detailedResults;
 
+  /// Rows that were neither imported nor duplicates (invalid or failed).
+  final int itemsSkipped;
+
+  /// Sections that could not be read (export) or written (import).
+  final List<String> failedSections;
+
   const ImportExportResult({
     required this.success,
     required this.message,
@@ -2196,7 +2439,13 @@ class ImportExportResult {
     required this.duplicatesFound,
     required this.errors,
     this.detailedResults,
+    this.itemsSkipped = 0,
+    this.failedSections = const [],
   });
+
+  /// Something was imported, but not everything.
+  bool get isPartial =>
+      itemsProcessed > 0 && (itemsSkipped > 0 || failedSections.isNotEmpty);
 }
 
 class ImportDetailedResults {
@@ -2339,8 +2588,13 @@ class CSVParseResult {
 class DataValidationResult {
   final bool isValid;
   final List<String> errors;
+  final List<String> warnings;
 
-  const DataValidationResult({required this.isValid, required this.errors});
+  const DataValidationResult({
+    required this.isValid,
+    required this.errors,
+    this.warnings = const [],
+  });
 }
 
 class ImportResult {
@@ -2348,11 +2602,13 @@ class ImportResult {
   final int itemsProcessed;
   final int duplicatesFound;
   final List<String> errors;
+  final int itemsSkipped;
 
   ImportResult({
     required this.success,
     required this.itemsProcessed,
     required this.duplicatesFound,
     required this.errors,
+    this.itemsSkipped = 0,
   });
 }
