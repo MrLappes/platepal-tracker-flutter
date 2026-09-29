@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/chat_message.dart';
@@ -8,6 +9,7 @@ import '../../models/chat_profile.dart';
 import '../../models/dish_models.dart';
 import '../../models/dish.dart';
 import '../../models/user_ingredient.dart';
+import '../../services/storage/dish_service.dart';
 import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
@@ -419,15 +421,14 @@ class MessageBubble extends StatelessWidget {
     final difference = now.difference(dateTime);
 
     if (difference.inDays == 0) {
-      final hour = dateTime.hour;
-      final minute = dateTime.minute.toString().padLeft(2, '0');
-      final period = hour >= 12 ? 'PM' : 'AM';
-      final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-      return '$displayHour:$minute $period';
+      return MaterialLocalizations.of(context).formatTimeOfDay(
+        TimeOfDay.fromDateTime(dateTime),
+        alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+      );
     } else if (difference.inDays == 1) {
       return localizations.componentsChatMessageBubbleYesterday;
     } else {
-      return '${dateTime.day}/${dateTime.month}';
+      return DateFormat.MMMd(localizations.localeName).format(dateTime);
     }
   }
 
@@ -571,17 +572,35 @@ class MessageBubble extends StatelessWidget {
   }
 
   /// Handle adding dish to meals by showing the dish log modal
-  void _handleAddToMeals(BuildContext context, ProcessedDish processedDish) {
-    // Convert ProcessedDish to Dish
+  Future<void> _handleAddToMeals(
+    BuildContext context,
+    ProcessedDish processedDish,
+  ) async {
     final dish = _convertToDish(processedDish);
-
-    // Show dish log modal
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DishLogModal(dish: dish),
-    );
+    try {
+      final dishService = DishService();
+      final storedDish =
+          await dishService.getDishById(dish.id) ??
+          await dishService.saveDish(dish);
+      if (!context.mounted) return;
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => DishLogModal(dish: storedDish),
+      );
+    } catch (error) {
+      debugPrint('Error saving suggested dish: $error');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).screensDishCreateErrorSavingDish,
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   /// Handle viewing dish details (async version for DishSuggestionCard)

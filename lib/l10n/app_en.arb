@@ -340,6 +340,22 @@
   "@componentsChatAgentStepsModalFailed": {
     "description": "Generic failed label"
   },
+  "componentsChatAgentStepsModalSeverityLow": "Low",
+  "@componentsChatAgentStepsModalSeverityLow": {
+    "description": "Low severity label for agent modifications"
+  },
+  "componentsChatAgentStepsModalSeverityMedium": "Medium",
+  "@componentsChatAgentStepsModalSeverityMedium": {
+    "description": "Medium severity label for agent modifications"
+  },
+  "componentsChatAgentStepsModalSeverityHigh": "High",
+  "@componentsChatAgentStepsModalSeverityHigh": {
+    "description": "High severity label for agent modifications"
+  },
+  "componentsChatAgentStepsModalSeverityCritical": "Critical",
+  "@componentsChatAgentStepsModalSeverityCritical": {
+    "description": "Critical severity label for agent modifications"
+  },
   "componentsChatAgentStepsModalBadgeEmergencyOverrides": "Emergency overrides",
   "@componentsChatAgentStepsModalBadgeEmergencyOverrides": {
     "description": "Label for emergency override badge"
@@ -398,6 +414,33 @@
         "type": "String"
       }
     }
+  },
+  "componentsChatAgentStepsModalUnknownStep": "Unknown Step",
+  "@componentsChatAgentStepsModalUnknownStep": {
+    "description": "Fallback label when a processing step has no name"
+  },
+  "componentsChatAgentStepsModalNoReasonProvided": "No reason provided",
+  "@componentsChatAgentStepsModalNoReasonProvided": {
+    "description": "Fallback explanation for a skipped processing step"
+  },
+  "componentsChatAgentStepsModalNoSummaryAvailable": "No summary available",
+  "@componentsChatAgentStepsModalNoSummaryAvailable": {
+    "description": "Fallback when a processing step has no modification summary"
+  },
+  "componentsChatAgentStepsModalListItems": "List with {count} items",
+  "@componentsChatAgentStepsModalListItems": {
+    "description": "Summary of a list value in agent data",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMapKeys": "Map with {count} keys",
+  "@componentsChatAgentStepsModalMapKeys": {
+    "description": "Summary of a map value in agent data",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMoreItems": "... and {count} more items",
+  "@componentsChatAgentStepsModalMoreItems": {
+    "description": "Summary of additional hidden agent data entries",
+    "placeholders": {"count": {"type": "int"}}
   },
   "componentsCommonCopyToClipboard": "Copy to clipboard",
   "@componentsCommonCopyToClipboard": {
@@ -544,6 +587,14 @@
   "componentsChatChatInputIngredientsAdded": "Ingredients Added",
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Label for added ingredients preview in chat"
+  },
+  "componentsChatChatInputIngredientAdded": "Ingredient added to chat",
+  "@componentsChatChatInputIngredientAdded": {
+    "description": "Confirmation after adding a product as a chat ingredient"
+  },
+  "componentsChatChatInputAttachments": "Add attachments",
+  "@componentsChatChatInputAttachments": {
+    "description": "Accessibility label for opening the chat attachment menu"
   },
   "componentsChatChatInputScanBarcode": "Scan Barcode",
   "@componentsChatChatInputScanBarcode": {
@@ -1058,6 +1109,10 @@
   "@providersChatProviderAiThinking": {
     "description": "AI thinking status message"
   },
+  "providersChatProviderIngredientsPrompt": "What can I make with these ingredients?",
+  "@providersChatProviderIngredientsPrompt": {
+    "description": "Default chat message when only ingredients are attached"
+  },
   "providersChatProviderTestChatResponse": "Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.",
   "@providersChatProviderTestChatResponse": {
     "description": "Test response message when no API key is configured"
@@ -1105,6 +1160,10 @@
   "screensChatChatAssistant": "AI Chat Assistant",
   "@screensChatChatAssistant": {
     "description": "Chat assistant title"
+  },
+  "screensChatSystemAnalyzing": "SYSTEM ANALYZING ::",
+  "@screensChatSystemAnalyzing": {
+    "description": "Header for the chat processing indicator"
   },
   "screensChatChatCleared": "Chat history cleared",
   "@screensChatChatCleared": {

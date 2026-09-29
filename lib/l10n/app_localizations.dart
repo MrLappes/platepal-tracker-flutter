@@ -604,6 +604,30 @@ abstract class AppLocalizations {
   /// **'Failed'**
   String get componentsChatAgentStepsModalFailed;
 
+  /// Low severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get componentsChatAgentStepsModalSeverityLow;
+
+  /// Medium severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get componentsChatAgentStepsModalSeverityMedium;
+
+  /// High severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get componentsChatAgentStepsModalSeverityHigh;
+
+  /// Critical severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get componentsChatAgentStepsModalSeverityCritical;
+
   /// Label for emergency override badge
   ///
   /// In en, this message translates to:
@@ -669,6 +693,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time: {time}'**
   String componentsChatAgentStepsModalTimeLabel(String time);
+
+  /// Fallback label when a processing step has no name
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Step'**
+  String get componentsChatAgentStepsModalUnknownStep;
+
+  /// Fallback explanation for a skipped processing step
+  ///
+  /// In en, this message translates to:
+  /// **'No reason provided'**
+  String get componentsChatAgentStepsModalNoReasonProvided;
+
+  /// Fallback when a processing step has no modification summary
+  ///
+  /// In en, this message translates to:
+  /// **'No summary available'**
+  String get componentsChatAgentStepsModalNoSummaryAvailable;
+
+  /// Summary of a list value in agent data
+  ///
+  /// In en, this message translates to:
+  /// **'List with {count} items'**
+  String componentsChatAgentStepsModalListItems(int count);
+
+  /// Summary of a map value in agent data
+  ///
+  /// In en, this message translates to:
+  /// **'Map with {count} keys'**
+  String componentsChatAgentStepsModalMapKeys(int count);
+
+  /// Summary of additional hidden agent data entries
+  ///
+  /// In en, this message translates to:
+  /// **'... and {count} more items'**
+  String componentsChatAgentStepsModalMoreItems(int count);
 
   /// Common tooltip for copy to clipboard
   ///
@@ -862,6 +922,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ingredients Added'**
   String get componentsChatChatInputIngredientsAdded;
+
+  /// Confirmation after adding a product as a chat ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient added to chat'**
+  String get componentsChatChatInputIngredientAdded;
+
+  /// Accessibility label for opening the chat attachment menu
+  ///
+  /// In en, this message translates to:
+  /// **'Add attachments'**
+  String get componentsChatChatInputAttachments;
 
   /// Scan barcode button text
   ///
@@ -1723,6 +1795,12 @@ abstract class AppLocalizations {
   /// **'AI is thinking...'**
   String get providersChatProviderAiThinking;
 
+  /// Default chat message when only ingredients are attached
+  ///
+  /// In en, this message translates to:
+  /// **'What can I make with these ingredients?'**
+  String get providersChatProviderIngredientsPrompt;
+
   /// Test response message when no API key is configured
   ///
   /// In en, this message translates to:
@@ -1794,6 +1872,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI Chat Assistant'**
   String get screensChatChatAssistant;
+
+  /// Header for the chat processing indicator
+  ///
+  /// In en, this message translates to:
+  /// **'SYSTEM ANALYZING ::'**
+  String get screensChatSystemAnalyzing;
 
   /// Chat cleared success message
   ///

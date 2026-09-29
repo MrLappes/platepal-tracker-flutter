@@ -297,6 +297,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsChatAgentStepsModalFailed => 'Failed';
 
   @override
+  String get componentsChatAgentStepsModalSeverityLow => 'Low';
+
+  @override
+  String get componentsChatAgentStepsModalSeverityMedium => 'Medium';
+
+  @override
+  String get componentsChatAgentStepsModalSeverityHigh => 'High';
+
+  @override
+  String get componentsChatAgentStepsModalSeverityCritical => 'Critical';
+
+  @override
   String get componentsChatAgentStepsModalBadgeEmergencyOverrides =>
       'Emergency overrides';
 
@@ -336,6 +348,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String componentsChatAgentStepsModalTimeLabel(String time) {
     return 'Time: $time';
+  }
+
+  @override
+  String get componentsChatAgentStepsModalUnknownStep => 'Unknown Step';
+
+  @override
+  String get componentsChatAgentStepsModalNoReasonProvided =>
+      'No reason provided';
+
+  @override
+  String get componentsChatAgentStepsModalNoSummaryAvailable =>
+      'No summary available';
+
+  @override
+  String componentsChatAgentStepsModalListItems(int count) {
+    return 'List with $count items';
+  }
+
+  @override
+  String componentsChatAgentStepsModalMapKeys(int count) {
+    return 'Map with $count keys';
+  }
+
+  @override
+  String componentsChatAgentStepsModalMoreItems(int count) {
+    return '... and $count more items';
   }
 
   @override
@@ -463,6 +501,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get componentsChatChatInputIngredientsAdded => 'Ingredients Added';
+
+  @override
+  String get componentsChatChatInputIngredientAdded =>
+      'Ingredient added to chat';
+
+  @override
+  String get componentsChatChatInputAttachments => 'Add attachments';
 
   @override
   String get componentsChatChatInputScanBarcode => 'Scan Barcode';
@@ -960,6 +1005,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get providersChatProviderAiThinking => 'AI is thinking...';
 
   @override
+  String get providersChatProviderIngredientsPrompt =>
+      'What can I make with these ingredients?';
+
+  @override
   String get providersChatProviderTestChatResponse =>
       'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
 
@@ -1002,6 +1051,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensChatChatAssistant => 'AI Chat Assistant';
+
+  @override
+  String get screensChatSystemAnalyzing => 'SYSTEM ANALYZING ::';
 
   @override
   String get screensChatChatCleared => 'Chat history cleared';
