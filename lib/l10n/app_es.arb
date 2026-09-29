@@ -306,6 +306,22 @@
   "@componentsChatAgentStepsModalFailed": {
     "description": "Etiqueta genérica de fallo"
   },
+  "componentsChatAgentStepsModalSeverityLow": "Bajo",
+  "@componentsChatAgentStepsModalSeverityLow": {
+    "description": "Gravedad baja de una modificación del agente"
+  },
+  "componentsChatAgentStepsModalSeverityMedium": "Medio",
+  "@componentsChatAgentStepsModalSeverityMedium": {
+    "description": "Gravedad media de una modificación del agente"
+  },
+  "componentsChatAgentStepsModalSeverityHigh": "Alto",
+  "@componentsChatAgentStepsModalSeverityHigh": {
+    "description": "Gravedad alta de una modificación del agente"
+  },
+  "componentsChatAgentStepsModalSeverityCritical": "Crítico",
+  "@componentsChatAgentStepsModalSeverityCritical": {
+    "description": "Gravedad crítica de una modificación del agente"
+  },
   "componentsChatAgentStepsModalBadgeEmergencyOverrides": "Sobrescrituras de emergencia",
   "@componentsChatAgentStepsModalBadgeEmergencyOverrides": {
     "description": "Etiqueta para sobrescrituras de emergencia"
@@ -364,6 +380,33 @@
         "type": "String"
       }
     }
+  },
+  "componentsChatAgentStepsModalUnknownStep": "Paso desconocido",
+  "@componentsChatAgentStepsModalUnknownStep": {
+    "description": "Etiqueta para un paso de procesamiento sin nombre"
+  },
+  "componentsChatAgentStepsModalNoReasonProvided": "No se indicó ningún motivo",
+  "@componentsChatAgentStepsModalNoReasonProvided": {
+    "description": "Motivo predeterminado de un paso omitido"
+  },
+  "componentsChatAgentStepsModalNoSummaryAvailable": "No hay ningún resumen disponible",
+  "@componentsChatAgentStepsModalNoSummaryAvailable": {
+    "description": "Texto cuando no hay resumen de modificaciones"
+  },
+  "componentsChatAgentStepsModalListItems": "Lista con {count} elementos",
+  "@componentsChatAgentStepsModalListItems": {
+    "description": "Resumen de una lista en los datos del agente",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMapKeys": "Mapa con {count} claves",
+  "@componentsChatAgentStepsModalMapKeys": {
+    "description": "Resumen de un mapa en los datos del agente",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMoreItems": "... y {count} elementos más",
+  "@componentsChatAgentStepsModalMoreItems": {
+    "description": "Resumen de entradas adicionales ocultas",
+    "placeholders": {"count": {"type": "int"}}
   },
   "componentsCommonCopyToClipboard": "Copiar al portapapeles",
   "@componentsCommonCopyToClipboard": {
@@ -541,6 +584,14 @@
   "componentsChatChatInputIngredientsAdded": "Ingredientes agregados",
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Ingredientes agregados"
+  },
+  "componentsChatChatInputIngredientAdded": "Ingrediente añadido al chat",
+  "@componentsChatChatInputIngredientAdded": {
+    "description": "Confirmación al añadir un producto como ingrediente al chat"
+  },
+  "componentsChatChatInputAttachments": "Añadir archivos adjuntos",
+  "@componentsChatChatInputAttachments": {
+    "description": "Etiqueta del menú de archivos adjuntos del chat"
   },
   "componentsChatChatInputScanBarcode": "Escanear Código de Barras",
   "@componentsChatChatInputScanBarcode": {
@@ -1032,6 +1083,10 @@
   "@providersChatProviderAiThinking": {
     "description": "La IA está pensando..."
   },
+  "providersChatProviderIngredientsPrompt": "¿Qué puedo preparar con estos ingredientes?",
+  "@providersChatProviderIngredientsPrompt": {
+    "description": "Mensaje predeterminado para enviar solo ingredientes"
+  },
   "providersChatProviderTestChatResponse": "¡Gracias por probar PlatePal! Esta es una respuesta de prueba para mostrarte cómo funciona nuestro asistente IA. Para obtener consejos nutricionales reales y sugerencias de comidas, por favor configura tu clave API de OpenAI en ajustes.",
   "@providersChatProviderTestChatResponse": {
     "description": "¡Gracias por probar PlatePal! Esta es una respuesta de prueba para mostrarte cómo funciona nuestro asistente IA. Para obtener consejos nutricionales reales y sugerencias de comidas, por favor configura tu clave API de OpenAI en ajustes."
@@ -1079,6 +1134,10 @@
   "screensChatChatAssistant": "Asistente de Chat IA",
   "@screensChatChatAssistant": {
     "description": "Asistente de Chat IA"
+  },
+  "screensChatSystemAnalyzing": "SISTEMA ANALIZANDO ::",
+  "@screensChatSystemAnalyzing": {
+    "description": "Encabezado del indicador de procesamiento del chat"
   },
   "screensChatChatCleared": "Historial del chat eliminado",
   "@screensChatChatCleared": {

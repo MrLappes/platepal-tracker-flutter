@@ -15,7 +15,9 @@ class AgentStepsModal extends StatelessWidget {
     final steps = metadata['stepResults'] as List? ?? [];
     final thinkingSteps = metadata['thinkingSteps'] as List? ?? [];
     final processingTime = metadata['processingTime'] as int? ?? 0;
-    final botType = metadata['botType'] as String? ?? 'assistant';
+    final botType =
+        metadata['botType'] as String? ??
+        l10n.componentsChatMessageBubbleAssistant;
     final deepSearchEnabled = metadata['deepSearchEnabled'] as bool? ?? false;
     return Dialog.fullscreen(
       child: SafeArea(
@@ -496,7 +498,10 @@ class AgentStepsModal extends StatelessWidget {
     int stepNumber,
     Map<String, dynamic> step,
   ) {
-    final stepName = step['stepName'] as String? ?? 'Unknown Step';
+    final l10n = AppLocalizations.of(context);
+    final stepName =
+        step['stepName'] as String? ??
+        l10n.componentsChatAgentStepsModalUnknownStep;
     final success = step['success'] as bool? ?? false;
     final data = step['data'] as Map<String, dynamic>? ?? {};
     final error = step['error'] as Map<String, dynamic>?;
@@ -515,20 +520,24 @@ class AgentStepsModal extends StatelessWidget {
     if (isSkipped) {
       statusColor = Colors.orange;
       statusIcon = Icons.skip_next;
-      statusText = 'Skipped';
+      statusText = l10n.componentsChatAgentStepsModalStatusSkipped;
     } else if (isErrorHandlingStep) {
       // Error handling steps should be shown as warning/error even if they succeeded
       statusColor = Colors.red;
       statusIcon = Icons.error_outline;
-      statusText = success ? 'Error recovered' : 'Error handling failed';
+      statusText =
+          success
+              ? l10n.componentsChatAgentStepsModalStatusErrorRecovered
+              : l10n.componentsChatAgentStepsModalStatusErrorHandlingFailed;
     } else if (success) {
       statusColor = Colors.green;
       statusIcon = Icons.check_circle;
-      statusText = 'Completed successfully';
+      statusText =
+          l10n.componentsChatAgentStepsModalStatusCompletedSuccessfully;
     } else {
       statusColor = Colors.red;
       statusIcon = Icons.error;
-      statusText = 'Failed';
+      statusText = l10n.componentsChatAgentStepsModalFailed;
     }
 
     return Card(
@@ -594,7 +603,9 @@ class AgentStepsModal extends StatelessWidget {
                       context,
                     ).componentsChatAgentStepsModalSkipDetails,
                     {
-                      'reason': skipReason ?? 'No reason provided',
+                      'reason':
+                          skipReason ??
+                          l10n.componentsChatAgentStepsModalNoReasonProvided,
                       'stepName': stepName,
                       if (data.containsKey('contextRequirements'))
                         'contextRequirements': data['contextRequirements'],
@@ -683,13 +694,17 @@ class AgentStepsModal extends StatelessWidget {
     );
   }
 
-  String _formatValue(dynamic value) {
+  String _formatValue(BuildContext context, dynamic value) {
     if (value is String) {
       return value.length > 100 ? '${value.substring(0, 100)}...' : value;
     } else if (value is List) {
-      return 'List with ${value.length} items';
+      return AppLocalizations.of(
+        context,
+      ).componentsChatAgentStepsModalListItems(value.length);
     } else if (value is Map) {
-      return 'Map with ${value.length} keys';
+      return AppLocalizations.of(
+        context,
+      ).componentsChatAgentStepsModalMapKeys(value.length);
     }
     return value.toString();
   }
@@ -711,13 +726,12 @@ class AgentStepsModal extends StatelessWidget {
       final sanitizedData = _sanitizeDataForJson(data);
       try {
         jsonString = const JsonEncoder.withIndent('  ').convert(sanitizedData);
-      } catch (e2) {
-        // Last resort: convert everything to strings
-        jsonString =
-            'Error serializing data: ${e2.toString()}\n\nRaw data:\n${data.toString()}';
+      } catch (_) {
+        jsonString = data.toString();
       }
     }
-    final displayString = isRaw ? jsonString : _formatDataForDisplay(data);
+    final displayString =
+        isRaw ? jsonString : _formatDataForDisplay(context, data);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -814,7 +828,10 @@ class AgentStepsModal extends StatelessWidget {
       if (modificationsList.isEmpty) return const SizedBox();
 
       final modificationSummary =
-          data['modificationSummary'] as String? ?? 'No summary available';
+          data['modificationSummary'] as String? ??
+          AppLocalizations.of(
+            context,
+          ).componentsChatAgentStepsModalNoSummaryAvailable;
 
       // Find most severe modification for border color
       String highestSeverity = 'low';
@@ -839,7 +856,9 @@ class AgentStepsModal extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '🔧 Step Modifications',
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalStepModifications,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -853,7 +872,10 @@ class AgentStepsModal extends StatelessWidget {
                       context,
                       const JsonEncoder.withIndent('  ').convert(modifications),
                     ),
-                tooltip: 'Copy modifications',
+                tooltip:
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalCopyModifications,
               ),
             ],
           ),
@@ -931,7 +953,10 @@ class AgentStepsModal extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  severity.toUpperCase(),
+                                  _severityLabel(
+                                    AppLocalizations.of(context),
+                                    severity,
+                                  ).toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: _getModificationSeverityColor(
@@ -991,7 +1016,9 @@ class AgentStepsModal extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '🤖 Enhanced System Prompt',
+                  AppLocalizations.of(
+                    context,
+                  ).componentsChatAgentStepsModalEnhancedSystemPrompt,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -1002,7 +1029,10 @@ class AgentStepsModal extends StatelessWidget {
                 icon: const Icon(Icons.copy, size: 18),
                 onPressed:
                     () => _copyToClipboard(context, enhancedSystemPrompt),
-                tooltip: 'Copy enhanced system prompt',
+                tooltip:
+                    AppLocalizations.of(
+                      context,
+                    ).componentsChatAgentStepsModalCopyEnhancedPrompt,
               ),
             ],
           ),
@@ -1045,7 +1075,9 @@ class AgentStepsModal extends StatelessWidget {
                     onPressed:
                         () => _showFullDataDialog(
                           context,
-                          'Enhanced System Prompt',
+                          AppLocalizations.of(
+                            context,
+                          ).componentsChatAgentStepsModalEnhancedSystemPrompt,
                           enhancedSystemPrompt,
                         ),
                     icon: const Icon(Icons.visibility, size: 16),
@@ -1074,16 +1106,23 @@ class AgentStepsModal extends StatelessWidget {
     }
   }
 
-  String _formatDataForDisplay(Map<String, dynamic> data) {
+  String _formatDataForDisplay(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
     final buffer = StringBuffer();
     var count = 0;
     data.forEach((key, value) {
       if (count >= 3) return; // Show only first 3 items in summary
-      buffer.writeln('$key: ${_formatValue(value)}');
+      buffer.writeln('$key: ${_formatValue(context, value)}');
       count++;
     });
     if (data.length > 3) {
-      buffer.writeln('... and ${data.length - 3} more items');
+      buffer.writeln(
+        AppLocalizations.of(
+          context,
+        ).componentsChatAgentStepsModalMoreItems(data.length - 3),
+      );
     }
     return buffer.toString().trim();
   }
@@ -1186,7 +1225,10 @@ class AgentStepsModal extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.copy),
                     onPressed: () => _copyToClipboard(context, content),
-                    tooltip: 'Copy to clipboard',
+                    tooltip:
+                        AppLocalizations.of(
+                          context,
+                        ).componentsCommonCopyToClipboard,
                   ),
                 ],
               ),
@@ -1339,6 +1381,7 @@ class AgentStepsModal extends StatelessWidget {
     ThemeData theme,
     Map<String, dynamic> summary,
   ) {
+    final l10n = AppLocalizations.of(context);
     final totalMods = summary['totalModifications'] as int? ?? 0;
     final hasEmergency = summary['hasEmergencyOverrides'] as bool? ?? false;
     final hasAi = summary['hasAiValidations'] as bool? ?? false;
@@ -1354,21 +1397,34 @@ class AgentStepsModal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Processing Summary',
+            l10n.componentsChatAgentStepsModalProcessingSummary,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Total modifications: $totalMods',
+            l10n.componentsChatAgentStepsModalTotalModifications(totalMods),
             style: theme.textTheme.bodySmall,
           ),
           if (hasEmergency)
-            _buildSummaryBadge('🚨', 'Emergency overrides', Colors.red),
-          if (hasAi) _buildSummaryBadge('🤖', 'AI validations', Colors.blue),
+            _buildSummaryBadge(
+              '🚨',
+              l10n.componentsChatAgentStepsModalBadgeEmergencyOverrides,
+              Colors.red,
+            ),
+          if (hasAi)
+            _buildSummaryBadge(
+              '🤖',
+              l10n.componentsChatAgentStepsModalBadgeAiValidations,
+              Colors.blue,
+            ),
           if (hasAuto)
-            _buildSummaryBadge('🔧', 'Automatic fixes', Colors.green),
+            _buildSummaryBadge(
+              '🔧',
+              l10n.componentsChatAgentStepsModalBadgeAutomaticFixes,
+              Colors.green,
+            ),
         ],
       ),
     );
@@ -1403,6 +1459,7 @@ class AgentStepsModal extends StatelessWidget {
     int index,
     Map<String, dynamic> modification,
   ) {
+    final l10n = AppLocalizations.of(context);
     final type = modification['type'] as String? ?? '';
     final severity = modification['severity'] as String? ?? '';
     final stepName = modification['stepName'] as String? ?? '';
@@ -1448,7 +1505,7 @@ class AgentStepsModal extends StatelessWidget {
             Text(severityEmoji, style: const TextStyle(fontSize: 12)),
             const SizedBox(width: 4),
             Text(
-              '$stepName • ${severity.toUpperCase()}',
+              '$stepName • ${_severityLabel(l10n, severity).toUpperCase()}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: severityColor,
                 fontWeight: FontWeight.w500,
@@ -1459,7 +1516,7 @@ class AgentStepsModal extends StatelessWidget {
               const Icon(Icons.error, size: 14, color: Colors.red),
               const SizedBox(width: 4),
               Text(
-                'FAILED',
+                l10n.componentsChatAgentStepsModalFailed.toUpperCase(),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
@@ -1476,7 +1533,7 @@ class AgentStepsModal extends StatelessWidget {
               children: [
                 if (technicalDetails != null) ...[
                   Text(
-                    'Technical Details',
+                    l10n.componentsChatAgentStepsModalTechnicalDetails,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -1502,7 +1559,9 @@ class AgentStepsModal extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'ID: ${modification['id'] ?? 'unknown'}',
+                      l10n.componentsChatAgentStepsModalIdLabel(
+                        (modification['id'] ?? '-').toString(),
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontFamily: 'monospace',
                         color: theme.colorScheme.onSurface.withValues(
@@ -1513,7 +1572,11 @@ class AgentStepsModal extends StatelessWidget {
                     if (timestamp != null) ...[
                       const SizedBox(width: 16),
                       Text(
-                        'Time: ${DateTime.parse(timestamp).toLocal().toString().split('.')[0]}',
+                        l10n.componentsChatAgentStepsModalTimeLabel(
+                          DateTime.parse(
+                            timestamp,
+                          ).toLocal().toString().split('.')[0],
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.6,
@@ -1537,6 +1600,7 @@ class AgentStepsModal extends StatelessWidget {
     ThemeData theme,
     Map<String, dynamic> modification,
   ) {
+    final l10n = AppLocalizations.of(context);
     final beforeData = modification['beforeData'] as Map<String, dynamic>?;
     final afterData = modification['afterData'] as Map<String, dynamic>?;
 
@@ -1544,7 +1608,7 @@ class AgentStepsModal extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Data Changes',
+          l10n.componentsChatAgentStepsModalDataChanges,
           style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -1567,7 +1631,7 @@ class AgentStepsModal extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Before',
+                        l10n.componentsChatAgentStepsModalBefore,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.red[700],
@@ -1575,7 +1639,7 @@ class AgentStepsModal extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatDataForDisplay(beforeData),
+                        _formatDataForDisplay(context, beforeData),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontFamily: 'monospace',
                           fontSize: 11,
@@ -1602,7 +1666,7 @@ class AgentStepsModal extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'After',
+                        l10n.componentsChatAgentStepsModalAfter,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.green[700],
@@ -1610,7 +1674,7 @@ class AgentStepsModal extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatDataForDisplay(afterData),
+                        _formatDataForDisplay(context, afterData),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontFamily: 'monospace',
                           fontSize: 11,
@@ -1654,6 +1718,21 @@ class AgentStepsModal extends StatelessWidget {
         return '🚨';
       default:
         return '⚙️';
+    }
+  }
+
+  String _severityLabel(AppLocalizations l10n, String severity) {
+    switch (severity) {
+      case 'low':
+        return l10n.componentsChatAgentStepsModalSeverityLow;
+      case 'medium':
+        return l10n.componentsChatAgentStepsModalSeverityMedium;
+      case 'high':
+        return l10n.componentsChatAgentStepsModalSeverityHigh;
+      case 'critical':
+        return l10n.componentsChatAgentStepsModalSeverityCritical;
+      default:
+        return severity;
     }
   }
 

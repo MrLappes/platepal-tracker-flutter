@@ -266,6 +266,22 @@
   "@componentsChatAgentStepsModalFailed": {
     "description": "Generic failed label"
   },
+  "componentsChatAgentStepsModalSeverityLow": "Niedrig",
+  "@componentsChatAgentStepsModalSeverityLow": {
+    "description": "Niedriger Schweregrad einer Agentenänderung"
+  },
+  "componentsChatAgentStepsModalSeverityMedium": "Mittel",
+  "@componentsChatAgentStepsModalSeverityMedium": {
+    "description": "Mittlerer Schweregrad einer Agentenänderung"
+  },
+  "componentsChatAgentStepsModalSeverityHigh": "Hoch",
+  "@componentsChatAgentStepsModalSeverityHigh": {
+    "description": "Hoher Schweregrad einer Agentenänderung"
+  },
+  "componentsChatAgentStepsModalSeverityCritical": "Kritisch",
+  "@componentsChatAgentStepsModalSeverityCritical": {
+    "description": "Kritischer Schweregrad einer Agentenänderung"
+  },
   "componentsChatAgentStepsModalBadgeEmergencyOverrides": "Notfall-Überschreibungen",
   "@componentsChatAgentStepsModalBadgeEmergencyOverrides": {
     "description": "Label for emergency override badge"
@@ -324,6 +340,33 @@
         "type": "String"
       }
     }
+  },
+  "componentsChatAgentStepsModalUnknownStep": "Unbekannter Schritt",
+  "@componentsChatAgentStepsModalUnknownStep": {
+    "description": "Bezeichnung für einen Verarbeitungsschritt ohne Namen"
+  },
+  "componentsChatAgentStepsModalNoReasonProvided": "Kein Grund angegeben",
+  "@componentsChatAgentStepsModalNoReasonProvided": {
+    "description": "Standardgrund für einen übersprungenen Schritt"
+  },
+  "componentsChatAgentStepsModalNoSummaryAvailable": "Keine Zusammenfassung verfügbar",
+  "@componentsChatAgentStepsModalNoSummaryAvailable": {
+    "description": "Standardtext ohne Änderungszusammenfassung"
+  },
+  "componentsChatAgentStepsModalListItems": "Listeneinträge: {count}",
+  "@componentsChatAgentStepsModalListItems": {
+    "description": "Zusammenfassung einer Liste in den Agentendaten",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMapKeys": "Zuordnungseinträge: {count}",
+  "@componentsChatAgentStepsModalMapKeys": {
+    "description": "Zusammenfassung einer Zuordnung in den Agentendaten",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMoreItems": "Weitere Einträge: {count}",
+  "@componentsChatAgentStepsModalMoreItems": {
+    "description": "Zusammenfassung zusätzlicher verborgener Agentendaten",
+    "placeholders": {"count": {"type": "int"}}
   },
   "componentsCommonCopyToClipboard": "In die Zwischenablage kopieren",
   "@componentsCommonCopyToClipboard": {
@@ -501,6 +544,14 @@
   "componentsChatChatInputIngredientsAdded": "Zutaten hinzugefügt",
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Zutaten hinzugefügt"
+  },
+  "componentsChatChatInputIngredientAdded": "Zutat zum Chat hinzugefügt",
+  "@componentsChatChatInputIngredientAdded": {
+    "description": "Bestätigung nach dem Hinzufügen eines Produkts als Chat-Zutat"
+  },
+  "componentsChatChatInputAttachments": "Anhänge hinzufügen",
+  "@componentsChatChatInputAttachments": {
+    "description": "Beschriftung für das Chat-Anhangmenü"
   },
   "componentsChatChatInputScanBarcode": "Barcode scannen",
   "@componentsChatChatInputScanBarcode": {
@@ -1032,6 +1083,10 @@
   "@providersChatProviderAiThinking": {
     "description": "KI denkt nach..."
   },
+  "providersChatProviderIngredientsPrompt": "Was kann ich mit diesen Zutaten zubereiten?",
+  "@providersChatProviderIngredientsPrompt": {
+    "description": "Standardnachricht, wenn nur Zutaten angehängt sind"
+  },
   "providersChatProviderTestChatResponse": "Danke, dass Sie PlatePal ausprobieren! Dies ist eine Testantwort, um Ihnen zu zeigen, wie unser KI-Assistent funktioniert. Um echte Ernährungsberatung und Mahlzeitenvorschläge zu erhalten, konfigurieren Sie bitte Ihren OpenAI API-Schlüssel in den Einstellungen.",
   "@providersChatProviderTestChatResponse": {
     "description": "Danke, dass Sie PlatePal ausprobieren! Dies ist eine Testantwort, um Ihnen zu zeigen, wie unser KI-Assistent funktioniert. Um echte Ernährungsberatung und Mahlzeitenvorschläge zu erhalten, konfigurieren Sie bitte Ihren OpenAI API-Schlüssel in den Einstellungen."
@@ -1079,6 +1134,10 @@
   "screensChatChatAssistant": "KI-Chat-Assistent",
   "@screensChatChatAssistant": {
     "description": "KI-Chat-Assistent"
+  },
+  "screensChatSystemAnalyzing": "SYSTEM ANALYSIERT ::",
+  "@screensChatSystemAnalyzing": {
+    "description": "Überschrift der Chat-Verarbeitungsanzeige"
   },
   "screensChatChatCleared": "Chat-Verlauf gelöscht",
   "@screensChatChatCleared": {

@@ -105,7 +105,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 8),
-                              Text('Edit Profile'),
+                              Text(
+                                localizations
+                                    .componentsChatUserProfileCustomizationDialogEditUserProfile,
+                              ),
                             ],
                           ),
                         ),
@@ -331,7 +334,10 @@ class _ChatScreenState extends State<ChatScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final currentStep = chatProvider.currentAgentStep;
-    final message = chatProvider.currentTypingMessage ?? 'AI is thinking...';
+    final localizations = AppLocalizations.of(context);
+    final message =
+        chatProvider.currentTypingMessage ??
+        localizations.providersChatProviderAiThinking;
     final thinkingSteps = chatProvider.currentThinkingSteps;
 
     return Container(
@@ -354,7 +360,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(width: 12),
               Text(
-                'SYSTEM ANALYZING ::',
+                localizations.screensChatSystemAnalyzing,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w900,

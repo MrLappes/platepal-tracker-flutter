@@ -227,7 +227,20 @@ class ChatProvider extends ChangeNotifier {
     BuildContext? context,
     List<UserIngredient>? userIngredients,
   }) async {
-    if (content.trim().isEmpty && imageUrl == null) return;
+    if (_isLoading ||
+        (content.trim().isEmpty &&
+            imageUrl == null &&
+            (userIngredients == null || userIngredients.isEmpty))) {
+      return;
+    }
+    final localizations = context == null ? null : AppLocalizations.of(context);
+    final messageContent =
+        content.trim().isEmpty && imageUrl == null
+            ? localizations?.providersChatProviderIngredientsPrompt ??
+                'What can I make with these ingredients?'
+            : content;
+    _isLoading = true;
+    notifyListeners();
 
     // Debug: Print what we received
     debugPrint(
@@ -241,44 +254,44 @@ class ChatProvider extends ChangeNotifier {
       }
     }
 
-    // Always reload agent settings from SharedPreferences before sending a message
-    await _loadAgentSettings();
-
-    // Ensure agent service is initialized if agent mode is enabled
-    if (_agentModeEnabled && _chatAgentService == null) {
-      await _initializeAgentService();
-    } // Create user message
-    final userMessage = ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      content: content,
-      sender: MessageSender.user,
-      timestamp: DateTime.now(),
-      status: MessageStatus.sending,
-      imageUrl: imageUrl,
-      metadata:
-          userIngredients != null && userIngredients.isNotEmpty
-              ? {
-                'userIngredients':
-                    userIngredients.map((e) => e.toJson()).toList(),
-              }
-              : null,
-    );
-
-    _messages.add(userMessage);
-    notifyListeners();
-
+    ChatMessage? userMessage;
     try {
+      // Always reload agent settings from SharedPreferences before sending a message
+      await _loadAgentSettings();
+
+      // Ensure agent service is initialized if agent mode is enabled
+      if (_agentModeEnabled && _chatAgentService == null) {
+        await _initializeAgentService();
+      }
+      final currentMessage = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        content: messageContent,
+        sender: MessageSender.user,
+        timestamp: DateTime.now(),
+        status: MessageStatus.sending,
+        imageUrl: imageUrl,
+        metadata:
+            userIngredients != null && userIngredients.isNotEmpty
+                ? {
+                  'userIngredients':
+                      userIngredients.map((e) => e.toJson()).toList(),
+                }
+                : null,
+      );
+      userMessage = currentMessage;
+
+      _messages.add(currentMessage);
+      notifyListeners();
+
       // Mark message as sent
-      final sentMessage = userMessage.copyWith(status: MessageStatus.sent);
-      final index = _messages.indexWhere((m) => m.id == userMessage.id);
+      final sentMessage = currentMessage.copyWith(status: MessageStatus.sent);
+      final index = _messages.indexWhere((m) => m.id == currentMessage.id);
       if (index != -1) {
         _messages[index] = sentMessage;
       }
-      _isLoading = true;
       _currentTypingMessage =
-          context != null
-              // ignore: use_build_context_synchronously
-              ? AppLocalizations.of(context).providersChatProviderAiThinking
+          localizations != null
+              ? localizations.providersChatProviderAiThinking
               : 'AI is thinking...';
       notifyListeners();
       String response;
@@ -289,13 +302,12 @@ class ChatProvider extends ChangeNotifier {
           _chatAgentService != null) {
         debugPrint('🧠 [ChatProvider] Using full agent pipeline for reply');
         final agentResponse = await _processWithAgentService(
-          content,
+          messageContent,
           imageUrl,
           userIngredients,
           localizedFallbacks:
-              context != null
-                  // ignore: use_build_context_synchronously
-                  ? _buildLocalizedFallbacks(AppLocalizations.of(context))
+              localizations != null
+                  ? _buildLocalizedFallbacks(localizations)
                   : null,
         );
         response = agentResponse['response'] as String;
@@ -307,7 +319,7 @@ class ChatProvider extends ChangeNotifier {
       } else if (_isApiKeyConfigured) {
         debugPrint('💬 [ChatProvider] Using fallback OpenAI service');
         response = await _openAIService.sendMessage(
-          content,
+          messageContent,
           imageUrl: imageUrl,
         );
         responseMetadata = {
@@ -326,11 +338,8 @@ class ChatProvider extends ChangeNotifier {
       } else {
         debugPrint('📝 [ChatProvider] Using test response');
         response =
-            context != null
-                // ignore: use_build_context_synchronously
-                ? AppLocalizations.of(
-                  context,
-                ).providersChatProviderTestChatResponse
+            localizations != null
+                ? localizations.providersChatProviderTestChatResponse
                 : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
         await Future.delayed(const Duration(milliseconds: 1500));
         responseMetadata = null;
@@ -351,10 +360,14 @@ class ChatProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error sending message: $e');
       // Mark message as failed
-      final failedMessage = userMessage.copyWith(status: MessageStatus.failed);
-      final index = _messages.indexWhere((m) => m.id == userMessage.id);
-      if (index != -1) {
-        _messages[index] = failedMessage;
+      if (userMessage != null) {
+        final failedMessage = userMessage.copyWith(
+          status: MessageStatus.failed,
+        );
+        final index = _messages.indexWhere((m) => m.id == failedMessage.id);
+        if (index != -1) {
+          _messages[index] = failedMessage;
+        }
       }
     } finally {
       _isLoading = false;
