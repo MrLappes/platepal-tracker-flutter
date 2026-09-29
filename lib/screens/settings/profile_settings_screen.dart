@@ -3,6 +3,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile.dart';
+import '../../utils/nutrition_calculator.dart';
 import '../../utils/service_extensions.dart';
 import '../../services/health_service.dart';
 
@@ -309,7 +310,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
 
     setState(() {
-      _selectedGender = profile.gender;
+      final gender = profile.gender.toLowerCase();
+      // The dropdown asserts if its value is not one of its items.
+      _selectedGender =
+          gender == 'male' || gender == 'female' ? gender : 'other';
       _selectedActivityLevel = profile.activityLevel;
       _selectedFitnessGoal = profile.goals.goal;
       _selectedUnitSystem = profile.preferredUnit;
@@ -331,10 +335,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       double weight = double.parse(_weightController.text);
       double targetWeight = double.parse(_targetWeightController.text);
 
-      // Store previous weight and height for history tracking
-      final double? previousWeight = _originalProfile?.weight;
-      final double? previousHeight = _originalProfile?.height;
-
       if (_selectedUnitSystem == 'imperial') {
         height = height * 2.54; // inches to cm
         weight = weight / 2.2046; // lbs to kg
@@ -343,26 +343,31 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
       // Calculate nutrition targets
       final age = int.parse(_ageController.text);
-      final bmr = _calculateBMR(weight, height, age, _selectedGender);
-      final tdee = _calculateTDEE(bmr, _selectedActivityLevel);
-      final dailyCalories = _calculateCaloriesForGoal(
-        tdee,
-        _selectedFitnessGoal,
+      final bmr = mifflinStJeorBmr(
+        weightKg: weight,
+        heightCm: height,
+        age: age,
+        gender: _selectedGender,
       );
-      final macros = _calculateMacroTargets(
-        dailyCalories,
-        weight,
-        _selectedFitnessGoal,
-      ); // Use a constant email instead of getting from form
+      final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
+      final dailyCalories = calorieTargetForGoal(tdee, _selectedFitnessGoal);
       const defaultEmail = "user@platepal.app";
 
       // Get current user ID from session service
+      final profileService = context.userProfileService;
       final prefs = await SharedPreferences.getInstance();
       final userSessionService = UserSessionService(prefs);
       final currentUserId = userSessionService.getCurrentUserId();
+      final profileId = _originalProfile?.id ?? currentUserId;
+
+      // Macro customization may have changed the split since this screen loaded.
+      final savedGoals =
+          (await profileService.getUserProfile(profileId))?.goals ??
+          _originalProfile?.goals;
+      final macros = macroTargetsFor(dailyCalories, previous: savedGoals);
 
       final updatedProfile = UserProfile(
-        id: _originalProfile?.id ?? currentUserId,
+        id: profileId,
         name: _nameController.text.trim(),
         email: defaultEmail, // Use default email
         age: age,
@@ -374,10 +379,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           goal: _selectedFitnessGoal,
           targetWeight: targetWeight,
           targetCalories: dailyCalories,
-          targetProtein: macros['protein']!,
-          targetCarbs: macros['carbs']!,
-          targetFat: macros['fat']!,
-          targetFiber: macros['fiber']!,
+          targetProtein: macros.protein,
+          targetCarbs: macros.carbs,
+          targetFat: macros.fat,
+          targetFiber: macros.fiber,
         ),
         preferences:
             _originalProfile?.preferences ?? const DietaryPreferences(),
@@ -385,29 +390,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         createdAt: _originalProfile?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      if (!mounted) return;
-      // Save profile to SQLite database
-      await context.userProfileService.saveUserProfile(updatedProfile);
-
-      // Always update metrics if body fat was entered, otherwise only update if weight or height changed
       final bodyFat =
           _bodyFatController.text.isNotEmpty
               ? double.tryParse(_bodyFatController.text)
               : null;
 
-      final bool weightChanged =
-          previousWeight != null && (weight - previousWeight).abs() > 0.1;
-      final bool heightChanged =
-          previousHeight != null && (height - previousHeight).abs() > 0.1;
-
-      if ((weightChanged || heightChanged || bodyFat != null) && mounted) {
-        await context.userProfileService.updateUserMetrics(
-          userId: updatedProfile.id,
-          weight: weight,
-          height: height,
-          bodyFat: bodyFat,
-        );
-      }
+      if (!mounted) return;
+      // Also records a metrics history row if weight/height/body fat changed.
+      await context.userProfileService.saveUserProfile(
+        updatedProfile,
+        bodyFat: bodyFat,
+      );
 
       // Update the original profile reference
       _originalProfile = updatedProfile;
@@ -467,59 +460,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           ),
     );
     return result ?? false;
-  }
-
-  // Calculation methods (simplified versions)
-  double _calculateBMR(double weight, double height, int age, String gender) {
-    if (gender == 'male') {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-    }
-  }
-
-  double _calculateTDEE(double bmr, String activityLevel) {
-    final multipliers = {
-      'sedentary': 1.2,
-      'lightly_active': 1.375,
-      'moderately_active': 1.55,
-      'very_active': 1.725,
-      'extra_active': 1.9,
-    };
-    return bmr * (multipliers[activityLevel] ?? 1.55);
-  }
-
-  double _calculateCaloriesForGoal(double tdee, String goal) {
-    switch (goal) {
-      case 'lose_weight':
-        return tdee - 500; // 500 calorie deficit
-      case 'gain_weight':
-        return tdee + 300; // 300 calorie surplus
-      case 'build_muscle':
-        return tdee + 200; // 200 calorie surplus
-      default:
-        return tdee; // maintain weight
-    }
-  }
-
-  Map<String, double> _calculateMacroTargets(
-    double calories,
-    double weight,
-    String goal,
-  ) {
-    // High protein diet: 40% protein, 30% carbs, 30% fat
-    // This helps preserve muscle mass during weight loss and supports muscle building
-
-    double protein =
-        (calories * 0.40) / 4; // 40% of calories from protein (4 cal/g)
-    double carbs =
-        (calories * 0.30) / 4; // 30% of calories from carbs (4 cal/g)
-    double fat = (calories * 0.30) / 9; // 30% of calories from fat (9 cal/g)
-
-    // Calculate fiber target based on calories (14g per 1000 calories)
-    double fiber = (calories / 1000) * 14;
-
-    return {'protein': protein, 'carbs': carbs, 'fat': fat, 'fiber': fiber};
   }
 
   Future<void> _navigateToMacroCustomization() async {
@@ -811,6 +751,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         value: 'female',
                         child: Text(
                           l10n.screensSettingsImportProfileCompletionFemale,
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'other',
+                        child: Text(
+                          l10n.screensSettingsImportProfileCompletionOther,
                         ),
                       ),
                     ],
@@ -1118,8 +1064,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     final actualWeight =
         _selectedUnitSystem == 'metric' ? weight : weight / 2.2046;
     final bmi = actualWeight / ((actualHeight / 100) * (actualHeight / 100));
-    final bmr = _calculateBMR(actualWeight, actualHeight, age, _selectedGender);
-    final tdee = _calculateTDEE(bmr, _selectedActivityLevel);
+    final bmr = mifflinStJeorBmr(
+      weightKg: actualWeight,
+      heightCm: actualHeight,
+      age: age,
+      gender: _selectedGender,
+    );
+    final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
 
     return Card(
       color: Theme.of(

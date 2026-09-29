@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import '../models/user_profile.dart';
 import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
+import '../utils/nutrition_calculator.dart';
 import 'health_service.dart';
 
 class CalorieExpenditureService {
@@ -13,18 +14,24 @@ class CalorieExpenditureService {
 
   final HealthService _healthService = HealthService();
   late final UserProfileRepository _userProfileRepository;
-  bool _isInitialized = false;
+  Future<void>? _initialization;
 
-  /// Initialize the service with required dependencies
-  Future<void> initialize() async {
-    if (_isInitialized) return;
+  /// Initialize the service with required dependencies.
+  ///
+  /// Concurrent callers share one initialization.
+  Future<void> initialize() => _initialization ??= _initialize();
 
-    final prefs = await SharedPreferences.getInstance();
-    final userSessionService = UserSessionService(prefs);
-    _userProfileRepository = UserProfileRepository(
-      userSessionService: userSessionService,
-    );
-    _isInitialized = true;
+  Future<void> _initialize() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userSessionService = UserSessionService(prefs);
+      _userProfileRepository = UserProfileRepository(
+        userSessionService: userSessionService,
+      );
+    } catch (_) {
+      _initialization = null;
+      rethrow;
+    }
   }
 
   /// Get calories burned for a specific date, with fallback to estimated values
@@ -139,13 +146,16 @@ class CalorieExpenditureService {
       if (userProfile == null) return null;
 
       // Basic estimation based on BMR and activity level
-      final bmr = _calculateBMR(userProfile);
-      final activityMultiplier = _getActivityMultiplier(
-        userProfile.activityLevel,
+      final bmr = mifflinStJeorBmr(
+        weightKg: userProfile.weight,
+        heightCm: userProfile.height,
+        age: userProfile.age,
+        gender: userProfile.gender,
       );
+      final multiplier = activityMultiplier(userProfile.activityLevel);
 
       // Calculate TDEE (Total Daily Energy Expenditure)
-      final tdee = bmr * activityMultiplier;
+      final tdee = bmr * multiplier;
 
       // Add some variability for different days
       final dayOfWeek = date.weekday;
@@ -164,7 +174,7 @@ class CalorieExpenditureService {
 
       developer.log(
         'Estimated calories for ${date.toIso8601String().split('T')[0]}: '
-        'BMR=$bmr, Activity=${userProfile.activityLevel} (${activityMultiplier}x), '
+        'BMR=$bmr, Activity=${userProfile.activityLevel} (${multiplier}x), '
         'TDEE=$tdee, Final=$estimatedCalories',
         name: 'CalorieExpenditureService',
       );
@@ -176,37 +186,6 @@ class CalorieExpenditureService {
         name: 'CalorieExpenditureService',
       );
       return null;
-    }
-  }
-
-  /// Calculate Basal Metabolic Rate using Mifflin-St Jeor Equation
-  double _calculateBMR(UserProfile profile) {
-    double bmr;
-
-    if (profile.gender == 'male') {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
-    } else {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
-    }
-
-    return bmr;
-  }
-
-  /// Get activity level multiplier for TDEE calculation
-  double _getActivityMultiplier(String activityLevel) {
-    switch (activityLevel) {
-      case 'sedentary':
-        return 1.2;
-      case 'lightly_active':
-        return 1.375;
-      case 'moderately_active':
-        return 1.55;
-      case 'very_active':
-        return 1.725;
-      case 'extra_active':
-        return 1.9;
-      default:
-        return 1.55; // Default to moderately active
     }
   }
 
@@ -288,7 +267,10 @@ class CalorieExpenditureService {
       return CalorieTargetAnalysis(
         needsAdjustment: needsAdjustment,
         currentTarget: currentTarget,
-        suggestedTarget: suggestedTarget,
+        suggestedTarget:
+            needsAdjustment && suggestedTarget < minimumCalorieTarget
+                ? minimumCalorieTarget
+                : suggestedTarget,
         averageExpenditure: averageExpenditure,
         analysisMessage: analysisMessage,
         daysAnalyzed: combinedData.length,
@@ -316,18 +298,35 @@ class CalorieExpenditureService {
       final userProfile = await _userProfileRepository.getCurrentUserProfile();
       if (userProfile == null) return false;
 
-      // Calculate new macro targets proportionally
-      final calorieRatio = newTargetCalories / userProfile.goals.targetCalories;
+      final targetCalories =
+          newTargetCalories < minimumCalorieTarget
+              ? minimumCalorieTarget
+              : newTargetCalories;
+      final goals = userProfile.goals;
+      final double protein;
+      final double carbs;
+      final double fat;
+      if (goals.targetCalories > 0) {
+        final calorieRatio = targetCalories / goals.targetCalories;
+        protein = goals.targetProtein * calorieRatio;
+        carbs = goals.targetCarbs * calorieRatio;
+        fat = goals.targetFat * calorieRatio;
+      } else {
+        // No current target to scale from: rebuild grams from the saved split.
+        final macros = macroTargetsFor(targetCalories, previous: goals);
+        protein = macros.protein;
+        carbs = macros.carbs;
+        fat = macros.fat;
+      }
 
       final newGoals = FitnessGoals(
-        goal: userProfile.goals.goal,
-        targetWeight: userProfile.goals.targetWeight,
-        targetCalories: newTargetCalories,
-        targetProtein: userProfile.goals.targetProtein * calorieRatio,
-        targetCarbs: userProfile.goals.targetCarbs * calorieRatio,
-        targetFat: userProfile.goals.targetFat * calorieRatio,
-        targetFiber:
-            userProfile.goals.targetFiber, // Keep fiber target unchanged
+        goal: goals.goal,
+        targetWeight: goals.targetWeight,
+        targetCalories: targetCalories,
+        targetProtein: protein,
+        targetCarbs: carbs,
+        targetFat: fat,
+        targetFiber: goals.targetFiber, // Keep fiber target unchanged
       );
       final updatedProfile = UserProfile(
         id: userProfile.id,
