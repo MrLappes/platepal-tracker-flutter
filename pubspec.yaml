@@ -67,6 +67,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  sqflite_common_ffi: ^2.3.6
   flutter_native_splash: ^2.4.0
   flutter_launcher_icons: ^0.13.1
 

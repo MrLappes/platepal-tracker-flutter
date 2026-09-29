@@ -633,20 +633,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
 
   Future<void> _toggleFavorite(Dish dish) async {
     try {
-      final updatedDish = Dish(
-        id: dish.id,
-        name: dish.name,
-        description: dish.description,
-        imageUrl: dish.imageUrl,
-        ingredients: dish.ingredients,
-        nutrition: dish.nutrition,
-        createdAt: dish.createdAt,
-        updatedAt: DateTime.now(),
-        isFavorite: !dish.isFavorite,
-        category: dish.category,
-      );
-
-      await _dishService.saveDish(updatedDish);
+      await _dishService.setFavorite(dish.id, !dish.isFavorite);
       if (!mounted) return;
       _loadDishes(); // Refresh the list
 

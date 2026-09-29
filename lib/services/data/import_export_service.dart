@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import '../storage/dish_service.dart';
-import '../storage/meal_log_service.dart';
 import '../storage/database_service.dart';
 import '../storage/user_profile_service.dart';
 import '../../models/dish.dart';
@@ -26,9 +26,27 @@ enum ExportFormat { json, csv }
 enum DuplicateHandling { skip, overwrite, merge }
 
 class ImportExportService {
-  final DishService _dishService = DishService();
-  final MealLogService _mealLogService = MealLogService();
+  ImportExportService({DishService? dishService})
+    : _dishService = dishService ?? DishService();
+
+  final DishService _dishService;
   final UserProfileService _userProfileService = UserProfileService();
+
+  // Upper bounds for imported meal-log fields.
+  static const double _maxServingSize = 50;
+  static const int _maxIdLength = 128;
+  static const int _maxDateLength = 64;
+  static const int _maxDishNameLength = 200;
+  static const int _maxNotesLength = 1000;
+
+  /// What "all data" imports. fitnessGoals is left out: profiles carry their
+  /// goals, and the goals importer appends a row per item.
+  static const List<DataType> _allDataTypes = [
+    DataType.userProfiles,
+    DataType.dishes,
+    DataType.ingredients,
+    DataType.mealLogs,
+  ];
 
   Future<ImportExportResult> exportData({
     required List<DataType> dataTypes,
@@ -175,7 +193,9 @@ class ImportExportService {
       final errors = <String>[];
 
       // Sort data types by dependency order to ensure dishes are imported before meal logs
-      final sortedDataTypes = _sortDataTypesByDependency(dataTypes);
+      final sortedDataTypes = _sortDataTypesByDependency(
+        dataTypes.contains(DataType.allData) ? _allDataTypes : dataTypes,
+      );
 
       // Calculate total items for progress tracking
       int totalItems = 0;
@@ -266,171 +286,322 @@ class ImportExportService {
     }
   }
 
-  /// Process meal logs from import data
-  Future<ImportExportResult> _processMealLogs(Map<String, dynamic> data) async {
-    final List<String> errors = [];
-    int itemsProcessed = 0;
-    int duplicatesFound = 0; // Processing meal logs from import data
+  /// Imports `mealLogs` into the `dish_logs` ledger.
+  ///
+  /// Every entry is validated before anything is written; invalid ones are
+  /// skipped and reported, the rest are written in a single transaction.
+  /// Entries are matched on (dish, instant, meal type,
+  /// serving size): files from older versions list each import-created log
+  /// twice (a `meal_logs` and a `dish_logs` entry), and logs already in the
+  /// ledger are never inserted again, whatever [DuplicateHandling] is chosen.
+  /// Imported logs are restored as-is and are not written to Health Connect.
+  Future<ImportExportResult> _processMealLogs(
+    Map<String, dynamic> data,
+    ImportDetailedResults detailedResults,
+  ) async {
+    const typeName = 'mealLogs';
+    final raw = data[typeName];
+    final entries = raw is List ? raw : const <dynamic>[];
+    if (raw == null) debugPrint('⚠️ No mealLogs found in import data');
 
-    if (data.containsKey('mealLogs')) {
-      final mealLogsData = data['mealLogs'] as List<dynamic>? ?? [];
-      // Found ${mealLogsData.length} meal logs to process
-      for (int i = 0; i < mealLogsData.length; i++) {
+    final errors = <String>[];
+    int processed = 0;
+    int duplicates = 0;
+    int skipped = 0;
+
+    final groups = <String, List<(int, _ImportedLog)>>{};
+    for (int i = 0; i < entries.length; i++) {
+      try {
+        final log = _parseImportedLog(entries[i]);
+        groups.putIfAbsent(log.key, () => []).add((i, log));
+      } on FormatException catch (e) {
+        skipped++;
+        final value = entries[i].toString();
+        detailedResults.validationErrors.add(
+          ValidationError(
+            field: typeName,
+            error: e.message,
+            value: value.length > 200 ? '${value.substring(0, 200)}…' : value,
+            itemIndex: i,
+          ),
+        );
+      }
+    }
+
+    final existing = await _existingLogCounts();
+    final toInsert = <(int, String, _ImportedLog, String?, _Nutrients)>[];
+    for (final entry in groups.entries) {
+      final group = entry.value;
+      // A logical log appears at most once per source, so the busiest
+      // source tells how many distinct logs share this key.
+      final perSource = <String, int>{};
+      for (final (_, log) in group) {
+        perSource[log.source] = (perSource[log.source] ?? 0) + 1;
+      }
+      final logical = perSource.values.reduce(max);
+      final toWrite = max(0, logical - (existing[entry.key] ?? 0));
+      final candidates = [
+        ...group.where((e) => e.$2.snapshot != null),
+        ...group.where((e) => e.$2.snapshot == null),
+      ];
+
+      for (int n = 0; n < candidates.length; n++) {
+        final (index, log) = candidates[n];
+        final identifier = '${log.dishId} @ ${log.loggedAt.toIso8601String()}';
+        if (n >= toWrite) {
+          duplicates++;
+          detailedResults.duplicates.add(
+            DuplicateItem(
+              type: typeName,
+              index: index,
+              identifier: identifier,
+              action: DuplicateHandling.skip.name,
+            ),
+          );
+          continue;
+        }
         try {
-          final mealLogData = mealLogsData[i];
-          // Processing raw meal log data [$i]: $mealLogData
-
-          if (mealLogData is Map<String, dynamic>) {
-            final convertedMealLog = _createMealLogFromImportData(mealLogData);
-            // Converted meal log data [$i]: $convertedMealLog            // Processing meal log $i: ${convertedMealLog['dishId']}
-
-            final success = await _saveMealLogFromImport(convertedMealLog);
-            if (success) {
-              itemsProcessed++;
-              // Meal log $i processed successfully
-            } else {
-              final errorMsg =
-                  'Failed to save meal log for dish ${convertedMealLog['dishId']}';
-              errors.add(errorMsg);
-              debugPrint('❌ $errorMsg');
-            }
-          } else {
-            final errorMsg = 'Invalid meal log format at index $i';
-            errors.add(errorMsg);
-            debugPrint('❌ $errorMsg');
-          }
+          final (dishName, snapshot) = await _resolveImportedLog(log);
+          toInsert.add((index, identifier, log, dishName, snapshot));
         } catch (e) {
-          final errorMsg = 'Error processing meal log item at index $i: $e';
+          final errorMsg = 'Error processing meal log item at index $index: $e';
           errors.add(errorMsg);
+          detailedResults.processingErrors.add(
+            ProcessingError(
+              type: typeName,
+              index: index,
+              error: e.toString(),
+              item: identifier,
+            ),
+          );
           debugPrint('❌ $errorMsg');
         }
       }
-    } else {
-      debugPrint('⚠️ No mealLogs found in import data');
-    } // Meal log processing complete: $itemsProcessed processed, ${errors.length} errors
+    }
+
+    // All or nothing: a failed write must not leave half an import behind.
+    if (toInsert.isNotEmpty) {
+      try {
+        final db = await DatabaseService.instance.database;
+        await db.transaction((txn) async {
+          for (final (_, _, log, dishName, snapshot) in toInsert) {
+            await _dishService.insertDishLogSnapshot(
+              dishId: log.dishId,
+              dishName: dishName,
+              loggedAt: log.loggedAt,
+              mealType: log.mealType,
+              servingSize: log.servingSize,
+              calories: snapshot.calories,
+              protein: snapshot.protein,
+              carbs: snapshot.carbs,
+              fat: snapshot.fat,
+              fiber: snapshot.fiber,
+              notes: log.notes,
+              executor: txn,
+            );
+          }
+        });
+        for (final (index, identifier, _, _, _) in toInsert) {
+          processed++;
+          detailedResults.processedItems.add(
+            ProcessedItem(
+              type: typeName,
+              index: index,
+              identifier: identifier,
+              action: 'created',
+            ),
+          );
+        }
+      } catch (e) {
+        final errorMsg =
+            'No meal logs imported, writing ${toInsert.length} failed: $e';
+        errors.add(errorMsg);
+        detailedResults.processingErrors.add(
+          ProcessingError(
+            type: typeName,
+            index: toInsert.first.$1,
+            error: e.toString(),
+            item: '${toInsert.length} meal logs',
+          ),
+        );
+        debugPrint('❌ $errorMsg');
+      }
+    }
+
+    detailedResults.summary[typeName] = TypeSummary(
+      total: entries.length,
+      processed: processed,
+      duplicates: duplicates,
+      skipped: skipped,
+      errors: errors.length,
+    );
 
     return ImportExportResult(
       success: errors.isEmpty,
-      message: 'Processed $itemsProcessed meal logs',
-      itemsProcessed: itemsProcessed,
-      duplicatesFound: duplicatesFound,
+      message: 'Processed $processed meal logs',
+      itemsProcessed: processed,
+      duplicatesFound: duplicates,
       errors: errors,
     );
   }
 
-  /// Save meal log from import data
-  Future<bool> _saveMealLogFromImport(Map<String, dynamic> mealLogData) async {
-    try {
-      // Attempting to save meal log: ${mealLogData}
+  static String _logKey(
+    String dishId,
+    DateTime loggedAt,
+    String mealType,
+    double servingSize,
+  ) =>
+      '$dishId|${loggedAt.toUtc().microsecondsSinceEpoch}|$mealType|'
+      '$servingSize';
 
-      // Ensure we have a valid dish ID
-      final dishId = mealLogData['dishId'] as String?;
-      if (dishId == null || dishId.isEmpty) {
-        debugPrint('❌ Invalid dish ID for meal log: $dishId');
-        return false;
-      }
-
-      // Check if the dish exists
-      final dish = await _dishService.getDishById(dishId);
-      if (dish == null) {
-        debugPrint('❌ Dish not found for meal log: $dishId');
-        return false;
-      }
-
-      // Parse the logged date
-      DateTime loggedAt;
-      try {
-        loggedAt = DateTime.parse(mealLogData['loggedAt'] as String);
-      } catch (e) {
-        debugPrint('❌ Invalid date format: ${mealLogData['loggedAt']}');
-        loggedAt = DateTime.now();
-      }
-
-      final servingSize =
-          (mealLogData['servingSize'] as num?)?.toDouble() ?? 1.0;
-      final mealType = mealLogData['mealType'] as String? ?? 'lunch';
-      final userId = mealLogData['userId'] as String? ?? 'default_user';
-
-      // Save to meal_logs table (traditional meal logging)
-      final mealLogId = await _mealLogService.logMeal(
-        userId: userId,
-        dishId: dishId,
-        servingSize: servingSize,
-        mealType: mealType,
-        loggedAt: loggedAt,
+  /// Number of ledger rows per [_logKey].
+  Future<Map<String, int>> _existingLogCounts() async {
+    final rows = await _getAllDishLogs();
+    final counts = <String, int>{};
+    for (final row in rows) {
+      final loggedAt = DateTime.tryParse(row['logged_at'] as String? ?? '');
+      if (loggedAt == null) continue;
+      final key = _logKey(
+        row['dish_id'] as String,
+        loggedAt,
+        row['meal_type'] as String,
+        (row['serving_size'] as num).toDouble(),
       );
-
-      // Also save to dish_logs table (for calendar display)
-      await _dishService.logDish(
-        dishId: dishId,
-        loggedAt: loggedAt,
-        mealType: mealType,
-        servingSize: servingSize,
-      );
-
-      // Meal log saved to both tables with ID: $mealLogId
-      return mealLogId > 0;
-    } catch (e) {
-      debugPrint('❌ Error saving meal log: $e');
-      return false;
+      counts[key] = (counts[key] ?? 0) + 1;
     }
+    return counts;
   }
 
-  Map<String, dynamic> _createMealLogFromImportData(Map<String, dynamic> data) {
-    // Parse and validate meal type with fallback to "lunch"
-    String mealType = _parseMealType(data['mealType'] ?? data['meal_type']);
-
-    // Ensure we have a valid dish ID
-    String dishId = data['dishId'] ?? data['dish_id'] ?? '';
-    if (dishId.isEmpty) {
-      throw Exception('Dish ID is required for meal log');
-    }
-
-    // Parse serving size with validation
-    double servingSize = 1.0;
-    final servingSizeRaw = data['servingSize'] ?? data['serving_size'];
-    if (servingSizeRaw != null) {
-      servingSize = _safeParseDouble(servingSizeRaw) ?? 1.0;
-    } // Parse logged date with fallback
-    // Check multiple possible date field names from different database structures
-    String loggedAt;
-    final loggedAtRaw = data['loggedAt'] ?? data['logged_at'] ?? data['date'];
-    if (loggedAtRaw != null) {
-      try {
-        // Handle different date formats from old database structure
-        String dateString = loggedAtRaw.toString();
-
-        // If it's just a date (YYYY-MM-DD), convert to full ISO string
-        if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(dateString)) {
-          dateString = '${dateString}T12:00:00.000Z';
-        }
-
-        // Validate and parse the date
-        DateTime parsedDate = DateTime.parse(dateString);
-        loggedAt = parsedDate.toIso8601String();
-
-        debugPrint(
-          '📅 Preserved original date: $loggedAt from raw: $loggedAtRaw',
-        );
-      } catch (e) {
-        debugPrint(
-          '⚠️ Failed to parse date $loggedAtRaw, using current date: $e',
-        );
-        loggedAt = DateTime.now().toIso8601String();
+  /// Name and nutrition snapshot for one validated log. Uses the file's
+  /// snapshot when present so the historical values survive; otherwise
+  /// snapshots the current dish.
+  Future<(String?, _Nutrients)> _resolveImportedLog(_ImportedLog log) async {
+    var snapshot = log.snapshot;
+    var dishName = log.dishName;
+    if (snapshot == null || dishName == null) {
+      final dish = await _dishService.getDishById(log.dishId);
+      if (dish == null && snapshot == null) {
+        throw Exception('Dish not found for meal log: ${log.dishId}');
       }
-    } else {
-      debugPrint('⚠️ No date field found in import data, using current date');
-      loggedAt = DateTime.now().toIso8601String();
+      dishName ??= dish?.name;
+      if (snapshot == null) {
+        final n = dish!.nutrition;
+        final s = log.servingSize;
+        snapshot = (
+          calories: n.calories * s,
+          protein: n.protein * s,
+          carbs: n.carbs * s,
+          fat: n.fat * s,
+          fiber: n.fiber * s,
+        );
+      }
+    }
+    return (dishName, snapshot);
+  }
+
+  /// Parses and validates one imported meal log; throws [FormatException].
+  _ImportedLog _parseImportedLog(dynamic data) {
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException('Meal log must be a JSON object');
     }
 
-    return {
-      'id': data['id'] ?? _generateId(),
-      'userId': data['userId'] ?? data['user_id'] ?? 'default_user',
-      'dishId': dishId,
-      'servingSize': servingSize,
-      'mealType': mealType,
-      'loggedAt': loggedAt,
-    };
+    final dishId = _boundedString(
+      data['dishId'] ?? data['dish_id'],
+      'dishId',
+      _maxIdLength,
+    );
+    if (dishId == null) {
+      throw const FormatException('Dish ID is required for meal log');
+    }
+
+    final servingRaw = data['servingSize'] ?? data['serving_size'];
+    final servingSize = servingRaw == null ? 1.0 : _safeParseDouble(servingRaw);
+    if (servingSize == null ||
+        !servingSize.isFinite ||
+        servingSize <= 0 ||
+        servingSize > _maxServingSize) {
+      throw FormatException(
+        'servingSize must be a number in (0, $_maxServingSize]: $servingRaw',
+      );
+    }
+
+    final dateString = _boundedString(
+      data['loggedAt'] ?? data['logged_at'] ?? data['date'],
+      'loggedAt',
+      _maxDateLength,
+    );
+    if (dateString == null) {
+      throw const FormatException('loggedAt is required for meal log');
+    }
+    // A bare date (YYYY-MM-DD) from old exports is logged at noon UTC.
+    final loggedAt = DateTime.tryParse(
+      RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(dateString)
+          ? '${dateString}T12:00:00.000Z'
+          : dateString,
+    );
+    if (loggedAt == null) {
+      throw FormatException('loggedAt is not a valid date: $dateString');
+    }
+    // Keeps stored ISO strings in the fixed-width form that sorts correctly.
+    final year = loggedAt.toLocal().year;
+    if (year < 1900 || year > 9999) {
+      throw FormatException('loggedAt is out of range: $dateString');
+    }
+
+    final calories = _nonNegative(data, 'calories');
+    final protein = _nonNegative(data, 'protein');
+    final carbs = _nonNegative(data, 'carbs');
+    final fat = _nonNegative(data, 'fat');
+    final fiber = _nonNegative(data, 'fiber');
+
+    return _ImportedLog(
+      source: data['source']?.toString() ?? '',
+      dishId: dishId,
+      dishName: _boundedString(
+        data['dishName'] ?? data['dish_name'],
+        'dishName',
+        _maxDishNameLength,
+      ),
+      loggedAt: loggedAt,
+      mealType: _parseMealType(data['mealType'] ?? data['meal_type']),
+      servingSize: servingSize,
+      snapshot:
+          calories == null
+              ? null
+              : (
+                calories: calories,
+                protein: protein ?? 0.0,
+                carbs: carbs ?? 0.0,
+                fat: fat ?? 0.0,
+                fiber: fiber ?? 0.0,
+              ),
+      notes: _boundedString(data['notes'], 'notes', _maxNotesLength),
+    );
+  }
+
+  /// Trimmed string or null when absent/blank; throws if not a string or
+  /// longer than [maxLength].
+  String? _boundedString(dynamic value, String field, int maxLength) {
+    if (value == null) return null;
+    if (value is! String) {
+      throw FormatException('$field must be a string');
+    }
+    final trimmed = value.trim();
+    if (trimmed.length > maxLength) {
+      throw FormatException('$field exceeds $maxLength characters');
+    }
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Finite, non-negative number or null when absent; throws otherwise.
+  double? _nonNegative(Map<String, dynamic> data, String field) {
+    final raw = data[field];
+    if (raw == null) return null;
+    final value = _safeParseDouble(raw);
+    if (value == null || !value.isFinite || value < 0) {
+      throw FormatException('$field must be a finite number >= 0: $raw');
+    }
+    return value;
   }
 
   /// Parses meal type and returns a valid value or defaults to "lunch"
@@ -456,48 +627,28 @@ class ImportExportService {
           }
         case DataType.mealLogs:
           try {
-            // Get all meal logs from both tables
-            final mealLogs = await _getAllMealLogs();
+            // One entry per ledger row; same keys as the old `dish_logs`
+            // entries (plus dishName/notes) so older versions can import it.
             final dishLogs = await _getAllDishLogs();
-
-            // Combine and format for export
-            final allLogs = <Map<String, dynamic>>[];
-
-            // Add meal_logs entries
-            allLogs.addAll(
-              mealLogs.map(
-                (log) => {
-                  'id': log['id'].toString(),
-                  'userId': log['user_id'],
-                  'dishId': log['dish_id'],
-                  'servingSize': log['serving_size'],
-                  'mealType': log['meal_type'],
-                  'loggedAt': log['logged_at'],
-                  'source': 'meal_logs',
-                },
-              ),
-            );
-
-            // Add dish_logs entries
-            allLogs.addAll(
-              dishLogs.map(
-                (log) => {
-                  'id': log['id'],
-                  'dishId': log['dish_id'],
-                  'servingSize': log['serving_size'],
-                  'mealType': log['meal_type'],
-                  'loggedAt': log['logged_at'],
-                  'calories': log['calories'],
-                  'protein': log['protein'],
-                  'carbs': log['carbs'],
-                  'fat': log['fat'],
-                  'fiber': log['fiber'],
-                  'source': 'dish_logs',
-                },
-              ),
-            );
-
-            return allLogs;
+            return dishLogs
+                .map(
+                  (log) => {
+                    'id': log['id'],
+                    'dishId': log['dish_id'],
+                    'dishName': log['dish_name'],
+                    'servingSize': log['serving_size'],
+                    'mealType': log['meal_type'],
+                    'loggedAt': log['logged_at'],
+                    'calories': log['calories'],
+                    'protein': log['protein'],
+                    'carbs': log['carbs'],
+                    'fat': log['fat'],
+                    'fiber': log['fiber'],
+                    'notes': log['notes'],
+                    'source': 'dish_logs',
+                  },
+                )
+                .toList();
           } catch (e) {
             throw Exception('Failed to retrieve meal logs: $e');
           }
@@ -655,7 +806,7 @@ class ImportExportService {
 
       // Special handling for meal logs
       if (type == DataType.mealLogs) {
-        return await _processMealLogs(data);
+        return await _processMealLogs(data, detailedResults);
       }
 
       List<dynamic> items = [];
@@ -672,7 +823,9 @@ class ImportExportService {
           items = _extractUserProfilesFromData(data);
           break;
         default:
-          items = data[type.name] as List<dynamic>? ?? [];
+          // Old table-format sections are Maps, handled via the dishes path.
+          final raw = data[type.name];
+          items = raw is List ? raw : [];
           break;
       }
 
@@ -820,7 +973,7 @@ class ImportExportService {
     }
 
     debugPrint('❌ No dishes found in data structure');
-    debugPrint('❌ Data structure: ${data.toString().substring(0, 500)}...');
+    debugPrint('❌ Data keys: ${data.keys.toList()}');
     return [];
   }
 
@@ -1612,12 +1765,6 @@ class ImportExportService {
     return [];
   }
 
-  /// Get all meal logs from meal_logs table
-  Future<List<Map<String, dynamic>>> _getAllMealLogs() async {
-    final db = await DatabaseService.instance.database;
-    return await db.query('meal_logs', orderBy: 'logged_at DESC');
-  }
-
   /// Get all dish logs from dish_logs table
   Future<List<Map<String, dynamic>>> _getAllDishLogs() async {
     final db = await DatabaseService.instance.database;
@@ -1845,12 +1992,29 @@ class ImportExportService {
         );
       }
 
+      // Read the backup before clearing anything, so a bad file loses nothing.
+      final Map<String, dynamic> backup;
+      try {
+        backup =
+            json.decode(await File(lastBackupPath).readAsString())
+                as Map<String, dynamic>;
+      } catch (e) {
+        return ImportExportResult(
+          success: false,
+          message: 'Backup file is unreadable: $e',
+          itemsProcessed: 0,
+          duplicatesFound: 0,
+          errors: [e.toString()],
+        );
+      }
+
       // Clear current data before restore
       await _clearAllData();
 
       // Import from backup
       final result = await importData(
         filePath: lastBackupPath,
+        jsonData: backup,
         dataTypes: [DataType.allData],
         duplicateHandling: DuplicateHandling.overwrite,
       );
@@ -1977,9 +2141,44 @@ class ImportExportService {
       case DataType.userProfiles:
         return _extractUserProfilesFromData(data);
       default:
-        return data[type.name] as List<dynamic>? ?? [];
+        final items = data[type.name];
+        return items is List ? items : const [];
     }
   }
+}
+
+/// Nutrition totals of one log (already scaled by its serving size).
+typedef _Nutrients =
+    ({double calories, double protein, double carbs, double fat, double fiber});
+
+/// A validated meal log from an import file.
+class _ImportedLog {
+  final String source;
+  final String dishId;
+  final String? dishName;
+  final DateTime loggedAt;
+  final String mealType;
+  final double servingSize;
+  final _Nutrients? snapshot;
+  final String? notes;
+
+  const _ImportedLog({
+    required this.source,
+    required this.dishId,
+    required this.dishName,
+    required this.loggedAt,
+    required this.mealType,
+    required this.servingSize,
+    required this.snapshot,
+    required this.notes,
+  });
+
+  String get key => ImportExportService._logKey(
+    dishId,
+    loggedAt,
+    mealType,
+    servingSize,
+  );
 }
 
 class ImportExportResult {

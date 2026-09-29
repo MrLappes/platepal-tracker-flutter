@@ -324,6 +324,15 @@ class UserProfileService {
 
       // Delete user profile
       await txn.delete('user_profiles', where: 'id = ?', whereArgs: [userId]);
+
+      // The dish_logs ledger has no user column; it belongs to the sole
+      // profile, so it goes with the last one.
+      final remaining = Sqflite.firstIntValue(
+        await txn.rawQuery('SELECT COUNT(*) FROM user_profiles'),
+      );
+      if (remaining == 0) {
+        await txn.delete('dish_logs');
+      }
     });
   }
 }
