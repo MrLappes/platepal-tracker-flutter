@@ -64,9 +64,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeServices();
+    _initialization = _initializeServices().catchError(
+      (Object e) => debugPrint('Failed to initialize health services: $e'),
+    );
     _loadData();
   }
+
+  late final Future<void> _initialization;
 
   // Initialize services
   Future<void> _initializeServices() async {
@@ -141,12 +145,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           });
           return;
         } // Load calorie data from meal logs and health data
-        final calorieData = await _loadCalorieHistory(startDate);
+        await _initialization;
+        if (!mounted) return;
+        final calorieStart =
+            _selectedTimeRange == 'all'
+                ? await _earliestMealLogDay(startDate)
+                : startDate;
+        if (!mounted) return;
 
-        // Load health data if connected
-        if (_isHealthConnected) {
-          await _loadHealthData(startDate);
+        // Expenditure must be loaded before the history that references it.
+        _caloriesBurnedData.clear();
+        if (_isHealthConnected && calorieStart != null) {
+          await _loadHealthData(calorieStart);
         }
+        if (!mounted) return;
+        final calorieData =
+            calorieStart == null
+                ? <Map<String, dynamic>>[]
+                : await _loadCalorieHistory(calorieStart);
 
         // Process the history data
         _metricsHistory = history;
@@ -166,26 +182,31 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
   }
 
-  // Load health data for calorie expenditure
+  /// Local day of the oldest meal log since [since], or null without logs.
+  Future<DateTime?> _earliestMealLogDay(DateTime since) async {
+    final logs = await context.mealLogService.getMealsByDateRange(
+      userId: _userProfile!.id,
+      startDate: since,
+      endDate: DateTime.now(),
+    );
+    if (logs.isEmpty) return null;
+    final oldest = logs.last.loggedAt.toLocal(); // newest first
+    return DateTime(oldest.year, oldest.month, oldest.day);
+  }
+
+  // Load health data for calorie expenditure with one Health range read.
   Future<void> _loadHealthData(DateTime startDate) async {
     try {
-      final DateTime endDate = DateTime.now();
-      final int daysDifference = endDate.difference(startDate).inDays;
-
-      _caloriesBurnedData.clear();
-
-      for (int i = 0; i <= daysDifference; i++) {
-        final currentDate = startDate.add(Duration(days: i));
-
-        // Get calories burned for this date
-        final (caloriesBurned, isEstimated) = await _calorieExpenditureService
-            .getCaloriesBurnedForDateWithStatus(currentDate);
-
-        if (caloriesBurned != null) {
-          final dateKey = currentDate.toIso8601String().split('T')[0];
-          _caloriesBurnedData[dateKey] = caloriesBurned;
-        }
-      }
+      final now = DateTime.now();
+      final byDay = await _calorieExpenditureService.getExpenditureByDay(
+        DateTime(startDate.year, startDate.month, startDate.day),
+        DateTime(now.year, now.month, now.day + 1),
+      );
+      _caloriesBurnedData
+        ..clear()
+        ..addAll({
+          for (final entry in byDay.entries) entry.key: entry.value.$1,
+        });
     } catch (e) {
       // Health data loading failed, continue without it
       debugPrint('Failed to load health data: $e');
@@ -199,16 +220,30 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     try {
       final List<Map<String, dynamic>> calorieData = [];
       final DateTime endDate = DateTime.now();
-      final int daysDifference = endDate.difference(startDate).inDays;
+      // Calendar-day steps; Duration(days: 1) is 23h/25h across DST.
+      final int daysDifference =
+          DateTime.utc(endDate.year, endDate.month, endDate.day)
+              .difference(
+                DateTime.utc(startDate.year, startDate.month, startDate.day),
+              )
+              .inDays;
 
       for (int i = 0; i <= daysDifference; i++) {
-        final currentDate = startDate.add(Duration(days: i));
+        final currentDate = DateTime(
+          startDate.year,
+          startDate.month,
+          startDate.day + i,
+        );
         final dayStart = DateTime(
           currentDate.year,
           currentDate.month,
           currentDate.day,
         );
-        final dayEnd = dayStart.add(const Duration(days: 1));
+        final dayEnd = DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day + 1,
+        );
 
         // Get nutrition summary for this day
         final summary = await context.mealLogService.getNutritionSummary(

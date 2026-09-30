@@ -47,9 +47,9 @@
 		<true/>
 		<!-- HealthKit Permissions -->
 		<key>NSHealthShareUsageDescription</key>
-		<string>PlatePal Tracker needs access to your health data to sync your weight, height, and other health metrics with your nutrition tracking. This helps provide more accurate calorie recommendations and track your fitness progress.</string>
+		<string>PlatePal Tracker reads your active and resting energy burned to compare the calories you burn with the calories you eat and to suggest calorie targets.</string>
 		<key>NSHealthUpdateUsageDescription</key>
-		<string>PlatePal Tracker would like to update your health data with nutrition information from meals you track.</string>
+		<string>PlatePal Tracker saves the nutrition (calories, protein, carbohydrates, fat, fiber, sugar and sodium) of meals you log to Apple Health.</string>
 		<!-- Required for HealthKit -->
 		<key>UIRequiredDeviceCapabilities</key>
 		<array>

@@ -42,82 +42,20 @@ class CalorieExpenditureService {
     await initialize();
 
     try {
-      final dateStr = date.toIso8601String().split('T')[0];
-      developer.log(
-        'Getting calories burned for date: $dateStr',
-        name: 'CalorieExpenditureService',
-      );
-
-      // Check if health service is connected
       if (!_healthService.isConnected) {
-        developer.log(
-          'Health service not connected, using estimation',
-          name: 'CalorieExpenditureService',
-        );
-        final estimatedCalories = await _estimateCaloriesBurned(date);
-        developer.log(
-          'Using estimated calories: $estimatedCalories',
-          name: 'CalorieExpenditureService',
-        );
-        return (estimatedCalories, true); // true = estimated
-      } // First try to get from health service for specific date using smart method
-      final healthCalories = await _healthService.getCaloriesBurnedForDateSmart(
-        date,
-      );
-      if (healthCalories != null && healthCalories > 0) {
-        developer.log(
-          'Found health data: $healthCalories calories for $dateStr',
-          name: 'CalorieExpenditureService',
-        );
-        return (healthCalories, false); // false = real data
-      } else {
-        developer.log(
-          'No health data found for $dateStr (returned: $healthCalories)',
-          name: 'CalorieExpenditureService',
-        );
+        return (await _estimateCaloriesBurned(date), true);
       }
 
-      // Check stored data for this specific date
-      final storedData = await _healthService.getStoredCaloriesBurnedData();
-      final dateKey = date.toIso8601String().split('T')[0];
+      // Falls back to the local cache when Health can't be read.
+      final day =
+          await _healthService.getEnergyBurnedForDate(date) ??
+          (await _healthService.getStoredEnergyBurned())[HealthService.dayKey(
+            date,
+          )];
+      final resolved = day == null ? null : await resolveExpenditure(day);
+      if (resolved != null) return resolved;
 
-      if (storedData.containsKey(dateKey)) {
-        final storedCalories = storedData[dateKey]!;
-        developer.log(
-          'Found stored data: $storedCalories calories',
-          name: 'CalorieExpenditureService',
-        );
-        return (
-          storedCalories,
-          false,
-        ); // false = real data (stored from health)
-      }
-
-      // If it's today or recent dates, try a cache refresh and retry
-      final isRecentDate = DateTime.now().difference(date).inDays <= 7;
-      if (isRecentDate && _healthService.isConnected) {
-        developer.log(
-          'Attempting to refresh calorie cache for recent data',
-          name: 'CalorieExpenditureService',
-        );
-        await _healthService.refreshCaloriesBurnedCache();
-        final syncedCalories = await _healthService
-            .getCaloriesBurnedForDateSmart(date);
-        if (syncedCalories != null && syncedCalories > 0) {
-          developer.log(
-            'Found synced data: $syncedCalories calories',
-            name: 'CalorieExpenditureService',
-          );
-          return (syncedCalories, false); // false = real data
-        }
-      }
-
-      // Health is connected but no data available for this date
-      // Do NOT fall back to estimation – Health Connect is the single source of truth
-      developer.log(
-        'Health connected but no data for $dateStr – returning null',
-        name: 'CalorieExpenditureService',
-      );
+      // Health is the source of truth once connected: no data means no value.
       return (null, false);
     } catch (e) {
       developer.log(
@@ -137,6 +75,74 @@ class CalorieExpenditureService {
   Future<double?> getCaloriesBurnedForDate(DateTime date) async {
     final (calories, _) = await getCaloriesBurnedForDateWithStatus(date);
     return calories;
+  }
+
+  /// Total expenditure for a Health day as (kcal, isEstimated). Without a
+  /// basal record, the profile's Mifflin-St Jeor BMR stands in for it.
+  Future<(double, bool)?> resolveExpenditure(DailyEnergyBurned day) async {
+    await initialize();
+    return day.totalExpenditure() ??
+        day.totalExpenditure(estimatedBasal: await _profileBmr());
+  }
+
+  /// Total expenditure per local day key (see [HealthService.dayKey]) in
+  /// [start, end) from one Health read, or the local cache if that fails.
+  Future<Map<String, (double, bool)>> getExpenditureByDay(
+    DateTime start,
+    DateTime end,
+  ) async {
+    await initialize();
+    if (!_healthService.isConnected) return {};
+
+    Map<String, DailyEnergyBurned> days;
+    try {
+      days = await _healthService.readEnergyBurnedByDay(start, end);
+    } catch (e) {
+      developer.log(
+        'Health range read failed, using cache: $e',
+        name: 'CalorieExpenditureService',
+      );
+      final startKey = HealthService.dayKey(start);
+      final endKey = HealthService.dayKey(end);
+      days = {
+        for (final entry in (await _healthService.getStoredEnergyBurned())
+            .entries)
+          if (entry.key.compareTo(startKey) >= 0 &&
+              entry.key.compareTo(endKey) <= 0)
+            entry.key: entry.value,
+      };
+    }
+    return _resolveAll(days);
+  }
+
+  Future<Map<String, (double, bool)>> _resolveAll(
+    Map<String, DailyEnergyBurned> days,
+  ) async {
+    final bmr = await _profileBmr();
+    return {
+      for (final entry in days.entries)
+        if (entry.value.totalExpenditure(estimatedBasal: bmr) case final value?)
+          entry.key: value,
+    };
+  }
+
+  Future<double?> _profileBmr() async {
+    try {
+      final profile = await _userProfileRepository.getCurrentUserProfile();
+      if (profile == null) return null;
+      return mifflinStJeorBmr(
+        weightKg: profile.weight,
+        heightCm: profile.height,
+        age: profile.age,
+        gender: profile.gender,
+      );
+    } catch (e) {
+      developer.log(
+        'Error loading profile for BMR: $e',
+        name: 'CalorieExpenditureService',
+      );
+      return null;
+    }
   }
 
   /// Estimate calories burned based on user profile when health data is not available
@@ -170,16 +176,7 @@ class CalorieExpenditureService {
         variabilityFactor = 1.0;
       }
 
-      final estimatedCalories = tdee * variabilityFactor;
-
-      developer.log(
-        'Estimated calories for ${date.toIso8601String().split('T')[0]}: '
-        'BMR=$bmr, Activity=${userProfile.activityLevel} (${multiplier}x), '
-        'TDEE=$tdee, Final=$estimatedCalories',
-        name: 'CalorieExpenditureService',
-      );
-
-      return estimatedCalories;
+      return tdee * variabilityFactor;
     } catch (e) {
       developer.log(
         'Error estimating calories burned: $e',
@@ -205,17 +202,22 @@ class CalorieExpenditureService {
         );
       }
 
-      // Get calories burned data for analysis period from cache
-      final caloriesData = await _healthService.refreshCaloriesBurnedCache(
-        days: days,
-      );
-      final storedData = await _healthService.getStoredCaloriesBurnedData();
+      // The refresh merges into the cache; a failed refresh leaves the cache.
+      await _healthService.refreshCaloriesBurnedCache(days: days);
+      final storedData = await _healthService.getStoredEnergyBurned();
 
-      // Combine fresh data with stored data
-      final combinedData = Map<String, double>.from(storedData);
-      combinedData.addAll(caloriesData);
+      // The last [days] complete days; today is partial and would skew low.
+      final now = DateTime.now();
+      final window = {
+        for (var i = 1; i <= days; i++)
+          HealthService.dayKey(DateTime(now.year, now.month, now.day - i)),
+      };
+      final expenditures = await _resolveAll({
+        for (final entry in storedData.entries)
+          if (window.contains(entry.key)) entry.key: entry.value,
+      });
 
-      if (combinedData.isEmpty) {
+      if (expenditures.isEmpty) {
         return CalorieTargetAnalysis(
           needsAdjustment: false,
           currentTarget: userProfile.goals.targetCalories,
@@ -226,11 +228,11 @@ class CalorieExpenditureService {
       }
 
       // Calculate average daily expenditure
-      final totalExpenditure = combinedData.values.fold(
+      final totalExpenditure = expenditures.values.fold(
         0.0,
-        (sum, calories) => sum + calories,
+        (sum, day) => sum + day.$1,
       );
-      final averageExpenditure = totalExpenditure / combinedData.length;
+      final averageExpenditure = totalExpenditure / expenditures.length;
 
       // Analyze if target needs adjustment
       final currentTarget = userProfile.goals.targetCalories;
@@ -273,7 +275,7 @@ class CalorieExpenditureService {
                 : suggestedTarget,
         averageExpenditure: averageExpenditure,
         analysisMessage: analysisMessage,
-        daysAnalyzed: combinedData.length,
+        daysAnalyzed: expenditures.length,
       );
     } catch (e) {
       developer.log(
@@ -356,17 +358,9 @@ class CalorieExpenditureService {
   }
 
   /// Sync health data and perform automatic analysis
-  Future<CalorieTargetAnalysis> syncAndAnalyze() async {
-    await initialize();
-
-    // Refresh calorie cache from Health Connect
-    if (_healthService.isConnected) {
-      await _healthService.refreshCaloriesBurnedCache(days: 14);
-    }
-
-    // Perform analysis
-    return await analyzeCalorieTargets();
-  }
+  Future<CalorieTargetAnalysis> syncAndAnalyze() =>
+      // analyzeCalorieTargets refreshes the cache itself.
+      analyzeCalorieTargets();
 }
 
 class CalorieTargetAnalysis {
