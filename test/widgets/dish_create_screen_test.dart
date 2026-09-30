@@ -10,6 +10,120 @@ import 'package:platepal_tracker/screens/dish_create_screen.dart';
 import 'package:platepal_tracker/services/storage/dish_service.dart';
 
 void main() {
+  testWidgets('edit dish offers one save action in the FAB', (tester) async {
+    final now = DateTime(2025);
+    final dish = Dish(
+      id: 'dish-save',
+      name: 'Salad',
+      ingredients: const [],
+      nutrition: const NutritionInfo(calories: 0, protein: 0, carbs: 0, fat: 0),
+      createdAt: now,
+      updatedAt: now,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DishCreateScreenAdvanced(dish: dish),
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.widgetWithText(TextButton, 'Save'),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.widgetWithText(FloatingActionButton, 'Save Dish'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('dish form reserves scroll padding above the FAB', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const DishCreateScreenAdvanced(),
+      ),
+    );
+
+    final scrollView = tester.widget<SingleChildScrollView>(
+      find.byType(SingleChildScrollView).first,
+    );
+    expect(
+      scrollView.padding!.resolve(TextDirection.ltr).bottom,
+      greaterThanOrEqualTo(112),
+    );
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -2000),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getBottomLeft(find.byType(SwitchListTile)).dy,
+      lessThan(tester.getTopLeft(find.byType(FloatingActionButton)).dy),
+    );
+  });
+
+  testWidgets('nutrition card is flat and has no decorative question icon', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const DishCreateScreenAdvanced(),
+      ),
+    );
+
+    final card = find.byType(SmartNutritionCard);
+    expect(
+      find.descendant(
+        of: card,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Container &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration! as BoxDecoration).gradient != null,
+        ),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: card, matching: find.byType(Card)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: card, matching: find.byIcon(Icons.help_outline)),
+      findsNothing,
+    );
+  });
+
+  testWidgets('calculator action has a localized tooltip', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const DishCreateScreenAdvanced(),
+      ),
+    );
+
+    final card = find.byType(SmartNutritionCard);
+    expect(
+      find.descendant(
+        of: card,
+        matching: find.byTooltip('Recalculate from ingredients'),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('deleting the last ingredient clears recalculated totals', (
     tester,
   ) async {
@@ -213,7 +327,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(TextButton, 'Save'));
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Save Dish'));
     await tester.pumpAndSettle();
     expect(service.saved?.imageUrl, dish.imageUrl);
   });
@@ -247,7 +361,7 @@ void main() {
             .first;
     await tester.enterText(calorieField, '1,5');
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, 'Save'));
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Save Dish'));
     await tester.pumpAndSettle();
 
     expect(service.saved?.nutrition.calories, 1.5);
@@ -274,7 +388,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(TextButton, 'Save'));
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Save Dish'));
     await tester.pumpAndSettle();
 
     expect(service.saveAttempts, 0);

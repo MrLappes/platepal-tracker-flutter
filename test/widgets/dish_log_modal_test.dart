@@ -102,4 +102,133 @@ void main() {
       proteinColor,
     );
   });
+
+  testWidgets(
+    'unselected meal types remain readable and selectable in dark mode',
+    (tester) async {
+      final now = DateTime.now();
+      final theme = ThemeData.dark();
+      final dish = Dish(
+        id: 'test-dish',
+        name: 'Soup',
+        ingredients: const [],
+        nutrition: const NutritionInfo(
+          calories: 100,
+          protein: 5,
+          carbs: 10,
+          fat: 3,
+        ),
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: DishLogModal(dish: dish)),
+        ),
+      );
+      await tester.tap(find.text('Breakfast'));
+      await tester.pump();
+
+      expect(
+        tester.widget<Icon>(find.byIcon(Icons.wb_sunny_outlined)).color,
+        theme.colorScheme.onSurfaceVariant,
+      );
+      expect(
+        tester.widget<Text>(find.text('Lunch')).style?.color,
+        theme.colorScheme.onSurfaceVariant,
+      );
+      final lunchTile = tester.widget<Container>(
+        find
+            .ancestor(of: find.text('Lunch'), matching: find.byType(Container))
+            .first,
+      );
+      expect(
+        ((lunchTile.decoration as BoxDecoration).border as Border).top.color,
+        theme.colorScheme.outline,
+      );
+      final lunchSemantics = tester.widget<Semantics>(
+        find.ancestor(
+          of: find.text('Lunch'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected != null,
+          ),
+        ),
+      );
+      expect(lunchSemantics.properties.button, isTrue);
+      expect(lunchSemantics.properties.selected, isFalse);
+      final breakfastSemantics = tester.widget<Semantics>(
+        find.ancestor(
+          of: find.text('Breakfast'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected != null,
+          ),
+        ),
+      );
+      expect(breakfastSemantics.properties.selected, isTrue);
+    },
+  );
+
+  testWidgets('calculated nutrition fills the sheet at large text scale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final now = DateTime.now();
+    final dish = Dish(
+      id: 'test-dish',
+      name: 'Soup',
+      ingredients: const [],
+      nutrition: const NutritionInfo(
+        calories: 100,
+        protein: 5,
+        carbs: 10,
+        fat: 3,
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder:
+            (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1.3)),
+              child: child!,
+            ),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: DishLogModal(dish: dish)),
+      ),
+    );
+
+    final nutritionBox =
+        find
+            .ancestor(
+              of: find.text('Calories'),
+              matching: find.byType(Container),
+            )
+            .first;
+    expect(tester.getSize(nutritionBox).width, 280);
+    final nutritionRow = tester.widget<Row>(
+      find.descendant(of: nutritionBox, matching: find.byType(Row)),
+    );
+    expect(nutritionRow.children, hasLength(4));
+    expect(nutritionRow.children, everyElement(isA<Expanded>()));
+    expect(
+      find.descendant(of: nutritionBox, matching: find.byType(FittedBox)),
+      findsNWidgets(8),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -1333,24 +1333,16 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-              )
-            else
-              TextButton(
-                onPressed: _saveDish,
-                child: Text(
-                  AppLocalizations.of(
-                    context,
-                  ).componentsChatBotProfileCustomizationDialogSave,
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               ),
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            112 + MediaQuery.paddingOf(context).bottom,
+          ),
           child: Column(
             children: [
               _buildImageSelector(),
@@ -1360,12 +1352,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               _buildBasicInformation(),
               const SizedBox(height: 16),
               _buildNutritionInputs(),
-              const SizedBox(height: 16), _buildIngredientsSection(),
+              const SizedBox(height: 16),
+              _buildIngredientsSection(),
               const SizedBox(height: 16),
               _buildOptionsSection(),
-              const SizedBox(
-                height: 100,
-              ), // Extra space for floating action button
             ],
           ),
         ),
