@@ -93,10 +93,6 @@
   "@componentsCalendarMacroSummaryProtein": {
     "description": "Protein label"
   },
-  "componentsCalendarMacroSummaryCompactCalories": "Cal",
-  "@componentsCalendarMacroSummaryCompactCalories": {
-    "description": "Short label for calories used in compact macro view"
-  },
   "componentsCalendarMacroSummaryCompactProtein": "Protein",
   "@componentsCalendarMacroSummaryCompactProtein": {
     "description": "Short label for protein used in compact macro view"

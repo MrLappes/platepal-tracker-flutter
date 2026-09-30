@@ -262,12 +262,6 @@ abstract class AppLocalizations {
   /// **'Protein'**
   String get componentsCalendarMacroSummaryProtein;
 
-  /// Short label for calories used in compact macro view
-  ///
-  /// In en, this message translates to:
-  /// **'Cal'**
-  String get componentsCalendarMacroSummaryCompactCalories;
-
   /// Short label for protein used in compact macro view
   ///
   /// In en, this message translates to:

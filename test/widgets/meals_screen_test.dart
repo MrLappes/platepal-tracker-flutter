@@ -20,7 +20,8 @@ class _StubDishService extends DishService {
 
 class _FailingDishService extends DishService {
   @override
-  Future<List<Dish>> getAllDishes() async => throw StateError('Private dish data');
+  Future<List<Dish>> getAllDishes() async =>
+      throw StateError('Private dish data');
 }
 
 void main() {
@@ -57,7 +58,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('No se pudieron cargar tus platos. Inténtalo de nuevo.'), findsOneWidget);
+    expect(
+      find.text('No se pudieron cargar tus platos. Inténtalo de nuevo.'),
+      findsOneWidget,
+    );
     expect(find.textContaining('Private dish data'), findsNothing);
   });
 
@@ -136,5 +140,39 @@ void main() {
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
     await tester.pumpAndSettle();
     expect(service.loadCount, greaterThan(previousLoads));
+  });
+
+  testWidgets('dish card shows kcal for an English US locale', (tester) async {
+    final now = DateTime.now();
+    final service = _StubDishService([
+      Dish(
+        id: 'dish-1',
+        name: 'Soup',
+        ingredients: const [],
+        nutrition: const NutritionInfo(
+          calories: 100,
+          protein: 5,
+          carbs: 8,
+          fat: 2,
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en', 'US'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MealsScreen(dishService: service),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('SOUP'), findsOneWidget);
+    expect(find.text('100'), findsOneWidget);
+    expect(find.text('kcal'), findsOneWidget);
+    expect(find.text('Cal'), findsNothing);
   });
 }

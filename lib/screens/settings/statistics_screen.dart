@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/nutrition_calculator.dart';
@@ -9,6 +10,15 @@ import '../../services/user_session_service.dart';
 import '../../services/health_service.dart';
 import '../../services/calorie_expenditure_service.dart';
 import 'dart:math' as math;
+
+String formatStatisticsAxisDate(
+  DateTime date,
+  String localeName, {
+  bool includeYear = false,
+}) =>
+    includeYear
+        ? DateFormat.yM(localeName).format(date)
+        : DateFormat.Md(localeName).format(date);
 
 /// Groups weight readings by ISO week and plots each median on its Monday.
 List<Map<String, dynamic>> calculateWeeklyWeightMedian(
@@ -1188,6 +1198,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           data: medianData,
           valueKey: 'weight',
           dateKey: 'recorded_date',
+          localeName: Localizations.localeOf(context).toString(),
           minValue: _minWeight,
           maxValue: _maxWeight,
           lineColor: colorScheme.primary,
@@ -1245,6 +1256,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           data: bmiData,
           valueKey: 'bmi',
           dateKey: 'recorded_date',
+          localeName: Localizations.localeOf(context).toString(),
           minValue: _minBMI,
           maxValue: _maxBMI,
           lineColor: Colors.green,
@@ -1299,6 +1311,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           data: bodyFatData,
           valueKey: 'body_fat',
           dateKey: 'recorded_date',
+          localeName: Localizations.localeOf(context).toString(),
           minValue: _minBodyFat,
           maxValue: _maxBodyFat,
           lineColor: colorScheme.primary,
@@ -1333,6 +1346,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         size: const Size(double.infinity, 200),
         painter: CalorieChartPainter(
           data: _calorieHistory,
+          localeName: Localizations.localeOf(context).toString(),
           maintenanceCalories: _maintenanceCalories!,
           minValue: _minCalories,
           maxValue: _maxCalories,
@@ -1785,6 +1799,7 @@ class LineChartPainter extends CustomPainter {
   final List<Map<String, dynamic>> data;
   final String valueKey;
   final String dateKey;
+  final String localeName;
   final double minValue;
   final double maxValue;
   final Color lineColor;
@@ -1797,6 +1812,7 @@ class LineChartPainter extends CustomPainter {
     required this.data,
     required this.valueKey,
     required this.dateKey,
+    this.localeName = 'en',
     required this.minValue,
     required this.maxValue,
     required this.lineColor,
@@ -2083,13 +2099,11 @@ class LineChartPainter extends CustomPainter {
       final daysOffset = daysOffsetDouble.round();
       final labelDate = minDate.add(Duration(days: daysOffset));
 
-      // Format date based on range
-      String dateLabel;
-      if (daysDiff <= 30) {
-        dateLabel = '${labelDate.day}/${labelDate.month}';
-      } else {
-        dateLabel = '${labelDate.month}/${labelDate.year}';
-      }
+      final dateLabel = formatStatisticsAxisDate(
+        labelDate,
+        localeName,
+        includeYear: daysDiff > 30,
+      );
 
       // Draw tick
       canvas.drawLine(
@@ -2111,6 +2125,7 @@ class LineChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(LineChartPainter oldDelegate) {
     return oldDelegate.data != data ||
+        oldDelegate.localeName != localeName ||
         oldDelegate.minValue != minValue ||
         oldDelegate.maxValue != maxValue ||
         oldDelegate.lineColor != lineColor ||
@@ -2135,6 +2150,7 @@ class ReferenceLine {
 // Custom chart painter for calorie intake vs maintenance
 class CalorieChartPainter extends CustomPainter {
   final List<Map<String, dynamic>> data;
+  final String localeName;
   final double maintenanceCalories;
   final double minValue;
   final double maxValue;
@@ -2144,6 +2160,7 @@ class CalorieChartPainter extends CustomPainter {
 
   CalorieChartPainter({
     required this.data,
+    this.localeName = 'en',
     required this.maintenanceCalories,
     required this.minValue,
     required this.maxValue,
@@ -2420,13 +2437,11 @@ class CalorieChartPainter extends CustomPainter {
       final daysOffset = daysOffsetDouble.round();
       final labelDate = minDate.add(Duration(days: daysOffset));
 
-      // Format date based on range
-      String dateLabel;
-      if (daysDiff <= 30) {
-        dateLabel = '${labelDate.day}/${labelDate.month}';
-      } else {
-        dateLabel = '${labelDate.month}/${labelDate.year}';
-      }
+      final dateLabel = formatStatisticsAxisDate(
+        labelDate,
+        localeName,
+        includeYear: daysDiff > 30,
+      );
 
       // Draw tick
       canvas.drawLine(
@@ -2448,6 +2463,7 @@ class CalorieChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(CalorieChartPainter oldDelegate) {
     return oldDelegate.data != data ||
+        oldDelegate.localeName != localeName ||
         oldDelegate.maintenanceCalories != maintenanceCalories ||
         oldDelegate.minValue != minValue ||
         oldDelegate.maxValue != maxValue ||

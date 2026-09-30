@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart' show initializeDateFormatting;
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/models/user_profile.dart';
 import 'package:platepal_tracker/screens/settings/statistics_screen.dart';
@@ -274,6 +276,24 @@ void main() {
         {'recorded_date': '2026-01-01', 'weight': null},
       ]),
       isEmpty,
+    );
+  });
+
+  test('statistics axis dates follow the selected locale', () async {
+    await initializeDateFormatting('en_US');
+    await initializeDateFormatting('de');
+    final date = DateTime(2026, 8, 31);
+    final english = formatStatisticsAxisDate(date, 'en_US');
+    final german = formatStatisticsAxisDate(date, 'de');
+
+    expect(english, DateFormat.Md('en_US').format(date));
+    expect(german, DateFormat.Md('de').format(date));
+    expect(english, '8/31');
+    expect(german, '31.8.');
+    expect(english, isNot(german));
+    expect(
+      formatStatisticsAxisDate(date, 'de', includeYear: true),
+      DateFormat.yM('de').format(date),
     );
   });
 
