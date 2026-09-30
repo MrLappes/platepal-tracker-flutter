@@ -171,6 +171,22 @@ void main() {
       expect(dishCardNames(response), ['Protein Oats']);
       expect(responseSystemPrompt(), contains(_contextMarker));
     });
+
+    test('exposes processed dishes as usable Dish objects', () async {
+      final service = await buildService(deepSearch: false);
+
+      final response = await service.processMessage(
+        userMessage: 'Suggest a high-protein breakfast',
+        conversationHistory: const [],
+        botConfig: _bot,
+      );
+
+      final dish = response.dishes!.single;
+      expect(dish.name, 'Protein Oats');
+      expect(dish.nutrition.calories, closeTo(190, 0.01));
+      final json = response.toJson();
+      expect((json['dishes'] as List).single['name'], 'Protein Oats');
+    });
   });
 
   group('deep search pipeline', () {
