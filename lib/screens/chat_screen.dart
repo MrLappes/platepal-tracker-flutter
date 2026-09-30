@@ -16,7 +16,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   late ChatProvider _chatProvider;
   bool _isUserAtBottom =
@@ -25,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _chatProvider = ChatProvider();
 
     // Listen to user scroll to detect if they scrolled up (so we don't force-scroll)
@@ -36,12 +37,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.removeListener(_onScroll);
     _chatProvider.removeListener(_onMessagesUpdated);
     _scrollController.dispose();
     // Dispose provider instance we created locally
     _chatProvider.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _chatProvider.refreshApiKeyConfiguration();
+    }
   }
 
   @override
@@ -265,36 +274,14 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 40),
               ElevatedButton.icon(
-                onPressed: () {
-                  context.push('/settings/api-key');
+                onPressed: () async {
+                  await context.push('/settings/api-key');
+                  if (!mounted) return;
+                  await _chatProvider.refreshApiKeyConfiguration();
                 },
                 icon: const Icon(Icons.settings),
                 label: Text(localizations.screensChatConfigureApiKeyButton),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () {
-                  _chatProvider.refreshApiKeyConfiguration();
-                  // Show loading indicator
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(localizations.screensChatLoading),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(localizations.screensChatReloadApiKeyButton),
-                style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,

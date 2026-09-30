@@ -1096,9 +1096,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensChatNoApiKeyConfigured => 'No API key configured';
 
   @override
-  String get screensChatReloadApiKeyButton => 'Reload API Key';
-
-  @override
   String get screensDishCreateBasicInfo => 'Basic Information';
 
   @override

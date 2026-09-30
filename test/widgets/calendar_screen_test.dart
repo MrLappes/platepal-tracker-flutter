@@ -136,6 +136,66 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('selected day with meals shows a contrasting marker', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+    final now = DateTime.now();
+    final db = await DatabaseService.instance.database;
+    await db.insert('dish_logs', {
+      'id': 'selected-day-marker',
+      'dish_id': 'deleted-dish',
+      'dish_name': 'Lunch',
+      'logged_at': DateTime(now.year, now.month, now.day, 12).toIso8601String(),
+      'meal_type': 'lunch',
+      'serving_size': 1.0,
+      'calories': 200.0,
+      'protein': 10.0,
+      'carbs': 25.0,
+      'fat': 5.0,
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.pink,
+            brightness: Brightness.dark,
+          ),
+        ),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const CalendarScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final selectedDay = find.bySemanticsLabel(
+      RegExp('${DateFormat.yMMMMEEEEd('en').format(now)}.*has meals logged'),
+    );
+    expect(selectedDay, findsOneWidget);
+    final marker = find.descendant(
+      of: selectedDay,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
+      ),
+    );
+    expect(marker, findsOneWidget);
+    final markerColor =
+        (tester.widget<Container>(marker).decoration! as BoxDecoration).color;
+    final selectedBackground =
+        tester.widget<Material>(
+          find.descendant(of: selectedDay, matching: find.byType(Material)),
+        ).color;
+    expect(markerColor, isNot(selectedBackground));
+    expect(markerColor, Theme.of(tester.element(marker)).colorScheme.onPrimary);
+  });
+
   testWidgets('calendar prompts when saved profile has no calorie target', (
     tester,
   ) async {

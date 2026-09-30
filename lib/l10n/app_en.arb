@@ -1194,10 +1194,6 @@
   "@screensChatNoApiKeyConfigured": {
     "description": "No API key error title"
   },
-  "screensChatReloadApiKeyButton": "Reload API Key",
-  "@screensChatReloadApiKeyButton": {
-    "description": "Button text for reloading API key configuration"
-  },
   "screensDishCreateBasicInfo": "Basic Information",
   "@screensDishCreateBasicInfo": {
     "description": "Basic Information"

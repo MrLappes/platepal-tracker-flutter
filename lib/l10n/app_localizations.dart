@@ -1939,12 +1939,6 @@ abstract class AppLocalizations {
   /// **'No API key configured'**
   String get screensChatNoApiKeyConfigured;
 
-  /// Button text for reloading API key configuration
-  ///
-  /// In en, this message translates to:
-  /// **'Reload API Key'**
-  String get screensChatReloadApiKeyButton;
-
   /// Basic Information
   ///
   /// In en, this message translates to:
