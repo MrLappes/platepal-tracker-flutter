@@ -214,6 +214,18 @@ abstract class AppLocalizations {
   /// **'Get AI Tip'**
   String get componentsCalendarMacroSummaryGetAiTip;
 
+  /// Progress toward a daily nutrition goal
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of goal'**
+  String componentsCalendarMacroSummaryPercentOfGoal(int percent);
+
+  /// Nutrition amount above a daily goal
+  ///
+  /// In en, this message translates to:
+  /// **'Over goal by {amount} {unit}'**
+  String componentsCalendarMacroSummaryOverBy(String amount, String unit);
+
   /// Message explaining health data source for complete days
   ///
   /// In en, this message translates to:
@@ -946,6 +958,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ingredients Added'**
   String get componentsChatChatInputIngredientsAdded;
+
+  /// Tooltip for removing an attached chat ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String componentsChatChatInputRemoveIngredient(String name);
 
   /// Confirmation after adding a product as a chat ingredient
   ///
@@ -2143,6 +2161,12 @@ abstract class AppLocalizations {
   /// **'Error loading dishes'**
   String get screensMealsErrorLoadingDishes;
 
+  /// Advice shown after a meal list load error
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your dishes. Please try again.'**
+  String get screensMealsLoadFailedHint;
+
   /// Error message when dish update fails
   ///
   /// In en, this message translates to:
@@ -2791,6 +2815,24 @@ abstract class AppLocalizations {
   /// **'Remove API Key'**
   String get screensSettingsApiKeySettingsRemoveApiKey;
 
+  /// Tooltip for revealing the API key
+  ///
+  /// In en, this message translates to:
+  /// **'Show API key'**
+  String get screensSettingsApiKeySettingsShowKey;
+
+  /// Tooltip for concealing the API key
+  ///
+  /// In en, this message translates to:
+  /// **'Hide API key'**
+  String get screensSettingsApiKeySettingsHideKey;
+
+  /// Tooltip for deleting the saved API key
+  ///
+  /// In en, this message translates to:
+  /// **'Delete API key'**
+  String get screensSettingsApiKeySettingsDeleteKey;
+
   /// Confirmation message for removing API key
   ///
   /// In en, this message translates to:
@@ -2970,6 +3012,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check Out Our GitHub Repository'**
   String get screensSettingsContributorsCheckGitHub;
+
+  /// Tooltip on a contributor profile link
+  ///
+  /// In en, this message translates to:
+  /// **'Open {name} on GitHub'**
+  String screensSettingsContributorsOpenGitHubProfile(String name);
 
   /// Plural form for contributor count
   ///
@@ -3319,6 +3367,24 @@ abstract class AppLocalizations {
   /// **'Export failed: {error}'**
   String screensSettingsExportDataFailedDetail(String error);
 
+  /// Export stopped when a selected section cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export the selected data. No file was created. Please try again.'**
+  String get screensSettingsExportDataSectionFailed;
+
+  /// Export file write failed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the export file. Please try again.'**
+  String get screensSettingsExportDataWriteFailed;
+
+  /// Failure when sharing the exported file
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share the file. Please try again.'**
+  String get screensSettingsExportDataShareProblem;
+
   /// Restore progress heading
   ///
   /// In en, this message translates to:
@@ -3426,6 +3492,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Detailed errors:'**
   String get screensSettingsImportDataDetailedErrors;
+
+  /// Introduces untranslated details from an imported file
+  ///
+  /// In en, this message translates to:
+  /// **'File and row details (may appear in English):'**
+  String get screensSettingsImportDataTechnicalDetails;
 
   /// Successful import results heading
   ///
@@ -3594,6 +3666,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore failed: {error}'**
   String screensSettingsImportDataRestoreFailedDetail(String error);
+
+  /// Selected import file has disappeared
+  ///
+  /// In en, this message translates to:
+  /// **'Import file not found. Select it again.'**
+  String get screensSettingsImportDataFileMissing;
+
+  /// Import file size limit
+  ///
+  /// In en, this message translates to:
+  /// **'This file is too large. Select a file of at most {maxSize} MB.'**
+  String screensSettingsImportDataFileTooLarge(int maxSize);
+
+  /// Invalid JSON import file
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not valid JSON. Check it and try again.'**
+  String get screensSettingsImportDataInvalidJson;
+
+  /// Import requires a supported file extension
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file format. Select a JSON or CSV file.'**
+  String get screensSettingsImportDataUnsupportedFormat;
+
+  /// Import failed validation before writing any data
+  ///
+  /// In en, this message translates to:
+  /// **'The file contains invalid data. Check the details and try again.'**
+  String get screensSettingsImportDataInvalidData;
+
+  /// File picker failure without technical details
+  ///
+  /// In en, this message translates to:
+  /// **'Could not select a file. Please try again.'**
+  String get screensSettingsImportDataFileSelectionProblem;
+
+  /// Last import backup unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'No backup was found to restore.'**
+  String get screensSettingsImportDataBackupMissing;
+
+  /// Restore stopped before changing data
+  ///
+  /// In en, this message translates to:
+  /// **'The backup could not be read. Nothing was changed.'**
+  String get screensSettingsImportDataBackupUnreadable;
+
+  /// Restore stopped when a safety snapshot failed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not protect your current data. Nothing was changed.'**
+  String get screensSettingsImportDataSnapshotFailed;
+
+  /// Generic restore failure without exposing exception details
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore your backup. Check your data before trying again.'**
+  String get screensSettingsImportDataRestoreProblem;
+
+  /// Restore failed and the safety rollback succeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed, but your previous data was left unchanged.'**
+  String get screensSettingsImportDataRestoreRolledBack;
+
+  /// Restore and rollback failed; location of safety copy
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed and your previous data may be incomplete. A recovery copy is saved at {path}.'**
+  String screensSettingsImportDataRestoreCopySaved(String path);
 
   /// Activity level field label
   ///
@@ -4074,6 +4218,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading data'**
   String get screensSettingsStatisticsErrorLoadingData;
+
+  /// Retry guidance after statistics load fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your statistics. Please try again.'**
+  String get screensSettingsStatisticsLoadFailedHint;
 
   /// Estimated balance label
   ///
@@ -4734,6 +4884,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Here is the dish information:'**
   String get servicesChatAgentFallbackDishInfo;
+
+  /// Reply when the model returned JSON without response text
+  ///
+  /// In en, this message translates to:
+  /// **'No response text found.'**
+  String get servicesChatAgentFallbackNoResponse;
+
+  /// Reply when the model response has an invalid format
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t process my response. Please try again.'**
+  String get servicesChatAgentFallbackFormatting;
 
   /// Title of the dish image section
   ///

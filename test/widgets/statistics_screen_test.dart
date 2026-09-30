@@ -44,4 +44,24 @@ void main() {
     expect(german.screensSettingsStatisticsPhaseDays(1), '(1 Tag)');
     expect(german.screensSettingsStatisticsPhaseDays(2), '(2 Tage)');
   });
+
+  test('calorie chart repaints when its maintenance label changes locale', () {
+    final data = <Map<String, dynamic>>[];
+    final english = CalorieChartPainter(
+      data: data,
+      maintenanceCalories: 2000,
+      minValue: 0,
+      maxValue: 3000,
+      maintenanceLabel: 'Maintenance',
+    );
+    final spanish = CalorieChartPainter(
+      data: data,
+      maintenanceCalories: 2000,
+      minValue: 0,
+      maxValue: 3000,
+      maintenanceLabel: 'Mantenimiento',
+    );
+
+    expect(spanish.shouldRepaint(english), isTrue);
+  });
 }

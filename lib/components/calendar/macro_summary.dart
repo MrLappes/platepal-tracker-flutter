@@ -159,13 +159,33 @@ class _MacroSummaryState extends State<MacroSummary> {
   }
 
   double _getProgressWidth(double current, double? target) {
-    if (target == null) return 0.2;
+    if (target == null || target <= 0) return 0.2;
 
     if (current > target * 1.5) {
       return 1.0;
     }
 
     return min(1.0, current / target);
+  }
+
+  String? _goalStatus(
+    BuildContext context,
+    double current,
+    double? target,
+    String unit,
+  ) {
+    if (target == null || target <= 0) return null;
+    final localizations = AppLocalizations.of(context);
+    if (current > target) {
+      final difference = current - target;
+      final amount = difference.toStringAsFixed(
+        difference == difference.round() ? 0 : 1,
+      );
+      return localizations.componentsCalendarMacroSummaryOverBy(amount, unit);
+    }
+    return localizations.componentsCalendarMacroSummaryPercentOfGoal(
+      (current / target * 100).round(),
+    );
   }
 
   Widget _buildMacroBar({
@@ -179,6 +199,12 @@ class _MacroSummaryState extends State<MacroSummary> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final progressWidth = _getProgressWidth(current, target);
+    final status = _goalStatus(
+      context,
+      current,
+      target,
+      unit.isEmpty ? 'kcal' : unit,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,23 +229,38 @@ class _MacroSummaryState extends State<MacroSummary> {
           ],
         ),
         const SizedBox(height: 4),
-        Container(
-          height: 8,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progressWidth,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4),
+        Semantics(
+          label: label,
+          value: status ?? '${current.toStringAsFixed(0)} $unit',
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progressWidth,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
           ),
         ),
+        if (status != null) ...[
+          const SizedBox(height: 4),
+          ExcludeSemantics(
+            child: Text(
+              status,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -445,69 +486,90 @@ class _MacroSummaryState extends State<MacroSummary> {
               },
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.bar_chart, color: colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.componentsCalendarMacroSummaryNutritionSummary,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    // AI Tip button
-                    if (widget.onAiTipPressed != null) ...[
-                      GestureDetector(
-                        onTap: widget.onAiTipPressed,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                size: 12,
-                                color: colorScheme.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                l10n.componentsCalendarMacroSummaryGetAiTip,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
+                    Row(
+                      children: [
+                        Icon(Icons.bar_chart, color: colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.componentsCalendarMacroSummaryNutritionSummary,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    // Quick stats when collapsed
-                    if (!_isExpanded) ...[
-                      Text(
-                        '${widget.calories.toStringAsFixed(0)} ${l10n.componentsCalendarMacroSummaryCalories}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        Icon(
+                          _isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
                           color: colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Icon(
-                      _isExpanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: colorScheme.onSurfaceVariant,
+                      ],
                     ),
+                    if (widget.onAiTipPressed != null || !_isExpanded)
+                      Row(
+                        children: [
+                          if (widget.onAiTipPressed != null) ...[
+                            Semantics(
+                              button: true,
+                              label:
+                                  l10n.componentsCalendarMacroSummaryGetAiTip,
+                              onTap: widget.onAiTipPressed,
+                              excludeSemantics: true,
+                              child: InkWell(
+                                onTap: widget.onAiTipPressed,
+                                borderRadius: BorderRadius.circular(4),
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.auto_awesome,
+                                        size: 12,
+                                        color: colorScheme.onPrimaryContainer,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        l10n.componentsCalendarMacroSummaryGetAiTip,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onPrimaryContainer,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          if (!_isExpanded)
+                            Expanded(
+                              child: Text(
+                                '${widget.calories.toStringAsFixed(0)} ${l10n.componentsCalendarMacroSummaryCalories}',
+                                textAlign: TextAlign.end,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -593,6 +655,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                           widget.calorieTarget,
                         ),
                         context,
+                        unit: 'kcal',
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -603,6 +666,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.proteinTarget,
                         _getProteinColor(widget.protein, widget.proteinTarget),
                         context,
+                        unit: 'g',
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -613,6 +677,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.carbsTarget,
                         _getCarbsColor(widget.carbs, widget.carbsTarget),
                         context,
+                        unit: 'g',
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -623,6 +688,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.fatTarget,
                         _getFatColor(widget.fat, widget.fatTarget),
                         context,
+                        unit: 'g',
                       ),
                     ),
                   ],
@@ -745,29 +811,35 @@ class _MacroSummaryState extends State<MacroSummary> {
     double current,
     double? target,
     Color color,
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    required String unit,
+  }) {
     final theme = Theme.of(context);
     final progressWidth = _getProgressWidth(current, target);
+    final status = _goalStatus(context, current, target, unit);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
         const SizedBox(height: 2),
-        Container(
-          height: 4,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progressWidth,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
+        Semantics(
+          label: label,
+          value: status ?? current.toStringAsFixed(0),
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progressWidth,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
           ),
@@ -780,6 +852,16 @@ class _MacroSummaryState extends State<MacroSummary> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
+        if (target != null && target > 0)
+          ExcludeSemantics(
+            child: Text(
+              '${(current / target * 100).round()}%',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
       ],
     );
   }

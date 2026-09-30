@@ -3,6 +3,42 @@ import 'package:file_picker/file_picker.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../services/data/import_export_service.dart';
 
+String _importErrorMessage(AppLocalizations localizations, ImportExportResult result) {
+  switch (result.errorCode) {
+    case ImportExportErrorCode.importFileMissing:
+      return localizations.screensSettingsImportDataFileMissing;
+    case ImportExportErrorCode.importFileTooLarge:
+      return localizations.screensSettingsImportDataFileTooLarge(
+        ImportExportService.maxImportBytes ~/ (1024 * 1024),
+      );
+    case ImportExportErrorCode.importInvalidJson:
+      return localizations.screensSettingsImportDataInvalidJson;
+    case ImportExportErrorCode.importUnsupportedFormat:
+      return localizations.screensSettingsImportDataUnsupportedFormat;
+    case ImportExportErrorCode.importInvalidData:
+      return localizations.screensSettingsImportDataInvalidData;
+    case ImportExportErrorCode.restoreBackupMissing:
+      return localizations.screensSettingsImportDataBackupMissing;
+    case ImportExportErrorCode.restoreBackupUnreadable:
+      return localizations.screensSettingsImportDataBackupUnreadable;
+    case ImportExportErrorCode.restoreSnapshotFailed:
+      return localizations.screensSettingsImportDataSnapshotFailed;
+    case ImportExportErrorCode.restoreRolledBack:
+      return localizations.screensSettingsImportDataRestoreRolledBack;
+    case ImportExportErrorCode.restoreRollbackFailed:
+      return result.filePath == null
+          ? localizations.screensSettingsImportDataRestoreProblem
+          : localizations.screensSettingsImportDataRestoreCopySaved(result.filePath!);
+    case ImportExportErrorCode.restoreFailed:
+      return localizations.screensSettingsImportDataRestoreProblem;
+    case ImportExportErrorCode.importFailed:
+    case ImportExportErrorCode.exportSectionFailed:
+    case ImportExportErrorCode.exportFailed:
+    case null:
+      return localizations.screensSettingsImportDataImportFailed;
+  }
+}
+
 class ImportDataScreen extends StatefulWidget {
   const ImportDataScreen({super.key});
 
@@ -542,7 +578,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             ],
             if (_importErrors.isNotEmpty) ...[
               Text(
-                AppLocalizations.of(context).screensSettingsImportDataDetailedErrors,
+                AppLocalizations.of(context).screensSettingsImportDataTechnicalDetails,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onErrorContainer,
                   fontWeight: FontWeight.w500,
@@ -629,10 +665,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      debugPrint('ImportDataScreen: File selection failed (${e.runtimeType})');
       setState(() {
-        _lastError = AppLocalizations.of(
-          context,
-        ).screensSettingsImportDataFileSelectionFailed(e.toString());
+        _lastError = AppLocalizations.of(context).screensSettingsImportDataFileSelectionProblem;
       });
     }
   }
@@ -726,21 +761,19 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           }
         } else {
           setState(() {
-            _importErrors = result.errors;
-            _lastError =
-                result.errors.isNotEmpty
-                ? AppLocalizations.of(context).screensSettingsImportDataCompletedWithErrors(result.errors.length)
-                    : AppLocalizations.of(
-                      context,
-                    ).screensSettingsImportDataImportFailed;
+            _importErrors = result.errorCode == ImportExportErrorCode.importInvalidData
+                ? result.errors
+                : [];
+            _lastError = _importErrorMessage(AppLocalizations.of(context), result);
           });
         }
       }
     } catch (e) {
       if (mounted) {
+        debugPrint('ImportDataScreen: Import failed (${e.runtimeType})');
         setState(() {
           _isImporting = false;
-          _lastError = AppLocalizations.of(context).screensSettingsImportDataFailedDetail(e.toString());
+          _lastError = AppLocalizations.of(context).screensSettingsImportDataImportFailed;
         });
       }
     }
@@ -934,16 +967,17 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           });
         } else {
           setState(() {
-            _lastError = result.message;
-            _importErrors = result.errors;
+            _lastError = _importErrorMessage(AppLocalizations.of(context), result);
+            _importErrors = [];
           });
         }
       }
     } catch (e) {
       if (mounted) {
+        debugPrint('ImportDataScreen: Restore failed (${e.runtimeType})');
         setState(() {
           _isRestoring = false;
-          _lastError = AppLocalizations.of(context).screensSettingsImportDataRestoreFailedDetail(e.toString());
+          _lastError = AppLocalizations.of(context).screensSettingsImportDataRestoreProblem;
         });
       }
     }
@@ -1017,11 +1051,14 @@ class ImportResultsCard extends StatelessWidget {
                 ExpansionTile(
                   title: Text(localizations.screensSettingsImportDataShowReasons),
                   children: [
+                    Text(localizations.screensSettingsImportDataTechnicalDetails),
                     for (final reason in reasons)
                       ListTile(dense: true, title: Text(reason)),
                   ],
                 ),
-            ] else
+            ] else if (!result.success)
+              Text(_importErrorMessage(localizations, result))
+            else
               Text(
                 localizations.screensSettingsImportDataImportedItemsCount(
                   result.itemsProcessed,

@@ -111,7 +111,52 @@ void main() {
     expect(find.text('Importiert: 2, übersprungen: 1'), findsOneWidget);
     await tester.tap(find.text('Gründe anzeigen'));
     await tester.pumpAndSettle();
+    expect(
+      find.text('Datei- und Zeilendetails (möglicherweise auf Englisch):'),
+      findsOneWidget,
+    );
     expect(find.text('Invalid CSV row'), findsOneWidget);
+  });
+
+  testWidgets('Spanish import failure uses its code instead of English message', (
+    tester,
+  ) async {
+    const result = ImportExportResult(
+      success: false,
+      message: 'Import failed: File not found',
+      errorCode: ImportExportErrorCode.importFileMissing,
+      itemsProcessed: 0,
+      duplicatesFound: 0,
+      errors: [],
+    );
+
+    await tester.pumpWidget(
+      _app(const ImportResultsCard(result: result), locale: const Locale('es')),
+    );
+
+    expect(find.text('No se encontró el archivo. Selecciónalo de nuevo.'), findsOneWidget);
+    expect(find.textContaining('Import failed'), findsNothing);
+  });
+
+  testWidgets('failed restore shows the recovery copy path without raw error', (
+    tester,
+  ) async {
+    const result = ImportExportResult(
+      success: false,
+      message: 'Restore failed: private exception text',
+      errorCode: ImportExportErrorCode.restoreRollbackFailed,
+      filePath: '/tmp/recovery.json',
+      itemsProcessed: 0,
+      duplicatesFound: 0,
+      errors: [],
+    );
+
+    await tester.pumpWidget(
+      _app(const ImportResultsCard(result: result), locale: const Locale('es')),
+    );
+
+    expect(find.textContaining('/tmp/recovery.json'), findsOneWidget);
+    expect(find.textContaining('private exception text'), findsNothing);
   });
 
   testWidgets('confirmation describes selected sections and strategy', (
@@ -211,5 +256,16 @@ void main() {
 
     expect(find.text('Advanced Options'), findsNothing);
     expect(find.byType(SwitchListTile), findsNothing);
+  });
+
+  testWidgets('Spanish export preview shows localized details', (tester) async {
+    await tester.pumpWidget(
+      _app(const ExportDataScreen(), locale: const Locale('es')),
+    );
+
+    expect(find.text('Vista previa de la exportación'), findsOneWidget);
+    expect(find.text('Formato: JSON'), findsOneWidget);
+    expect(find.text('Tipos de datos seleccionados: 2 tipos'), findsOneWidget);
+    expect(find.text('Listo para exportar'), findsOneWidget);
   });
 }

@@ -120,6 +120,7 @@ class ImportExportService {
           return ImportExportResult(
             success: false,
             message: 'Failed to export ${failed.join(', ')}: $e',
+            errorCode: ImportExportErrorCode.exportSectionFailed,
             itemsProcessed: 0,
             duplicatesFound: 0,
             errors: ['Export error for ${failed.join(', ')}: $e'],
@@ -144,6 +145,7 @@ class ImportExportService {
       return ImportExportResult(
         success: true,
         message: 'Data exported successfully to ${file.path}',
+        filePath: file.path,
         itemsProcessed: itemsProcessed,
         duplicatesFound: 0,
         errors: [],
@@ -153,6 +155,7 @@ class ImportExportService {
       return ImportExportResult(
         success: false,
         message: 'Export failed: $e',
+        errorCode: ImportExportErrorCode.exportFailed,
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
@@ -167,6 +170,7 @@ class ImportExportService {
     Map<String, dynamic>? jsonData,
     Function(int current, int total, String currentType)? onProgress,
   }) async {
+    ImportExportErrorCode? errorCode;
     try {
       Map<String, dynamic> importData;
       final detailedResults = ImportDetailedResults();
@@ -176,10 +180,12 @@ class ImportExportService {
       } else {
         final file = File(filePath);
         if (!await file.exists()) {
+          errorCode = ImportExportErrorCode.importFileMissing;
           throw Exception('File not found');
         }
         final size = await file.length();
         if (size > maxImportBytes) {
+          errorCode = ImportExportErrorCode.importFileTooLarge;
           throw Exception(
             'File is too large (${size ~/ (1024 * 1024)} MB, '
             'max ${maxImportBytes ~/ (1024 * 1024)} MB)',
@@ -200,6 +206,7 @@ class ImportExportService {
           try {
             decoded = await compute(_decodeJson, content);
           } catch (e) {
+            errorCode = ImportExportErrorCode.importInvalidJson;
             detailedResults.parsingErrors.add(
               ParsingError(
                 line: _findJsonErrorLine(content, e.toString()),
@@ -214,6 +221,7 @@ class ImportExportService {
             throw Exception('JSON parsing failed: $e');
           }
           if (decoded is! Map<String, dynamic>) {
+            errorCode = ImportExportErrorCode.importInvalidJson;
             throw Exception('The file must contain a JSON object');
           }
           importData = decoded;
@@ -222,6 +230,7 @@ class ImportExportService {
           importData = csvResult.data;
           detailedResults.parsingErrors.addAll(csvResult.errors);
         } else {
+          errorCode = ImportExportErrorCode.importUnsupportedFormat;
           throw Exception('Unsupported file format');
         }
       }
@@ -240,6 +249,7 @@ class ImportExportService {
         return ImportExportResult(
           success: false,
           message: 'Import failed: ${validationResult.errors.join('; ')}',
+          errorCode: ImportExportErrorCode.importInvalidData,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: validationResult.errors,
@@ -294,6 +304,9 @@ class ImportExportService {
                 ? 'Import completed. Processed $totalProcessed items.'
                 : 'Import completed. Imported $totalProcessed items, '
                     'skipped $skipped.',
+        errorCode: errors.isEmpty && detailedResults.parsingErrors.isEmpty
+          ? null
+          : ImportExportErrorCode.importFailed,
         itemsProcessed: totalProcessed,
         duplicatesFound: totalDuplicates,
         errors: errors,
@@ -305,6 +318,7 @@ class ImportExportService {
       return ImportExportResult(
         success: false,
         message: 'Import failed: $e',
+        errorCode: errorCode ?? ImportExportErrorCode.importFailed,
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
@@ -328,6 +342,7 @@ class ImportExportService {
         duplicatesFound: result.duplicatesFound,
         errors: result.errors,
         itemsSkipped: result.itemsSkipped,
+        errorCode: result.errorCode,
       );
     } catch (e) {
       return ImportResult(
@@ -335,6 +350,7 @@ class ImportExportService {
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
+        errorCode: ImportExportErrorCode.importFailed,
       );
     }
   }
@@ -356,6 +372,7 @@ class ImportExportService {
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
+        errorCode: ImportExportErrorCode.importFailed,
       );
     }
   }
@@ -1019,6 +1036,7 @@ class ImportExportService {
       return ImportExportResult(
         success: false,
         message: 'Failed to import ${type.name}: $e',
+        errorCode: ImportExportErrorCode.importFailed,
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
@@ -2148,6 +2166,7 @@ class ImportExportService {
         return ImportExportResult(
           success: false,
           message: 'No backup found to restore from',
+          errorCode: ImportExportErrorCode.restoreBackupMissing,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: ['No backup file found'],
@@ -2169,6 +2188,7 @@ class ImportExportService {
         return ImportExportResult(
           success: false,
           message: 'Backup file is unreadable: $e',
+          errorCode: ImportExportErrorCode.restoreBackupUnreadable,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: [e.toString()],
@@ -2187,6 +2207,7 @@ class ImportExportService {
         return ImportExportResult(
           success: false,
           message: 'Could not save the current data, nothing was changed: $e',
+          errorCode: ImportExportErrorCode.restoreSnapshotFailed,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: [e.toString()],
@@ -2206,6 +2227,7 @@ class ImportExportService {
         result = ImportExportResult(
           success: false,
           message: 'Restore failed: $e',
+          errorCode: ImportExportErrorCode.restoreFailed,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: [e.toString()],
@@ -2234,6 +2256,7 @@ class ImportExportService {
         rollback = ImportExportResult(
           success: false,
           message: e.toString(),
+          errorCode: ImportExportErrorCode.restoreFailed,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: [e.toString()],
@@ -2246,6 +2269,7 @@ class ImportExportService {
           success: false,
           message:
               'Restore failed, your data was left unchanged: ${result.message}',
+          errorCode: ImportExportErrorCode.restoreRolledBack,
           itemsProcessed: 0,
           duplicatesFound: 0,
           errors: result.errors,
@@ -2259,6 +2283,8 @@ class ImportExportService {
         message:
             'Restore failed and the previous data could not be fully put '
             'back. A copy is saved at $snapshotPath',
+        errorCode: ImportExportErrorCode.restoreRollbackFailed,
+        filePath: snapshotPath,
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [...result.errors, ...rollback.errors],
@@ -2267,6 +2293,7 @@ class ImportExportService {
       return ImportExportResult(
         success: false,
         message: 'Failed to restore from backup: $e',
+        errorCode: ImportExportErrorCode.restoreFailed,
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
@@ -2418,9 +2445,28 @@ class _ImportedLog {
   );
 }
 
+enum ImportExportErrorCode {
+  exportSectionFailed,
+  exportFailed,
+  importFileMissing,
+  importFileTooLarge,
+  importInvalidJson,
+  importUnsupportedFormat,
+  importInvalidData,
+  importFailed,
+  restoreBackupMissing,
+  restoreBackupUnreadable,
+  restoreSnapshotFailed,
+  restoreFailed,
+  restoreRolledBack,
+  restoreRollbackFailed,
+}
+
 class ImportExportResult {
   final bool success;
   final String message;
+  final ImportExportErrorCode? errorCode;
+  final String? filePath;
   final int itemsProcessed;
   final int duplicatesFound;
   final List<String> errors;
@@ -2435,6 +2481,8 @@ class ImportExportResult {
   const ImportExportResult({
     required this.success,
     required this.message,
+    this.errorCode,
+    this.filePath,
     required this.itemsProcessed,
     required this.duplicatesFound,
     required this.errors,
@@ -2603,6 +2651,7 @@ class ImportResult {
   final int duplicatesFound;
   final List<String> errors;
   final int itemsSkipped;
+  final ImportExportErrorCode? errorCode;
 
   ImportResult({
     required this.success,
@@ -2610,5 +2659,6 @@ class ImportResult {
     required this.duplicatesFound,
     required this.errors,
     this.itemsSkipped = 0,
+    this.errorCode,
   });
 }

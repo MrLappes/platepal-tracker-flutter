@@ -5,6 +5,28 @@ import 'package:platepal_tracker/screens/settings/api_key_settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  testWidgets('Spanish API key visibility and removal controls have tooltips', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const ApiKeySettingsScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final showKey = find.byTooltip('Mostrar clave API');
+    expect(showKey, findsOneWidget);
+    expect(tester.getSize(showKey).shortestSide, greaterThanOrEqualTo(48));
+    await tester.tap(showKey);
+    await tester.pump();
+    expect(find.byTooltip('Ocultar clave API'), findsOneWidget);
+  });
+
   testWidgets(
     'compatibility settings labels and required errors follow Spanish locale',
     (tester) async {

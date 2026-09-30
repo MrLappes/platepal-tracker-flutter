@@ -59,6 +59,10 @@
   "@componentsCalendarMacroSummaryGetAiTip": {
     "description": "Obtener Consejo IA"
   },
+  "componentsCalendarMacroSummaryPercentOfGoal": "{percent} % del objetivo",
+  "@componentsCalendarMacroSummaryPercentOfGoal": {"description": "Progreso hacia el objetivo diario", "placeholders": {"percent": {"type": "int"}}},
+  "componentsCalendarMacroSummaryOverBy": "Por encima del objetivo en {amount} {unit}",
+  "@componentsCalendarMacroSummaryOverBy": {"description": "Cantidad que supera el objetivo diario", "placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}}},
   "componentsCalendarMacroSummaryHealthDataMessage": "Estos datos fueron recopilados de los datos de salud en tu teléfono, proporcionando información precisa sobre las calorías quemadas de tus actividades de fitness para este día completo.",
   "@componentsCalendarMacroSummaryHealthDataMessage": {
     "description": "Estos datos fueron recopilados de los datos de salud en tu teléfono, proporcionando información precisa sobre las calorías quemadas de tus actividades de fitness para este día completo."
@@ -596,6 +600,8 @@
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Ingredientes agregados"
   },
+  "componentsChatChatInputRemoveIngredient": "Quitar {name}",
+  "@componentsChatChatInputRemoveIngredient": {"description": "Quitar un ingrediente adjunto al chat", "placeholders": {"name": {"type": "String"}}},
   "componentsChatChatInputIngredientAdded": "Ingrediente añadido al chat",
   "@componentsChatChatInputIngredientAdded": {
     "description": "Confirmación al añadir un producto como ingrediente al chat"
@@ -1309,6 +1315,8 @@
   "@screensMealsErrorLoadingDishes": {
     "description": "Error al cargar los platos"
   },
+  "screensMealsLoadFailedHint": "No se pudieron cargar tus platos. Inténtalo de nuevo.",
+  "@screensMealsLoadFailedHint": {"description": "Indicación tras un error al cargar platos"},
   "screensMealsErrorUpdatingDish": "Error al actualizar el plato",
   "@screensMealsErrorUpdatingDish": {
     "description": "Error al actualizar el plato"
@@ -1726,6 +1734,12 @@
   "@screensSettingsApiKeySettingsRemoveApiKey": {
     "description": "Eliminar clave API"
   },
+  "screensSettingsApiKeySettingsShowKey": "Mostrar clave API",
+  "@screensSettingsApiKeySettingsShowKey": {"description": "Mostrar la clave API oculta"},
+  "screensSettingsApiKeySettingsHideKey": "Ocultar clave API",
+  "@screensSettingsApiKeySettingsHideKey": {"description": "Ocultar la clave API visible"},
+  "screensSettingsApiKeySettingsDeleteKey": "Eliminar clave API",
+  "@screensSettingsApiKeySettingsDeleteKey": {"description": "Eliminar la clave API guardada"},
   "screensSettingsApiKeySettingsRemoveApiKeyConfirmation": "¿Estás seguro de que quieres eliminar tu clave API? Esto desactivará las funciones de IA.",
   "@screensSettingsApiKeySettingsRemoveApiKeyConfirmation": {
     "description": "¿Estás seguro de que quieres eliminar tu clave API? Esto desactivará las funciones de IA."
@@ -1818,6 +1832,8 @@
   "@screensSettingsContributorsCheckGitHub": {
     "description": "Echa un vistazo a nuestro repositorio de GitHub"
   },
+  "screensSettingsContributorsOpenGitHubProfile": "Abrir el perfil de {name} en GitHub",
+  "@screensSettingsContributorsOpenGitHubProfile": {"description": "Perfil de un colaborador en GitHub", "placeholders": {"name": {"type": "String"}}},
   "screensSettingsContributorsContributorPlural": "Contribuidores",
   "@screensSettingsContributorsContributorPlural": {
     "description": "Contribuidores"
@@ -2000,6 +2016,12 @@
   "@screensSettingsExportDataShareSubject": {"description": "Asunto al compartir"},
   "screensSettingsExportDataFailedDetail": "Error de exportación: {error}",
   "@screensSettingsExportDataFailedDetail": {"description": "Error con detalles técnicos", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsExportDataSectionFailed": "No se pudieron exportar los datos seleccionados. No se creó ningún archivo. Inténtalo de nuevo.",
+  "@screensSettingsExportDataSectionFailed": {"description": "Fallo al leer una sección durante la exportación"},
+  "screensSettingsExportDataWriteFailed": "No se pudo guardar el archivo de exportación. Inténtalo de nuevo.",
+  "@screensSettingsExportDataWriteFailed": {"description": "Fallo al guardar el archivo exportado"},
+  "screensSettingsExportDataShareProblem": "No se pudo compartir el archivo. Inténtalo de nuevo.",
+  "@screensSettingsExportDataShareProblem": {"description": "Fallo al compartir el archivo exportado"},
   "screensSettingsImportDataRestoring": "Restaurando desde la copia de seguridad...",
   "@screensSettingsImportDataRestoring": {"description": "Progreso de restauración"},
   "screensSettingsImportDataProcessingItems": "Procesando {current} de {total} elementos",
@@ -2036,6 +2058,8 @@
   "@screensSettingsImportDataIssues": {"description": "Encabezado de errores"},
   "screensSettingsImportDataDetailedErrors": "Errores detallados:",
   "@screensSettingsImportDataDetailedErrors": {"description": "Encabezado de lista de errores"},
+  "screensSettingsImportDataTechnicalDetails": "Detalles del archivo y las filas (pueden aparecer en inglés):",
+  "@screensSettingsImportDataTechnicalDetails": {"description": "Detalles del archivo que pueden estar en inglés"},
   "screensSettingsImportDataResults": "Resultados de la importación",
   "@screensSettingsImportDataResults": {"description": "Encabezado de resultados"},
   "screensSettingsImportDataPartialResults": "Importación completada con elementos omitidos",
@@ -2092,6 +2116,30 @@
   "@screensSettingsImportDataRestoreSuccess": {"description": "Mensaje de restauración correcta"},
   "screensSettingsImportDataRestoreFailedDetail": "Error de restauración: {error}",
   "@screensSettingsImportDataRestoreFailedDetail": {"description": "Detalles del error de restauración", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsImportDataFileMissing": "No se encontró el archivo. Selecciónalo de nuevo.",
+  "@screensSettingsImportDataFileMissing": {"description": "No se encuentra el archivo seleccionado"},
+  "screensSettingsImportDataFileTooLarge": "El archivo es demasiado grande. Selecciona uno de hasta {maxSize} MB.",
+  "@screensSettingsImportDataFileTooLarge": {"description": "Tamaño máximo de importación", "placeholders": {"maxSize": {"type": "int"}}},
+  "screensSettingsImportDataInvalidJson": "El archivo no contiene JSON válido. Revísalo e inténtalo de nuevo.",
+  "@screensSettingsImportDataInvalidJson": {"description": "Archivo JSON no válido"},
+  "screensSettingsImportDataUnsupportedFormat": "Formato de archivo no admitido. Selecciona un archivo JSON o CSV.",
+  "@screensSettingsImportDataUnsupportedFormat": {"description": "Formato no admitido para importar"},
+  "screensSettingsImportDataInvalidData": "El archivo contiene datos no válidos. Revisa los detalles e inténtalo de nuevo.",
+  "@screensSettingsImportDataInvalidData": {"description": "La validación impidió la importación"},
+  "screensSettingsImportDataFileSelectionProblem": "No se pudo seleccionar un archivo. Inténtalo de nuevo.",
+  "@screensSettingsImportDataFileSelectionProblem": {"description": "Error al seleccionar un archivo sin detalles técnicos"},
+  "screensSettingsImportDataBackupMissing": "No se encontró ninguna copia de seguridad para restaurar.",
+  "@screensSettingsImportDataBackupMissing": {"description": "Copia de seguridad no disponible"},
+  "screensSettingsImportDataBackupUnreadable": "No se pudo leer la copia de seguridad. No se modificaron los datos.",
+  "@screensSettingsImportDataBackupUnreadable": {"description": "No se puede leer la copia de seguridad"},
+  "screensSettingsImportDataSnapshotFailed": "No se pudieron proteger tus datos actuales. No se modificaron los datos.",
+  "@screensSettingsImportDataSnapshotFailed": {"description": "No se pudo crear la copia de seguridad previa"},
+  "screensSettingsImportDataRestoreProblem": "No se pudo restaurar la copia de seguridad. Comprueba tus datos antes de reintentar.",
+  "@screensSettingsImportDataRestoreProblem": {"description": "Error de restauración sin detalles técnicos"},
+  "screensSettingsImportDataRestoreRolledBack": "La restauración falló, pero tus datos anteriores no se modificaron.",
+  "@screensSettingsImportDataRestoreRolledBack": {"description": "Se revirtieron los cambios tras el error de restauración"},
+  "screensSettingsImportDataRestoreCopySaved": "La restauración falló y tus datos anteriores pueden estar incompletos. Hay una copia de recuperación en {path}.",
+  "@screensSettingsImportDataRestoreCopySaved": {"description": "Ubicación de la copia tras fallar la restauración y la reversión", "placeholders": {"path": {"type": "String"}}},
   "screensSettingsImportProfileCompletionActivityLevel": "Nivel de Actividad",
   "@screensSettingsImportProfileCompletionActivityLevel": {
     "description": "Nivel de Actividad"
@@ -2412,6 +2460,8 @@
   "@screensSettingsStatisticsErrorLoadingData": {
     "description": "Error al cargar datos"
   },
+  "screensSettingsStatisticsLoadFailedHint": "No se pudieron cargar las estadísticas. Inténtalo de nuevo.",
+  "@screensSettingsStatisticsLoadFailedHint": {"description": "Indicación tras un error al cargar estadísticas"},
   "screensSettingsStatisticsEstimatedBalance": "Balance Estimado",
   "@screensSettingsStatisticsEstimatedBalance": {
     "description": "Balance Estimado"
@@ -2670,6 +2720,10 @@
   "servicesChatAgentFallbackTemporaryIssue": "Encontré un problema temporal al procesar tu solicitud. Por favor, inténtalo de nuevo.",
   "servicesChatAgentFallbackRephrase": "Me disculpo, pero tengo dificultades con esa solicitud. ¿Podrías reformularla?",
   "servicesChatAgentFallbackDishInfo": "Aquí está la información del plato:",
+  "servicesChatAgentFallbackNoResponse": "No se encontró texto de respuesta.",
+  "@servicesChatAgentFallbackNoResponse": {"description": "Respuesta cuando falta el texto en la respuesta JSON"},
+  "servicesChatAgentFallbackFormatting": "No pude procesar mi respuesta. Inténtalo de nuevo.",
+  "@servicesChatAgentFallbackFormatting": {"description": "Respuesta cuando el formato generado no es válido"},
   "screensDishCreateImage": "Imagen",
   "screensDishCreateNoImageSelected": "No se ha seleccionado ninguna imagen",
   "screensDishCreateChangeImage": "Cambiar imagen",

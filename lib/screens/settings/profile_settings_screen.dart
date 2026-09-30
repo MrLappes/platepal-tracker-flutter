@@ -1500,11 +1500,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
       // Show error message
       if (mounted) {
+        debugPrint('ProfileSettingsScreen: Reset failed (${e.runtimeType})');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${l10n.screensSettingsProfileSettingsResetAppError}: $e',
-            ),
+            content: Text(l10n.screensSettingsProfileSettingsResetAppError),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
