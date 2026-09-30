@@ -2957,6 +2957,7 @@
   },
   "screensSettingsProfileSettingsPhysicalStats": "Physical Stats",
   "screensSettingsProfileSettingsBodyFatOptional": "Body Fat % (optional)",
+  "screensSettingsProfileSettingsOptional": "Optional",
   "screensSettingsProfileSettingsNameHint": "Enter your name",
   "screensSettingsProfileSettingsCustomizeMacroRatios": "Customize Macro Ratios",
   "screensSettingsProfileSettingsImperialHeightRange": "Height must be between 39 and 98 inches",

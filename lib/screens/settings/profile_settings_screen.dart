@@ -800,54 +800,40 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               validator: (value) => _validateRequired(value, 'Name'),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildTextField(
-                    controller: _ageController,
-                    label: l10n.screensSettingsImportProfileCompletionAge,
-                    icon: Icons.cake,
-                    keyboardType: TextInputType.number,
-                    validator: _validateAge,
+            _buildTextField(
+              controller: _ageController,
+              label: l10n.screensSettingsImportProfileCompletionAge,
+              icon: Icons.cake,
+              keyboardType: TextInputType.number,
+              validator: _validateAge,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown<String>(
+              value: _selectedGender,
+              label: l10n.screensSettingsImportProfileCompletionGender,
+              icon: Icons.person_outline,
+              items: [
+                DropdownMenuItem(
+                  value: 'male',
+                  child: Text(l10n.screensSettingsImportProfileCompletionMale),
+                ),
+                DropdownMenuItem(
+                  value: 'female',
+                  child: Text(
+                    l10n.screensSettingsImportProfileCompletionFemale,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 3,
-                  child: _buildDropdown<String>(
-                    value: _selectedGender,
-                    label: l10n.screensSettingsImportProfileCompletionGender,
-                    icon: Icons.person_outline,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'male',
-                        child: Text(
-                          l10n.screensSettingsImportProfileCompletionMale,
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'female',
-                        child: Text(
-                          l10n.screensSettingsImportProfileCompletionFemale,
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'other',
-                        child: Text(
-                          l10n.screensSettingsImportProfileCompletionOther,
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedGender = value!;
-                        _onFieldChanged();
-                      });
-                    },
-                  ),
+                DropdownMenuItem(
+                  value: 'other',
+                  child: Text(l10n.screensSettingsImportProfileCompletionOther),
                 ),
               ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedGender = value!;
+                  _onFieldChanged();
+                });
+              },
             ),
           ],
         ),
@@ -862,66 +848,51 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: _heightController,
-                    label:
-                        '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
-                    icon: Icons.height,
-                    keyboardType: TextInputType.number,
-                    validator: _validateHeight,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    controller: _weightController,
-                    label:
-                        '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
-                    icon: Icons.monitor_weight,
-                    keyboardType: TextInputType.number,
-                    validator: _validateWeight,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              controller: _heightController,
+              label:
+                  '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
+              icon: Icons.height,
+              keyboardType: TextInputType.number,
+              validator: _validateHeight,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: _bodyFatController,
-                    label: l10n.screensSettingsProfileSettingsBodyFatOptional,
-                    icon: Icons.fitness_center,
-                    keyboardType: TextInputType.number,
-                    validator: _validateBodyFat,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown<String>(
-                    value: _selectedActivityLevel,
-                    label:
-                        l10n.screensSettingsImportProfileCompletionActivityLevel,
-                    icon: Icons.directions_run,
-                    items:
-                        _activityLevels.keys.map((level) {
-                          return DropdownMenuItem(
-                            value: level,
-                            child: Text(_getActivityLevelText(level, l10n)),
-                          );
-                        }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedActivityLevel = value!;
-                        _onFieldChanged();
-                      });
-                    },
-                  ),
-                ),
-              ],
+            _buildTextField(
+              controller: _weightController,
+              label:
+                  '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
+              icon: Icons.monitor_weight,
+              keyboardType: TextInputType.number,
+              validator: _validateWeight,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _bodyFatController,
+              label: '${l10n.screensSettingsStatisticsBodyFat} (%)',
+              helper: l10n.screensSettingsProfileSettingsOptional,
+              icon: Icons.fitness_center,
+              keyboardType: TextInputType.number,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              validator: _validateBodyFat,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown<String>(
+              value: _selectedActivityLevel,
+              label: l10n.screensSettingsImportProfileCompletionActivityLevel,
+              icon: Icons.directions_run,
+              items:
+                  _activityLevels.keys.map((level) {
+                    return DropdownMenuItem(
+                      value: level,
+                      child: Text(_getActivityLevelText(level, l10n)),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedActivityLevel = value!;
+                  _onFieldChanged();
+                });
+              },
             ),
           ],
         ),
@@ -1174,20 +1145,26 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatColumn(
-                  l10n.screensSettingsProfileSettingsBmi,
-                  bmi.toStringAsFixed(1),
-                  _getBMICategory(bmi, l10n),
+                Expanded(
+                  child: _buildStatColumn(
+                    l10n.screensSettingsProfileSettingsBmi,
+                    bmi.toStringAsFixed(1),
+                    _getBMICategory(bmi, l10n),
+                  ),
                 ),
-                _buildStatColumn(
-                  'BMR',
-                  '${bmr.round()} cal',
-                  l10n.screensSettingsProfileSettingsBaseMetabolicRate,
+                Expanded(
+                  child: _buildStatColumn(
+                    'BMR',
+                    '${bmr.round()} cal',
+                    l10n.screensSettingsProfileSettingsBaseMetabolicRate,
+                  ),
                 ),
-                _buildStatColumn(
-                  'TDEE',
-                  '${tdee.round()} cal',
-                  l10n.screensSettingsProfileSettingsTotalDailyEnergy,
+                Expanded(
+                  child: _buildStatColumn(
+                    'TDEE',
+                    '${tdee.round()} cal',
+                    l10n.screensSettingsProfileSettingsTotalDailyEnergy,
+                  ),
                 ),
               ],
             ),
@@ -1201,8 +1178,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     required TextEditingController controller,
     required String label,
     String? hint,
+    String? helper,
     required IconData icon,
     TextInputType? keyboardType,
+    FloatingLabelBehavior? floatingLabelBehavior,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
@@ -1210,7 +1189,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        helperText: helper,
         prefixIcon: Icon(icon),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 48,
+        ),
+        floatingLabelBehavior: floatingLabelBehavior,
         border: const OutlineInputBorder(),
       ),
       keyboardType: keyboardType,

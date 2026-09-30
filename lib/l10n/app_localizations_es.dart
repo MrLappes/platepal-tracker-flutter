@@ -3061,6 +3061,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Grasa corporal % (opcional)';
 
   @override
+  String get screensSettingsProfileSettingsOptional => 'Opcional';
+
+  @override
   String get screensSettingsProfileSettingsNameHint => 'Introduce tu nombre';
 
   @override

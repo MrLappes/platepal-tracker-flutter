@@ -2744,6 +2744,7 @@
   "componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": "Introduce los valores nutricionales para ver el análisis y las recomendaciones.",
   "screensSettingsProfileSettingsPhysicalStats": "Datos físicos",
   "screensSettingsProfileSettingsBodyFatOptional": "Grasa corporal % (opcional)",
+  "screensSettingsProfileSettingsOptional": "Opcional",
   "screensSettingsProfileSettingsNameHint": "Introduce tu nombre",
   "screensSettingsProfileSettingsCustomizeMacroRatios": "Personalizar proporciones de macronutrientes",
   "screensSettingsProfileSettingsImperialHeightRange": "La altura debe estar entre 39 y 98 pulgadas",

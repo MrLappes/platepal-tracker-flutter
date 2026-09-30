@@ -2989,6 +2989,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Body Fat % (optional)';
 
   @override
+  String get screensSettingsProfileSettingsOptional => 'Optional';
+
+  @override
   String get screensSettingsProfileSettingsNameHint => 'Enter your name';
 
   @override
