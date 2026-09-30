@@ -558,6 +558,7 @@ void main() {
 
       expect(result.success, isFalse);
       expect(result.errors.join(), contains('too many items'));
+      expect(result.errorCode, ImportExportErrorCode.importInvalidData);
       expect(await dishService.getDishById('rice'), isNull);
       expect(await _ledger(), isEmpty);
     });
@@ -581,6 +582,18 @@ void main() {
       );
       expect(result.success, isFalse);
       expect(result.message, contains('JSON object'));
+      expect(result.errorCode, ImportExportErrorCode.importInvalidJson);
+    });
+
+    test('a missing import file returns a stable error code', () async {
+      final result = await service.importData(
+        filePath: '${tempDir.path}/missing.json',
+        dataTypes: [DataType.allData],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+
+      expect(result.success, isFalse);
+      expect(result.errorCode, ImportExportErrorCode.importFileMissing);
     });
 
     test('an oversized file is rejected before reading', () async {
@@ -595,6 +608,7 @@ void main() {
       );
       expect(result.success, isFalse);
       expect(result.message, contains('too large'));
+      expect(result.errorCode, ImportExportErrorCode.importFileTooLarge);
     });
 
     test('skipped rows are reported as a partial import', () async {
@@ -640,8 +654,27 @@ void main() {
 
     expect(result.success, isFalse);
     expect(result.failedSections, ['fitnessGoals']);
+    expect(result.errorCode, ImportExportErrorCode.exportSectionFailed);
     expect(tempDir.listSync().whereType<File>(), isEmpty);
     expect(await service.createBackupBeforeImport(), isFalse);
+  });
+
+  test('successful export returns its file path separately from the message', () async {
+    final result = await service.exportData(
+      dataTypes: [DataType.dishes],
+      format: ExportFormat.json,
+    );
+
+    expect(result.success, isTrue);
+    expect(result.filePath, isA<String>());
+    expect(await File(result.filePath!).exists(), isTrue);
+  });
+
+  test('missing restore backup returns a stable error code', () async {
+    final result = await service.restoreFromLastBackup();
+
+    expect(result.success, isFalse);
+    expect(result.errorCode, ImportExportErrorCode.restoreBackupMissing);
   });
 
   test('logs never contain imported personal data', () async {

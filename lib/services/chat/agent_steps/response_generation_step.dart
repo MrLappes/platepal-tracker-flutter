@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Locale;
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/models/user_ingredient.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/chat_types.dart';
@@ -36,6 +38,9 @@ class ResponseGenerationStep extends AgentStep {
   Future<ChatStepResult> execute(ChatStepInput input) async {
     try {
       debugPrint('🤖 ResponseGenerationStep: Starting response generation');
+      final localizations = lookupAppLocalizations(
+        Locale(input.metadata?['languageCode'] as String? ?? 'en'),
+      );
 
       // Check for verification feedback from retry attempts
       final verificationFeedback =
@@ -146,7 +151,8 @@ class ResponseGenerationStep extends AgentStep {
           dishInfoFallback:
               (input.metadata?['localizedFallbacks']
                       as Map<String, dynamic>?)?['dishInfo']
-                  as String?,
+                as String? ??
+              localizations.servicesChatAgentFallbackDishInfo,
         );
         replyText = result['replyText'] as String? ?? '';
         recommendation = result['recommendation'] as String?;
@@ -170,7 +176,7 @@ class ResponseGenerationStep extends AgentStep {
                 jsonDecode(openaiResponse) as Map<String, dynamic>;
             replyText =
                 jsonResponse['replyText'] as String? ??
-                'No response text found.';
+              localizations.servicesChatAgentFallbackNoResponse;
             recommendation = jsonResponse['recommendation'] as String?;
 
             final dishesJson = jsonResponse['dishes'] as List<dynamic>?;
@@ -195,7 +201,10 @@ class ResponseGenerationStep extends AgentStep {
           debugPrint(
             '⚠️ ResponseGenerationStep: Failed to parse JSON response (${e.runtimeType})',
           );
-          replyText = _extractReplyTextFromMalformedJson(openaiResponse);
+          replyText = _extractReplyTextFromMalformedJson(
+            openaiResponse,
+            localizations.servicesChatAgentFallbackFormatting,
+          );
         }
       }
 
@@ -297,7 +306,7 @@ class ResponseGenerationStep extends AgentStep {
   Map<String, dynamic> _dispatchToolCalls(
     List<ToolCall> toolCalls,
     String? uploadedImageUri, {
-    String? dishInfoFallback,
+    required String dishInfoFallback,
   }) {
     String replyText = '';
     String? recommendation;
@@ -402,7 +411,7 @@ class ResponseGenerationStep extends AgentStep {
     }
 
     if (replyText.isEmpty && dishes.isNotEmpty) {
-      replyText = dishInfoFallback ?? 'Here is the dish information:';
+      replyText = dishInfoFallback;
     }
 
     return {
@@ -879,7 +888,10 @@ class ResponseGenerationStep extends AgentStep {
   }
 
   /// Helper method to extract replyText from potentially malformed JSON
-  String _extractReplyTextFromMalformedJson(String rawResponse) {
+  String _extractReplyTextFromMalformedJson(
+    String rawResponse,
+    String formattingFallback,
+  ) {
     try {
       // First try to find replyText using regex pattern matching
       final replyTextPattern = RegExp(
@@ -940,10 +952,10 @@ class ResponseGenerationStep extends AgentStep {
       }
 
       // If all else fails, provide a helpful error message instead of raw JSON
-      return "I apologize, but I encountered a formatting issue with my response. Could you please try your question again?";
+      return formattingFallback;
     } catch (e) {
       debugPrint('⚠️ Error extracting reply text from malformed JSON: $e');
-      return "I apologize, but I encountered a formatting issue with my response. Could you please try your question again?";
+      return formattingFallback;
     }
   }
 

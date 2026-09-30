@@ -84,9 +84,9 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       });
     } catch (e) {
       if (!mounted) return;
-      debugPrint('❌ MealsScreen: Error loading dishes: $e');
+      debugPrint('MealsScreen: Error loading dishes (${e.runtimeType})');
       setState(() {
-        _error = e.toString();
+        _error = AppLocalizations.of(context).screensMealsLoadFailedHint;
         _isLoading = false;
       });
     }

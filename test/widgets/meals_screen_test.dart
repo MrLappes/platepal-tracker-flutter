@@ -18,7 +18,29 @@ class _StubDishService extends DishService {
   }
 }
 
+class _FailingDishService extends DishService {
+  @override
+  Future<List<Dish>> getAllDishes() async => throw StateError('Private dish data');
+}
+
 void main() {
+  testWidgets('meal load failure shows localized guidance, not exception', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MealsScreen(dishService: _FailingDishService()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('No se pudieron cargar tus platos. Inténtalo de nuevo.'), findsOneWidget);
+    expect(find.textContaining('Private dish data'), findsNothing);
+  });
+
   testWidgets('meals page has one primary create action and pullable content', (
     tester,
   ) async {

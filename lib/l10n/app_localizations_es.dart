@@ -78,6 +78,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsCalendarMacroSummaryGetAiTip => 'Obtener Consejo IA';
 
   @override
+  String componentsCalendarMacroSummaryPercentOfGoal(int percent) {
+    return '$percent % del objetivo';
+  }
+
+  @override
+  String componentsCalendarMacroSummaryOverBy(String amount, String unit) {
+    return 'Por encima del objetivo en $amount $unit';
+  }
+
+  @override
   String get componentsCalendarMacroSummaryHealthDataMessage =>
       'Estos datos fueron recopilados de los datos de salud en tu teléfono, proporcionando información precisa sobre las calorías quemadas de tus actividades de fitness para este día completo.';
 
@@ -528,6 +538,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get componentsChatChatInputIngredientsAdded =>
       'Ingredientes agregados';
+
+  @override
+  String componentsChatChatInputRemoveIngredient(String name) {
+    return 'Quitar $name';
+  }
 
   @override
   String get componentsChatChatInputIngredientAdded =>
@@ -1229,6 +1244,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensMealsErrorLoadingDishes => 'Error al cargar los platos';
 
   @override
+  String get screensMealsLoadFailedHint =>
+      'No se pudieron cargar tus platos. Inténtalo de nuevo.';
+
+  @override
   String get screensMealsErrorUpdatingDish => 'Error al actualizar el plato';
 
   @override
@@ -1602,6 +1621,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensSettingsApiKeySettingsRemoveApiKey => 'Eliminar clave API';
 
   @override
+  String get screensSettingsApiKeySettingsShowKey => 'Mostrar clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsHideKey => 'Ocultar clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsDeleteKey => 'Eliminar clave API';
+
+  @override
   String get screensSettingsApiKeySettingsRemoveApiKeyConfirmation =>
       '¿Estás seguro de que quieres eliminar tu clave API? Esto desactivará las funciones de IA.';
 
@@ -1714,6 +1742,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsContributorsCheckGitHub =>
       'Echa un vistazo a nuestro repositorio de GitHub';
+
+  @override
+  String screensSettingsContributorsOpenGitHubProfile(String name) {
+    return 'Abrir el perfil de $name en GitHub';
+  }
 
   @override
   String get screensSettingsContributorsContributorPlural => 'Contribuidores';
@@ -1941,6 +1974,18 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get screensSettingsExportDataSectionFailed =>
+      'No se pudieron exportar los datos seleccionados. No se creó ningún archivo. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsExportDataWriteFailed =>
+      'No se pudo guardar el archivo de exportación. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsExportDataShareProblem =>
+      'No se pudo compartir el archivo. Inténtalo de nuevo.';
+
+  @override
   String get screensSettingsImportDataRestoring =>
       'Restaurando desde la copia de seguridad...';
 
@@ -2008,6 +2053,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataDetailedErrors => 'Errores detallados:';
+
+  @override
+  String get screensSettingsImportDataTechnicalDetails =>
+      'Detalles del archivo y las filas (pueden aparecer en inglés):';
 
   @override
   String get screensSettingsImportDataResults => 'Resultados de la importación';
@@ -2150,6 +2199,56 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String screensSettingsImportDataRestoreFailedDetail(String error) {
     return 'Error de restauración: $error';
+  }
+
+  @override
+  String get screensSettingsImportDataFileMissing =>
+      'No se encontró el archivo. Selecciónalo de nuevo.';
+
+  @override
+  String screensSettingsImportDataFileTooLarge(int maxSize) {
+    return 'El archivo es demasiado grande. Selecciona uno de hasta $maxSize MB.';
+  }
+
+  @override
+  String get screensSettingsImportDataInvalidJson =>
+      'El archivo no contiene JSON válido. Revísalo e inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataUnsupportedFormat =>
+      'Formato de archivo no admitido. Selecciona un archivo JSON o CSV.';
+
+  @override
+  String get screensSettingsImportDataInvalidData =>
+      'El archivo contiene datos no válidos. Revisa los detalles e inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataFileSelectionProblem =>
+      'No se pudo seleccionar un archivo. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataBackupMissing =>
+      'No se encontró ninguna copia de seguridad para restaurar.';
+
+  @override
+  String get screensSettingsImportDataBackupUnreadable =>
+      'No se pudo leer la copia de seguridad. No se modificaron los datos.';
+
+  @override
+  String get screensSettingsImportDataSnapshotFailed =>
+      'No se pudieron proteger tus datos actuales. No se modificaron los datos.';
+
+  @override
+  String get screensSettingsImportDataRestoreProblem =>
+      'No se pudo restaurar la copia de seguridad. Comprueba tus datos antes de reintentar.';
+
+  @override
+  String get screensSettingsImportDataRestoreRolledBack =>
+      'La restauración falló, pero tus datos anteriores no se modificaron.';
+
+  @override
+  String screensSettingsImportDataRestoreCopySaved(String path) {
+    return 'La restauración falló y tus datos anteriores pueden estar incompletos. Hay una copia de recuperación en $path.';
   }
 
   @override
@@ -2443,6 +2542,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsStatisticsErrorLoadingData =>
       'Error al cargar datos';
+
+  @override
+  String get screensSettingsStatisticsLoadFailedHint =>
+      'No se pudieron cargar las estadísticas. Inténtalo de nuevo.';
 
   @override
   String get screensSettingsStatisticsEstimatedBalance => 'Balance Estimado';
@@ -2861,6 +2964,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get servicesChatAgentFallbackDishInfo =>
       'Aquí está la información del plato:';
+
+  @override
+  String get servicesChatAgentFallbackNoResponse =>
+      'No se encontró texto de respuesta.';
+
+  @override
+  String get servicesChatAgentFallbackFormatting =>
+      'No pude procesar mi respuesta. Inténtalo de nuevo.';
 
   @override
   String get screensDishCreateImage => 'Imagen';

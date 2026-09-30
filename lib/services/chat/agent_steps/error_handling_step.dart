@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Locale;
+import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../../models/chat_types.dart';
 
 /// Handles graceful error recovery and fallback strategies for chat agent
@@ -330,6 +332,7 @@ class ErrorHandlingStep extends AgentStep {
     final fallbackResponse = _createFallbackResponse(
       fallbackType,
       originalError,
+      languageCode: input.metadata?['languageCode'] as String? ?? 'en',
       localizedFallbacks:
           input.metadata?['localizedFallbacks'] as Map<String, dynamic>?,
     );
@@ -379,15 +382,17 @@ class ErrorHandlingStep extends AgentStep {
   ChatResponse _createFallbackResponse(
     String fallbackType,
     ChatAgentError originalError, {
+    required String languageCode,
     Map<String, dynamic>? localizedFallbacks,
   }) {
     String? loc(String key) => localizedFallbacks?[key] as String?;
+    final localizations = lookupAppLocalizations(Locale(languageCode));
     switch (fallbackType) {
       case 'parsing':
         return ChatResponse(
           replyText:
               loc('parsing') ??
-              "I apologize, but I'm having trouble processing your request right now. Could you please try rephrasing your question?",
+              localizations.servicesChatAgentFallbackParsing,
           metadata: {'fallbackReason': 'parsing_error'},
         );
 
@@ -395,7 +400,7 @@ class ErrorHandlingStep extends AgentStep {
         return ChatResponse(
           replyText:
               loc('critical') ??
-              "I'm experiencing some technical difficulties at the moment. Please try again in a few moments.",
+              localizations.servicesChatAgentFallbackCritical,
           metadata: {'fallbackReason': 'critical_error'},
         );
 
@@ -403,7 +408,7 @@ class ErrorHandlingStep extends AgentStep {
         return ChatResponse(
           replyText:
               loc('network') ??
-              "I'm having trouble connecting to my knowledge base right now. Please check your internet connection and try again.",
+              localizations.servicesChatAgentFallbackNetwork,
           metadata: {'fallbackReason': 'network_error'},
         );
 
@@ -411,7 +416,7 @@ class ErrorHandlingStep extends AgentStep {
         return ChatResponse(
           replyText:
               loc('context') ??
-              'Your request contains a lot of information. Could you please break it down into smaller, more specific questions?',
+              localizations.servicesChatAgentFallbackContext,
           metadata: {'fallbackReason': 'context_length'},
         );
 
@@ -420,7 +425,7 @@ class ErrorHandlingStep extends AgentStep {
         return ChatResponse(
           replyText:
               loc('generic') ??
-              'I apologize, but I encountered an unexpected issue. Please try again.',
+              localizations.servicesChatAgentFallbackGeneric,
           metadata: {'fallbackReason': 'generic_error'},
         );
     }

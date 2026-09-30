@@ -439,34 +439,19 @@ class _ChatInputState extends State<ChatInput>
               Positioned(
                 top: 8,
                 right: 8,
-                child: GestureDetector(
-                  onTap: () {
+                child: IconButton(
+                  tooltip: localizations.screensDishCreateRemoveImage,
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  onPressed: () {
                     setState(() {
                       _selectedImage = null;
                     });
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.shadow.withValues(
-                            alpha: 0.2,
-                          ),
-                          spreadRadius: 1,
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 16,
-                      color: theme.colorScheme.error,
-                    ),
+                  style: IconButton.styleFrom(
+                    backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.9),
+                    foregroundColor: theme.colorScheme.error,
                   ),
+                  icon: const Icon(Icons.close, size: 16),
                 ),
               ),
             ],
@@ -502,9 +487,10 @@ class _ChatInputState extends State<ChatInput>
                   final ingredient = entry.value;
 
                   return Container(
+                    constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width - 32),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
-                      vertical: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
@@ -522,21 +508,21 @@ class _ChatInputState extends State<ChatInput>
                           color: theme.colorScheme.primary,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Text(
+                            '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        GestureDetector(
-                          onTap: () => _removeIngredient(index),
-                          child: Icon(
-                            Icons.close,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
+                        IconButton(
+                          tooltip: localizations.componentsChatChatInputRemoveIngredient(ingredient.name),
+                          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                          onPressed: () => _removeIngredient(index),
+                          icon: Icon(Icons.close, size: 16, color: theme.colorScheme.primary),
                         ),
                       ],
                     ),
@@ -609,15 +595,9 @@ class _ChatInputState extends State<ChatInput>
       return;
     }
 
-    // Debug: Print what we're about to send
     debugPrint(
-      '🔍 DEBUG: Sending message with ${_selectedIngredients.length} ingredients',
+      'ChatInput: Sending message with ${_selectedIngredients.length} ingredients',
     );
-    for (final ingredient in _selectedIngredients) {
-      debugPrint(
-        '   - ${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
-      );
-    }
 
     // For now, we'll pass the file path as imageUrl
     // In a real app, you'd upload the image to a server first

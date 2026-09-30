@@ -65,6 +65,10 @@
   "@componentsCalendarMacroSummaryGetAiTip": {
     "description": "Button text to get AI nutrition tip"
   },
+  "componentsCalendarMacroSummaryPercentOfGoal": "{percent}% of goal",
+  "@componentsCalendarMacroSummaryPercentOfGoal": {"description": "Progress toward a daily nutrition goal", "placeholders": {"percent": {"type": "int"}}},
+  "componentsCalendarMacroSummaryOverBy": "Over goal by {amount} {unit}",
+  "@componentsCalendarMacroSummaryOverBy": {"description": "Nutrition amount above a daily goal", "placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}}},
   "componentsCalendarMacroSummaryHealthDataMessage": "This data was gathered from health data on your phone, providing accurate calories burned information from your fitness activities for this complete day.",
   "@componentsCalendarMacroSummaryHealthDataMessage": {
     "description": "Message explaining health data source for complete days"
@@ -599,6 +603,8 @@
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Label for added ingredients preview in chat"
   },
+  "componentsChatChatInputRemoveIngredient": "Remove {name}",
+  "@componentsChatChatInputRemoveIngredient": {"description": "Tooltip for removing an attached chat ingredient", "placeholders": {"name": {"type": "String"}}},
   "componentsChatChatInputIngredientAdded": "Ingredient added to chat",
   "@componentsChatChatInputIngredientAdded": {
     "description": "Confirmation after adding a product as a chat ingredient"
@@ -1342,6 +1348,8 @@
   "@screensMealsErrorLoadingDishes": {
     "description": "Error message when dishes fail to load"
   },
+  "screensMealsLoadFailedHint": "Could not load your dishes. Please try again.",
+  "@screensMealsLoadFailedHint": {"description": "Advice shown after a meal list load error"},
   "screensMealsErrorUpdatingDish": "Error updating dish",
   "@screensMealsErrorUpdatingDish": {
     "description": "Error message when dish update fails"
@@ -1774,6 +1782,12 @@
   "@screensSettingsApiKeySettingsRemoveApiKey": {
     "description": "Title for remove API key confirmation dialog"
   },
+  "screensSettingsApiKeySettingsShowKey": "Show API key",
+  "@screensSettingsApiKeySettingsShowKey": {"description": "Tooltip for revealing the API key"},
+  "screensSettingsApiKeySettingsHideKey": "Hide API key",
+  "@screensSettingsApiKeySettingsHideKey": {"description": "Tooltip for concealing the API key"},
+  "screensSettingsApiKeySettingsDeleteKey": "Delete API key",
+  "@screensSettingsApiKeySettingsDeleteKey": {"description": "Tooltip for deleting the saved API key"},
   "screensSettingsApiKeySettingsRemoveApiKeyConfirmation": "Are you sure you want to remove your API key? This will disable AI features.",
   "@screensSettingsApiKeySettingsRemoveApiKeyConfirmation": {
     "description": "Confirmation message for removing API key"
@@ -1866,6 +1880,8 @@
   "@screensSettingsContributorsCheckGitHub": {
     "description": "GitHub repository button text"
   },
+  "screensSettingsContributorsOpenGitHubProfile": "Open {name} on GitHub",
+  "@screensSettingsContributorsOpenGitHubProfile": {"description": "Tooltip on a contributor profile link", "placeholders": {"name": {"type": "String"}}},
   "screensSettingsContributorsContributorPlural": "Contributors",
   "@screensSettingsContributorsContributorPlural": {
     "description": "Plural form for contributor count"
@@ -2050,6 +2066,12 @@
   "@screensSettingsExportDataShareSubject": {"description": "Shared export subject"},
   "screensSettingsExportDataFailedDetail": "Export failed: {error}",
   "@screensSettingsExportDataFailedDetail": {"description": "Export failure with technical details", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsExportDataSectionFailed": "Could not export the selected data. No file was created. Please try again.",
+  "@screensSettingsExportDataSectionFailed": {"description": "Export stopped when a selected section cannot be read"},
+  "screensSettingsExportDataWriteFailed": "Could not save the export file. Please try again.",
+  "@screensSettingsExportDataWriteFailed": {"description": "Export file write failed"},
+  "screensSettingsExportDataShareProblem": "Could not share the file. Please try again.",
+  "@screensSettingsExportDataShareProblem": {"description": "Failure when sharing the exported file"},
   "screensSettingsImportDataRestoring": "Restoring from backup...",
   "@screensSettingsImportDataRestoring": {"description": "Restore progress heading"},
   "screensSettingsImportDataProcessingItems": "Processing {current} of {total} items",
@@ -2086,6 +2108,8 @@
   "@screensSettingsImportDataIssues": {"description": "Import error heading"},
   "screensSettingsImportDataDetailedErrors": "Detailed errors:",
   "@screensSettingsImportDataDetailedErrors": {"description": "Import error list heading"},
+  "screensSettingsImportDataTechnicalDetails": "File and row details (may appear in English):",
+  "@screensSettingsImportDataTechnicalDetails": {"description": "Introduces untranslated details from an imported file"},
   "screensSettingsImportDataResults": "Import results",
   "@screensSettingsImportDataResults": {"description": "Successful import results heading"},
   "screensSettingsImportDataPartialResults": "Import completed with skipped items",
@@ -2142,6 +2166,30 @@
   "@screensSettingsImportDataRestoreSuccess": {"description": "Successful restore message"},
   "screensSettingsImportDataRestoreFailedDetail": "Restore failed: {error}",
   "@screensSettingsImportDataRestoreFailedDetail": {"description": "Restore error details", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsImportDataFileMissing": "Import file not found. Select it again.",
+  "@screensSettingsImportDataFileMissing": {"description": "Selected import file has disappeared"},
+  "screensSettingsImportDataFileTooLarge": "This file is too large. Select a file of at most {maxSize} MB.",
+  "@screensSettingsImportDataFileTooLarge": {"description": "Import file size limit", "placeholders": {"maxSize": {"type": "int"}}},
+  "screensSettingsImportDataInvalidJson": "This file is not valid JSON. Check it and try again.",
+  "@screensSettingsImportDataInvalidJson": {"description": "Invalid JSON import file"},
+  "screensSettingsImportDataUnsupportedFormat": "Unsupported file format. Select a JSON or CSV file.",
+  "@screensSettingsImportDataUnsupportedFormat": {"description": "Import requires a supported file extension"},
+  "screensSettingsImportDataInvalidData": "The file contains invalid data. Check the details and try again.",
+  "@screensSettingsImportDataInvalidData": {"description": "Import failed validation before writing any data"},
+  "screensSettingsImportDataFileSelectionProblem": "Could not select a file. Please try again.",
+  "@screensSettingsImportDataFileSelectionProblem": {"description": "File picker failure without technical details"},
+  "screensSettingsImportDataBackupMissing": "No backup was found to restore.",
+  "@screensSettingsImportDataBackupMissing": {"description": "Last import backup unavailable"},
+  "screensSettingsImportDataBackupUnreadable": "The backup could not be read. Nothing was changed.",
+  "@screensSettingsImportDataBackupUnreadable": {"description": "Restore stopped before changing data"},
+  "screensSettingsImportDataSnapshotFailed": "Could not protect your current data. Nothing was changed.",
+  "@screensSettingsImportDataSnapshotFailed": {"description": "Restore stopped when a safety snapshot failed"},
+  "screensSettingsImportDataRestoreProblem": "Could not restore your backup. Check your data before trying again.",
+  "@screensSettingsImportDataRestoreProblem": {"description": "Generic restore failure without exposing exception details"},
+  "screensSettingsImportDataRestoreRolledBack": "Restore failed, but your previous data was left unchanged.",
+  "@screensSettingsImportDataRestoreRolledBack": {"description": "Restore failed and the safety rollback succeeded"},
+  "screensSettingsImportDataRestoreCopySaved": "Restore failed and your previous data may be incomplete. A recovery copy is saved at {path}.",
+  "@screensSettingsImportDataRestoreCopySaved": {"description": "Restore and rollback failed; location of safety copy", "placeholders": {"path": {"type": "String"}}},
   "screensSettingsImportProfileCompletionActivityLevel": "Activity Level",
   "@screensSettingsImportProfileCompletionActivityLevel": {
     "description": "Activity level field label"
@@ -2462,6 +2510,8 @@
   "@screensSettingsStatisticsErrorLoadingData": {
     "description": "Error message when data loading fails"
   },
+  "screensSettingsStatisticsLoadFailedHint": "Could not load your statistics. Please try again.",
+  "@screensSettingsStatisticsLoadFailedHint": {"description": "Retry guidance after statistics load fails"},
   "screensSettingsStatisticsEstimatedBalance": "Estimated Balance",
   "@screensSettingsStatisticsEstimatedBalance": {
     "description": "Estimated balance label"
@@ -2817,6 +2867,10 @@
   "@servicesChatAgentFallbackDishInfo": {
     "description": "Prefix shown when the AI returns dish data without a reply text"
   },
+  "servicesChatAgentFallbackNoResponse": "No response text found.",
+  "@servicesChatAgentFallbackNoResponse": {"description": "Reply when the model returned JSON without response text"},
+  "servicesChatAgentFallbackFormatting": "I couldn't process my response. Please try again.",
+  "@servicesChatAgentFallbackFormatting": {"description": "Reply when the model response has an invalid format"},
   "screensDishCreateImage": "Image",
   "@screensDishCreateImage": {
     "description": "Title of the dish image section"

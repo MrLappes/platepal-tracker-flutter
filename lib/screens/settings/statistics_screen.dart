@@ -215,8 +215,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      debugPrint('StatisticsScreen: Data load failed (${e.runtimeType})');
       setState(() {
-        _error = e.toString();
+        _error = AppLocalizations.of(context).screensSettingsStatisticsLoadFailedHint;
         _isLoading = false;
       });
     }
@@ -1262,6 +1263,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           maintenanceCalories: _maintenanceCalories!,
           minValue: _minCalories,
           maxValue: _maxCalories,
+          maintenanceLabel: l10n.screensSettingsStatisticsMaintenance,
         ),
       ),
     );
@@ -2051,12 +2053,14 @@ class CalorieChartPainter extends CustomPainter {
   final double maintenanceCalories;
   final double minValue;
   final double maxValue;
+  final String maintenanceLabel;
 
   CalorieChartPainter({
     required this.data,
     required this.maintenanceCalories,
     required this.minValue,
     required this.maxValue,
+    required this.maintenanceLabel,
   });
 
   @override
@@ -2145,7 +2149,7 @@ class CalorieChartPainter extends CustomPainter {
     // Draw maintenance label
     final textPainter = TextPainter(
       text: TextSpan(
-        text: 'Maintenance',
+        text: maintenanceLabel,
         style: TextStyle(
           color: Colors.green.shade700,
           fontSize: 10,
@@ -2357,6 +2361,7 @@ class CalorieChartPainter extends CustomPainter {
     return oldDelegate.data != data ||
         oldDelegate.maintenanceCalories != maintenanceCalories ||
         oldDelegate.minValue != minValue ||
-        oldDelegate.maxValue != maxValue;
+      oldDelegate.maxValue != maxValue ||
+      oldDelegate.maintenanceLabel != maintenanceLabel;
   }
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/models/chat_types.dart';
+import 'package:platepal_tracker/services/chat/agent_steps/error_handling_step.dart';
 import 'package:platepal_tracker/services/chat/agent_steps/response_generation_step.dart';
 import 'package:platepal_tracker/services/chat/agent_steps/thinking_step.dart';
 import 'package:platepal_tracker/services/chat/openai_service.dart';
@@ -80,6 +81,92 @@ List<String> _captureLogs() {
 }
 
 void main() {
+  test('German fallback replaces missing JSON reply text', () async {
+    final openai = _FakeOpenAIService(
+      compat: true,
+      reply: {'role': 'assistant', 'content': '{"dishes": []}'},
+    );
+    final result = await ResponseGenerationStep(openaiService: openai).execute(
+      const ChatStepInput(
+        userMessage: 'Hallo',
+        metadata: {'languageCode': 'de'},
+      ),
+    );
+
+    expect(result.success, isTrue);
+    final response = ChatResponse.fromJson(
+      result.data['chatResponse'] as Map<String, dynamic>,
+    );
+    expect(response.replyText, 'Kein Antworttext gefunden.');
+  });
+
+  test('German formatting issue gives a localized retry reply', () async {
+    final openai = _FakeOpenAIService(
+      compat: true,
+      reply: {'role': 'assistant', 'content': '{"dishes": [}'},
+    );
+    final result = await ResponseGenerationStep(openaiService: openai).execute(
+      const ChatStepInput(userMessage: 'Hallo', metadata: {'languageCode': 'de'}),
+    );
+
+    final response = ChatResponse.fromJson(
+      result.data['chatResponse'] as Map<String, dynamic>,
+    );
+    expect(response.replyText,
+        'Meine Antwort konnte nicht verarbeitet werden. Bitte versuche es erneut.');
+  });
+
+  test('German dish-only tool call uses a localized intro', () async {
+    final openai = _FakeOpenAIService(
+      finishReason: 'tool_calls',
+      reply: {
+        'role': 'assistant',
+        'content': null,
+        'tool_calls': [
+          {
+            'id': 'call_1',
+            'type': 'function',
+            'function': {
+              'name': 'reference_existing_dish',
+              'arguments': jsonEncode({'dish_id': 'oats', 'dish_name': 'Hafer'}),
+            },
+          },
+        ],
+      },
+    );
+    final result = await ResponseGenerationStep(openaiService: openai).execute(
+      const ChatStepInput(userMessage: 'Hallo', metadata: {'languageCode': 'de'}),
+    );
+
+    final response = ChatResponse.fromJson(
+      result.data['chatResponse'] as Map<String, dynamic>,
+    );
+    expect(response.replyText, 'Hier sind die Gerichte-Informationen:');
+  });
+
+  test('German error recovery localizes fallback without provider strings', () async {
+    final result = await ErrorHandlingStep().execute(
+      const ChatStepInput(
+        userMessage: 'Hallo',
+        metadata: {
+          'languageCode': 'de',
+          'failedStep': 'response_generation',
+          'originalError': ChatAgentError(
+            type: ChatErrorType.criticalError,
+            message: 'Internal error',
+            retryable: false,
+          ),
+          'retryCount': 0,
+        },
+      ),
+    );
+
+    expect(result.success, isTrue);
+    final recovery = result.data['recoveryResult'] as ErrorRecoveryResult;
+    expect(recovery.fallbackResponse?.replyText,
+      'Ich erlebe gerade technische Schwierigkeiten. Bitte versuche es in einem Moment erneut.');
+  });
+
   group('logging (F7-02)', () {
     test('response generation never logs prompts, history or tool args', () async {
       final logs = _captureLogs();

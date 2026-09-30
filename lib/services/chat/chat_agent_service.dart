@@ -641,6 +641,7 @@ class ChatAgentService {
         thinkingSteps,
         startTime,
         botConfig,
+        languageCode,
       );
     }
   }
@@ -1839,14 +1840,16 @@ class ChatAgentService {
     List<String> thinkingSteps,
     DateTime startTime,
     BotConfiguration botConfig,
+    String languageCode,
   ) {
     debugPrint('❌ Building error response: $error');
 
     final duration = DateTime.now().difference(startTime);
 
     return ChatResponse(
-      replyText:
-          'I apologize, but I encountered an issue processing your request. Please try again.',
+      replyText: lookupAppLocalizations(
+        Locale(languageCode),
+      ).servicesChatAgentFallbackGeneric,
       dishes: [],
       metadata: {
         'processingTime': duration.inMilliseconds,

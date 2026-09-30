@@ -59,6 +59,10 @@
   "@componentsCalendarMacroSummaryGetAiTip": {
     "description": "KI-Tipp"
   },
+  "componentsCalendarMacroSummaryPercentOfGoal": "{percent} % des Ziels",
+  "@componentsCalendarMacroSummaryPercentOfGoal": {"description": "Fortschritt zum Tagesziel", "placeholders": {"percent": {"type": "int"}}},
+  "componentsCalendarMacroSummaryOverBy": "{amount} {unit} über dem Ziel",
+  "@componentsCalendarMacroSummaryOverBy": {"description": "Nährwertmenge über dem Tagesziel", "placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}}},
   "componentsCalendarMacroSummaryHealthDataMessage": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt und liefern genaue Informationen über verbrannte Kalorien aus Ihren Fitnessaktivitäten für diesen vollständigen Tag.",
   "@componentsCalendarMacroSummaryHealthDataMessage": {
     "description": "Diese Daten wurden von den Gesundheitsdaten auf Ihrem Telefon gesammelt und liefern genaue Informationen über verbrannte Kalorien aus Ihren Fitnessaktivitäten für diesen vollständigen Tag."
@@ -556,6 +560,8 @@
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Zutaten hinzugefügt"
   },
+  "componentsChatChatInputRemoveIngredient": "{name} entfernen",
+  "@componentsChatChatInputRemoveIngredient": {"description": "Angehängte Chat-Zutat entfernen", "placeholders": {"name": {"type": "String"}}},
   "componentsChatChatInputIngredientAdded": "Zutat zum Chat hinzugefügt",
   "@componentsChatChatInputIngredientAdded": {
     "description": "Bestätigung nach dem Hinzufügen eines Produkts als Chat-Zutat"
@@ -1309,6 +1315,8 @@
   "@screensMealsErrorLoadingDishes": {
     "description": "Fehler beim Laden der Gerichte"
   },
+  "screensMealsLoadFailedHint": "Deine Gerichte konnten nicht geladen werden. Bitte versuche es erneut.",
+  "@screensMealsLoadFailedHint": {"description": "Hinweis nach einem Fehler beim Laden von Gerichten"},
   "screensMealsErrorUpdatingDish": "Fehler beim Aktualisieren des Gerichts",
   "@screensMealsErrorUpdatingDish": {
     "description": "Fehler beim Aktualisieren des Gerichts"
@@ -1726,6 +1734,12 @@
   "@screensSettingsApiKeySettingsRemoveApiKey": {
     "description": "API-Schlüssel entfernen"
   },
+  "screensSettingsApiKeySettingsShowKey": "API-Schlüssel anzeigen",
+  "@screensSettingsApiKeySettingsShowKey": {"description": "Verborgenen API-Schlüssel anzeigen"},
+  "screensSettingsApiKeySettingsHideKey": "API-Schlüssel verbergen",
+  "@screensSettingsApiKeySettingsHideKey": {"description": "Sichtbaren API-Schlüssel verbergen"},
+  "screensSettingsApiKeySettingsDeleteKey": "API-Schlüssel löschen",
+  "@screensSettingsApiKeySettingsDeleteKey": {"description": "Gespeicherten API-Schlüssel löschen"},
   "screensSettingsApiKeySettingsRemoveApiKeyConfirmation": "Sind Sie sicher, dass Sie Ihren API-Schlüssel entfernen möchten? Dies deaktiviert KI-Funktionen.",
   "@screensSettingsApiKeySettingsRemoveApiKeyConfirmation": {
     "description": "Sind Sie sicher, dass Sie Ihren API-Schlüssel entfernen möchten? Dies deaktiviert KI-Funktionen."
@@ -1818,6 +1832,8 @@
   "@screensSettingsContributorsCheckGitHub": {
     "description": "Schauen Sie sich unser GitHub-Repository an"
   },
+  "screensSettingsContributorsOpenGitHubProfile": "GitHub-Profil von {name} öffnen",
+  "@screensSettingsContributorsOpenGitHubProfile": {"description": "Link zum GitHub-Profil eines Mitwirkenden", "placeholders": {"name": {"type": "String"}}},
   "screensSettingsContributorsContributorPlural": "Mitwirkende",
   "@screensSettingsContributorsContributorPlural": {
     "description": "Mitwirkende"
@@ -2000,6 +2016,12 @@
   "@screensSettingsExportDataShareSubject": {"description": "Betreff beim Teilen"},
   "screensSettingsExportDataFailedDetail": "Export fehlgeschlagen: {error}",
   "@screensSettingsExportDataFailedDetail": {"description": "Exportfehler mit technischen Details", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsExportDataSectionFailed": "Die ausgewählten Daten konnten nicht exportiert werden. Es wurde keine Datei erstellt. Bitte versuche es erneut.",
+  "@screensSettingsExportDataSectionFailed": {"description": "Fehler beim Lesen eines Exportbereichs"},
+  "screensSettingsExportDataWriteFailed": "Die Exportdatei konnte nicht gespeichert werden. Bitte versuche es erneut.",
+  "@screensSettingsExportDataWriteFailed": {"description": "Fehler beim Speichern der Exportdatei"},
+  "screensSettingsExportDataShareProblem": "Die Datei konnte nicht geteilt werden. Bitte versuche es erneut.",
+  "@screensSettingsExportDataShareProblem": {"description": "Fehler beim Teilen der Exportdatei"},
   "screensSettingsImportDataRestoring": "Sicherung wird wiederhergestellt...",
   "@screensSettingsImportDataRestoring": {"description": "Fortschritt der Wiederherstellung"},
   "screensSettingsImportDataProcessingItems": "{current} von {total} Einträgen werden verarbeitet",
@@ -2036,6 +2058,8 @@
   "@screensSettingsImportDataIssues": {"description": "Fehlerüberschrift"},
   "screensSettingsImportDataDetailedErrors": "Fehler im Detail:",
   "@screensSettingsImportDataDetailedErrors": {"description": "Überschrift der Fehlerliste"},
+  "screensSettingsImportDataTechnicalDetails": "Datei- und Zeilendetails (möglicherweise auf Englisch):",
+  "@screensSettingsImportDataTechnicalDetails": {"description": "Hinweis zu nicht übersetzten Importdetails"},
   "screensSettingsImportDataResults": "Importergebnis",
   "@screensSettingsImportDataResults": {"description": "Ergebnisüberschrift"},
   "screensSettingsImportDataPartialResults": "Import mit übersprungenen Einträgen abgeschlossen",
@@ -2092,6 +2116,30 @@
   "@screensSettingsImportDataRestoreSuccess": {"description": "Meldung nach Wiederherstellung"},
   "screensSettingsImportDataRestoreFailedDetail": "Wiederherstellung fehlgeschlagen: {error}",
   "@screensSettingsImportDataRestoreFailedDetail": {"description": "Wiederherstellungsfehler", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsImportDataFileMissing": "Importdatei nicht gefunden. Wähle sie erneut aus.",
+  "@screensSettingsImportDataFileMissing": {"description": "Ausgewählte Datei nicht mehr vorhanden"},
+  "screensSettingsImportDataFileTooLarge": "Die Datei ist zu groß. Wähle eine Datei mit höchstens {maxSize} MB.",
+  "@screensSettingsImportDataFileTooLarge": {"description": "Maximale Dateigröße für den Import", "placeholders": {"maxSize": {"type": "int"}}},
+  "screensSettingsImportDataInvalidJson": "Die Datei enthält kein gültiges JSON. Prüfe sie und versuche es erneut.",
+  "@screensSettingsImportDataInvalidJson": {"description": "Ungültige JSON-Importdatei"},
+  "screensSettingsImportDataUnsupportedFormat": "Nicht unterstütztes Dateiformat. Wähle eine JSON- oder CSV-Datei.",
+  "@screensSettingsImportDataUnsupportedFormat": {"description": "Nicht unterstütztes Dateiformat beim Import"},
+  "screensSettingsImportDataInvalidData": "Die Datei enthält ungültige Daten. Prüfe die Details und versuche es erneut.",
+  "@screensSettingsImportDataInvalidData": {"description": "Import durch Validierung verhindert"},
+  "screensSettingsImportDataFileSelectionProblem": "Datei konnte nicht ausgewählt werden. Bitte versuche es erneut.",
+  "@screensSettingsImportDataFileSelectionProblem": {"description": "Dateiauswahl fehlgeschlagen ohne technische Details"},
+  "screensSettingsImportDataBackupMissing": "Keine Sicherung zur Wiederherstellung gefunden.",
+  "@screensSettingsImportDataBackupMissing": {"description": "Sicherung für letzten Import fehlt"},
+  "screensSettingsImportDataBackupUnreadable": "Die Sicherung konnte nicht gelesen werden. Es wurde nichts geändert.",
+  "@screensSettingsImportDataBackupUnreadable": {"description": "Sicherungsdatei nicht lesbar"},
+  "screensSettingsImportDataSnapshotFailed": "Deine aktuellen Daten konnten nicht gesichert werden. Es wurde nichts geändert.",
+  "@screensSettingsImportDataSnapshotFailed": {"description": "Wiederherstellung vor Datenänderung gestoppt"},
+  "screensSettingsImportDataRestoreProblem": "Die Sicherung konnte nicht wiederhergestellt werden. Prüfe deine Daten vor einem erneuten Versuch.",
+  "@screensSettingsImportDataRestoreProblem": {"description": "Wiederherstellungsfehler ohne technische Details"},
+  "screensSettingsImportDataRestoreRolledBack": "Die Wiederherstellung ist fehlgeschlagen, aber deine bisherigen Daten blieben unverändert.",
+  "@screensSettingsImportDataRestoreRolledBack": {"description": "Wiederherstellung fehlgeschlagen, Rücksetzung erfolgreich"},
+  "screensSettingsImportDataRestoreCopySaved": "Wiederherstellung fehlgeschlagen; deine bisherigen Daten könnten unvollständig sein. Eine Sicherungskopie liegt unter {path}.",
+  "@screensSettingsImportDataRestoreCopySaved": {"description": "Speicherort der Sicherungskopie bei gescheiterter Rücksetzung", "placeholders": {"path": {"type": "String"}}},
   "screensSettingsImportProfileCompletionActivityLevel": "Aktivitätslevel",
   "@screensSettingsImportProfileCompletionActivityLevel": {
     "description": "Aktivitätslevel"
@@ -2412,6 +2460,8 @@
   "@screensSettingsStatisticsErrorLoadingData": {
     "description": "Fehler beim Laden der Daten"
   },
+  "screensSettingsStatisticsLoadFailedHint": "Die Statistik konnte nicht geladen werden. Bitte versuche es erneut.",
+  "@screensSettingsStatisticsLoadFailedHint": {"description": "Hinweis nach einem Fehler beim Laden der Statistik"},
   "screensSettingsStatisticsEstimatedBalance": "Geschätzte Bilanz",
   "@screensSettingsStatisticsEstimatedBalance": {
     "description": "Geschätzte Bilanz"
@@ -2700,6 +2750,10 @@
   "servicesChatAgentFallbackTemporaryIssue": "Es ist ein vorübergehendes Problem aufgetreten. Bitte versuche es erneut.",
   "servicesChatAgentFallbackRephrase": "Entschuldigung, ich habe Schwierigkeiten mit dieser Anfrage. Könntest du sie umformulieren?",
   "servicesChatAgentFallbackDishInfo": "Hier sind die Gerichte-Informationen:",
+  "servicesChatAgentFallbackNoResponse": "Kein Antworttext gefunden.",
+  "@servicesChatAgentFallbackNoResponse": {"description": "Antwort bei fehlendem Antworttext im JSON"},
+  "servicesChatAgentFallbackFormatting": "Meine Antwort konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+  "@servicesChatAgentFallbackFormatting": {"description": "Antwort bei ungültigem Antwortformat"},
   "screensDishCreateImage": "Bild",
   "screensDishCreateNoImageSelected": "Kein Bild ausgewählt",
   "screensDishCreateChangeImage": "Bild ändern",

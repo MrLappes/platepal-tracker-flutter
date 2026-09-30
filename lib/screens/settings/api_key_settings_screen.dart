@@ -698,6 +698,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                           _pasteSuccess ? Icons.check : Icons.content_paste,
                           color: _pasteSuccess ? Colors.green : null,
                         ),
+                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                         onPressed: _isLoading ? null : _pasteFromClipboard,
                         tooltip:
                             localizations
@@ -707,12 +708,19 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                         icon: Icon(
                           _isObscured ? Icons.visibility : Icons.visibility_off,
                         ),
+                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                        tooltip:
+                            _isObscured
+                                ? localizations.screensSettingsApiKeySettingsShowKey
+                                : localizations.screensSettingsApiKeySettingsHideKey,
                         onPressed:
                             () => setState(() => _isObscured = !_isObscured),
                       ),
                       if (_hasApiKey)
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
+                          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                          tooltip: localizations.screensSettingsApiKeySettingsDeleteKey,
                           onPressed: _isLoading ? null : _removeApiKey,
                         ),
                     ],
