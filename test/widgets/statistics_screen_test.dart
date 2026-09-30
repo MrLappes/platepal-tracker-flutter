@@ -1,9 +1,76 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/models/user_profile.dart';
 import 'package:platepal_tracker/screens/settings/statistics_screen.dart';
+import 'package:platepal_tracker/services/storage/database_service.dart';
+import 'package:platepal_tracker/services/storage/dish_service.dart';
+import 'package:platepal_tracker/services/storage/meal_log_service.dart';
+import 'package:platepal_tracker/services/storage/storage_service_provider.dart';
+import 'package:platepal_tracker/services/storage/user_profile_service.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
+
+  testWidgets('calorie history failure shows a retry banner, not just empty', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+    final now = DateTime.now();
+    await UserProfileService().saveUserProfile(
+      UserProfile(
+        id: 'default',
+        name: 'Test',
+        email: 'test@example.com',
+        age: 30,
+        gender: 'other',
+        height: 170,
+        weight: 70,
+        activityLevel: 'moderately_active',
+        goals: const FitnessGoals(
+          goal: 'maintain_weight',
+          targetWeight: 70,
+          targetCalories: 2000,
+          targetProtein: 100,
+          targetCarbs: 200,
+          targetFat: 60,
+          targetFiber: 25,
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    final db = await DatabaseService.instance.database;
+    await db.execute('DROP TABLE dish_logs');
+    final storage =
+        StorageServiceProvider()
+          ..userProfileService = UserProfileService()
+          ..dishService = DishService()
+          ..mealLogService = MealLogService();
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<StorageServiceProvider>.value(
+        value: storage,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const StatisticsScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining("calorie data couldn't be loaded"),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(TextButton, 'Try Again'), findsOneWidget);
+  });
   test('weekly weight medians keep ISO weeks separate across years', () {
     final medians = calculateWeeklyWeightMedian([
       {'recorded_date': '2024-12-30', 'weight': 70.0},

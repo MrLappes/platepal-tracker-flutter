@@ -3283,4 +3283,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String servicesChatAgentFailedStep(String step) {
     return 'Step \"$step\" encountered an issue, attempting recovery...';
   }
+
+  @override
+  String get componentsChatMessageBubbleErrorAuth =>
+      'Your API key was rejected. Check it in the API key settings.';
+
+  @override
+  String get componentsChatMessageBubbleErrorRateLimit =>
+      'Your AI provider\'s rate limit or quota was reached. Wait a moment or check your plan and credit, then try again.';
+
+  @override
+  String get componentsChatMessageBubbleErrorNetwork =>
+      'Couldn\'t reach the AI provider or the request timed out. Check your internet connection and try again.';
+
+  @override
+  String get componentsChatMessageBubbleErrorServer =>
+      'The AI provider is currently unavailable. Please try again in a moment.';
+
+  @override
+  String get componentsChatMessageBubbleErrorKeyUnreadable =>
+      'Your API key couldn\'t be read on this device. Enter it again in the API key settings.';
+
+  @override
+  String get componentsChatMessageBubbleErrorUnknown =>
+      'The message couldn\'t be sent. Please try again.';
+
+  @override
+  String get componentsChatMessageBubbleOpenApiKeySettings =>
+      'API key settings';
+
+  @override
+  String get componentsChatMessageBubbleNoteContextIncomplete =>
+      'Some of your data couldn\'t be loaded; the answer may be less personal.';
+
+  @override
+  String get componentsChatMessageBubbleNoteImageNotAnalyzed =>
+      'The image couldn\'t be analyzed.';
+
+  @override
+  String get screensChatHistoryLoadFailed =>
+      'Some of your chat history couldn\'t be loaded.';
+
+  @override
+  String get screensChatHistorySaveFailed =>
+      'Your chat history couldn\'t be saved on this device.';
+
+  @override
+  String get screensChatSettingsFailed =>
+      'Chat settings couldn\'t be loaded or saved. Defaults are used for now.';
+
+  @override
+  String get screensChatProfilesLoadFailed =>
+      'Chat profiles couldn\'t be loaded. Defaults are shown; your saved profiles were not changed.';
+
+  @override
+  String get screensChatProfileSaveFailed =>
+      'Your profile changes couldn\'t be saved.';
+
+  @override
+  String get screensChatApiKeyReadFailedTitle =>
+      'Your API key couldn\'t be read';
+
+  @override
+  String get screensChatApiKeyReadFailedMessage =>
+      'The key stored on this device couldn\'t be accessed. Reload to try again, or enter it again in the API key settings.';
+
+  @override
+  String get screensSettingsStatisticsPartialLoadFailed =>
+      'Some health or calorie data couldn\'t be loaded, so the charts may be incomplete.';
+
+  @override
+  String get screensSettingsHealthSettingsLoadDataFailed =>
+      'Today\'s health data couldn\'t be loaded.';
+
+  @override
+  String get screensSettingsHealthSettingsOpenSettingsFailed =>
+      'Health Connect settings couldn\'t be opened.';
+
+  @override
+  String get screensCalendarProfileLoadFailed =>
+      'Your profile couldn\'t be loaded, so daily targets aren\'t shown.';
 }

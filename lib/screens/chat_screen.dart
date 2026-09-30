@@ -204,6 +204,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildNoApiKeyState(BuildContext context) {
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context);
+    final readFailed = _chatProvider.apiKeyReadFailed;
 
     return Container(
       decoration: BoxDecoration(
@@ -237,14 +238,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.key_off,
+                  readFailed ? Icons.error_outline : Icons.key_off,
                   size: 60,
                   color: theme.colorScheme.onPrimary,
                 ),
               ),
               const SizedBox(height: 32),
               Text(
-                localizations.screensChatNoApiKeyConfigured,
+                readFailed
+                    ? localizations.screensChatApiKeyReadFailedTitle
+                    : localizations.screensChatNoApiKeyConfigured,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -252,7 +255,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.screensChatConfigureApiKeyToUseChat,
+                readFailed
+                    ? localizations.screensChatApiKeyReadFailedMessage
+                    : localizations.screensChatConfigureApiKeyToUseChat,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -493,10 +498,31 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onMessagesUpdated() {
     if (!mounted) return;
+    _showPendingNotices();
     // If user is at/near bottom, attempt to scroll to bottom. Use multiple attempts to
     // handle layout changes (e.g. thinking indicator or images that change the extent after build).
     if (_isUserAtBottom) {
       _scrollToBottom(retryAttempts: 3);
+    }
+  }
+
+  void _showPendingNotices() {
+    final notices = _chatProvider.takeNotices();
+    if (notices.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    for (final notice in notices) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(switch (notice) {
+            ChatNotice.historyLoadFailed => l10n.screensChatHistoryLoadFailed,
+            ChatNotice.historySaveFailed => l10n.screensChatHistorySaveFailed,
+            ChatNotice.settingsFailed => l10n.screensChatSettingsFailed,
+            ChatNotice.profilesLoadFailed => l10n.screensChatProfilesLoadFailed,
+            ChatNotice.profileSaveFailed => l10n.screensChatProfileSaveFailed,
+          }),
+        ),
+      );
     }
   }
 

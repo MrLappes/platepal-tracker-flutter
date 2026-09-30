@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +11,7 @@ import '../../models/dish_models.dart';
 import '../../models/dish.dart';
 import '../../models/user_ingredient.dart';
 import '../../services/storage/dish_service.dart';
+import '../../services/chat/openai_service.dart' show ChatErrorKind;
 import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
@@ -146,27 +148,30 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
                   ] else if (message.hasFailed) ...[
-                    TextButton.icon(
-                      onPressed: onRetry,
-                      style: TextButton.styleFrom(
-                        backgroundColor: theme.colorScheme.error,
-                        foregroundColor: theme.colorScheme.onError,
-                        minimumSize: const Size(0, 48),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      icon: const Icon(Icons.refresh, size: 14),
-                      label: Text(
-                        localizations.componentsChatMessageBubbleRetryMessage,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onError,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    Flexible(child: _buildFailureActions(context, theme)),
+                  ],
+                ],
+              ),
+            ],
+            for (final note in _responseNotes(localizations)) ...[
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      note,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ],
@@ -422,6 +427,93 @@ class MessageBubble extends StatelessWidget {
     } else {
       return DateFormat.MMMd(localizations.localeName).format(dateTime);
     }
+  }
+
+  /// Why the message failed, Retry, and for key problems a settings shortcut.
+  Widget _buildFailureActions(BuildContext context, ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
+    final kind = ChatErrorKind.values.asNameMap()[message.metadata?['errorKind']];
+    final guidance = switch (kind) {
+      ChatErrorKind.auth => localizations.componentsChatMessageBubbleErrorAuth,
+      ChatErrorKind.rateLimit =>
+        localizations.componentsChatMessageBubbleErrorRateLimit,
+      ChatErrorKind.network =>
+        localizations.componentsChatMessageBubbleErrorNetwork,
+      ChatErrorKind.server =>
+        localizations.componentsChatMessageBubbleErrorServer,
+      ChatErrorKind.keyUnreadable =>
+        localizations.componentsChatMessageBubbleErrorKeyUnreadable,
+      ChatErrorKind.unknown =>
+        localizations.componentsChatMessageBubbleErrorUnknown,
+      null => null, // History saved before error kinds existed.
+    };
+    final opensKeySettings =
+        kind == ChatErrorKind.auth || kind == ChatErrorKind.keyUnreadable;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (guidance != null) ...[
+          Text(
+            guidance,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            TextButton.icon(
+              onPressed: onRetry,
+              style: TextButton.styleFrom(
+                backgroundColor: theme.colorScheme.error,
+                foregroundColor: theme.colorScheme.onError,
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              icon: const Icon(Icons.refresh, size: 14),
+              label: Text(
+                localizations.componentsChatMessageBubbleRetryMessage,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onError,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (opensKeySettings)
+              TextButton.icon(
+                onPressed: () => context.push('/settings/api-key'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                icon: const Icon(Icons.key, size: 14),
+                label: Text(
+                  localizations.componentsChatMessageBubbleOpenApiKeySettings,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Localized notes for assistant answers built from incomplete data.
+  List<String> _responseNotes(AppLocalizations localizations) {
+    final notes = message.metadata?['responseNotes'];
+    if (message.isFromUser || notes is! List) return const [];
+    return [
+      if (notes.contains('contextIncomplete'))
+        localizations.componentsChatMessageBubbleNoteContextIncomplete,
+      if (notes.contains('imageNotAnalyzed'))
+        localizations.componentsChatMessageBubbleNoteImageNotAnalyzed,
+    ];
   }
 
   /// Check if this message has agent processing metadata

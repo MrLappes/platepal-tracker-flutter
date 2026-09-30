@@ -65,6 +65,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   List<Map<String, dynamic>> _metricsHistory = [];
   List<Map<String, dynamic>> _calorieHistory = [];
   bool _isShowingTestData = false; // Track if we're showing test data
+  // Health or calorie data failed to load; charts may be incomplete.
+  bool _partialLoadFailed = false;
+  bool _healthInitFailed = false;
 
   // Services
   final HealthService _healthService = HealthService();
@@ -106,13 +109,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _initialization = _initializeServices().catchError(
-      (Object e) => debugPrint('Failed to initialize health services: $e'),
-    );
+    _initialization = _startInitialization();
     _loadData();
   }
 
-  late final Future<void> _initialization;
+  late Future<void> _initialization;
+
+  Future<void> _startInitialization() {
+    _healthInitFailed = false;
+    return _initializeServices().catchError((Object e) {
+      debugPrint('Failed to initialize health services (${e.runtimeType})');
+      _healthInitFailed = true;
+    });
+  }
 
   // Initialize services
   Future<void> _initializeServices() async {
@@ -133,7 +142,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _isLoading = true;
         _error = null;
         _isShowingTestData = false; // Clear test data flag
+        _partialLoadFailed = false;
       });
+      if (_healthInitFailed) _initialization = _startInitialization();
 
       // Get current user ID from session service
       final prefs = await SharedPreferences.getInstance();
@@ -183,6 +194,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         // Load calorie data from meal logs and health data
         await _initialization;
         if (!mounted) return;
+        if (_healthInitFailed) _partialLoadFailed = true;
         final calorieStart =
             _selectedTimeRange == 'all'
                 ? await _earliestMealLogDay(startDate)
@@ -249,8 +261,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           for (final entry in byDay.entries) entry.key: entry.value.$1,
         });
     } catch (e) {
-      // Health data loading failed, continue without it
-      debugPrint('Failed to load health data: $e');
+      debugPrint('Failed to load health data (${e.runtimeType})');
+      _partialLoadFailed = true;
     }
   }
 
@@ -295,6 +307,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
       return calorieData;
     } catch (e) {
+      debugPrint('Failed to load calorie history (${e.runtimeType})');
+      _partialLoadFailed = true;
       return [];
     }
   }
@@ -655,12 +669,46 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _loadData,
-        child:
-            hasEnoughData || _isShowingTestData
-                ? _buildStatisticsContent(context, l10n)
-                : _buildEmptyState(context, l10n),
+      body: Column(
+        children: [
+          if (_partialLoadFailed) _buildPartialLoadBanner(context, l10n),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadData,
+              child:
+                  hasEnoughData || _isShowingTestData
+                      ? _buildStatisticsContent(context, l10n)
+                      : _buildEmptyState(context, l10n),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPartialLoadBanner(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        child: Row(
+          children: [
+            Icon(Icons.warning_amber_outlined, color: colorScheme.onErrorContainer),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.screensSettingsStatisticsPartialLoadFailed,
+                style: TextStyle(color: colorScheme.onErrorContainer),
+              ),
+            ),
+            TextButton(
+              onPressed: _loadData,
+              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+              child: Text(l10n.screensSettingsStatisticsTryAgain),
+            ),
+          ],
+        ),
       ),
     );
   }

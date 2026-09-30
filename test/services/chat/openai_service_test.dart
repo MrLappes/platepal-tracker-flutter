@@ -349,6 +349,85 @@ void main() {
     });
   });
 
+  group('chat request errors are typed', () {
+    Future<Object?> failSend(MockClient client, {bool plain = false}) async {
+      SharedPreferences.setMockInitialValues({'openai_api_key': 'sk-test'});
+      final service = OpenAIService(httpClient: client);
+      try {
+        if (plain) {
+          await service.sendMessage('hi');
+        } else {
+          await service.sendChatRequest(
+            messages: [
+              {'role': 'user', 'content': 'hi'},
+            ],
+          );
+        }
+      } catch (e) {
+        expect(service.lastErrorKind, OpenAIService.errorKindOf(e));
+        return e;
+      }
+      fail('request should have failed');
+    }
+
+    for (final (status, kind) in [
+      (401, ChatErrorKind.auth),
+      (403, ChatErrorKind.auth),
+      (429, ChatErrorKind.rateLimit),
+      (500, ChatErrorKind.server),
+      (503, ChatErrorKind.server),
+      (400, ChatErrorKind.unknown),
+    ]) {
+      for (final plain in [false, true]) {
+        test('HTTP $status is $kind (plain: $plain)', () async {
+          final error = await failSend(
+            MockClient(
+              (_) async => http.Response(
+                jsonEncode({
+                  'error': {'message': 'nope'},
+                }),
+                status,
+              ),
+            ),
+            plain: plain,
+          );
+          expect(
+            error,
+            isA<OpenAIServiceException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              status,
+            ),
+          );
+          expect(OpenAIService.errorKindOf(error!), kind);
+        });
+      }
+    }
+
+    test('connection failures are network errors', () async {
+      final error = await failSend(
+        MockClient((_) async => throw http.ClientException('offline')),
+      );
+      expect(
+        error,
+        isA<OpenAIServiceException>().having(
+          (e) => e.failure,
+          'failure',
+          OpenAIFailure.network,
+        ),
+      );
+      expect(OpenAIService.errorKindOf(error!), ChatErrorKind.network);
+    });
+
+    test('timeouts are network errors', () {
+      expect(
+        OpenAIService.errorKindOf(TimeoutException('slow')),
+        ChatErrorKind.network,
+      );
+      expect(OpenAIService.errorKindOf(Exception('x')), ChatErrorKind.unknown);
+    });
+  });
+
   test('reads a migrated legacy key from secure storage', () async {
     SharedPreferences.setMockInitialValues({'openai_api_key': 'sk-legacy'});
     String? authHeader;

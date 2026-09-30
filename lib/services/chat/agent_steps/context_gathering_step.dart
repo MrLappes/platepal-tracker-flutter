@@ -30,6 +30,8 @@ class ContextGatheringStep extends AgentStep {
   Future<ChatStepResult> execute(ChatStepInput input) async {
     final contextSections = <String, String>{};
     final gatheredContextData = <String, dynamic>{};
+    // Context the AI asked for but that could not be read.
+    final failedContextParts = <String>{};
     try {
       debugPrint('📊 ContextGatheringStep: Starting context gathering');
       final thinkingResult = input.thinkingResult;
@@ -64,6 +66,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get user profile: $e');
+          failedContextParts.add('userProfile');
         }
       }
       // Gather existing dishes if needed (unless explicitly skipped)
@@ -97,6 +100,7 @@ class ContextGatheringStep extends AgentStep {
                   }
                 } catch (e) {
                   debugPrint('⚠️ Failed to search dishes by name: $e');
+                  failedContextParts.add('existingDishes');
                 }
               }
             }
@@ -117,6 +121,7 @@ class ContextGatheringStep extends AgentStep {
                   }
                 } catch (e) {
                   debugPrint('⚠️ Failed to search dishes by ingredient: $e');
+                  failedContextParts.add('existingDishes');
                 }
               }
             }
@@ -148,6 +153,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get dishes: $e');
+          failedContextParts.add('existingDishes');
         }
       } else if (skipExistingDishesLookup) {
         debugPrint('⏩ Skipping existing dishes lookup as requested');
@@ -168,6 +174,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get today\'s meals: $e');
+          failedContextParts.add('todayNutrition');
         }
       }
       // Gather weekly summary if needed
@@ -189,6 +196,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get weekly meals: $e');
+          failedContextParts.add('weeklyNutrition');
         }
       }
       // Gather historical data if needed
@@ -214,6 +222,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get historical meals: $e');
+          failedContextParts.add('historicalMeals');
         }
       }
 
@@ -282,7 +291,11 @@ class ContextGatheringStep extends AgentStep {
       );
       return ChatStepResult.success(
         stepName: stepName,
-        data: {'contextGatheringResult': response.toJson()},
+        data: {
+          'contextGatheringResult': response.toJson(),
+          if (failedContextParts.isNotEmpty)
+            'failedContextParts': failedContextParts.toList(),
+        },
       );
     } catch (error, stackTrace) {
       debugPrint(

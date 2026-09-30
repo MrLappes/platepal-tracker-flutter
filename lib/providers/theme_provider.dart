@@ -15,6 +15,7 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   AppTheme _currentTheme = AppThemes.dark;
   bool _isDark = true;
   bool _observingBrightness = false;
+  bool _lastSaveFailed = false;
 
   ThemeProvider({SharedPreferences? prefs}) : _prefs = prefs {
     if (prefs == null) {
@@ -30,6 +31,9 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   String get currentThemeName => _currentThemeName;
   AppTheme get currentTheme => _currentTheme;
   bool get isDark => _isDark;
+
+  /// The latest choice is in effect but could not be persisted.
+  bool get lastSaveFailed => _lastSaveFailed;
   ThemeData get materialTheme => _currentTheme.materialTheme;
   ThemeData get lightTheme =>
       AppThemes.getThemeByName(_currentThemeName).toLight().materialTheme;
@@ -47,7 +51,15 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _restoreThemePreference(SharedPreferences prefs) {
-    final savedPreference = prefs.getString(_themePrefKey);
+    final String? savedPreference;
+    final String? savedThemeName;
+    try {
+      savedPreference = prefs.getString(_themePrefKey);
+      savedThemeName = prefs.getString(_themeNameKey);
+    } catch (error) {
+      debugPrint('Failed to read theme preference: ${error.runtimeType}');
+      return;
+    }
     if (savedPreference != null) {
       _themePreference = ThemePreference.values.firstWhere(
         (preference) => preference.name == savedPreference,
@@ -55,7 +67,7 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
       );
     }
 
-    _currentThemeName = prefs.getString(_themeNameKey) ?? AppThemes.dark.name;
+    _currentThemeName = savedThemeName ?? AppThemes.dark.name;
     _updateTheme();
   }
 
@@ -65,8 +77,10 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
       final prefs = _prefs ?? await SharedPreferences.getInstance();
       await prefs.setString(_themePrefKey, _themePreference.name);
       await prefs.setString(_themeNameKey, _currentThemeName);
+      _lastSaveFailed = false;
     } catch (error) {
-      debugPrint('Failed to save theme preference: $error');
+      debugPrint('Failed to save theme preference: ${error.runtimeType}');
+      _lastSaveFailed = true;
     }
   }
 

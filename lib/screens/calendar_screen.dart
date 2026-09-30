@@ -35,6 +35,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   bool _hasLoadedDayLogs = false;
   int _selectionRequestId = 0;
   UserProfile? _userProfile;
+  bool _profileLoadFailed = false;
   final bool _isMacroSummaryExpanded = true;
   // ignore: unused_field
   bool _isGeneratingTip = false;
@@ -118,15 +119,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (!mounted) return;
       setState(() {
         _userProfile = userProfile;
+        _profileLoadFailed = false;
       });
     } catch (error) {
       debugPrint('Error loading user profile: ${error.runtimeType}');
+      if (mounted) setState(() => _profileLoadFailed = true);
     }
   }
 
   Future<void> _openProfile() async {
     await context.push('/settings/profile');
     if (!mounted) return;
+    await _retryProfileLoad();
+  }
+
+  Future<void> _retryProfileLoad() async {
     await _loadUserProfile();
     if (!mounted) return;
     await _handleDateSelect(_selectedDate);
@@ -926,6 +933,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     child: CircularProgressIndicator(),
                                   ),
                                 if (_selectedDaySummary != null &&
+                                    _profileLoadFailed)
+                                  Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.errorContainer,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).screensCalendarProfileLoadFailed,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color:
+                                                    colorScheme
+                                                        .onErrorContainer,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        TextButton(
+                                          onPressed: _retryProfileLoad,
+                                          style: TextButton.styleFrom(
+                                            minimumSize: const Size(48, 48),
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            ).componentsSharedErrorDisplayRetry,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                if (_selectedDaySummary != null &&
+                                    !_profileLoadFailed &&
                                     (_userProfile == null ||
                                         _userProfile!.goals.targetCalories <=
                                             0))

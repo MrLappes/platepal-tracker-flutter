@@ -26,6 +26,9 @@ class ResponseGenerationStep extends AgentStep {
   /// Character budget for those history messages.
   static const int maxHistoryChars = 24000;
 
+  /// Set while building messages when the uploaded image had to be dropped.
+  bool _imageProcessingFailed = false;
+
   ResponseGenerationStep({
     required OpenAIService openaiService,
     PipelineModificationTracker? modificationTracker,
@@ -36,6 +39,7 @@ class ResponseGenerationStep extends AgentStep {
   String get stepName => 'response_generation';
   @override
   Future<ChatStepResult> execute(ChatStepInput input) async {
+    _imageProcessingFailed = false;
     try {
       debugPrint('🤖 ResponseGenerationStep: Starting response generation');
       final localizations = lookupAppLocalizations(
@@ -228,6 +232,7 @@ class ResponseGenerationStep extends AgentStep {
           'parsedResponse': choice.message.content ?? '[tool_calls]',
           'conversationHistoryIncluded': includeConversationHistory,
           'usedToolCalling': choice.isToolCall,
+          if (_imageProcessingFailed) 'imageAnalysisFailed': true,
           if (choice.isToolCall &&
               (choice.message.toolCalls?.isNotEmpty ?? false))
             'toolCallDetails':
@@ -703,6 +708,7 @@ class ResponseGenerationStep extends AgentStep {
           debugPrint(
             '❌ ResponseGenerationStep: Error processing image: $imageError',
           );
+          _imageProcessingFailed = true;
           // Fallback to text-only message with note about image
           enhancedUserMessage +=
               '\n\n[Note: User uploaded an image, but it could not be processed]';
