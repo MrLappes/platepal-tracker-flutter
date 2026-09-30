@@ -21,6 +21,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   bool _isHealthAvailable = false;
   // Health Connect missing/outdated: connecting offers the install instead.
   bool _canInstallHealth = false;
+  bool _isCheckingAvailability = true;
+  bool _availabilityCheckFailed = false;
   bool _isSyncing = false;
   bool _writeMealsEnabled = true;
   double? _todaysBurnedCalories;
@@ -41,31 +43,40 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   }
 
   Future<void> _initialize() async {
-    await _healthService.loadConnectionStatus();
-    final availability = await _healthService.getHealthAvailability();
-    final prefs = await SharedPreferences.getInstance();
-    final writeMeals = prefs.getBool('health_write_meals_enabled') ?? true;
-    if (!mounted) return;
-
-    // Subscribe to connection status changes
-    _healthConnectionSubscription = _healthService.connectionStatusStream
-        .listen((isConnected) {
-          if (mounted) {
-            setState(() {});
-            if (isConnected) _loadHealthData();
-          }
-        });
-
     setState(() {
-      _isHealthAvailable = availability == HealthAvailability.available;
-      _canInstallHealth =
-          availability == HealthAvailability.needsInstall ||
-          availability == HealthAvailability.needsUpdate;
-      _writeMealsEnabled = writeMeals;
+      _isCheckingAvailability = true;
+      _availabilityCheckFailed = false;
     });
+    try {
+      await _healthService.loadConnectionStatus();
+      final availability = await _healthService.getHealthAvailability();
+      final prefs = await SharedPreferences.getInstance();
+      final writeMeals = prefs.getBool('health_write_meals_enabled') ?? true;
+      if (!mounted) return;
 
-    if (_healthService.isConnected) {
-      await _loadHealthData();
+      _healthConnectionSubscription = _healthService.connectionStatusStream
+          .listen((isConnected) {
+            if (mounted) {
+              setState(() {});
+              if (isConnected) _loadHealthData();
+            }
+          });
+
+      setState(() {
+        _isHealthAvailable = availability == HealthAvailability.available;
+        _canInstallHealth =
+            availability == HealthAvailability.needsInstall ||
+            availability == HealthAvailability.needsUpdate;
+        _writeMealsEnabled = writeMeals;
+        _isCheckingAvailability = false;
+      });
+
+      if (_healthService.isConnected) await _loadHealthData();
+    } catch (error) {
+      debugPrint('Failed to check health availability: ${error.runtimeType}');
+      if (mounted) setState(() => _availabilityCheckFailed = true);
+    } finally {
+      if (mounted) setState(() => _isCheckingAvailability = false);
     }
   }
 
@@ -497,7 +508,29 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
           AppLocalizations.of(context).screensSettingsHealthSettingsTitle,
         ),
       ),
-      body: ListView(
+      body: _isCheckingAvailability
+          ? const Center(child: CircularProgressIndicator())
+          : _availabilityCheckFailed
+          ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppLocalizations.of(context).providersStorageError),
+                  TextButton(
+                    onPressed: _initialize,
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsSharedErrorDisplayRetry,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Connection status card

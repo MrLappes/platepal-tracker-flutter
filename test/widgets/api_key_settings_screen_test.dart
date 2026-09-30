@@ -46,6 +46,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('URL base'), findsOneWidget);
       expect(find.text('Nombre del modelo'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(
+              find.descendant(
+                of: find.byType(TextFormField).at(2),
+                matching: find.byType(TextField),
+              ),
+            )
+            .decoration?.hintText,
+        'gpt-4o-mini',
+      );
 
       await tester.scrollUntilVisible(
         find.text('Probar y Guardar Clave API'),

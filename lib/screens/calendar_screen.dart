@@ -36,6 +36,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   int _selectionRequestId = 0;
   UserProfile? _userProfile;
   bool _profileLoadFailed = false;
+  bool _initializationFailed = false;
   final bool _isMacroSummaryExpanded = true;
   // ignore: unused_field
   bool _isGeneratingTip = false;
@@ -66,9 +67,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _init() async {
-    await _initializeServices();
-    if (!mounted) return;
-    await _fetchCalendarData();
+    setState(() {
+      _isLoading = true;
+      _initializationFailed = false;
+    });
+    try {
+      await _initializeServices();
+      if (!mounted) return;
+      await _fetchCalendarData();
+    } catch (error) {
+      debugPrint('Error initializing calendar: ${error.runtimeType}');
+      if (mounted) {
+        setState(() {
+          _initializationFailed = true;
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _initializeServices() async {
@@ -354,24 +369,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _getAiTip() async {
     final l10n = AppLocalizations.of(context);
-    // Check if OpenAI service is configured
-    final isConfigured = await _openAIService.isConfigured();
-    if (!mounted) return;
-    if (!isConfigured) {
-      if (mounted) {
+    try {
+      final isConfigured = await _openAIService.isConfigured();
+      if (!mounted) return;
+      if (!isConfigured) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.screensCalendarConfigureApiKeyForAiTips),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
+        return;
       }
-      return;
-    }
 
-    setState(() => _isGeneratingTip = true);
-
-    try {
+      setState(() => _isGeneratingTip = true);
       // Build context for AI recommendation
       final summary = _selectedDaySummary;
       final profile = _userProfile;
@@ -779,7 +790,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _initializationFailed ? null : FloatingActionButton.extended(
         heroTag: 'calendar_log_meal',
         onPressed: _openDishPicker,
         tooltip: AppLocalizations.of(context).screensCalendarLogMeal,
@@ -788,7 +799,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
       body: SafeArea(
         child:
-            _isLoading
+            _initializationFailed
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(AppLocalizations.of(context).providersStorageError),
+                      TextButton(
+                        onPressed: _init,
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).componentsSharedErrorDisplayRetry,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                : _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
                   onRefresh: _fetchCalendarData,

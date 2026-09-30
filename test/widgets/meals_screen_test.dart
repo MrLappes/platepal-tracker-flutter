@@ -24,6 +24,26 @@ class _FailingDishService extends DishService {
 }
 
 void main() {
+  testWidgets('meals load once and do not reload on locale changes', (
+    tester,
+  ) async {
+    final service = _StubDishService([]);
+    Widget screen(Locale locale) => MaterialApp(
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: MealsScreen(dishService: service),
+    );
+
+    await tester.pumpWidget(screen(const Locale('en')));
+    await tester.pumpAndSettle();
+    expect(service.loadCount, 1);
+
+    await tester.pumpWidget(screen(const Locale('es')));
+    await tester.pumpAndSettle();
+    expect(service.loadCount, 1);
+  });
+
   testWidgets('meal load failure shows localized guidance, not exception', (
     tester,
   ) async {

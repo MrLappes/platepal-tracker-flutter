@@ -754,7 +754,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                     return null;
                   },
                   decoration: InputDecoration(
-                    hintText: 'gpt-3.5-turbo, claude-3-sonnet, etc.',
+                    hintText: 'gpt-4o-mini',
                     helperText: localizations.screensSettingsApiKeySettingsModelNameHelper,
                     prefixIcon: const Icon(Icons.memory),
                     border: OutlineInputBorder(
