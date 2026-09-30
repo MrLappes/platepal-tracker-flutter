@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../utils/link_handler.dart';
 
@@ -13,6 +14,7 @@ class _AboutScreenState extends State<AboutScreen>
     with TickerProviderStateMixin {
   late AnimationController _contentController;
   late Animation<Offset> _contentSlide;
+  final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
 
   @override
   void initState() {
@@ -82,10 +84,17 @@ class _AboutScreenState extends State<AboutScreen>
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      localizations.screensSettingsIndustrialStableBuild('V1.12.6'),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    FutureBuilder<PackageInfo>(
+                      future: _packageInfo,
+                      builder: (context, snapshot) => Text(
+                        localizations.screensSettingsIndustrialStableBuild(
+                          snapshot.hasData
+                              ? 'v${snapshot.data!.version}+${snapshot.data!.buildNumber}'
+                              : '?',
+                        ),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                     const Padding(

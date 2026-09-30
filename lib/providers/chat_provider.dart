@@ -242,17 +242,9 @@ class ChatProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // Debug: Print what we received
     debugPrint(
       '🔍 DEBUG: ChatProvider received ${userIngredients?.length ?? 0} ingredients',
     );
-    if (userIngredients != null) {
-      for (final ingredient in userIngredients) {
-        debugPrint(
-          '   - ${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
-        );
-      }
-    }
 
     ChatMessage? userMessage;
     try {

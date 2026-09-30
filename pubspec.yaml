@@ -59,6 +59,7 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.10+1
   url_launcher: ^6.3.1
+  package_info_plus: ^8.3.1
     # Barcode scanning and product search
   mobile_scanner: ^5.2.3
     # Health data integration

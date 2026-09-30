@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:platepal_tracker/models/dish.dart';
@@ -66,6 +67,25 @@ void main() {
   });
 
   group('dish_logs is the single meal ledger', () {
+    test('dish debug output omits dish and ingredient names', () async {
+      final messages = <String>[];
+      final originalDebugPrint = debugPrint;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) messages.add(message);
+      };
+      addTearDown(() => debugPrint = originalDebugPrint);
+
+      await dishService.saveDish(_dish());
+      await dishService.getDishById('oats');
+
+      expect(messages, isNotEmpty);
+      final output = messages.join('\n');
+      expect(output, isNot(contains('Oats')));
+      expect(output, isNot(contains('Oat flakes')));
+      expect(output, isNot(contains('Milk')));
+      expect(output, isNot(contains('amount:')));
+    });
+
     test('a dish logged via logDish appears in the day summary', () async {
       await dishService.saveDish(_dish());
       final day = DateTime(2026, 9, 20);
@@ -106,6 +126,50 @@ void main() {
       expect(logs.single.dishName, 'Oats');
       expect(logs.single.notes, 'with honey');
     });
+
+    test(
+      'daily nutrition totals group local ledger days in a half-open range',
+      () async {
+        for (final (date, calories, protein) in [
+          (DateTime(2025, 12, 31, 23, 30), 90.0, 9.0),
+          (DateTime(2026, 1, 1), 100.0, 10.0),
+          (DateTime(2026, 1, 1, 20), 200.0, 20.0),
+          (DateTime(2026, 1, 2), 400.0, 40.0),
+        ]) {
+          await dishService.insertDishLogSnapshot(
+            dishId: 'deleted-dish',
+            loggedAt: date,
+            mealType: 'lunch',
+            servingSize: 1,
+            calories: calories,
+            protein: protein,
+            carbs: calories / 10,
+            fat: calories / 20,
+            fiber: calories / 50,
+          );
+        }
+
+        final acrossYears = await dishService.getDailyNutritionTotals(
+          DateTime(2025, 12, 31),
+          DateTime(2026, 1, 2),
+        );
+        expect(acrossYears.keys, ['2025-12-31', '2026-01-01']);
+        expect(acrossYears['2025-12-31']!.calories, 90);
+        expect(acrossYears['2026-01-01']!.calories, 300);
+
+        final totals = await dishService.getDailyNutritionTotals(
+          DateTime(2026, 1, 1, 12),
+          DateTime(2026, 1, 2),
+        );
+
+        expect(totals.keys, ['2026-01-01']);
+        expect(totals['2026-01-01']!.calories, 300);
+        expect(totals['2026-01-01']!.protein, 30);
+        expect(totals['2026-01-01']!.carbs, 30);
+        expect(totals['2026-01-01']!.fat, 15);
+        expect(totals['2026-01-01']!.fiber, 6);
+      },
+    );
 
     test('logMeal writes one ledger row and returns its rowid', () async {
       await dishService.saveDish(_dish());
@@ -176,40 +240,36 @@ void main() {
     });
 
     final dstDays = _dstDays(2026);
-    test(
-      'day queries end at the next local midnight on DST days',
-      () async {
-        SharedPreferences.setMockInitialValues({});
-        await dishService.saveDish(_dish());
-        for (final day in dstDays) {
-          await dishService.logDish(
-            dishId: 'oats',
-            loggedAt: DateTime(day.year, day.month, day.day, 23, 30),
-            mealType: 'dinner',
-            servingSize: 1,
-          );
-          await dishService.logDish(
-            dishId: 'oats',
-            loggedAt: DateTime(day.year, day.month, day.day + 1, 0, 30),
-            mealType: 'breakfast',
-            servingSize: 1,
-          );
-        }
+    test('day queries end at the next local midnight on DST days', () async {
+      SharedPreferences.setMockInitialValues({});
+      await dishService.saveDish(_dish());
+      for (final day in dstDays) {
+        await dishService.logDish(
+          dishId: 'oats',
+          loggedAt: DateTime(day.year, day.month, day.day, 23, 30),
+          mealType: 'dinner',
+          servingSize: 1,
+        );
+        await dishService.logDish(
+          dishId: 'oats',
+          loggedAt: DateTime(day.year, day.month, day.day + 1, 0, 30),
+          mealType: 'breakfast',
+          servingSize: 1,
+        );
+      }
 
-        for (final day in dstDays) {
-          final logs = await dishService.getDishLogsForDate(day);
-          expect(logs.map((l) => l.mealType), ['dinner'], reason: '$day');
-          final meals = await mealLogService.getMealsByDate(
-            userId: 'u',
-            date: day,
-          );
-          expect(meals.map((m) => m.mealType), ['dinner'], reason: '$day');
-          final macros = await dishService.getMacroSummaryForDate(day);
-          expect(macros.calories, closeTo(200, 1e-9), reason: '$day');
-        }
-      },
-      skip: dstDays.isEmpty ? 'local time zone has no DST' : false,
-    );
+      for (final day in dstDays) {
+        final logs = await dishService.getDishLogsForDate(day);
+        expect(logs.map((l) => l.mealType), ['dinner'], reason: '$day');
+        final meals = await mealLogService.getMealsByDate(
+          userId: 'u',
+          date: day,
+        );
+        expect(meals.map((m) => m.mealType), ['dinner'], reason: '$day');
+        final macros = await dishService.getMacroSummaryForDate(day);
+        expect(macros.calories, closeTo(200, 1e-9), reason: '$day');
+      }
+    }, skip: dstDays.isEmpty ? 'local time zone has no DST' : false);
   });
 
   group('v3 -> v4 migration', () {
@@ -464,7 +524,10 @@ Future<void> _seedV3(Database db) async {
 /// v2 differs from v3 only by the missing fitness_goals.target_fiber.
 final _v2Schema = [
   for (final sql in _v3Schema)
-    sql.replaceFirst(RegExp(r'\s*target_fiber REAL NOT NULL DEFAULT 25\.0,'), ''),
+    sql.replaceFirst(
+      RegExp(r'\s*target_fiber REAL NOT NULL DEFAULT 25\.0,'),
+      '',
+    ),
 ];
 
 /// v1 differs from v2 only by the missing dish_logs table and its indexes.

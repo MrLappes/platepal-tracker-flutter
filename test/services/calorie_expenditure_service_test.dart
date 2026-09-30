@@ -64,7 +64,8 @@ void main() {
 
       expect(await service.updateCalorieTargets(2500), isTrue);
 
-      final goals = (await UserProfileService().getUserProfile('default'))!.goals;
+      final goals =
+          (await UserProfileService().getUserProfile('default'))!.goals;
       expect(goals.targetCalories, 2500);
       expect(goals.targetProtein, closeTo(187.5, 1e-9));
       expect(goals.targetCarbs, closeTo(250, 1e-9));
@@ -77,7 +78,8 @@ void main() {
 
       expect(await service.updateCalorieTargets(2000), isTrue);
 
-      final goals = (await UserProfileService().getUserProfile('default'))!.goals;
+      final goals =
+          (await UserProfileService().getUserProfile('default'))!.goals;
       expect(goals.targetCalories, 2000);
       for (final grams in [
         goals.targetProtein,
@@ -96,7 +98,8 @@ void main() {
 
       expect(await service.updateCalorieTargets(400), isTrue);
 
-      final goals = (await UserProfileService().getUserProfile('default'))!.goals;
+      final goals =
+          (await UserProfileService().getUserProfile('default'))!.goals;
       expect(goals.targetCalories, 1200);
       expect(goals.targetProtein, closeTo(90, 1e-9));
     });
@@ -132,10 +135,43 @@ void main() {
       await HealthService().storeEnergyBurned({
         for (final entry in byDaysAgo.entries)
           HealthService.dayKey(
-            DateTime(today.year, today.month, today.day - entry.key),
-          ): entry.value,
+                DateTime(today.year, today.month, today.day - entry.key),
+              ):
+              entry.value,
       });
     }
+
+    test(
+      'reports profile and expenditure availability as typed statuses',
+      () async {
+        final missingProfile = await service.analyzeCalorieTargets();
+        expect(missingProfile.status, CalorieTargetStatus.profileNotFound);
+
+        await UserProfileService().saveUserProfile(_profile(_goals()));
+        final missingData = await service.analyzeCalorieTargets();
+        expect(missingData.status, CalorieTargetStatus.noExpenditureData);
+        expect(missingData.currentTarget, 2000);
+      },
+    );
+
+    test('reports the recommendation status with calculated targets', () async {
+      await UserProfileService().saveUserProfile(_profile(_goals()));
+      await cacheDays({1: const DailyEnergyBurned(total: 4000)});
+
+      final increase = await service.analyzeCalorieTargets(days: 1);
+      expect(increase.status, CalorieTargetStatus.increaseIntake);
+      expect(increase.suggestedTarget, 3200);
+
+      await cacheDays({1: const DailyEnergyBurned(total: 1000)});
+      final decrease = await service.analyzeCalorieTargets(days: 1);
+      expect(decrease.status, CalorieTargetStatus.decreaseIntake);
+      expect(decrease.suggestedTarget, 1200);
+
+      await cacheDays({1: const DailyEnergyBurned(total: 2500)});
+      final aligned = await service.analyzeCalorieTargets(days: 1);
+      expect(aligned.status, CalorieTargetStatus.onTarget);
+      expect(aligned.needsAdjustment, isFalse);
+    });
 
     test('averages only the requested window', () async {
       await UserProfileService().saveUserProfile(_profile(_goals()));

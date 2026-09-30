@@ -157,6 +157,33 @@ void main() {
   }
 
   group('default pipeline', () {
+    test('streams progress titles and details in the saved language', () async {
+      final service = await buildService(deepSearch: false);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('app_locale', 'es');
+      final steps = <(String, String?)>[];
+
+      await service.processMessage(
+        userMessage: 'Suggest a high-protein breakfast',
+        conversationHistory: const [],
+        botConfig: _bot,
+        onThinkingStep: (title, detail) => steps.add((title, detail)),
+      );
+
+      expect(
+        steps.first.$1,
+        '🧠 Analizando tu solicitud y planificando cómo proceder...',
+      );
+      expect(
+        steps.first.$2,
+        'Desglosando tu solicitud para decidir el mejor enfoque',
+      );
+      expect(
+        steps.map((step) => step.$1),
+        contains('📚 Reuniendo contexto y datos relevantes...'),
+      );
+    });
+
     test('runs response generation once and keeps tool-call dishes', () async {
       final service = await buildService(deepSearch: false);
 

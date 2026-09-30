@@ -582,38 +582,53 @@ class MenuScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isSelected = themeProvider.themePreference == preference;
 
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      selected: isSelected,
       onTap: () => themeProvider.setThemePreference(preference),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary : colorScheme.surface,
-          border: Border.all(
-            color:
-                isSelected
-                    ? colorScheme.primary
-                    : colorScheme.outline.withValues(alpha: 0.5),
-          ),
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => themeProvider.setThemePreference(preference),
           borderRadius: BorderRadius.circular(4),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label.toUpperCase(),
-              style: theme.textTheme.labelSmall?.copyWith(
+          child: Ink(
+            decoration: BoxDecoration(
+              color: isSelected ? colorScheme.primary : colorScheme.surface,
+              border: Border.all(
                 color:
-                    isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
-                fontSize: 9,
-                fontWeight: FontWeight.w900,
+                    isSelected
+                        ? colorScheme.primary
+                        : colorScheme.outline.withValues(alpha: 0.5),
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 16,
+                    color:
+                        isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label.toUpperCase(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color:
+                          isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

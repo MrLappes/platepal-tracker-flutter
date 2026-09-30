@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/nutrition_calculator.dart';
@@ -8,6 +9,47 @@ import '../../services/user_session_service.dart';
 import '../../services/health_service.dart';
 import '../../services/calorie_expenditure_service.dart';
 import 'dart:math' as math;
+
+/// Groups weight readings by ISO week and plots each median on its Monday.
+List<Map<String, dynamic>> calculateWeeklyWeightMedian(
+  List<Map<String, dynamic>> data,
+) {
+  final weightsByWeek = <(int, int), List<double>>{};
+  for (final entry in data) {
+    final weight = entry['weight'] as double?;
+    if (weight == null) continue;
+    final date = DateTime.parse(entry['recorded_date'] as String);
+    final day = DateTime.utc(date.year, date.month, date.day);
+    final thursday = day.add(Duration(days: 4 - day.weekday));
+    final weekYear = thursday.year;
+    final jan4 = DateTime.utc(weekYear, 1, 4);
+    final firstThursday = jan4.add(Duration(days: 4 - jan4.weekday));
+    final week = 1 + thursday.difference(firstThursday).inDays ~/ 7;
+    weightsByWeek.putIfAbsent((weekYear, week), () => []).add(weight);
+  }
+
+  final medianData = <Map<String, dynamic>>[];
+  for (final entry in weightsByWeek.entries) {
+    final weights = entry.value..sort();
+    final middle = weights.length ~/ 2;
+    final median = weights.length.isOdd
+        ? weights[middle]
+        : (weights[middle - 1] + weights[middle]) / 2;
+    final (weekYear, week) = entry.key;
+    final jan4 = DateTime(weekYear, 1, 4);
+    final weekDate = DateTime(weekYear, 1, 5 - jan4.weekday + (week - 1) * 7);
+    medianData.add({
+      'recorded_date': weekDate.toIso8601String(),
+      'weight': median,
+    });
+  }
+  medianData.sort(
+    (a, b) => (a['recorded_date'] as String).compareTo(
+      b['recorded_date'] as String,
+    ),
+  );
+  return medianData;
+}
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -102,6 +144,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       final userProfiles = await context.userProfileService.getUserProfile(
         currentUserId,
       );
+      if (!mounted) return;
 
       if (userProfiles != null) {
         _userProfile =
@@ -132,19 +175,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             startDate = DateTime(now.year, now.month - 1, now.day);
         }
 
-        var history = <Map<String, dynamic>>[];
-        if (mounted) {
-          history = await context.userProfileService.getUserMetricsHistory(
-            _userProfile!.id,
-            startDate: startDate,
-          );
-        } else {
-          setState(() {
-            _error = "No metrics history found";
-            _isLoading = false;
-          });
-          return;
-        } // Load calorie data from meal logs and health data
+        final history = await context.userProfileService.getUserMetricsHistory(
+          _userProfile!.id,
+          startDate: startDate,
+        );
+        if (!mounted) return;
+        // Load calorie data from meal logs and health data
         await _initialization;
         if (!mounted) return;
         final calorieStart =
@@ -163,6 +199,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             calorieStart == null
                 ? <Map<String, dynamic>>[]
                 : await _loadCalorieHistory(calorieStart);
+        if (!mounted) return;
 
         // Process the history data
         _metricsHistory = history;
@@ -170,11 +207,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _processMetricsData();
       } else {
         setState(() {
-          _error = "User profile not found";
+          _error = AppLocalizations.of(
+            context,
+          ).screensSettingsStatisticsProfileNotFound;
           _isLoading = false;
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -220,55 +260,31 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     try {
       final List<Map<String, dynamic>> calorieData = [];
       final DateTime endDate = DateTime.now();
-      // Calendar-day steps; Duration(days: 1) is 23h/25h across DST.
-      final int daysDifference =
-          DateTime.utc(endDate.year, endDate.month, endDate.day)
-              .difference(
-                DateTime.utc(startDate.year, startDate.month, startDate.day),
-              )
-              .inDays;
-
-      for (int i = 0; i <= daysDifference; i++) {
-        final currentDate = DateTime(
-          startDate.year,
-          startDate.month,
-          startDate.day + i,
-        );
-        final dayStart = DateTime(
-          currentDate.year,
-          currentDate.month,
-          currentDate.day,
-        );
-        final dayEnd = DateTime(
-          currentDate.year,
-          currentDate.month,
-          currentDate.day + 1,
-        );
-
-        // Get nutrition summary for this day
-        final summary = await context.mealLogService.getNutritionSummary(
-          userId: _userProfile!.id,
-          startDate: dayStart,
-          endDate: dayEnd,
-        );
-        if (summary.totalCalories > 0) {
-          final dateKey = currentDate.toIso8601String().split('T')[0];
+      final totals = await context.dishService.getDailyNutritionTotals(
+        startDate,
+        DateTime(endDate.year, endDate.month, endDate.day + 1),
+      );
+      for (final entry in totals.entries) {
+        final summary = entry.value;
+        if (summary.calories > 0) {
+          final dateKey = entry.key;
+          final currentDate = DateTime.parse(dateKey);
           final caloriesBurned = _caloriesBurnedData[dateKey];
 
           // Calculate deficit/surplus if we have expenditure data
           double? deficit;
           double? netCalories;
           if (caloriesBurned != null) {
-            deficit = summary.totalCalories - caloriesBurned;
-            netCalories = summary.totalCalories - caloriesBurned;
+            deficit = summary.calories - caloriesBurned;
+            netCalories = summary.calories - caloriesBurned;
           }
 
           calorieData.add({
             'date': currentDate.toIso8601String(),
-            'calories': summary.totalCalories,
-            'protein': summary.totalProtein,
-            'carbs': summary.totalCarbs,
-            'fat': summary.totalFat,
+            'calories': summary.calories,
+            'protein': summary.protein,
+            'carbs': summary.carbs,
+            'fat': summary.fat,
             'calories_burned': caloriesBurned,
             'deficit': deficit,
             'net_calories': netCalories,
@@ -419,6 +435,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading
+    if (!mounted) return;
 
     try {
       final now = DateTime.now();
@@ -441,8 +458,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _error = null;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _error = 'Failed to generate test data: $e';
+        _error = AppLocalizations.of(
+          context,
+        ).screensSettingsStatisticsTestDataFailed(e.toString());
         _isLoading = false;
       });
     }
@@ -573,67 +593,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return _calculateTDEE(bmr, _userProfile!.activityLevel);
   }
 
-  // Method to calculate weekly median weight
-  List<Map<String, dynamic>> _calculateWeeklyMedian(
-    List<Map<String, dynamic>> data,
-  ) {
-    if (data.isEmpty) return [];
-
-    // Group entries by week
-    final Map<int, List<double>> weightsByWeek = {};
-
-    for (final entry in data) {
-      final DateTime date = DateTime.parse(entry['recorded_date'] as String);
-      final weight = entry['weight'] as double?;
-      if (weight != null) {
-        // Calculate week number (based on ISO week date)
-        final int weekNumber =
-            ((date.difference(DateTime(date.year, 1, 1)).inDays) / 7).floor();
-        if (weightsByWeek.containsKey(weekNumber)) {
-          weightsByWeek[weekNumber]!.add(weight);
-        } else {
-          weightsByWeek[weekNumber] = [weight];
-        }
-      }
-    }
-
-    // Calculate median for each week
-    final List<Map<String, dynamic>> medianData = [];
-    weightsByWeek.forEach((weekNumber, weights) {
-      weights.sort();
-      double median;
-      if (weights.length.isOdd) {
-        median = weights[weights.length ~/ 2];
-      } else {
-        median =
-            (weights[(weights.length ~/ 2) - 1] +
-                weights[weights.length ~/ 2]) /
-            2;
-      }
-
-      // Estimate a date for this week number
-      final DateTime weekDate = DateTime(
-        DateTime.now().year,
-        1,
-        1,
-      ).add(Duration(days: weekNumber * 7));
-
-      medianData.add({
-        'recorded_date': weekDate.toIso8601String(),
-        'weight': median,
-      });
-    });
-
-    // Sort by date
-    medianData.sort((a, b) {
-      final dateA = DateTime.parse(a['recorded_date'] as String);
-      final dateB = DateTime.parse(b['recorded_date'] as String);
-      return dateA.compareTo(dateB);
-    });
-
-    return medianData;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -742,7 +701,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 label: Text(l10n.screensSettingsStatisticsUpdateMetricsNow),
                 onPressed: () {
                   // Navigate to profile settings to update metrics
-                  Navigator.pushReplacementNamed(context, '/settings/profile');
+                  context.push('/settings/profile');
                 },
               ),
               const SizedBox(height: 16),
@@ -872,7 +831,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Calorie expenditure data coverage: ${coverage.toStringAsFixed(1)}% ($healthDataDays/$totalDays days)',
+              l10n.screensSettingsStatisticsCoverage(
+                coverage.toStringAsFixed(1),
+                healthDataDays,
+                totalDays,
+              ),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
@@ -959,7 +922,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   child: _buildStatItem(
                     context,
                     icon: Icons.speed,
-                    label: 'BMI',
+                    label: l10n.screensSettingsProfileSettingsBmi,
                     value:
                         _currentBMI != null
                             ? _currentBMI!.toStringAsFixed(1)
@@ -1139,18 +1102,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     // Use weekly median for weight to smooth out daily fluctuations
-    final medianData = _calculateWeeklyMedian(_metricsHistory);
+    final medianData = calculateWeeklyWeightMedian(_metricsHistory);
+    if (medianData.isEmpty) {
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable),
+      );
+    }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: LineChartPainter(
-        data: medianData,
-        valueKey: 'weight',
-        dateKey: 'recorded_date',
-        minValue: _minWeight,
-        maxValue: _maxWeight,
-        lineColor: Colors.blue,
-        pointColor: Colors.blue.shade800,
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        l10n.screensSettingsStatisticsWeightHistory,
+        medianData.length,
+        _minWeight.toStringAsFixed(1),
+        _maxWeight.toStringAsFixed(1),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: LineChartPainter(
+          data: medianData,
+          valueKey: 'weight',
+          dateKey: 'recorded_date',
+          minValue: _minWeight,
+          maxValue: _maxWeight,
+          lineColor: Colors.blue,
+          pointColor: Colors.blue.shade800,
+        ),
       ),
     );
   }
@@ -1186,34 +1163,42 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: LineChartPainter(
-        data: bmiData,
-        valueKey: 'bmi',
-        dateKey: 'recorded_date',
-        minValue: _minBMI,
-        maxValue: _maxBMI,
-        lineColor: Colors.green,
-        pointColor:
-            Colors.green.shade800, // Add reference lines for BMI categories
-        referenceLines: [
-          ReferenceLine(
-            value: 18.5,
-            color: Colors.orange.withValues(alpha: 0.5),
-            label: l10n.screensSettingsStatisticsBmiUnderweight,
-          ),
-          ReferenceLine(
-            value: 25.0,
-            color: Colors.orange.withValues(alpha: 0.5),
-            label: l10n.screensSettingsStatisticsBmiOverweight,
-          ),
-          ReferenceLine(
-            value: 30.0,
-            color: Colors.red.withValues(alpha: 0.5),
-            label: l10n.screensSettingsStatisticsBmiObese,
-          ),
-        ],
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        l10n.screensSettingsStatisticsBmiHistory,
+        bmiData.length,
+        _minBMI.toStringAsFixed(1),
+        _maxBMI.toStringAsFixed(1),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: LineChartPainter(
+          data: bmiData,
+          valueKey: 'bmi',
+          dateKey: 'recorded_date',
+          minValue: _minBMI,
+          maxValue: _maxBMI,
+          lineColor: Colors.green,
+          pointColor: Colors.green.shade800,
+          referenceLines: [
+            ReferenceLine(
+              value: 18.5,
+              color: Colors.orange.withValues(alpha: 0.5),
+              label: l10n.screensSettingsStatisticsBmiUnderweight,
+            ),
+            ReferenceLine(
+              value: 25.0,
+              color: Colors.orange.withValues(alpha: 0.5),
+              label: l10n.screensSettingsStatisticsBmiOverweight,
+            ),
+            ReferenceLine(
+              value: 30.0,
+              color: Colors.red.withValues(alpha: 0.5),
+              label: l10n.screensSettingsStatisticsBmiObese,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1229,16 +1214,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: LineChartPainter(
-        data: bodyFatData,
-        valueKey: 'body_fat',
-        dateKey: 'recorded_date',
-        minValue: _minBodyFat,
-        maxValue: _maxBodyFat,
-        lineColor: Colors.purple,
-        pointColor: Colors.purple.shade800,
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        l10n.screensSettingsStatisticsBodyFatHistory,
+        bodyFatData.length,
+        _minBodyFat.toStringAsFixed(1),
+        _maxBodyFat.toStringAsFixed(1),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: LineChartPainter(
+          data: bodyFatData,
+          valueKey: 'body_fat',
+          dateKey: 'recorded_date',
+          minValue: _minBodyFat,
+          maxValue: _maxBodyFat,
+          lineColor: Colors.purple,
+          pointColor: Colors.purple.shade800,
+        ),
       ),
     );
   }
@@ -1251,13 +1245,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: CalorieChartPainter(
-        data: _calorieHistory,
-        maintenanceCalories: _maintenanceCalories!,
-        minValue: _minCalories,
-        maxValue: _maxCalories,
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        _isHealthConnected && _caloriesBurnedData.isNotEmpty
+            ? l10n.screensSettingsStatisticsCalorieBalanceTitle
+            : l10n.screensSettingsStatisticsCalorieIntakeHistory,
+        _calorieHistory.length,
+        _minCalories.toStringAsFixed(0),
+        _maxCalories.toStringAsFixed(0),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: CalorieChartPainter(
+          data: _calorieHistory,
+          maintenanceCalories: _maintenanceCalories!,
+          minValue: _minCalories,
+          maxValue: _maxCalories,
+        ),
       ),
     );
   }
@@ -1378,7 +1383,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
           Text(
-            '($count days)',
+            AppLocalizations.of(context).screensSettingsStatisticsPhaseDays(count),
             style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
           ),
         ],
@@ -1393,7 +1398,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     // Calculate actual weekly deficit if health data is available
     double? actualWeeklyDeficit;
-    String? healthDataLabel;
 
     if (_isHealthConnected && _caloriesBurnedData.isNotEmpty) {
       final healthDataDays = _calorieHistory.where(
@@ -1404,7 +1408,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .map((entry) => entry['deficit'] as double)
             .reduce((a, b) => a + b);
         actualWeeklyDeficit = totalActualDeficit / healthDataDays.length;
-        healthDataLabel = 'Actual Balance';
       }
     }
 
@@ -1440,7 +1443,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     ),
                     Text(
-                      '${isDeficit ? "-" : "+"}${weeklyDeficit.abs().round()} cal/day',
+                      l10n.screensSettingsStatisticsCalPerDay(
+                        '${isDeficit ? "-" : "+"}${weeklyDeficit.abs().round()}',
+                      ),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -1451,7 +1456,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ),
               ),
               Text(
-                '${weeklyAverage.round()} cal',
+                l10n.screensSettingsStatisticsCalValue(
+                  weeklyAverage.round().toString(),
+                ),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -1482,7 +1489,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Row(
                         children: [
                           Text(
-                            healthDataLabel!,
+                            l10n.screensSettingsStatisticsActualBalance,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -1497,7 +1504,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ],
                       ),
                       Text(
-                        '${actualWeeklyDeficit < 0 ? "" : "+"}${actualWeeklyDeficit.round()} cal/day',
+                        l10n.screensSettingsStatisticsCalPerDay(
+                          '${actualWeeklyDeficit < 0 ? "" : "+"}${actualWeeklyDeficit.round()}',
+                        ),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
