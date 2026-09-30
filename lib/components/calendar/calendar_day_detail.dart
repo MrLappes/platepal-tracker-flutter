@@ -7,12 +7,14 @@ class CalendarDayDetail extends StatefulWidget {
   final DateTime date;
   final List<DishLog>? logs;
   final Widget Function(BuildContext, DishLog)? renderLogItem;
+  final VoidCallback? onLogMeal;
 
   const CalendarDayDetail({
     super.key,
     required this.date,
     this.logs,
     this.renderLogItem,
+    this.onLogMeal,
   });
 
   @override
@@ -149,11 +151,24 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(
-            l10n.componentsCalendarCalendarDayDetailNoMealsLoggedForDay,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.componentsCalendarCalendarDayDetailNoMealsLoggedForDay,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (widget.onLogMeal != null) ...[
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: widget.onLogMeal,
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                  child: Text(l10n.screensCalendarLogMeal),
+                ),
+              ],
+            ],
           ),
         ),
       );

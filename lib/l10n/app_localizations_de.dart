@@ -20,6 +20,21 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ernährungsübersicht konnte nicht geladen werden';
 
   @override
+  String get screensCalendarProfileNudge =>
+      'Profil einrichten, um Tagesziele zu erhalten';
+
+  @override
+  String get screensCalendarSetUpProfile => 'Profil einrichten';
+
+  @override
+  String get screensCalendarLogMeal => 'Mahlzeit eintragen';
+
+  @override
+  String screensCalendarCaloriesPerServing(int calories) {
+    return '$calories kcal pro Portion';
+  }
+
+  @override
   String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
       'Mahlzeiten konnten nicht geladen werden';
 

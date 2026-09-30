@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../models/dish.dart';
@@ -9,7 +10,9 @@ import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
 import '../services/chat/openai_service.dart';
 import '../components/calendar/calendar_day_detail.dart';
+import '../components/calendar/calendar_dish_picker.dart';
 import '../components/calendar/macro_summary.dart';
+import '../components/modals/dish_log_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -122,6 +125,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
     } catch (error) {
       debugPrint('Error loading user profile: $error');
     }
+  }
+
+  Future<void> _openProfile() async {
+    await context.push('/settings/profile');
+    if (!mounted) return;
+    await _loadUserProfile();
+    if (!mounted) return;
+    await _handleDateSelect(_selectedDate);
+  }
+
+  Future<void> _createDishFromCalendar() async {
+    final created = await context.push<bool>('/dishes/create');
+    if (!mounted || created != true) return;
+    await _openDishPicker();
+  }
+
+  Future<void> _openDishPicker() async {
+    final dish = await showModalBottomSheet<Dish>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (sheetContext) => CalendarDishPicker(
+            dishService: _dishService,
+            onCreateDish: () {
+              Navigator.of(sheetContext).pop();
+              _createDishFromCalendar();
+            },
+          ),
+    );
+    if (!mounted || dish == null) return;
+    final logged = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => DishLogModal(dish: dish, initialDate: _selectedDate),
+    );
+    if (!mounted || logged != true) return;
+    await _handleDateSelect(_selectedDate);
+    if (mounted) await _loadCalendarDates();
   }
 
   Future<void> _loadCalendarDates() async {
@@ -730,6 +775,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'calendar_log_meal',
+        onPressed: _openDishPicker,
+        tooltip: AppLocalizations.of(context).screensCalendarLogMeal,
+        icon: const Icon(Icons.add),
+        label: Text(AppLocalizations.of(context).screensCalendarLogMeal),
+      ),
       body: SafeArea(
         child:
             _isLoading
@@ -844,6 +896,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     padding: EdgeInsets.all(16),
                                     child: CircularProgressIndicator(),
                                   ),
+                                if (_selectedDaySummary != null &&
+                                    (_userProfile == null ||
+                                        _userProfile!.goals.targetCalories <=
+                                            0))
+                                  Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surfaceContainer,
+                                      border: Border.all(
+                                        color: colorScheme.outline.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).screensCalendarProfileNudge,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        TextButton(
+                                          onPressed: _openProfile,
+                                          style: TextButton.styleFrom(
+                                            minimumSize: const Size(48, 48),
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            ).screensCalendarSetUpProfile,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 if (_selectedDaySummary != null)
                                   MacroSummary(
                                     calories: _selectedDaySummary!.calories,
@@ -859,7 +953,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     isHealthConnected:
                                         _selectedDaySummary!.isHealthConnected,
                                     calorieTarget:
-                                        _userProfile?.goals.targetCalories,
+                                        (_userProfile?.goals.targetCalories ??
+                                                    0) >
+                                                0
+                                            ? _userProfile!.goals.targetCalories
+                                            : null,
                                     proteinTarget:
                                         _userProfile?.goals.targetProtein,
                                     carbsTarget:
@@ -878,6 +976,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   CalendarDayDetail(
                                     date: _selectedDate,
                                     logs: _selectedDayLogs,
+                                    onLogMeal: _openDishPicker,
                                     renderLogItem:
                                         (context, log) =>
                                             _buildLogItem(context, log),

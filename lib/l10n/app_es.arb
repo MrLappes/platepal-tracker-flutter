@@ -3,6 +3,17 @@
   "screensCalendarHasMealsLogged": "tiene comidas registradas",
   "screensCalendarFailedToLoadDates": "No se pudieron cargar las fechas del calendario",
   "screensCalendarFailedToLoadSummary": "No se pudo cargar el resumen nutricional",
+  "screensCalendarProfileNudge": "Configura tu perfil para obtener objetivos diarios",
+  "@screensCalendarProfileNudge": {"description": "Aviso del calendario cuando no hay objetivo calórico"},
+  "screensCalendarSetUpProfile": "Configurar perfil",
+  "@screensCalendarSetUpProfile": {"description": "Abre los ajustes de perfil desde el calendario"},
+  "screensCalendarLogMeal": "Registrar comida",
+  "@screensCalendarLogMeal": {"description": "Abre el selector de platos del calendario"},
+  "screensCalendarCaloriesPerServing": "{calories} kcal por ración",
+  "@screensCalendarCaloriesPerServing": {
+    "description": "Calorías por ración en el selector de platos",
+    "placeholders": {"calories": {"type": "int"}}
+  },
   "componentsCalendarCalendarDayDetailErrorLoadingMeals": "No se pudieron cargar las comidas de este día",
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "No hay comidas registradas para este día",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {

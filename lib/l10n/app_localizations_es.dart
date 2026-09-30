@@ -20,6 +20,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo cargar el resumen nutricional';
 
   @override
+  String get screensCalendarProfileNudge =>
+      'Configura tu perfil para obtener objetivos diarios';
+
+  @override
+  String get screensCalendarSetUpProfile => 'Configurar perfil';
+
+  @override
+  String get screensCalendarLogMeal => 'Registrar comida';
+
+  @override
+  String screensCalendarCaloriesPerServing(int calories) {
+    return '$calories kcal por ración';
+  }
+
+  @override
   String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
       'No se pudieron cargar las comidas de este día';
 
