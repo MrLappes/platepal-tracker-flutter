@@ -32,9 +32,10 @@ List<Map<String, dynamic>> calculateWeeklyWeightMedian(
   for (final entry in weightsByWeek.entries) {
     final weights = entry.value..sort();
     final middle = weights.length ~/ 2;
-    final median = weights.length.isOdd
-        ? weights[middle]
-        : (weights[middle - 1] + weights[middle]) / 2;
+    final median =
+        weights.length.isOdd
+            ? weights[middle]
+            : (weights[middle - 1] + weights[middle]) / 2;
     final (weekYear, week) = entry.key;
     final jan4 = DateTime(weekYear, 1, 4);
     final weekDate = DateTime(weekYear, 1, 5 - jan4.weekday + (week - 1) * 7);
@@ -44,9 +45,8 @@ List<Map<String, dynamic>> calculateWeeklyWeightMedian(
     });
   }
   medianData.sort(
-    (a, b) => (a['recorded_date'] as String).compareTo(
-      b['recorded_date'] as String,
-    ),
+    (a, b) =>
+        (a['recorded_date'] as String).compareTo(b['recorded_date'] as String),
   );
   return medianData;
 }
@@ -219,9 +219,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _processMetricsData();
       } else {
         setState(() {
-          _error = AppLocalizations.of(
-            context,
-          ).screensSettingsStatisticsProfileNotFound;
+          _error =
+              AppLocalizations.of(
+                context,
+              ).screensSettingsStatisticsProfileNotFound;
           _isLoading = false;
         });
       }
@@ -229,7 +230,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       if (!mounted) return;
       debugPrint('StatisticsScreen: Data load failed (${e.runtimeType})');
       setState(() {
-        _error = AppLocalizations.of(context).screensSettingsStatisticsLoadFailedHint;
+        _error =
+            AppLocalizations.of(
+              context,
+            ).screensSettingsStatisticsLoadFailedHint;
         _isLoading = false;
       });
     }
@@ -694,7 +698,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
         child: Row(
           children: [
-            Icon(Icons.warning_amber_outlined, color: colorScheme.onErrorContainer),
+            Icon(
+              Icons.warning_amber_outlined,
+              color: colorScheme.onErrorContainer,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -987,7 +994,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     value:
                         _currentBodyFat != null
                             ? '${_currentBodyFat!.toStringAsFixed(1)}%'
-                        : l10n.utilsLinkHandlerNotAvailable,
+                            : '–',
+                    detail:
+                        _currentBodyFat == null
+                            ? l10n.utilsLinkHandlerNotAvailable
+                            : null,
                   ),
                 ),
               ],
@@ -1449,7 +1460,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
           Text(
-            AppLocalizations.of(context).screensSettingsStatisticsPhaseDays(count),
+            AppLocalizations.of(
+              context,
+            ).screensSettingsStatisticsPhaseDays(count),
             style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
           ),
         ],
@@ -2437,9 +2450,9 @@ class CalorieChartPainter extends CustomPainter {
     return oldDelegate.data != data ||
         oldDelegate.maintenanceCalories != maintenanceCalories ||
         oldDelegate.minValue != minValue ||
-      oldDelegate.maxValue != maxValue ||
-      oldDelegate.maintenanceLabel != maintenanceLabel ||
-      oldDelegate.axisColor != axisColor ||
-      oldDelegate.labelColor != labelColor;
+        oldDelegate.maxValue != maxValue ||
+        oldDelegate.maintenanceLabel != maintenanceLabel ||
+        oldDelegate.axisColor != axisColor ||
+        oldDelegate.labelColor != labelColor;
   }
 }
