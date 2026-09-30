@@ -3060,6 +3060,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Körperfett % (optional)';
 
   @override
+  String get screensSettingsProfileSettingsOptional => 'Optional';
+
+  @override
   String get screensSettingsProfileSettingsNameHint => 'Namen eingeben';
 
   @override

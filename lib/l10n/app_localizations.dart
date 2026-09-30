@@ -5037,6 +5037,12 @@ abstract class AppLocalizations {
   /// **'Body Fat % (optional)'**
   String get screensSettingsProfileSettingsBodyFatOptional;
 
+  /// No description provided for @screensSettingsProfileSettingsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get screensSettingsProfileSettingsOptional;
+
   /// No description provided for @screensSettingsProfileSettingsNameHint.
   ///
   /// In en, this message translates to:

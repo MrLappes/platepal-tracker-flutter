@@ -2774,6 +2774,7 @@
   "componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": "Nährwerte eingeben, um die Analyse und Empfehlungen zu sehen.",
   "screensSettingsProfileSettingsPhysicalStats": "Körperdaten",
   "screensSettingsProfileSettingsBodyFatOptional": "Körperfett % (optional)",
+  "screensSettingsProfileSettingsOptional": "Optional",
   "screensSettingsProfileSettingsNameHint": "Namen eingeben",
   "screensSettingsProfileSettingsCustomizeMacroRatios": "Makronährstoffverteilung anpassen",
   "screensSettingsProfileSettingsImperialHeightRange": "Die Größe muss zwischen 39 und 98 Zoll liegen",
