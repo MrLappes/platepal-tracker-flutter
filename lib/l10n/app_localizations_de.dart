@@ -666,25 +666,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get componentsChatMessageBubbleYesterday => 'Gestern';
 
   @override
-  String get componentsChatNutritionAnalysisCardAddToMeals =>
-      'Zu Mahlzeiten hinzufügen';
-
-  @override
-  String get componentsChatNutritionAnalysisCardCookingInstructions =>
-      'Kochanweisungen';
-
-  @override
   String get componentsChatNutritionAnalysisCardDishName => 'Gerichtname';
-
-  @override
-  String get componentsChatNutritionAnalysisCardMealType => 'Mahlzeitentyp';
 
   @override
   String get componentsChatNutritionAnalysisCardNutritionAnalysis =>
       'Nährwertanalyse';
-
-  @override
-  String get componentsChatNutritionAnalysisCardServingSize => 'Portionsgröße';
 
   @override
   String get componentsChatQuickActionsQuickActions => 'Schnellaktionen';
@@ -1213,10 +1199,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get providersStorageRetry => 'Erneut versuchen';
 
   @override
-  String get screensHomeWelcomeToPlatePalTracker =>
-      'Willkommen bei PlatePal Tracker';
-
-  @override
   String get screensMealsAddedToFavorites => 'Zu Favoriten hinzugefügt';
 
   @override
@@ -1379,6 +1361,107 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensMenuViewStatistics => 'Statistiken anzeigen';
+
+  @override
+  String get screensPrivacyTitle => 'Datenschutzerklärung';
+
+  @override
+  String get screensPrivacyEffectiveDate => 'Gültig ab: 2026-09-30';
+
+  @override
+  String get screensPrivacyOverviewTitle => 'Auf einen Blick';
+
+  @override
+  String get screensPrivacyOverviewBody =>
+      'PlatePal Tracker ist ein Ernährungstracker, der überwiegend offline funktioniert. Wir betreiben keine Server für deine App-Daten und verlangen kein Konto; die App enthält weder Analyse- noch Werbe- oder Tracking-SDKs. Die unten genannten optionalen Netzwerkfunktionen kontaktieren bei Nutzung ihre jeweiligen Anbieter.';
+
+  @override
+  String get screensPrivacyStorageTitle => 'Daten auf deinem Gerät';
+
+  @override
+  String get screensPrivacyStorageBody =>
+      'Gerichte, Mahlzeitenprotokolle, Profildaten (einschließlich Körpermaßen), Ziele, Chatverlauf und Einstellungen werden in SQLite oder SharedPreferences auf deinem Gerät gespeichert. Gespeicherte Lebensmittelfotos können ebenfalls im App-Speicher liegen. Deinen API-Schlüssel speichert die App im sicheren Plattformspeicher; ältere Schlüssel aus SharedPreferences werden nach Möglichkeit dorthin übertragen.';
+
+  @override
+  String get screensPrivacyAiTitle => 'KI-Chat';
+
+  @override
+  String get screensPrivacyAiBody =>
+      'Der KI-Chat ist freiwillig und benötigt deinen eigenen API-Schlüssel. Bei der Nutzung werden deine Nachrichten, angehängte Bilder und, falls relevant, frühere Nachrichten, dein Profil, Mahlzeitenprotokolle oder Nährwertzusammenfassungen sowie gespeicherte Gerichte an OpenAI oder den von dir eingerichteten OpenAI-kompatiblen Anbieter gesendet. Der Schlüssel wird dem Anbieter zur Authentifizierung übermittelt. Dieser verarbeitet die Daten nach seiner eigenen Datenschutzerklärung; wähle einen Anbieter, dem du vertraust. Wir erhalten diese Anfragen nicht.';
+
+  @override
+  String get screensPrivacyFoodFactsTitle => 'Open Food Facts';
+
+  @override
+  String get screensPrivacyFoodFactsBody =>
+      'Wenn du nach Lebensmitteln suchst oder einen Barcode scannst, sendet die App den Suchbegriff oder die Barcodenummer und gewählte Filter an world.openfoodfacts.org. Produktinformationen und Bilder können von Open Food Facts heruntergeladen werden.';
+
+  @override
+  String get screensPrivacyHealthTitle => 'Health Connect und Apple Health';
+
+  @override
+  String get screensPrivacyHealthBody =>
+      'Mit deiner Erlaubnis liest die App verbrannte Kalorien (Gesamt- und Aktivkalorien unter Android, Aktiv- und Grundumsatzkalorien unter iOS) aus Health Connect oder Apple Health und schreibt die Nährwerte deiner protokollierten Mahlzeiten dorthin. Die gelesenen Werte werden auf diesem Gerät zwischengespeichert und für Berechnungen zu Energieverbrauch und Zielen in der App genutzt; sie werden weder in KI-Anfragen eingefügt noch an einen Entwickler-Server gesendet. Health Connect und Apple Health verwalten ihre gespeicherten Einträge selbst.';
+
+  @override
+  String get screensPrivacyExternalTitle => 'Externe Links und Bilder';
+
+  @override
+  String get screensPrivacyExternalBody =>
+      'Die Mitwirkendenseite lädt Profilbilder von GitHubs avatars.githubusercontent.com. Wenn du GitHub, die Online-Datenschutzerklärung, andere externe Webseiten oder Produktbilder aus dem Netz öffnest, werden diese Dienste kontaktiert. Sie können dabei deine IP-Adresse sehen und Anfragen nach ihren eigenen Richtlinien verarbeiten.';
+
+  @override
+  String get screensPrivacyExportTitle => 'Export und Import';
+
+  @override
+  String get screensPrivacyExportBody =>
+      'Exportdateien (JSON oder CSV) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch.';
+
+  @override
+  String get screensPrivacyBackupTitle => 'Android-Sicherung';
+
+  @override
+  String get screensPrivacyBackupBody =>
+      'Die Android-Systemsicherung kann die Datenbank und Einstellungen der App, einschließlich zwischengespeicherter Gesundheits-Kalorienwerte und des Chatverlaufs, in dein Google-Konto kopieren oder auf ein anderes Gerät übertragen. Die Sicherungsregeln schließen Einstellungsdateien des sicheren Speichers aus; ein älterer API-Schlüssel kann bis zur Übertragung jedoch noch in anderen Einstellungen stehen. Über die Android-Sicherungseinstellungen kannst du das steuern.';
+
+  @override
+  String get screensPrivacyDeletionTitle => 'Daten löschen';
+
+  @override
+  String get screensPrivacyDeletionBody =>
+      'Unter Profil löscht App zurücksetzen die SQLite-Datenbank, SharedPreferences und den gespeicherten API-Schlüssel auf diesem Gerät. Beim Deinstallieren werden private App-Daten entfernt. Das Zurücksetzen entfernt keine gespeicherten Bilder, Exportdateien oder Sicherungen vor Importen, anderweitig geteilte Kopien, bereits in Health Connect oder Apple Health geschriebene Einträge oder Systemsicherungen; lösche sie bei Bedarf separat.';
+
+  @override
+  String get screensPrivacyChildrenTitle => 'Kinder';
+
+  @override
+  String get screensPrivacyChildrenBody =>
+      'PlatePal Tracker ist nicht für Kinder bestimmt. Die App prüft das Alter nicht; Eltern oder Erziehungsberechtigte sollten die Nutzung beaufsichtigen, besonders bevor externe Dienste aktiviert oder sensible Angaben geteilt werden.';
+
+  @override
+  String get screensPrivacyChangesTitle => 'Änderungen dieser Richtlinie';
+
+  @override
+  String get screensPrivacyChangesBody =>
+      'Wir können diese Richtlinie aktualisieren, wenn sich die App ändert. Das oben genannte Gültigkeitsdatum zeigt, wann diese Fassung in Kraft trat; die aktuelle Erklärung findest du in der App oder im GitHub-Repository.';
+
+  @override
+  String get screensPrivacyContactTitle => 'Kontakt';
+
+  @override
+  String get screensPrivacyContactBody =>
+      'Bei Fragen zum Datenschutz erstelle ein GitHub-Issue unter github.com/MrLappes/platepal-tracker-flutter/issues. Auf Daten, die nur auf deinem Gerät gespeichert sind, haben wir keinen Zugriff; nutze zum Löschen die oben genannten App- und Systemeinstellungen.';
+
+  @override
+  String get screensPrivacyMenuSubtitle =>
+      'Welche Daten das Gerät verlassen und wie du sie verwaltest';
+
+  @override
+  String get screensPrivacyViewOnline => 'Online ansehen';
+
+  @override
+  String get screensPrivacyLinkError =>
+      'Datenschutzerklärung konnte nicht geöffnet werden.';
 
   @override
   String get screensSettingsAboutAboutAppTitle => 'Über uns';

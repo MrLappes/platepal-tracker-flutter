@@ -139,6 +139,13 @@ class MenuScreen extends StatelessWidget {
               ),
               _buildSettingsTile(
                 context,
+                title: AppLocalizations.of(context).screensPrivacyTitle,
+                subtitle: AppLocalizations.of(context).screensPrivacyMenuSubtitle,
+                icon: Icons.privacy_tip_outlined,
+                onTap: () => context.push('/privacy'),
+              ),
+              _buildSettingsTile(
+                context,
                 title: AppLocalizations.of(context).screensMenuContributors,
                 subtitle:
                     AppLocalizations.of(context).screensMenuViewContributors,

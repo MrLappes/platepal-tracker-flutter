@@ -1175,41 +1175,17 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get componentsChatMessageBubbleYesterday;
 
-  /// Add to meals button text
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Meals'**
-  String get componentsChatNutritionAnalysisCardAddToMeals;
-
-  /// Cooking instructions label
-  ///
-  /// In en, this message translates to:
-  /// **'Cooking Instructions'**
-  String get componentsChatNutritionAnalysisCardCookingInstructions;
-
   /// Dish name label
   ///
   /// In en, this message translates to:
   /// **'Dish Name'**
   String get componentsChatNutritionAnalysisCardDishName;
 
-  /// Meal type label
-  ///
-  /// In en, this message translates to:
-  /// **'Meal Type'**
-  String get componentsChatNutritionAnalysisCardMealType;
-
   /// Nutrition analysis section title
   ///
   /// In en, this message translates to:
   /// **'Nutrition Analysis'**
   String get componentsChatNutritionAnalysisCardNutritionAnalysis;
-
-  /// Serving size label
-  ///
-  /// In en, this message translates to:
-  /// **'Serving Size'**
-  String get componentsChatNutritionAnalysisCardServingSize;
 
   /// Quick actions section title
   ///
@@ -2113,12 +2089,6 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get providersStorageRetry;
 
-  /// Welcome message for PlatePal Tracker
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to PlatePal Tracker'**
-  String get screensHomeWelcomeToPlatePalTracker;
-
   /// Success message when dish added to favorites
   ///
   /// In en, this message translates to:
@@ -2424,6 +2394,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Statistics'**
   String get screensMenuViewStatistics;
+
+  /// Title of the in-app privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get screensPrivacyTitle;
+
+  /// Effective date of the privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Effective date: 2026-09-30'**
+  String get screensPrivacyEffectiveDate;
+
+  /// Privacy policy overview heading
+  ///
+  /// In en, this message translates to:
+  /// **'At a glance'**
+  String get screensPrivacyOverviewTitle;
+
+  /// Privacy policy overview
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker is an offline-first nutrition tracker. We do not run servers for your app data or require an account, and the app has no analytics, advertising, or tracking SDKs. The optional network features below contact their providers when used.'**
+  String get screensPrivacyOverviewBody;
+
+  /// Local storage section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Data on your device'**
+  String get screensPrivacyStorageTitle;
+
+  /// Local storage and API key handling
+  ///
+  /// In en, this message translates to:
+  /// **'Dishes, meal logs, profile information (including body measurements), goals, chat history, and settings are stored on your device in SQLite or SharedPreferences. Saved food photos may also be kept in app storage. The API key you enter is stored using the platform\'s secure storage; legacy keys in SharedPreferences are migrated when possible.'**
+  String get screensPrivacyStorageBody;
+
+  /// Optional AI chat section heading
+  ///
+  /// In en, this message translates to:
+  /// **'AI chat'**
+  String get screensPrivacyAiTitle;
+
+  /// AI provider data sharing
+  ///
+  /// In en, this message translates to:
+  /// **'AI chat is optional and requires your own API key. When used, your chat messages, attached images, and, when relevant, conversation history, your profile, meal logs or nutrition summaries, and saved dishes are sent to OpenAI or the OpenAI-compatible endpoint you configured. The key is sent to that provider for authentication. That provider handles this information under its own privacy policy; choose an endpoint you trust. We do not receive these requests.'**
+  String get screensPrivacyAiBody;
+
+  /// Open Food Facts section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts'**
+  String get screensPrivacyFoodFactsTitle;
+
+  /// Food lookup data sharing
+  ///
+  /// In en, this message translates to:
+  /// **'When you search for food or scan a barcode, the app sends your search text or barcode number and selected filters to world.openfoodfacts.org. Product information and images can be downloaded from Open Food Facts.'**
+  String get screensPrivacyFoodFactsBody;
+
+  /// Health integration section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect and Apple Health'**
+  String get screensPrivacyHealthTitle;
+
+  /// Health access and local use
+  ///
+  /// In en, this message translates to:
+  /// **'With your permission, the app reads calories burned (total and active on Android, active and basal on iOS) from Health Connect or Apple Health and writes nutrition for meals you log to that service. Readings are cached on this device and used for in-app energy and goal calculations; the app does not include Health readings in AI requests or send them to a developer server. Health Connect and Apple Health control their own stored records.'**
+  String get screensPrivacyHealthBody;
+
+  /// External content section heading
+  ///
+  /// In en, this message translates to:
+  /// **'External links and images'**
+  String get screensPrivacyExternalTitle;
+
+  /// Third-party images and links
+  ///
+  /// In en, this message translates to:
+  /// **'The Contributors screen loads avatar images from GitHub\'s avatars.githubusercontent.com. Opening GitHub, the online policy, other external websites, or remote product images contacts those services, which may see your IP address and process requests under their own policies.'**
+  String get screensPrivacyExternalBody;
+
+  /// Manual export and import section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import'**
+  String get screensPrivacyExportTitle;
+
+  /// Export, import, and pre-import backups
+  ///
+  /// In en, this message translates to:
+  /// **'Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.'**
+  String get screensPrivacyExportBody;
+
+  /// Android operating system backup section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Android backup'**
+  String get screensPrivacyBackupTitle;
+
+  /// Possible Google backup of app data and Health cache
+  ///
+  /// In en, this message translates to:
+  /// **'Android\'s system backup may copy the app\'s database and preferences, including cached Health calorie readings and chat history, to your Google account or transfer them to another device. The backup rules exclude secure-storage preference files, but a legacy API key may be present in other preferences until migration. Check your Android backup settings to control this.'**
+  String get screensPrivacyBackupBody;
+
+  /// Data deletion section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your data'**
+  String get screensPrivacyDeletionTitle;
+
+  /// Reset, uninstall, and remaining copies
+  ///
+  /// In en, this message translates to:
+  /// **'In Profile, Reset App deletes the SQLite database, SharedPreferences, and saved API key on this device. Uninstalling removes app-private data. Reset does not remove saved images, exported or pre-import backup files, copies shared elsewhere, Health Connect or Apple Health records already written, or system backups; remove those separately where applicable.'**
+  String get screensPrivacyDeletionBody;
+
+  /// Children's privacy section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get screensPrivacyChildrenTitle;
+
+  /// Children's privacy notice
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker is not intended for children. The app has no age verification; a parent or guardian should supervise use, especially before enabling external services or sharing sensitive information.'**
+  String get screensPrivacyChildrenBody;
+
+  /// Policy changes section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Changes to this policy'**
+  String get screensPrivacyChangesTitle;
+
+  /// How changes to the policy are announced
+  ///
+  /// In en, this message translates to:
+  /// **'We may update this policy when the app changes. The effective date above shows when this version took effect; review the current policy in the app or GitHub repository.'**
+  String get screensPrivacyChangesBody;
+
+  /// Privacy contact section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get screensPrivacyContactTitle;
+
+  /// How to contact the project about privacy
+  ///
+  /// In en, this message translates to:
+  /// **'For privacy questions, open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.'**
+  String get screensPrivacyContactBody;
+
+  /// Privacy policy menu subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'What leaves the device and how to control your data'**
+  String get screensPrivacyMenuSubtitle;
+
+  /// Button to open the privacy policy on GitHub
+  ///
+  /// In en, this message translates to:
+  /// **'View online'**
+  String get screensPrivacyViewOnline;
+
+  /// Error shown when the online privacy policy cannot be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the privacy policy.'**
+  String get screensPrivacyLinkError;
 
   /// About the app title
   ///

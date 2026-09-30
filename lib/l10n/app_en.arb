@@ -754,29 +754,13 @@
   "@componentsChatMessageBubbleYesterday": {
     "description": "Label for yesterday in date formatting"
   },
-  "componentsChatNutritionAnalysisCardAddToMeals": "Add to Meals",
-  "@componentsChatNutritionAnalysisCardAddToMeals": {
-    "description": "Add to meals button text"
-  },
-  "componentsChatNutritionAnalysisCardCookingInstructions": "Cooking Instructions",
-  "@componentsChatNutritionAnalysisCardCookingInstructions": {
-    "description": "Cooking instructions label"
-  },
   "componentsChatNutritionAnalysisCardDishName": "Dish Name",
   "@componentsChatNutritionAnalysisCardDishName": {
     "description": "Dish name label"
   },
-  "componentsChatNutritionAnalysisCardMealType": "Meal Type",
-  "@componentsChatNutritionAnalysisCardMealType": {
-    "description": "Meal type label"
-  },
   "componentsChatNutritionAnalysisCardNutritionAnalysis": "Nutrition Analysis",
   "@componentsChatNutritionAnalysisCardNutritionAnalysis": {
     "description": "Nutrition analysis section title"
-  },
-  "componentsChatNutritionAnalysisCardServingSize": "Serving Size",
-  "@componentsChatNutritionAnalysisCardServingSize": {
-    "description": "Serving size label"
   },
   "componentsChatQuickActionsQuickActions": "Quick Actions",
   "@componentsChatQuickActionsQuickActions": {
@@ -1316,10 +1300,6 @@
   "@providersStorageRetry": {
     "description": "Button to retry initializing local data storage"
   },
-  "screensHomeWelcomeToPlatePalTracker": "Welcome to PlatePal Tracker",
-  "@screensHomeWelcomeToPlatePalTracker": {
-    "description": "Welcome message for PlatePal Tracker"
-  },
   "screensMealsAddedToFavorites": "Added to favorites",
   "@screensMealsAddedToFavorites": {
     "description": "Success message when dish added to favorites"
@@ -1529,6 +1509,122 @@
   "screensMenuViewStatistics": "View Statistics",
   "@screensMenuViewStatistics": {
     "description": "View statistics button text"
+  },
+  "screensPrivacyTitle": "Privacy policy",
+  "@screensPrivacyTitle": {
+    "description": "Title of the in-app privacy policy"
+  },
+  "screensPrivacyEffectiveDate": "Effective date: 2026-09-30",
+  "@screensPrivacyEffectiveDate": {
+    "description": "Effective date of the privacy policy"
+  },
+  "screensPrivacyOverviewTitle": "At a glance",
+  "@screensPrivacyOverviewTitle": {
+    "description": "Privacy policy overview heading"
+  },
+  "screensPrivacyOverviewBody": "PlatePal Tracker is an offline-first nutrition tracker. We do not run servers for your app data or require an account, and the app has no analytics, advertising, or tracking SDKs. The optional network features below contact their providers when used.",
+  "@screensPrivacyOverviewBody": {
+    "description": "Privacy policy overview"
+  },
+  "screensPrivacyStorageTitle": "Data on your device",
+  "@screensPrivacyStorageTitle": {
+    "description": "Local storage section heading"
+  },
+  "screensPrivacyStorageBody": "Dishes, meal logs, profile information (including body measurements), goals, chat history, and settings are stored on your device in SQLite or SharedPreferences. Saved food photos may also be kept in app storage. The API key you enter is stored using the platform's secure storage; legacy keys in SharedPreferences are migrated when possible.",
+  "@screensPrivacyStorageBody": {
+    "description": "Local storage and API key handling"
+  },
+  "screensPrivacyAiTitle": "AI chat",
+  "@screensPrivacyAiTitle": {
+    "description": "Optional AI chat section heading"
+  },
+  "screensPrivacyAiBody": "AI chat is optional and requires your own API key. When used, your chat messages, attached images, and, when relevant, conversation history, your profile, meal logs or nutrition summaries, and saved dishes are sent to OpenAI or the OpenAI-compatible endpoint you configured. The key is sent to that provider for authentication. That provider handles this information under its own privacy policy; choose an endpoint you trust. We do not receive these requests.",
+  "@screensPrivacyAiBody": {
+    "description": "AI provider data sharing"
+  },
+  "screensPrivacyFoodFactsTitle": "Open Food Facts",
+  "@screensPrivacyFoodFactsTitle": {
+    "description": "Open Food Facts section heading"
+  },
+  "screensPrivacyFoodFactsBody": "When you search for food or scan a barcode, the app sends your search text or barcode number and selected filters to world.openfoodfacts.org. Product information and images can be downloaded from Open Food Facts.",
+  "@screensPrivacyFoodFactsBody": {
+    "description": "Food lookup data sharing"
+  },
+  "screensPrivacyHealthTitle": "Health Connect and Apple Health",
+  "@screensPrivacyHealthTitle": {
+    "description": "Health integration section heading"
+  },
+  "screensPrivacyHealthBody": "With your permission, the app reads calories burned (total and active on Android, active and basal on iOS) from Health Connect or Apple Health and writes nutrition for meals you log to that service. Readings are cached on this device and used for in-app energy and goal calculations; the app does not include Health readings in AI requests or send them to a developer server. Health Connect and Apple Health control their own stored records.",
+  "@screensPrivacyHealthBody": {
+    "description": "Health access and local use"
+  },
+  "screensPrivacyExternalTitle": "External links and images",
+  "@screensPrivacyExternalTitle": {
+    "description": "External content section heading"
+  },
+  "screensPrivacyExternalBody": "The Contributors screen loads avatar images from GitHub's avatars.githubusercontent.com. Opening GitHub, the online policy, other external websites, or remote product images contacts those services, which may see your IP address and process requests under their own policies.",
+  "@screensPrivacyExternalBody": {
+    "description": "Third-party images and links"
+  },
+  "screensPrivacyExportTitle": "Export and import",
+  "@screensPrivacyExportTitle": {
+    "description": "Manual export and import section heading"
+  },
+  "screensPrivacyExportBody": "Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.",
+  "@screensPrivacyExportBody": {
+    "description": "Export, import, and pre-import backups"
+  },
+  "screensPrivacyBackupTitle": "Android backup",
+  "@screensPrivacyBackupTitle": {
+    "description": "Android operating system backup section heading"
+  },
+  "screensPrivacyBackupBody": "Android's system backup may copy the app's database and preferences, including cached Health calorie readings and chat history, to your Google account or transfer them to another device. The backup rules exclude secure-storage preference files, but a legacy API key may be present in other preferences until migration. Check your Android backup settings to control this.",
+  "@screensPrivacyBackupBody": {
+    "description": "Possible Google backup of app data and Health cache"
+  },
+  "screensPrivacyDeletionTitle": "Delete your data",
+  "@screensPrivacyDeletionTitle": {
+    "description": "Data deletion section heading"
+  },
+  "screensPrivacyDeletionBody": "In Profile, Reset App deletes the SQLite database, SharedPreferences, and saved API key on this device. Uninstalling removes app-private data. Reset does not remove saved images, exported or pre-import backup files, copies shared elsewhere, Health Connect or Apple Health records already written, or system backups; remove those separately where applicable.",
+  "@screensPrivacyDeletionBody": {
+    "description": "Reset, uninstall, and remaining copies"
+  },
+  "screensPrivacyChildrenTitle": "Children",
+  "@screensPrivacyChildrenTitle": {
+    "description": "Children's privacy section heading"
+  },
+  "screensPrivacyChildrenBody": "PlatePal Tracker is not intended for children. The app has no age verification; a parent or guardian should supervise use, especially before enabling external services or sharing sensitive information.",
+  "@screensPrivacyChildrenBody": {
+    "description": "Children's privacy notice"
+  },
+  "screensPrivacyChangesTitle": "Changes to this policy",
+  "@screensPrivacyChangesTitle": {
+    "description": "Policy changes section heading"
+  },
+  "screensPrivacyChangesBody": "We may update this policy when the app changes. The effective date above shows when this version took effect; review the current policy in the app or GitHub repository.",
+  "@screensPrivacyChangesBody": {
+    "description": "How changes to the policy are announced"
+  },
+  "screensPrivacyContactTitle": "Contact",
+  "@screensPrivacyContactTitle": {
+    "description": "Privacy contact section heading"
+  },
+  "screensPrivacyContactBody": "For privacy questions, open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.",
+  "@screensPrivacyContactBody": {
+    "description": "How to contact the project about privacy"
+  },
+  "screensPrivacyMenuSubtitle": "What leaves the device and how to control your data",
+  "@screensPrivacyMenuSubtitle": {
+    "description": "Privacy policy menu subtitle"
+  },
+  "screensPrivacyViewOnline": "View online",
+  "@screensPrivacyViewOnline": {
+    "description": "Button to open the privacy policy on GitHub"
+  },
+  "screensPrivacyLinkError": "Could not open the privacy policy.",
+  "@screensPrivacyLinkError": {
+    "description": "Error shown when the online privacy policy cannot be opened"
   },
   "screensSettingsAboutAboutAppTitle": "About the App",
   "@screensSettingsAboutAboutAppTitle": {
