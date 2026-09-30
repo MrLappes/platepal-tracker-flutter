@@ -208,14 +208,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
 
   /// Determines if the dish should be updated (exists in DB) or created as new
   Future<bool> _shouldUpdateDish(String dishId) async {
-    try {
-      final existingDish = await _dishService.getDishById(dishId);
-      return existingDish != null;
-    } catch (e) {
-      debugPrint('🍽️ Error checking dish existence: $e');
-      // If we can't check, assume it's a new dish to be safe
-      return false;
-    }
+    final existingDish = await _dishService.getDishById(dishId);
+    return existingDish != null;
   }
 
   Future<void> _saveDish() async {
@@ -260,11 +254,8 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         isFavorite: _isFavorite,
         category: _selectedCategory,
       );
-      debugPrint('🍽️ Saving dish: ${dishData.name} with ID: ${dishData.id}');
+      debugPrint('🍽️ Saving dish ID: ${dishData.id}');
       debugPrint('🍽️ Dish has ${dishData.ingredients.length} ingredients');
-      debugPrint(
-        '🍽️ Dish nutrition: ${dishData.nutrition.calories} kcal',
-      ); // Determine if this is an update or create operation
       final isUpdate = await _shouldUpdateDish(dishData.id);
       if (!mounted) return;
 
@@ -301,7 +292,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      debugPrint('❌ Error saving dish: $e');
+      debugPrint('❌ Error saving dish: ${e.runtimeType}');
       if (mounted) {
         _showErrorSnackBar(
           AppLocalizations.of(context).screensDishCreateErrorSavingDish,
@@ -355,7 +346,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           ).componentsChatChatInputErrorPickingImage(e.toString()),
         );
       }
-      debugPrint('❌ Error picking image: $e');
+      debugPrint('❌ Error picking image: ${e.runtimeType}');
     }
   }
 
@@ -480,7 +471,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   Future<void> _downloadAndSetProductImage(String imageUrl) async {
     final client = http.Client();
     try {
-      debugPrint('📸 Downloading product image: $imageUrl');
+      debugPrint('📸 Downloading product image');
       final file = await downloadProductImage(
         Uri.parse(imageUrl),
         temporaryDirectory: await getTemporaryDirectory(),
@@ -496,7 +487,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         });
       }
     } catch (e) {
-      debugPrint('❌ Error downloading product image: $e');
+      debugPrint('❌ Error downloading product image: ${e.runtimeType}');
       // Don't show error to user as this is a nice-to-have feature
     } finally {
       client.close();
@@ -626,6 +617,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     final colorScheme = theme.colorScheme;
     final existingImageUrl = _existingImageUrl;
     final hasImage = _selectedImage != null || existingImageUrl != null;
+    final imageLabel = [
+      AppLocalizations.of(context).screensDishCreateImage,
+      if (_nameController.text.trim().isNotEmpty) _nameController.text.trim(),
+    ].join(': ');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -665,13 +660,22 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     borderRadius: BorderRadius.circular(4),
                     child:
                         _selectedImage != null
-                            ? Image.file(_selectedImage!, fit: BoxFit.cover)
+                            ? Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.cover,
+                              semanticLabel: imageLabel,
+                            )
                             : existingImageUrl!.startsWith('http://') ||
                                 existingImageUrl.startsWith('https://')
-                            ? Image.network(existingImageUrl, fit: BoxFit.cover)
+                            ? Image.network(
+                              existingImageUrl,
+                              fit: BoxFit.cover,
+                              semanticLabel: imageLabel,
+                            )
                             : Image.file(
                               File(existingImageUrl),
                               fit: BoxFit.cover,
+                              semanticLabel: imageLabel,
                             ),
                   ),
                 )

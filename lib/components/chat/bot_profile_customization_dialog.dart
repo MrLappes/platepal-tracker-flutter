@@ -159,40 +159,46 @@ class _BotProfileCustomizationDialogState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        GestureDetector(
+        Semantics(
+          button: true,
+          label: l10n.componentsChatBotProfileCustomizationDialogChangeAvatar,
           onTap: _pickImage,
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
-                width: 2,
+          excludeSemantics: true,
+          child: GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                  width: 2,
+                ),
               ),
+              child:
+                  _avatarUrl != null
+                      ? ClipOval(
+                        child:
+                            _avatarUrl!.startsWith('http')
+                                ? Image.network(
+                                  _avatarUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          _buildDefaultAvatar(),
+                                )
+                                : Image.file(
+                                  File(_avatarUrl!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          _buildDefaultAvatar(),
+                                ),
+                      )
+                      : _buildDefaultAvatar(),
             ),
-            child:
-                _avatarUrl != null
-                    ? ClipOval(
-                      child:
-                          _avatarUrl!.startsWith('http')
-                              ? Image.network(
-                                _avatarUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                        _buildDefaultAvatar(),
-                              )
-                              : Image.file(
-                                File(_avatarUrl!),
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                        _buildDefaultAvatar(),
-                              ),
-                    )
-                    : _buildDefaultAvatar(),
           ),
         ),
         const SizedBox(height: 12),

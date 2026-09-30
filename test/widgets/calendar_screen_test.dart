@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +42,47 @@ void main() {
       tester.getTopLeft(prompt).dy,
       lessThan(tester.getTopLeft(find.byType(MacroSummary)).dy),
     );
+  });
+
+  testWidgets('calendar navigation exposes localized button actions', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const CalendarScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final label in [
+      'Previous month',
+      'Next month',
+      'Previous page',
+      'Next page',
+    ]) {
+      expect(find.byTooltip(label), findsOneWidget);
+      expect(
+        tester.getSize(find.byTooltip(label)).height,
+        greaterThanOrEqualTo(48),
+      );
+    }
+    final today = find.bySemanticsLabel('Today');
+    expect(today, findsOneWidget);
+    expect(tester.getSemantics(today).flagsCollection.isButton, isTrue);
+    expect(
+      tester.getSemantics(today).getSemanticsData().hasAction(
+        SemanticsAction.tap,
+      ),
+      isTrue,
+    );
+    semantics.dispose();
   });
 
   testWidgets('calendar prompts when saved profile has no calorie target', (

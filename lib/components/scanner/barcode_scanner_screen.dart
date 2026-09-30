@@ -83,13 +83,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     });
 
     try {
-      debugPrint('🔍 Barcode scanned: $code');
-
       final product = await _openFoodFactsService.getProductByBarcode(code);
       if (!mounted) return;
       if (product != null && product.isValid) {
-        debugPrint('✅ Product found: ${product.name}');
-
         // Stop the camera before closing
         _controller.stop();
 
@@ -99,7 +95,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           widget.onProductFound?.call(product);
         }
       } else {
-        debugPrint('❌ Product not found for barcode: $code');
+        debugPrint('Product not found for scanned barcode');
         if (mounted) {
           setState(() {
             _errorMessage =
@@ -119,7 +115,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         }
       }
     } catch (e) {
-      debugPrint('❌ Error searching for product: $e');
+      debugPrint('❌ Error searching for product: ${e.runtimeType}');
       if (mounted) {
         setState(() {
           _errorMessage =
@@ -169,6 +165,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () {
             widget.onCancel?.call();
             Navigator.of(context).pop();

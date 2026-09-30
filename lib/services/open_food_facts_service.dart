@@ -167,7 +167,7 @@ class OpenFoodFactsService {
         '$tagParams'
         '&lc=$lc&nocache=1';
 
-    debugPrint('🔍 OFF search (page $page): $url');
+    debugPrint('🔍 OFF search page $page');
     return _fetchAndParse(url);
   }
 
@@ -207,7 +207,7 @@ class OpenFoodFactsService {
         'image_front_url,quantity,nutriments,nutrition_grades,categories_tags_en'
         '&lc=$lc&nocache=1';
 
-    debugPrint('📂 OFF browse "${category.id}" (page $page): $url');
+    debugPrint('📂 OFF browse page $page');
     return _fetchAndParse(url);
   }
 
@@ -297,7 +297,7 @@ class OpenFoodFactsService {
     } on TimeoutException {
       rethrow;
     } catch (e) {
-      debugPrint('❌ Fetch error: $e');
+      debugPrint('❌ OFF fetch error: ${e.runtimeType}');
       throw Exception('Error fetching products: $e');
     }
   }
@@ -319,7 +319,7 @@ class OpenFoodFactsService {
         rawData: productData,
       );
     } catch (e) {
-      debugPrint('Error parsing product: $e');
+      debugPrint('Error parsing product: ${e.runtimeType}');
       return null;
     }
   }

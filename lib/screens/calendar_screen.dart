@@ -98,7 +98,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (!mounted) return;
       await _handleDateSelect(_selectedDate);
     } catch (error) {
-      debugPrint('Error fetching calendar data: $error');
+      debugPrint('Error fetching calendar data: ${error.runtimeType}');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -111,9 +111,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (userProfile != null) {
         debugPrint('User profile id: ${userProfile.id}');
         debugPrint('User profile has goals');
-        debugPrint(
-          'User goals: ${userProfile.goals.targetCalories} cal, ${userProfile.goals.targetProtein}g protein',
-        );
       } else {
         debugPrint('User profile not found');
       }
@@ -123,7 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _userProfile = userProfile;
       });
     } catch (error) {
-      debugPrint('Error loading user profile: $error');
+      debugPrint('Error loading user profile: ${error.runtimeType}');
     }
   }
 
@@ -195,7 +192,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _datesWithLogs = dateGroups.expand((dates) => dates).toSet();
       });
     } catch (error) {
-      debugPrint('Error fetching dates with logs: $error');
+      debugPrint('Error fetching dates with logs: ${error.runtimeType}');
       if (!mounted || requestId != _markerRequestId) return;
       setState(() {
         _datesWithLogs = {};
@@ -241,7 +238,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _selectedDaySummary = summary;
       });
     } catch (error) {
-      debugPrint('Error loading logs for date: $error');
+      debugPrint('Error loading logs for date: ${error.runtimeType}');
       if (!mounted || requestId != _selectionRequestId) return;
       _showLoadError(
         _hasLoadedDayLogs
@@ -422,7 +419,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       if (mounted) _showAiTipDialog(response);
     } catch (error) {
-      debugPrint('Error getting AI tip: $error');
+      debugPrint('Error getting AI tip: ${error.runtimeType}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -806,6 +803,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           children: [
                             IconButton(
                               onPressed: _goToPreviousMonth,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).previousMonthTooltip,
                               icon: const Icon(Icons.chevron_left),
                             ),
                             Text(
@@ -816,6 +818,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                             IconButton(
                               onPressed: _goToNextMonth,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).nextMonthTooltip,
                               icon: const Icon(Icons.chevron_right),
                             ),
                           ],
@@ -833,41 +840,63 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           children: [
                             IconButton(
                               onPressed: _goToPreviousWeek,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).previousPageTooltip,
                               icon: const Icon(Icons.keyboard_arrow_left),
                             ),
-                            GestureDetector(
+                            Semantics(
+                              button: true,
+                              label: MaterialLocalizations.of(context).currentDateLabel,
                               onTap: _goToToday,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainer,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      size: 16,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _getWeekRangeText(),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
+                              excludeSemantics: true,
+                              child: GestureDetector(
+                                onTap: _goToToday,
+                                behavior: HitTestBehavior.opaque,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(minHeight: 48),
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.surfaceContainer,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 16,
                                             color: colorScheme.onSurfaceVariant,
                                           ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            _getWeekRangeText(),
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: colorScheme.onSurfaceVariant,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
                             IconButton(
                               onPressed: _goToNextWeek,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).nextPageTooltip,
                               icon: const Icon(Icons.keyboard_arrow_right),
                             ),
                           ],
