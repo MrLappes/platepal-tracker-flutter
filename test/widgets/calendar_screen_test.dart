@@ -111,4 +111,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
   });
+
+  testWidgets('calorie progress compares intake with its target, not burn', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: MacroSummary(
+            calories: 800,
+            protein: 10,
+            carbs: 25,
+            fat: 5,
+            calorieTarget: 2000,
+            caloriesBurned: 300,
+            isCollapsible: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('800 / 2000'), findsOneWidget);
+    final calorieBar = tester.widget<FractionallySizedBox>(
+      find
+          .descendant(
+            of: find.byType(MacroSummary),
+            matching: find.byType(FractionallySizedBox),
+          )
+          .first,
+    );
+    expect(calorieBar.widthFactor, closeTo(0.4, 0.001));
+  });
 }

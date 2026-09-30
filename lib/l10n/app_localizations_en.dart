@@ -2411,4 +2411,140 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback =>
       'Enter nutrition values to see smart analysis and recommendations.';
+
+  @override
+  String get screensSettingsProfileSettingsPhysicalStats => 'Physical Stats';
+
+  @override
+  String get screensSettingsProfileSettingsBodyFatOptional =>
+      'Body Fat % (optional)';
+
+  @override
+  String get screensSettingsProfileSettingsNameHint => 'Enter your name';
+
+  @override
+  String get screensSettingsProfileSettingsCustomizeMacroRatios =>
+      'Customize Macro Ratios';
+
+  @override
+  String get screensSettingsProfileSettingsImperialHeightRange =>
+      'Height must be between 39 and 98 inches';
+
+  @override
+  String get screensSettingsProfileSettingsImperialWeightRange =>
+      'Weight must be between 66 and 660 lbs';
+
+  @override
+  String get screensSettingsProfileSettingsValidNumber =>
+      'Please enter a valid number';
+
+  @override
+  String get screensSettingsProfileSettingsBodyFatRange =>
+      'Body fat must be between 3% and 50%';
+
+  @override
+  String get screensSettingsProfileSettingsBaseMetabolicRate =>
+      'Base Metabolic Rate';
+
+  @override
+  String get screensSettingsProfileSettingsTotalDailyEnergy =>
+      'Total Daily Energy';
+
+  @override
+  String get screensSettingsProfileSettingsResettingAppData =>
+      'Resetting application data...';
+
+  @override
+  String screensSettingsProfileSettingsLoadFailed(String error) {
+    return 'Failed to load profile data: $error';
+  }
+
+  @override
+  String screensSettingsProfileSettingsUpdateFailed(String error) {
+    return 'Failed to update profile: $error';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationDailyCalories(String calories) {
+    return 'Daily calories: $calories kcal';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationMacroRatios => 'Macro Ratios';
+
+  @override
+  String get screensSettingsMacroCustomizationFiberTarget => 'Fiber Target';
+
+  @override
+  String get screensSettingsMacroCustomizationTargetPreview => 'Target Preview';
+
+  @override
+  String get screensSettingsMacroCustomizationQuickPresets => 'Quick Presets';
+
+  @override
+  String screensSettingsMacroCustomizationTotalRatio(String value) {
+    return 'Total: $value%';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationPinMacro(String macro) {
+    return 'Pin $macro';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationUnpinMacro(String macro) {
+    return 'Unpin $macro';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationPinnedValue =>
+      'Pinned - value locked';
+
+  @override
+  String get screensSettingsMacroCustomizationTooManyPins =>
+      'Cannot adjust - too many pins active';
+
+  @override
+  String screensSettingsMacroCustomizationFiberTotal(String grams) {
+    return '$grams g total';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationFiberPer1000Calories(String grams) {
+    return '$grams g per 1000 calories';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationFiberGuidance =>
+      'Recommended: 14 g per 1000 calories (FDA guideline). Range: 5-35 g per 1000 calories';
+
+  @override
+  String get screensSettingsMacroCustomizationDailyMacroTargets =>
+      'Daily Macro Targets';
+
+  @override
+  String get screensSettingsMacroCustomizationPresetDescription =>
+      'Choose from common macro distributions';
+
+  @override
+  String get screensSettingsMacroCustomizationBalancedPreset =>
+      'Balanced (30P / 40C / 30F)';
+
+  @override
+  String get screensSettingsMacroCustomizationHighProteinPreset =>
+      'High Protein (40P / 30C / 30F)';
+
+  @override
+  String get screensSettingsMacroCustomizationProfileNotFound =>
+      'User profile not found. Please set up your profile.';
+
+  @override
+  String screensSettingsMacroCustomizationLoadFailed(String error) {
+    return 'Failed to load profile: $error';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationSaveFailed(String error) {
+    return 'Failed to save macro targets: $error';
+  }
 }

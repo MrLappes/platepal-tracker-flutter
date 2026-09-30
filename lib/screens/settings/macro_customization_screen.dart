@@ -49,11 +49,12 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       final userSessionService = UserSessionService(prefs);
       final currentUserId = userSessionService.getCurrentUserId();
       try {
-        if (!mounted) throw Exception('Widget not mounted');
+        if (!mounted) return;
         final userProfileService = context.userProfileService;
         var userProfile = await userProfileService.getUserProfile(
           currentUserId,
         );
+        if (!mounted) return;
 
         if (userProfile != null) {
           _userProfile = userProfile;
@@ -85,7 +86,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         } else {
           // Handle case where user profile does not exist
           _showErrorSnackBar(
-            'User profile not found. Please set up your profile.',
+            AppLocalizations.of(
+              context,
+            ).screensSettingsMacroCustomizationProfileNotFound,
           );
           setState(() {
             _userProfile = UserProfile(
@@ -118,13 +121,25 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
           });
         }
       } catch (e) {
-        _showErrorSnackBar('Failed to load profile: ${e.toString()}');
+        if (mounted) {
+          _showErrorSnackBar(
+            AppLocalizations.of(
+              context,
+            ).screensSettingsMacroCustomizationLoadFailed(e.toString()),
+          );
+        }
       } finally {
-        setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (error) {
-      setState(() => _isLoading = false);
-      _showErrorSnackBar('Error loading user profile: ${error.toString()}');
+      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        _showErrorSnackBar(
+          AppLocalizations.of(
+            context,
+          ).screensSettingsMacroCustomizationLoadFailed(error.toString()),
+        );
+      }
     }
   }
 
@@ -213,6 +228,16 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         return;
       }
 
+      if (pinnedCount == 1) {
+        final pinnedRatio =
+            _proteinPinned
+                ? _proteinRatio
+                : _carbsPinned
+                ? _carbsRatio
+                : _fatRatio;
+        newValue = newValue.clamp(10.0, 90.0 - pinnedRatio);
+      }
+
       if (changedMacro == 'protein') {
         _proteinRatio = newValue;
         final remainingPercentage = 100.0 - _proteinRatio;
@@ -220,17 +245,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         if (_carbsPinned && !_fatPinned) {
           // Only fat can change
           _fatRatio = remainingPercentage - _carbsRatio;
-          if (_fatRatio < 10.0) {
-            _fatRatio = 10.0;
-            _carbsRatio = remainingPercentage - _fatRatio;
-          }
         } else if (_fatPinned && !_carbsPinned) {
           // Only carbs can change
           _carbsRatio = remainingPercentage - _fatRatio;
-          if (_carbsRatio < 10.0) {
-            _carbsRatio = 10.0;
-            _fatRatio = remainingPercentage - _carbsRatio;
-          }
         } else if (!_carbsPinned && !_fatPinned) {
           // Both carbs and fat can change proportionally
           final totalOther = _carbsRatio + _fatRatio;
@@ -251,17 +268,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         if (_proteinPinned && !_fatPinned) {
           // Only fat can change
           _fatRatio = remainingPercentage - _proteinRatio;
-          if (_fatRatio < 10.0) {
-            _fatRatio = 10.0;
-            _proteinRatio = remainingPercentage - _fatRatio;
-          }
         } else if (_fatPinned && !_proteinPinned) {
           // Only protein can change
           _proteinRatio = remainingPercentage - _fatRatio;
-          if (_proteinRatio < 10.0) {
-            _proteinRatio = 10.0;
-            _fatRatio = remainingPercentage - _proteinRatio;
-          }
         } else if (!_proteinPinned && !_fatPinned) {
           // Both protein and fat can change proportionally
           final totalOther = _proteinRatio + _fatRatio;
@@ -283,17 +292,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         if (_proteinPinned && !_carbsPinned) {
           // Only carbs can change
           _carbsRatio = remainingPercentage - _proteinRatio;
-          if (_carbsRatio < 10.0) {
-            _carbsRatio = 10.0;
-            _proteinRatio = remainingPercentage - _carbsRatio;
-          }
         } else if (_carbsPinned && !_proteinPinned) {
           // Only protein can change
           _proteinRatio = remainingPercentage - _carbsRatio;
-          if (_proteinRatio < 10.0) {
-            _proteinRatio = 10.0;
-            _carbsRatio = remainingPercentage - _proteinRatio;
-          }
         } else if (!_proteinPinned && !_carbsPinned) {
           // Both protein and carbs can change proportionally
           final totalOther = _proteinRatio + _carbsRatio;
@@ -346,6 +347,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       );
 
       await context.userProfileService.saveUserProfile(updatedProfile);
+      if (!mounted) return;
 
       _userProfile = updatedProfile;
       setState(() => _hasUnsavedChanges = false);
@@ -363,9 +365,15 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to save macro targets: ${e.toString()}');
+      if (mounted) {
+        _showErrorSnackBar(
+          AppLocalizations.of(
+            context,
+          ).screensSettingsMacroCustomizationSaveFailed(e.toString()),
+        );
+      }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -428,7 +436,11 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop && _hasUnsavedChanges) {
           final shouldSave = await _showUnsavedChangesDialog();
-          if (shouldSave) {
+          if (!context.mounted) return;
+          if (shouldSave == false) {
+            setState(() => _hasUnsavedChanges = false);
+            Navigator.of(context).pop();
+          } else if (shouldSave == true) {
             await _saveChanges();
           }
         }
@@ -543,7 +555,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Daily Calories: ${_dailyCalories.toStringAsFixed(0)} kcal',
+                    l10n.screensSettingsMacroCustomizationDailyCalories(
+                      _dailyCalories.toStringAsFixed(0),
+                    ),
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
@@ -557,23 +571,35 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
           const SizedBox(height: 24),
 
           // Macro ratio sliders
-          _buildSectionHeader('Macro Ratios', theme),
+          _buildSectionHeader(
+            l10n.screensSettingsMacroCustomizationMacroRatios,
+            theme,
+          ),
           _buildMacroSliderCard(l10n, theme, colorScheme, macros),
 
           const SizedBox(height: 24),
 
           // Fiber settings
-          _buildSectionHeader('Fiber Target', theme),
+          _buildSectionHeader(
+            l10n.screensSettingsMacroCustomizationFiberTarget,
+            theme,
+          ),
           _buildFiberCard(l10n, theme, colorScheme, macros),
 
           const SizedBox(height: 24),
 
           // Preview card
-          _buildSectionHeader('Target Preview', theme),
+          _buildSectionHeader(
+            l10n.screensSettingsMacroCustomizationTargetPreview,
+            theme,
+          ),
           _buildPreviewCard(l10n, theme, colorScheme, macros),
 
           const SizedBox(height: 24), // Preset buttons
-          _buildSectionHeader('Quick Presets', theme),
+          _buildSectionHeader(
+            l10n.screensSettingsMacroCustomizationQuickPresets,
+            theme,
+          ),
           _buildPresetButtons(l10n, theme),
 
           const SizedBox(height: 80), // Extra space for bottom bar
@@ -680,10 +706,15 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                             : Colors.orange,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Total: ${(_proteinRatio + _carbsRatio + _fatRatio).toStringAsFixed(1)}%',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  Flexible(
+                    child: Text(
+                      l10n.screensSettingsMacroCustomizationTotalRatio(
+                        (_proteinRatio + _carbsRatio + _fatRatio)
+                            .toStringAsFixed(1),
+                      ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -706,6 +737,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     required VoidCallback onPinToggle,
     required String macroType,
   }) {
+    final l10n = AppLocalizations.of(context);
     // Calculate pin count to determine if slider should be disabled
     final pinnedCount =
         [_proteinPinned, _carbsPinned, _fatPinned].where((p) => p).length;
@@ -714,10 +746,14 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   label,
@@ -727,20 +763,31 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: onPinToggle,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: isPinned ? color : Colors.transparent,
-                      border: Border.all(color: color, width: 1.5),
+                IconButton(
+                  onPressed: onPinToggle,
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  tooltip:
+                      isPinned
+                          ? l10n.screensSettingsMacroCustomizationUnpinMacro(
+                            label,
+                          )
+                          : l10n.screensSettingsMacroCustomizationPinMacro(
+                            label,
+                          ),
+                  style: IconButton.styleFrom(
+                    backgroundColor: isPinned ? color : Colors.transparent,
+                    side: BorderSide(color: color, width: 1.5),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Icon(
-                      isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                      size: 16,
-                      color: isPinned ? Colors.white : color,
-                    ),
+                  ),
+                  icon: Icon(
+                    isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                    size: 16,
+                    color: isPinned ? Colors.white : color,
                   ),
                 ),
               ],
@@ -771,6 +818,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             min: 10.0,
             max: 50.0,
             divisions: 40,
+            label: label,
+            semanticFormatterCallback:
+                (newValue) => '${newValue.toStringAsFixed(1)}%',
             onChanged: isSliderDisabled ? null : onChanged,
           ),
         ),
@@ -779,8 +829,8 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               isPinned
-                  ? 'Pinned - value locked'
-                  : 'Cannot adjust - too many pins active',
+                  ? l10n.screensSettingsMacroCustomizationPinnedValue
+                  : l10n.screensSettingsMacroCustomizationTooManyPins,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: isPinned ? color : Colors.orange,
                 fontStyle: FontStyle.italic,
@@ -803,8 +853,11 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Text(
                   l10n.componentsCalendarMacroSummaryFiber,
@@ -813,7 +866,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                   ),
                 ),
                 Text(
-                  '${macros['fiber']!.toStringAsFixed(1)}g total',
+                  l10n.screensSettingsMacroCustomizationFiberTotal(
+                    macros['fiber']!.toStringAsFixed(1),
+                  ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF8b5cf6), // Purple
@@ -823,7 +878,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${_fiberPer1000Cal.toStringAsFixed(1)}g per 1000 calories',
+              l10n.screensSettingsMacroCustomizationFiberPer1000Calories(
+                _fiberPer1000Cal.toStringAsFixed(1),
+              ),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -843,6 +900,12 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 min: 5.0,
                 max: 35.0,
                 divisions: 60,
+                label: l10n.componentsCalendarMacroSummaryFiber,
+                semanticFormatterCallback:
+                    (newValue) => l10n
+                        .screensSettingsMacroCustomizationFiberPer1000Calories(
+                          newValue.toStringAsFixed(1),
+                        ),
                 onChanged: (value) {
                   setState(() {
                     _fiberPer1000Cal = value;
@@ -853,7 +916,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Recommended: 14g per 1000 calories (FDA guideline). Range: 5-35g per 1000 calories',
+              l10n.screensSettingsMacroCustomizationFiberGuidance,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
@@ -879,7 +942,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Daily Macro Targets',
+              l10n.screensSettingsMacroCustomizationDailyMacroTargets,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -889,7 +952,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               children: [
                 Expanded(
                   child: _buildMacroPreview(
-                    'Protein',
+                    l10n.componentsCalendarMacroSummaryProtein,
                     macros['protein']!,
                     'g',
                     const Color(0xFF4ade80),
@@ -898,7 +961,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 ),
                 Expanded(
                   child: _buildMacroPreview(
-                    'Carbs',
+                    l10n.componentsCalendarMacroSummaryCarbs,
                     macros['carbs']!,
                     'g',
                     const Color(0xFF3b82f6),
@@ -912,7 +975,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               children: [
                 Expanded(
                   child: _buildMacroPreview(
-                    'Fat',
+                    l10n.componentsCalendarMacroSummaryFat,
                     macros['fat']!,
                     'g',
                     const Color(0xFFf59e0b),
@@ -921,7 +984,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 ),
                 Expanded(
                   child: _buildMacroPreview(
-                    'Fiber',
+                    l10n.componentsCalendarMacroSummaryFiber,
                     macros['fiber']!,
                     'g',
                     const Color(0xFF8b5cf6),
@@ -981,7 +1044,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Choose from common macro distributions',
+              l10n.screensSettingsMacroCustomizationPresetDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -994,7 +1057,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               child: OutlinedButton.icon(
                 onPressed: _setBalancedPreset,
                 icon: const Icon(Icons.balance),
-                label: const Text('Balanced (30P / 40C / 30F)'),
+                label: Text(
+                  l10n.screensSettingsMacroCustomizationBalancedPreset,
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -1008,7 +1073,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               child: OutlinedButton.icon(
                 onPressed: _setHighProteinPreset,
                 icon: const Icon(Icons.fitness_center),
-                label: const Text('High Protein (40P / 30C / 30F)'),
+                label: Text(
+                  l10n.screensSettingsMacroCustomizationHighProteinPreset,
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -1032,7 +1099,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     );
   }
 
-  Future<bool> _showUnsavedChangesDialog() async {
+  Future<bool?> _showUnsavedChangesDialog() async {
     final l10n = AppLocalizations.of(context);
     final result = await showDialog<bool>(
       context: context,
@@ -1056,6 +1123,6 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             ],
           ),
     );
-    return result ?? false;
+    return result;
   }
 }

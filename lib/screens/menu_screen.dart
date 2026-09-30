@@ -44,7 +44,7 @@ class MenuScreen extends StatelessWidget {
                 subtitle:
                     AppLocalizations.of(context).screensMenuSetNutritionTargets,
                 icon: Icons.track_changes,
-                onTap: () => context.push('/settings/nutrition-goals'),
+                onTap: () => context.push('/settings/macro-customization'),
               ),
               _buildSettingsTile(
                 context,

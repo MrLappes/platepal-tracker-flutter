@@ -2637,5 +2637,68 @@
   "componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": "Enter nutrition values to see smart analysis and recommendations.",
   "@componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": {
     "description": "Feedback when dish nutrition needs more data"
+  },
+  "screensSettingsProfileSettingsPhysicalStats": "Physical Stats",
+  "screensSettingsProfileSettingsBodyFatOptional": "Body Fat % (optional)",
+  "screensSettingsProfileSettingsNameHint": "Enter your name",
+  "screensSettingsProfileSettingsCustomizeMacroRatios": "Customize Macro Ratios",
+  "screensSettingsProfileSettingsImperialHeightRange": "Height must be between 39 and 98 inches",
+  "screensSettingsProfileSettingsImperialWeightRange": "Weight must be between 66 and 660 lbs",
+  "screensSettingsProfileSettingsValidNumber": "Please enter a valid number",
+  "screensSettingsProfileSettingsBodyFatRange": "Body fat must be between 3% and 50%",
+  "screensSettingsProfileSettingsBaseMetabolicRate": "Base Metabolic Rate",
+  "screensSettingsProfileSettingsTotalDailyEnergy": "Total Daily Energy",
+  "screensSettingsProfileSettingsResettingAppData": "Resetting application data...",
+  "screensSettingsProfileSettingsLoadFailed": "Failed to load profile data: {error}",
+  "@screensSettingsProfileSettingsLoadFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsProfileSettingsUpdateFailed": "Failed to update profile: {error}",
+  "@screensSettingsProfileSettingsUpdateFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationDailyCalories": "Daily calories: {calories} kcal",
+  "@screensSettingsMacroCustomizationDailyCalories": {
+    "placeholders": {"calories": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationMacroRatios": "Macro Ratios",
+  "screensSettingsMacroCustomizationFiberTarget": "Fiber Target",
+  "screensSettingsMacroCustomizationTargetPreview": "Target Preview",
+  "screensSettingsMacroCustomizationQuickPresets": "Quick Presets",
+  "screensSettingsMacroCustomizationTotalRatio": "Total: {value}%",
+  "@screensSettingsMacroCustomizationTotalRatio": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationPinMacro": "Pin {macro}",
+  "@screensSettingsMacroCustomizationPinMacro": {
+    "placeholders": {"macro": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationUnpinMacro": "Unpin {macro}",
+  "@screensSettingsMacroCustomizationUnpinMacro": {
+    "placeholders": {"macro": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationPinnedValue": "Pinned - value locked",
+  "screensSettingsMacroCustomizationTooManyPins": "Cannot adjust - too many pins active",
+  "screensSettingsMacroCustomizationFiberTotal": "{grams} g total",
+  "@screensSettingsMacroCustomizationFiberTotal": {
+    "placeholders": {"grams": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationFiberPer1000Calories": "{grams} g per 1000 calories",
+  "@screensSettingsMacroCustomizationFiberPer1000Calories": {
+    "placeholders": {"grams": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationFiberGuidance": "Recommended: 14 g per 1000 calories (FDA guideline). Range: 5-35 g per 1000 calories",
+  "screensSettingsMacroCustomizationDailyMacroTargets": "Daily Macro Targets",
+  "screensSettingsMacroCustomizationPresetDescription": "Choose from common macro distributions",
+  "screensSettingsMacroCustomizationBalancedPreset": "Balanced (30P / 40C / 30F)",
+  "screensSettingsMacroCustomizationHighProteinPreset": "High Protein (40P / 30C / 30F)",
+  "screensSettingsMacroCustomizationProfileNotFound": "User profile not found. Please set up your profile.",
+  "screensSettingsMacroCustomizationLoadFailed": "Failed to load profile: {error}",
+  "@screensSettingsMacroCustomizationLoadFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationSaveFailed": "Failed to save macro targets: {error}",
+  "@screensSettingsMacroCustomizationSaveFailed": {
+    "placeholders": {"error": {"type": "String"}}
   }
 }

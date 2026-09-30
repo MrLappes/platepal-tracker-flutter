@@ -4190,6 +4190,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter nutrition values to see smart analysis and recommendations.'**
   String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback;
+
+  /// No description provided for @screensSettingsProfileSettingsPhysicalStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical Stats'**
+  String get screensSettingsProfileSettingsPhysicalStats;
+
+  /// No description provided for @screensSettingsProfileSettingsBodyFatOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Body Fat % (optional)'**
+  String get screensSettingsProfileSettingsBodyFatOptional;
+
+  /// No description provided for @screensSettingsProfileSettingsNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get screensSettingsProfileSettingsNameHint;
+
+  /// No description provided for @screensSettingsProfileSettingsCustomizeMacroRatios.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Macro Ratios'**
+  String get screensSettingsProfileSettingsCustomizeMacroRatios;
+
+  /// No description provided for @screensSettingsProfileSettingsImperialHeightRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Height must be between 39 and 98 inches'**
+  String get screensSettingsProfileSettingsImperialHeightRange;
+
+  /// No description provided for @screensSettingsProfileSettingsImperialWeightRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight must be between 66 and 660 lbs'**
+  String get screensSettingsProfileSettingsImperialWeightRange;
+
+  /// No description provided for @screensSettingsProfileSettingsValidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number'**
+  String get screensSettingsProfileSettingsValidNumber;
+
+  /// No description provided for @screensSettingsProfileSettingsBodyFatRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Body fat must be between 3% and 50%'**
+  String get screensSettingsProfileSettingsBodyFatRange;
+
+  /// No description provided for @screensSettingsProfileSettingsBaseMetabolicRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Metabolic Rate'**
+  String get screensSettingsProfileSettingsBaseMetabolicRate;
+
+  /// No description provided for @screensSettingsProfileSettingsTotalDailyEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Daily Energy'**
+  String get screensSettingsProfileSettingsTotalDailyEnergy;
+
+  /// No description provided for @screensSettingsProfileSettingsResettingAppData.
+  ///
+  /// In en, this message translates to:
+  /// **'Resetting application data...'**
+  String get screensSettingsProfileSettingsResettingAppData;
+
+  /// No description provided for @screensSettingsProfileSettingsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load profile data: {error}'**
+  String screensSettingsProfileSettingsLoadFailed(String error);
+
+  /// No description provided for @screensSettingsProfileSettingsUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile: {error}'**
+  String screensSettingsProfileSettingsUpdateFailed(String error);
+
+  /// No description provided for @screensSettingsMacroCustomizationDailyCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily calories: {calories} kcal'**
+  String screensSettingsMacroCustomizationDailyCalories(String calories);
+
+  /// No description provided for @screensSettingsMacroCustomizationMacroRatios.
+  ///
+  /// In en, this message translates to:
+  /// **'Macro Ratios'**
+  String get screensSettingsMacroCustomizationMacroRatios;
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber Target'**
+  String get screensSettingsMacroCustomizationFiberTarget;
+
+  /// No description provided for @screensSettingsMacroCustomizationTargetPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Preview'**
+  String get screensSettingsMacroCustomizationTargetPreview;
+
+  /// No description provided for @screensSettingsMacroCustomizationQuickPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Presets'**
+  String get screensSettingsMacroCustomizationQuickPresets;
+
+  /// No description provided for @screensSettingsMacroCustomizationTotalRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {value}%'**
+  String screensSettingsMacroCustomizationTotalRatio(String value);
+
+  /// No description provided for @screensSettingsMacroCustomizationPinMacro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin {macro}'**
+  String screensSettingsMacroCustomizationPinMacro(String macro);
+
+  /// No description provided for @screensSettingsMacroCustomizationUnpinMacro.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin {macro}'**
+  String screensSettingsMacroCustomizationUnpinMacro(String macro);
+
+  /// No description provided for @screensSettingsMacroCustomizationPinnedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned - value locked'**
+  String get screensSettingsMacroCustomizationPinnedValue;
+
+  /// No description provided for @screensSettingsMacroCustomizationTooManyPins.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot adjust - too many pins active'**
+  String get screensSettingsMacroCustomizationTooManyPins;
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g total'**
+  String screensSettingsMacroCustomizationFiberTotal(String grams);
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberPer1000Calories.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g per 1000 calories'**
+  String screensSettingsMacroCustomizationFiberPer1000Calories(String grams);
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: 14 g per 1000 calories (FDA guideline). Range: 5-35 g per 1000 calories'**
+  String get screensSettingsMacroCustomizationFiberGuidance;
+
+  /// No description provided for @screensSettingsMacroCustomizationDailyMacroTargets.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Macro Targets'**
+  String get screensSettingsMacroCustomizationDailyMacroTargets;
+
+  /// No description provided for @screensSettingsMacroCustomizationPresetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from common macro distributions'**
+  String get screensSettingsMacroCustomizationPresetDescription;
+
+  /// No description provided for @screensSettingsMacroCustomizationBalancedPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced (30P / 40C / 30F)'**
+  String get screensSettingsMacroCustomizationBalancedPreset;
+
+  /// No description provided for @screensSettingsMacroCustomizationHighProteinPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'High Protein (40P / 30C / 30F)'**
+  String get screensSettingsMacroCustomizationHighProteinPreset;
+
+  /// No description provided for @screensSettingsMacroCustomizationProfileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User profile not found. Please set up your profile.'**
+  String get screensSettingsMacroCustomizationProfileNotFound;
+
+  /// No description provided for @screensSettingsMacroCustomizationLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load profile: {error}'**
+  String screensSettingsMacroCustomizationLoadFailed(String error);
+
+  /// No description provided for @screensSettingsMacroCustomizationSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save macro targets: {error}'**
+  String screensSettingsMacroCustomizationSaveFailed(String error);
 }
 
 class _AppLocalizationsDelegate

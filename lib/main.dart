@@ -12,9 +12,9 @@ import 'screens/calendar_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/settings/about_screen.dart';
 import 'screens/settings/api_key_settings_screen.dart';
+import 'screens/settings/macro_customization_screen.dart';
 import 'screens/settings/profile_settings_screen.dart';
 import 'screens/settings/statistics_screen.dart';
-import 'screens/settings/nutrition_goals_screen.dart';
 import 'screens/settings/contributors_screen.dart';
 import 'screens/settings/export_data_screen.dart';
 import 'screens/settings/import_data_screen.dart';
@@ -137,8 +137,8 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const ProfileSettingsScreen(),
     ),
     GoRoute(
-      path: '/settings/nutrition-goals',
-      builder: (context, state) => const NutritionGoalsScreen(),
+      path: '/settings/macro-customization',
+      builder: (context, state) => const MacroCustomizationScreen(),
     ),
     GoRoute(
       path: '/settings/contributors',
