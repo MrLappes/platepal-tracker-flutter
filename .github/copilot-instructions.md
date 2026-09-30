@@ -9,7 +9,7 @@ This is a Flutter nutrition tracking application that helps users log meals, tra
 - **State Management**: Use Provider pattern for state management
 - **Navigation**: Use GoRouter for navigation between screens
 - **Localization**: Use Flutter's built-in internationalization with ARB files
-- **Storage**: Use SharedPreferences for local data storage
+- **Storage**: Use sqflite (SQLite) for app data, SharedPreferences for settings, flutter_secure_storage for the API key
 - **API Integration**: Prepare for GPT API integration for meal analysis
 - **Code Organization**: Follow the established folder structure with clear separation of concerns
 
@@ -40,6 +40,7 @@ This is a Flutter nutrition tracking application that helps users log meals, tra
 - `lib/repositories/`: Data access layer
 - `lib/utils/`: Helper functions and utilities
 - `lib/constants/`: App-wide constants and configuration
+- `test/`: Unit and widget tests
 
 ## Testing Guidelines
 - Write unit tests for business logic
@@ -51,7 +52,9 @@ This is a Flutter nutrition tracking application that helps users log meals, tra
 ## Dependencies
 - Provider for state management
 - GoRouter for navigation
-- SharedPreferences for local storage
+- sqflite for app data
+- SharedPreferences for settings
+- flutter_secure_storage for the API key
 - HTTP for API calls
 - flutter_gen for localization
 - CachedNetworkImage for image handling

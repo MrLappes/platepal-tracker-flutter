@@ -87,23 +87,16 @@ lib/
 │   │   ├── chat_welcome.dart
 │   │   ├── dish_suggestion_card.dart
 │   │   ├── message_bubble.dart
-│   │   ├── nutrition_analysis_card.dart
-│   │   ├── quick_actions.dart
 │   │   └── user_profile_customization_dialog.dart
 │   ├── dishes/          # Meal and dish related components
-│   │   ├── dish_card.dart
 │   │   └── dish_form/
 │   │       ├── ingredient_form_modal.dart
 │   │       └── smart_nutrition_card.dart
-│   ├── meals/           # Meal-related components
-│   │   └── meal_card.dart
 │   ├── modals/          # Shared modal dialogs
 │   │   └── dish_log_modal.dart
 │   ├── scanner/         # Barcode scanning components
 │   │   ├── barcode_scanner_screen.dart
 │   │   └── product_search_screen.dart
-│   ├── shared/          # Shared small components
-│   │   └── error_display.dart
 │   └── ui/              # Generic UI components
 │       └── custom_tab_bar.dart
 ├── constants/           # App-wide constants and configuration
@@ -117,7 +110,6 @@ lib/
 │   ├── calendar_screen.dart
 │   ├── chat_screen.dart
 │   ├── dish_create_screen.dart
-│   ├── home_screen.dart
 │   ├── meals_screen.dart
 │   ├── menu_screen.dart
 │   └── settings/
