@@ -6,6 +6,17 @@
   "@screensCalendarFailedToLoadDates": {"description": "Error loading meal markers for the visible week"},
   "screensCalendarFailedToLoadSummary": "Could not load nutrition summary",
   "@screensCalendarFailedToLoadSummary": {"description": "Error loading the selected day's nutrition summary"},
+  "screensCalendarProfileNudge": "Set up your profile to get daily targets",
+  "@screensCalendarProfileNudge": {"description": "Calendar prompt shown when there is no calorie target"},
+  "screensCalendarSetUpProfile": "Set up profile",
+  "@screensCalendarSetUpProfile": {"description": "Opens profile settings from the calendar"},
+  "screensCalendarLogMeal": "Log meal",
+  "@screensCalendarLogMeal": {"description": "Opens the calendar quick-log dish picker"},
+  "screensCalendarCaloriesPerServing": "{calories} kcal per serving",
+  "@screensCalendarCaloriesPerServing": {
+    "description": "Calories in a dish serving in the calendar picker",
+    "placeholders": {"calories": {"type": "int"}}
+  },
   "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Could not load meals for this day",
   "@componentsCalendarCalendarDayDetailErrorLoadingMeals": {
     "description": "Error shown when the selected day's meal logs cannot be loaded"

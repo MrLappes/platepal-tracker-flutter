@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/health_service.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
+import 'screens/dish_create_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/chat_screen.dart';
@@ -114,6 +115,10 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const MainNavigationScreen(),
     ),
     GoRoute(path: '/meals', builder: (context, state) => const MealsScreen()),
+    GoRoute(
+      path: '/dishes/create',
+      builder: (context, state) => const DishCreateScreenAdvanced(),
+    ),
     GoRoute(path: '/menu', builder: (context, state) => const MenuScreen()),
     GoRoute(
       path: '/calendar',

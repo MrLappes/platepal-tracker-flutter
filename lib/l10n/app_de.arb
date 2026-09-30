@@ -3,6 +3,17 @@
   "screensCalendarHasMealsLogged": "Mahlzeiten eingetragen",
   "screensCalendarFailedToLoadDates": "Kalenderdaten konnten nicht geladen werden",
   "screensCalendarFailedToLoadSummary": "Ernährungsübersicht konnte nicht geladen werden",
+  "screensCalendarProfileNudge": "Profil einrichten, um Tagesziele zu erhalten",
+  "@screensCalendarProfileNudge": {"description": "Kalenderhinweis ohne Kalorienziel"},
+  "screensCalendarSetUpProfile": "Profil einrichten",
+  "@screensCalendarSetUpProfile": {"description": "Öffnet die Profileinstellungen vom Kalender aus"},
+  "screensCalendarLogMeal": "Mahlzeit eintragen",
+  "@screensCalendarLogMeal": {"description": "Öffnet die Gerichteauswahl im Kalender"},
+  "screensCalendarCaloriesPerServing": "{calories} kcal pro Portion",
+  "@screensCalendarCaloriesPerServing": {
+    "description": "Kalorien pro Portion in der Gerichteauswahl",
+    "placeholders": {"calories": {"type": "int"}}
+  },
   "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Mahlzeiten konnten nicht geladen werden",
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "Keine Mahlzeiten für diesen Tag protokolliert",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {

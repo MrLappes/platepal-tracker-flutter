@@ -35,6 +35,22 @@ class DishService {
     return dishes;
   }
 
+  /// Most recent local log time for each dish in the meal ledger.
+  Future<Map<String, DateTime>> getLastLoggedAtByDish() async {
+    final db = await _databaseService.database;
+    final rows = await db.rawQuery('''
+      SELECT dish_id, MAX(logged_at) AS last_logged_at
+      FROM dish_logs
+      GROUP BY dish_id
+    ''');
+    return {
+      for (final row in rows)
+        row['dish_id'] as String: DateTime.parse(
+          row['last_logged_at'] as String,
+        ),
+    };
+  }
+
   // Get dish by ID
   Future<Dish?> getDishById(String id) async {
     final db = await _databaseService.database;
@@ -56,9 +72,7 @@ class DishService {
   Future<Dish> _getDishWithRelations(Map<String, dynamic> dishMap) async {
     final db = await _databaseService.database;
     final String dishId = dishMap['id'] as String;
-    debugPrint(
-      '🔍 _getDishWithRelations: Building dish with id: $dishId',
-    );
+    debugPrint('🔍 _getDishWithRelations: Building dish with id: $dishId');
     // Get nutrition info
     final List<Map<String, dynamic>> nutritionMaps = await db.query(
       'dish_nutrition',
@@ -164,9 +178,7 @@ class DishService {
 
   // Save a new dish
   Future<Dish> saveDish(Dish dish) async {
-    debugPrint(
-      '🍽️ DishService: Starting to save dish ID: ${dish.id}',
-    );
+    debugPrint('🍽️ DishService: Starting to save dish ID: ${dish.id}');
     final db = await _databaseService.database;
 
     await db.transaction((txn) async {

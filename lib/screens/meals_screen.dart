@@ -214,13 +214,16 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: "meals_fab", // Unique hero tag to avoid conflicts
-        onPressed: _createNewDish,
-        tooltip: localizations.screensDishCreateCreateDish,
-        icon: const Icon(Icons.add),
-        label: Text(localizations.screensDishCreateCreateDish),
-      ),
+      floatingActionButton:
+          !_isLoading && _error == null && _dishes.isEmpty
+              ? null
+              : FloatingActionButton.extended(
+                heroTag: "meals_fab", // Unique hero tag to avoid conflicts
+                onPressed: _createNewDish,
+                tooltip: localizations.screensDishCreateCreateDish,
+                icon: const Icon(Icons.add),
+                label: Text(localizations.screensDishCreateCreateDish),
+              ),
     );
   }
 

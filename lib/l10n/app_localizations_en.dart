@@ -20,6 +20,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not load nutrition summary';
 
   @override
+  String get screensCalendarProfileNudge =>
+      'Set up your profile to get daily targets';
+
+  @override
+  String get screensCalendarSetUpProfile => 'Set up profile';
+
+  @override
+  String get screensCalendarLogMeal => 'Log meal';
+
+  @override
+  String screensCalendarCaloriesPerServing(int calories) {
+    return '$calories kcal per serving';
+  }
+
+  @override
   String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
       'Could not load meals for this day';
 

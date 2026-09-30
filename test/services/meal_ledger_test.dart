@@ -127,6 +127,29 @@ void main() {
       expect(logs.single.notes, 'with honey');
     });
 
+    test('recent dish log times use the newest log for each dish', () async {
+      await dishService.saveDish(_dish());
+      await dishService.saveDish(_dish(id: 'eggs', name: 'Eggs'));
+      for (final (dishId, day) in [('oats', 19), ('oats', 21), ('eggs', 20)]) {
+        await dishService.insertDishLogSnapshot(
+          dishId: dishId,
+          loggedAt: DateTime(2026, 9, day, 12),
+          mealType: 'lunch',
+          servingSize: 1,
+          calories: 200,
+          protein: 10,
+          carbs: 30,
+          fat: 5,
+        );
+      }
+
+      final recent = await dishService.getLastLoggedAtByDish();
+      expect(recent, {
+        'oats': DateTime(2026, 9, 21, 12),
+        'eggs': DateTime(2026, 9, 20, 12),
+      });
+    });
+
     test(
       'daily nutrition totals group local ledger days in a half-open range',
       () async {

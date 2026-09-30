@@ -12,8 +12,9 @@ DateTime combineMealDateAndTime(DateTime date, TimeOfDay time) {
 
 class DishLogModal extends StatefulWidget {
   final Dish dish;
+  final DateTime? initialDate;
 
-  const DishLogModal({super.key, required this.dish});
+  const DishLogModal({super.key, required this.dish, this.initialDate});
 
   @override
   State<DishLogModal> createState() => _DishLogModalState();
@@ -39,7 +40,14 @@ class _DishLogModalState extends State<DishLogModal> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = DateTime.now();
+    final now = DateTime.now();
+    _selectedDate =
+        widget.initialDate == null
+            ? now
+            : combineMealDateAndTime(
+              widget.initialDate!,
+              TimeOfDay.fromDateTime(now),
+            );
     _selectedMealType = defaultMealTypeForTime(_selectedDate).toJsonValue();
   }
 

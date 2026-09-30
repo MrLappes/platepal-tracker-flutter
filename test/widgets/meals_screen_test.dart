@@ -36,7 +36,7 @@ void main() {
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.actions, anyOf(isNull, isEmpty));
     expect(find.byIcon(Icons.refresh), findsNothing);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
     expect(find.text('Create Dish'), findsWidgets);
 
     final scrollViews = tester.widgetList<CustomScrollView>(

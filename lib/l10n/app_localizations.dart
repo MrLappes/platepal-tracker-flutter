@@ -118,6 +118,30 @@ abstract class AppLocalizations {
   /// **'Could not load nutrition summary'**
   String get screensCalendarFailedToLoadSummary;
 
+  /// Calendar prompt shown when there is no calorie target
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your profile to get daily targets'**
+  String get screensCalendarProfileNudge;
+
+  /// Opens profile settings from the calendar
+  ///
+  /// In en, this message translates to:
+  /// **'Set up profile'**
+  String get screensCalendarSetUpProfile;
+
+  /// Opens the calendar quick-log dish picker
+  ///
+  /// In en, this message translates to:
+  /// **'Log meal'**
+  String get screensCalendarLogMeal;
+
+  /// Calories in a dish serving in the calendar picker
+  ///
+  /// In en, this message translates to:
+  /// **'{calories} kcal per serving'**
+  String screensCalendarCaloriesPerServing(int calories);
+
   /// Error shown when the selected day's meal logs cannot be loaded
   ///
   /// In en, this message translates to:

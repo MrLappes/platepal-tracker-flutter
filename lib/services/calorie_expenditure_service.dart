@@ -15,11 +15,16 @@ class CalorieExpenditureService {
   final HealthService _healthService = HealthService();
   late final UserProfileRepository _userProfileRepository;
   Future<void>? _initialization;
+  bool _isInitialized = false;
 
   /// Initialize the service with required dependencies.
   ///
   /// Concurrent callers share one initialization.
-  Future<void> initialize() => _initialization ??= _initialize();
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+    await (_initialization ??= _initialize());
+    _isInitialized = true;
+  }
 
   Future<void> _initialize() async {
     try {
