@@ -1,0 +1,15 @@
+PlatePal Tracker is a local-first nutrition diary for the meals you actually eat. Log your dishes, review your goals and keep your data under your control.
+
+- Create your own dishes with ingredients and log breakfast, lunch, dinner or snacks.
+- Scan a barcode or search Open Food Facts for products and their nutrition data.
+- Browse your calendar diary, compare each day's calories and macros with your targets, and tap Log meal to add a meal to that day.
+- Set calorie and macro targets from your profile using the Mifflin-St Jeor formula; adjust your macro split to suit you.
+- View weight trends and calorie history in statistics.
+- Optionally ask the AI chat assistant for dish suggestions with your own OpenAI or OpenAI-compatible API key. Your key is kept in secure storage.
+- With your permission, connect Health Connect on Android or Apple Health on iOS to read calories burned and write logged meal nutrition.
+- Export or import your data in JSON or CSV. The app backs up your data before importing so you can undo; if a backup fails, it asks whether to continue without one.
+- Choose English, Spanish or German and a light, dark or system theme.
+
+No account, ads or tracking. Meals and profile data are stored on your device. Product searches contact Open Food Facts; using AI sends chat data and relevant context to the provider you choose. Health data access is optional. Details are in the app's privacy policy.
+
+Open source under GPL-2.0. Nutrition information and AI suggestions are not medical advice.
