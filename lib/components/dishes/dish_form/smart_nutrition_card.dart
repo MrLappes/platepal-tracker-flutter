@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import '../../../utils/number_parsing.dart';
 
 class SmartNutritionCard extends StatefulWidget {
@@ -178,6 +179,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final macroColors = MacroColors.of(context);
     final l10n = AppLocalizations.of(context);
 
     return Container(
@@ -294,7 +296,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                 suffix:
                                     l10n.componentsDishesDishFormIngredientFormModalKcal,
                                 icon: Icons.local_fire_department_outlined,
-                                color: Colors.orange,
+                                color: macroColors.calories,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -305,7 +307,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                 suffix:
                                     l10n.componentsDishesDishFormIngredientFormModalGrams,
                                 icon: Icons.grass_outlined,
-                                color: Colors.green,
+                                color: macroColors.fiber,
                               ),
                             ),
                           ],
@@ -331,7 +333,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                           suffix:
                                               l10n.componentsDishesDishFormIngredientFormModalGrams,
                                           icon: Icons.fitness_center_outlined,
-                                          color: Colors.blue,
+                                          color: macroColors.protein,
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -343,7 +345,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                           suffix:
                                               l10n.componentsDishesDishFormIngredientFormModalGrams,
                                           icon: Icons.grain_outlined,
-                                          color: Colors.amber,
+                                          color: macroColors.carbs,
                                         ),
                                       ),
                                     ],
@@ -359,7 +361,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                           suffix:
                                               l10n.componentsDishesDishFormIngredientFormModalGrams,
                                           icon: Icons.water_drop_outlined,
-                                          color: Colors.teal,
+                                          color: macroColors.fat,
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -381,7 +383,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.fitness_center_outlined,
-                                      color: Colors.blue,
+                                      color: macroColors.protein,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -393,7 +395,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.grain_outlined,
-                                      color: Colors.amber,
+                                      color: macroColors.carbs,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -405,7 +407,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.water_drop_outlined,
-                                      color: Colors.teal,
+                                      color: macroColors.fat,
                                     ),
                                   ),
                                 ],
@@ -496,7 +498,7 @@ class _SmartNutritionCardState extends State<SmartNutritionCard>
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
-            suffixStyle: TextStyle(color: color.withValues(alpha: 0.7)),
+            suffixStyle: TextStyle(color: color),
             prefixIcon: Icon(icon, size: 18, color: color),
             filled: true,
             fillColor: colorScheme.surfaceContainer,

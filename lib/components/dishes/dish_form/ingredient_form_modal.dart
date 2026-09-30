@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import '../../../models/dish.dart';
 import '../../../models/product.dart';
 import '../../../utils/number_parsing.dart';
@@ -135,6 +136,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final macroColors = MacroColors.of(context);
     final mediaQuery = MediaQuery.of(context);
 
     return Container(
@@ -337,7 +339,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             suffix:
                                 l10n.componentsDishesDishFormIngredientFormModalKcal,
                             icon: Icons.local_fire_department_outlined,
-                            color: Colors.orange,
+                            color: macroColors.calories,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -348,7 +350,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             suffix:
                                 l10n.componentsDishesDishFormIngredientFormModalGrams,
                             icon: Icons.grass_outlined,
-                            color: Colors.green,
+                            color: macroColors.fiber,
                           ),
                         ),
                       ],
@@ -374,7 +376,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.fitness_center_outlined,
-                                      color: Colors.blue,
+                                      color: macroColors.protein,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -386,7 +388,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.grain_outlined,
-                                      color: Colors.amber,
+                                      color: macroColors.carbs,
                                     ),
                                   ),
                                 ],
@@ -402,7 +404,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.water_drop_outlined,
-                                      color: Colors.teal,
+                                      color: macroColors.fat,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -424,7 +426,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   suffix:
                                       l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.fitness_center_outlined,
-                                  color: Colors.blue,
+                                  color: macroColors.protein,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -436,7 +438,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   suffix:
                                       l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.grain_outlined,
-                                  color: Colors.amber,
+                                  color: macroColors.carbs,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -447,7 +449,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   suffix:
                                       l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.water_drop_outlined,
-                                  color: Colors.teal,
+                                  color: macroColors.fat,
                                 ),
                               ),
                             ],
@@ -603,7 +605,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
-            suffixStyle: TextStyle(color: color.withValues(alpha: 0.7)),
+            suffixStyle: TextStyle(color: color),
             prefixIcon: Icon(icon, size: 18, color: color),
             filled: true,
             fillColor: colorScheme.surfaceContainer,
@@ -781,7 +783,9 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       ? colorScheme.onPrimary
                                       : colorScheme.onSurfaceVariant,
                               fontWeight:
-                                  isSelected ? FontWeight.w600 : FontWeight.w500,
+                                  isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
                               fontSize: 12,
                             ),
                           ),
