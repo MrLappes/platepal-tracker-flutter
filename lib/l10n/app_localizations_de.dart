@@ -1470,6 +1470,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'API-Schlüssel konnte nicht entfernt werden';
 
   @override
+  String get screensSettingsApiKeySettingsInvalidBaseUrl =>
+      'Die Basis-URL muss mit https:// beginnen (http:// ist nur für localhost erlaubt)';
+
+  @override
   String get screensSettingsApiKeySettingsGetApiKeyFromOpenAi =>
       'API-Schlüssel von OpenAI holen';
 
@@ -1665,6 +1669,342 @@ class AppLocalizationsDe extends AppLocalizations {
       'Duplikate überspringen';
 
   @override
+  String get screensSettingsExportDataPreparing =>
+      'Deine Daten werden vorbereitet...';
+
+  @override
+  String get screensSettingsExportDataPreview => 'Exportvorschau';
+
+  @override
+  String screensSettingsExportDataFormatLabel(String format) {
+    return 'Format: $format';
+  }
+
+  @override
+  String screensSettingsExportDataTypesSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Bereiche',
+      one: '1 Bereich',
+    );
+    return 'Ausgewählte Datenbereiche: $_temp0';
+  }
+
+  @override
+  String get screensSettingsExportDataReady => 'Bereit zum Exportieren';
+
+  @override
+  String get screensSettingsExportDataDishesDescription =>
+      'Deine gespeicherten Rezepte und Gerichte';
+
+  @override
+  String get screensSettingsExportDataMealLogsDescription =>
+      'Deine Mahlzeitenhistorie und Ernährungsprotokolle';
+
+  @override
+  String get screensSettingsExportDataUserProfilesDescription =>
+      'Benutzerprofil und Einstellungen';
+
+  @override
+  String get screensSettingsExportDataIngredientsDescription =>
+      'Zutatendatenbank';
+
+  @override
+  String get screensSettingsExportDataSupplementsDescription =>
+      'Daten zur Erfassung von Nahrungsergänzungsmitteln';
+
+  @override
+  String get screensSettingsExportDataFitnessGoalsDescription =>
+      'Fitness- und Ernährungsziele';
+
+  @override
+  String get screensSettingsExportDataAllDataDescription =>
+      'Alle deine Daten exportieren';
+
+  @override
+  String get screensSettingsExportDataFormatTitle => 'Exportformat';
+
+  @override
+  String get screensSettingsExportDataJsonDescription =>
+      'Strukturiertes Format, ideal für Sicherungen';
+
+  @override
+  String get screensSettingsExportDataCsvDescription =>
+      'Tabellenformat, gut für Auswertungen';
+
+  @override
+  String get screensSettingsExportDataError => 'Exportfehler';
+
+  @override
+  String get screensSettingsExportDataResults => 'Exportergebnis';
+
+  @override
+  String screensSettingsExportDataFileLabel(String fileName) {
+    return 'Datei: $fileName';
+  }
+
+  @override
+  String screensSettingsExportDataLocationLabel(String path) {
+    return 'Speicherort: $path';
+  }
+
+  @override
+  String get screensSettingsExportDataItemsExported => 'Exportierte Einträge:';
+
+  @override
+  String get screensSettingsExportDataShare => 'Teilen';
+
+  @override
+  String get screensSettingsExportDataShowFileLocation =>
+      'Dateispeicherort anzeigen';
+
+  @override
+  String get screensSettingsExportDataLocationTitle =>
+      'Speicherort des Exports';
+
+  @override
+  String get screensSettingsExportDataLocationDescription =>
+      'Deine exportierte Datei liegt hier:';
+
+  @override
+  String get screensSettingsExportDataNoFileToShare =>
+      'Keine Datei zum Teilen vorhanden. Exportiere zuerst deine Daten.';
+
+  @override
+  String get screensSettingsExportDataFileNotFound =>
+      'Exportdatei nicht gefunden. Exportiere deine Daten erneut.';
+
+  @override
+  String screensSettingsExportDataShareFailed(String error) {
+    return 'Datei konnte nicht geteilt werden: $error';
+  }
+
+  @override
+  String screensSettingsExportDataShareText(String fileName) {
+    return 'PlatePal-Datenexport - $fileName';
+  }
+
+  @override
+  String get screensSettingsExportDataShareSubject => 'PlatePal-Datenexport';
+
+  @override
+  String screensSettingsExportDataFailedDetail(String error) {
+    return 'Export fehlgeschlagen: $error';
+  }
+
+  @override
+  String get screensSettingsImportDataRestoring =>
+      'Sicherung wird wiederhergestellt...';
+
+  @override
+  String screensSettingsImportDataProcessingItems(int current, int total) {
+    return '$current von $total Einträgen werden verarbeitet';
+  }
+
+  @override
+  String screensSettingsImportDataCurrentType(String type) {
+    return 'Aktuell: $type';
+  }
+
+  @override
+  String get screensSettingsImportDataUndoing =>
+      'Letzter Import wird rückgängig gemacht...';
+
+  @override
+  String get screensSettingsImportDataFileSelection => 'Dateiauswahl';
+
+  @override
+  String get screensSettingsImportDataRemoveFile =>
+      'Ausgewählte Datei entfernen';
+
+  @override
+  String get screensSettingsImportDataChangeFile => 'Datei wechseln';
+
+  @override
+  String get screensSettingsImportDataSupportedFormats =>
+      'Unterstützte Formate: JSON, CSV';
+
+  @override
+  String get screensSettingsImportDataAllDataDescription =>
+      'Alles aus der Datei importieren';
+
+  @override
+  String get screensSettingsImportDataSkipDescription =>
+      'Vorhandene Daten behalten; importierte Duplikate überspringen';
+
+  @override
+  String get screensSettingsImportDataOverwriteDescription =>
+      'Vorhandene Daten durch importierte Daten ersetzen';
+
+  @override
+  String get screensSettingsImportDataAdvancedOptions => 'Erweiterte Optionen';
+
+  @override
+  String get screensSettingsImportDataValidateBeforeImport =>
+      'Daten vor dem Import prüfen';
+
+  @override
+  String get screensSettingsImportDataValidateDescription =>
+      'Datenintegrität prüfen und Warnungen anzeigen';
+
+  @override
+  String get screensSettingsImportDataBackupBeforeImport =>
+      'Sicherung vor dem Import erstellen';
+
+  @override
+  String get screensSettingsImportDataBackupDescription =>
+      'Vorhandene Daten automatisch sichern';
+
+  @override
+  String get screensSettingsImportDataIssues => 'Importprobleme';
+
+  @override
+  String get screensSettingsImportDataDetailedErrors => 'Fehler im Detail:';
+
+  @override
+  String get screensSettingsImportDataResults => 'Importergebnis';
+
+  @override
+  String get screensSettingsImportDataPartialResults =>
+      'Import mit übersprungenen Einträgen abgeschlossen';
+
+  @override
+  String screensSettingsImportDataImportedSkipped(int imported, int skipped) {
+    return 'Importiert: $imported, übersprungen: $skipped';
+  }
+
+  @override
+  String get screensSettingsImportDataShowReasons => 'Gründe anzeigen';
+
+  @override
+  String screensSettingsImportDataFailedSection(String section) {
+    return 'Fehlgeschlagener Bereich: $section';
+  }
+
+  @override
+  String get screensSettingsImportDataConfirmTitle => 'Import bestätigen';
+
+  @override
+  String get screensSettingsImportDataSelectedSections =>
+      'Ausgewählte Bereiche:';
+
+  @override
+  String screensSettingsImportDataDuplicatesLabel(String strategy) {
+    return 'Duplikate: $strategy';
+  }
+
+  @override
+  String get screensSettingsImportDataConfirmAction => 'Importieren';
+
+  @override
+  String get screensSettingsImportDataBackupFailedTitle =>
+      'Sicherung fehlgeschlagen';
+
+  @override
+  String get screensSettingsImportDataBackupFailedDescription =>
+      'Die automatische Sicherung konnte nicht erstellt werden. Import ohne Sicherung fortsetzen?';
+
+  @override
+  String get screensSettingsImportDataContinueWithoutBackup =>
+      'Ohne Sicherung fortfahren';
+
+  @override
+  String screensSettingsImportDataFileSelectionFailed(String error) {
+    return 'Fehler bei der Dateiauswahl: $error';
+  }
+
+  @override
+  String screensSettingsImportDataCompletedWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Import mit $count Fehlern abgeschlossen',
+      one: 'Import mit 1 Fehler abgeschlossen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensSettingsImportDataFailedDetail(String error) {
+    return 'Import fehlgeschlagen: $error';
+  }
+
+  @override
+  String get screensSettingsImportDataBackupAvailable => 'Sicherung verfügbar';
+
+  @override
+  String get screensSettingsImportDataBackupAvailableDescription =>
+      'Eine Sicherung deines letzten Imports ist verfügbar.';
+
+  @override
+  String screensSettingsImportDataBackupCreated(String date) {
+    return 'Erstellt: $date';
+  }
+
+  @override
+  String screensSettingsImportDataBackupSize(String size) {
+    return 'Größe: $size KB';
+  }
+
+  @override
+  String get screensSettingsImportDataUndoLastImport =>
+      'Letzten Import rückgängig machen';
+
+  @override
+  String screensSettingsImportDataMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'vor $count Minuten',
+      one: 'vor 1 Minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensSettingsImportDataHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'vor $count Stunden',
+      one: 'vor 1 Stunde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensSettingsImportDataDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'vor $count Tagen',
+      one: 'vor 1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get screensSettingsImportDataRestoreTitle =>
+      'Aus Sicherung wiederherstellen';
+
+  @override
+  String get screensSettingsImportDataRestoreWarning =>
+      'Deine Daten werden auf den Stand vor dem letzten Import zurückgesetzt. Alle Änderungen seitdem gehen verloren. Bist du sicher?';
+
+  @override
+  String get screensSettingsImportDataRestoreAction => 'Wiederherstellen';
+
+  @override
+  String get screensSettingsImportDataRestoreSuccess =>
+      'Sicherung erfolgreich wiederhergestellt!';
+
+  @override
+  String screensSettingsImportDataRestoreFailedDetail(String error) {
+    return 'Wiederherstellung fehlgeschlagen: $error';
+  }
+
+  @override
   String get screensSettingsImportProfileCompletionActivityLevel =>
       'Aktivitätslevel';
 
@@ -1678,12 +2018,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get screensSettingsImportProfileCompletionBuildMuscle =>
       'Muskeln aufbauen';
-
-  @override
-  String get screensSettingsImportProfileCompletionCm => 'cm';
-
-  @override
-  String get screensSettingsImportProfileCompletionEmail => 'E-Mail';
 
   @override
   String get screensSettingsImportProfileCompletionExtraActive =>
@@ -1712,19 +2046,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get screensSettingsImportProfileCompletionImperial =>
       'Imperial (lb, ft)';
-
-  @override
-  String get screensSettingsImportProfileCompletionInches => 'in';
-
-  @override
-  String get screensSettingsImportProfileCompletionInvalidEmail =>
-      'Bitte geben Sie eine gültige E-Mail-Adresse ein';
-
-  @override
-  String get screensSettingsImportProfileCompletionKg => 'kg';
-
-  @override
-  String get screensSettingsImportProfileCompletionLb => 'lb';
 
   @override
   String get screensSettingsImportProfileCompletionLightlyActive =>
@@ -1779,9 +2100,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get screensSettingsImportProfileCompletionWeightRange =>
       'Das Gewicht muss zwischen 30-300 kg liegen';
-
-  @override
-  String get screensSettingsImportProfileCompletionYears => 'Jahre';
 
   @override
   String get screensSettingsMacroCustomizationDiscardChanges =>
