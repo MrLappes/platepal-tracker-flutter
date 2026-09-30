@@ -48,21 +48,6 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
     }
   }
 
-  // Add a method to refresh when screen becomes visible
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Refresh dishes every time dependencies change (e.g., when coming back to this screen)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        debugPrint(
-          '🔄 MealsScreen: Dependencies changed, refreshing dishes...',
-        );
-        _loadDishes();
-      }
-    });
-  }
-
   Future<void> _loadDishes() async {
     if (!mounted) return;
     debugPrint('🔄 MealsScreen: Loading dishes...');

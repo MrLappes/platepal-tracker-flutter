@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -67,6 +68,31 @@ void main() {
     );
     expect(find.text('Set up your profile to get daily targets'), findsNothing);
     expect(find.widgetWithText(TextButton, 'Retry'), findsOneWidget);
+  });
+
+  testWidgets('AI tip configuration failure shows the localized error', (
+    tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'openai_compatibility_mode': 'invalid',
+    });
+    await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const CalendarScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    tester.widget<MacroSummary>(find.byType(MacroSummary)).onAiTipPressed!();
+  await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Failed to get AI tip. Please try again.'), findsOneWidget);
   });
 
   testWidgets('calendar navigation exposes localized button actions', (
