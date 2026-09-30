@@ -68,6 +68,7 @@ class PlatePalApp extends StatelessWidget {
     return Consumer2<LocaleProvider, ThemeProvider>(
       builder: (context, localeProvider, themeProvider, child) {
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           onGenerateTitle:
               (context) => AppLocalizations.of(context).screensHomeAppTitle,
           theme: themeProvider.lightTheme,
