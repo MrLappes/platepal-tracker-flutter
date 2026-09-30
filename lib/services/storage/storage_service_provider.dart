@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/dish.dart';
+import '../secure_key_store.dart';
 import 'database_service.dart';
 import 'dish_service.dart';
 import 'user_profile_service.dart';
@@ -58,6 +59,9 @@ class StorageServiceProvider extends ChangeNotifier {
   /// Completely resets all application data including database and SharedPreferences
   Future<void> resetAllData() async {
     try {
+      // The API key lives outside SharedPreferences, so prefs.clear() misses it.
+      await SecureKeyStore.deleteApiKey();
+
       // Close existing database connections
       await closeDatabase();
 

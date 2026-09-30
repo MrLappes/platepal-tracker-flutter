@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../services/chat/openai_service.dart';
+import '../../services/secure_key_store.dart';
 
 class ApiKeySettingsScreen extends StatefulWidget {
   const ApiKeySettingsScreen({super.key});
@@ -31,17 +33,28 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   String? _modelError;
   List<OpenAIModel> _availableModels = [];
 
+  Timer? _modelFetchDebounce;
+  // Incremented per fetch so a slow, older response can't overwrite a newer one.
+  int _modelFetchGeneration = 0;
+
   @override
   void initState() {
     super.initState();
-    _loadApiKey();
-    _loadCompatibilitySettings();
     _loadDefaultModels();
-    _loadSelectedModel();
+    _loadSettings();
+  }
+
+  // Compatibility settings must be known before the saved key is used to
+  // fetch models, or a custom-endpoint key would be sent to api.openai.com.
+  Future<void> _loadSettings() async {
+    await _loadCompatibilitySettings();
+    await _loadSelectedModel();
+    await _loadApiKey();
   }
 
   @override
   void dispose() {
+    _modelFetchDebounce?.cancel();
     _apiKeyController.dispose();
     _customUrlController.dispose();
     _customModelController.dispose();
@@ -50,8 +63,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
   Future<void> _loadApiKey() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final apiKey = prefs.getString('openai_api_key');
+      final apiKey = await SecureKeyStore.readApiKey();
+      if (!mounted) return;
       if (apiKey != null && apiKey.isNotEmpty) {
         setState(() {
           _apiKeyController.text = apiKey;
@@ -60,11 +73,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
         // Load available models for existing API key
         await _fetchAvailableModels(apiKey);
-        // After models are loaded, reload selected model
-        await _loadSelectedModel();
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(
         localizations.screensSettingsApiKeySettingsFailedToLoadApiKey,
@@ -74,6 +85,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
   Future<void> _loadSelectedModel() async {
     final model = await _openAIService.getSelectedModel();
+    if (!mounted) return;
     setState(() {
       _selectedModel = model;
       // Ensure the selected model is in the available models list
@@ -89,6 +101,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       final isCompatibility = await _openAIService.getIsCompatibilityMode();
       final customUrl = await _openAIService.getCustomBaseUrl();
       final customModel = await _openAIService.getCustomModel();
+      if (!mounted) return;
 
       setState(() {
         _isCompatibilityMode = isCompatibility;
@@ -96,7 +109,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         _customModelController.text = customModel ?? '';
       });
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(
         localizations.screensSettingsApiKeySettingsFailedToLoadApiKey,
@@ -115,8 +128,25 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     });
   }
 
+  void _scheduleModelFetch(String apiKey) {
+    _modelFetchDebounce?.cancel();
+    // The key changed, so any in-flight response belongs to an old key.
+    _modelFetchGeneration++;
+    if (_isLoadingModels) setState(() => _isLoadingModels = false);
+    if (apiKey.trim().length < 30) return;
+    _modelFetchDebounce = Timer(
+      const Duration(milliseconds: 600),
+      () => _fetchAvailableModels(apiKey),
+    );
+  }
+
   Future<void> _fetchAvailableModels(String apiKey) async {
     if (apiKey.trim().length < 30) return; // Only try if key looks valid
+    // The model list is only shown for the official API.
+    if (_isCompatibilityMode) return;
+
+    final generation = ++_modelFetchGeneration;
+    bool isStale() => generation != _modelFetchGeneration;
 
     setState(() {
       _isLoadingModels = true;
@@ -124,12 +154,8 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     });
 
     try {
-      final customUrl =
-          _isCompatibilityMode ? _customUrlController.text.trim() : null;
-      final models = await _openAIService.getAvailableModels(
-        apiKey,
-        customBaseUrl: customUrl,
-      );
+      final models = await _openAIService.getAvailableModels(apiKey);
+      if (!mounted || isStale()) return;
       setState(() {
         _availableModels = models;
 
@@ -141,7 +167,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       // After models are loaded, reload selected model
       await _loadSelectedModel();
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted || isStale()) return;
       final localizations = AppLocalizations.of(context);
       setState(() {
         _modelError =
@@ -149,9 +175,11 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         _availableModels = _openAIService.getDefaultModels();
       });
     } finally {
-      setState(() {
-        _isLoadingModels = false;
-      });
+      if (mounted && !isStale()) {
+        setState(() {
+          _isLoadingModels = false;
+        });
+      }
     }
   }
 
@@ -211,17 +239,20 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         modelToTest,
         customBaseUrl: customUrl,
       );
+      if (!mounted) return;
 
       if (!testResult.success) {
         setState(() {
-          _errorMessage = testResult.message;
+          _errorMessage =
+              testResult.failure == OpenAIFailure.invalidBaseUrl
+                  ? _invalidBaseUrlMessage
+                  : testResult.message;
         });
         return;
       }
 
       // If successful, save all settings
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('openai_api_key', apiKey);
+      await SecureKeyStore.writeApiKey(apiKey);
       await _openAIService.setIsCompatibilityMode(_isCompatibilityMode);
 
       if (_isCompatibilityMode) {
@@ -230,26 +261,28 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       } else {
         await _openAIService.setSelectedModel(_selectedModel);
       }
+      if (!mounted) return;
 
       setState(() {
         _hasApiKey = true;
       });
 
-      if (mounted) {
-        final localizations = AppLocalizations.of(context);
-        _showSuccessDialog(
-          localizations.screensSettingsApiKeySettingsApiKeySavedSuccessfully,
-          testResult.message,
-        );
-      }
+      final localizations = AppLocalizations.of(context);
+      _showSuccessDialog(
+        localizations.screensSettingsApiKeySettingsApiKeySavedSuccessfully,
+        testResult.message,
+      );
     } catch (error) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = error.toString();
+        _errorMessage = OpenAIService.redactSecrets(error.toString(), apiKey);
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -260,18 +293,18 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       localizations.screensSettingsApiKeySettingsRemoveApiKeyConfirmation,
     );
 
-    if (!confirm) return;
+    if (!confirm || !mounted) return;
 
     setState(() => _isLoading = true);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('openai_api_key');
+      await SecureKeyStore.deleteApiKey();
 
       // Also clear compatibility mode settings
       await _openAIService.setIsCompatibilityMode(false);
       await _openAIService.setCustomBaseUrl(null);
       await _openAIService.setCustomModel(null);
+      if (!mounted) return;
 
       setState(() {
         _apiKeyController.clear();
@@ -292,7 +325,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         localizations.screensSettingsApiKeySettingsFailedToRemoveApiKey,
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -306,7 +339,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         throw Exception('Could not launch $url');
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(localizations.screensSettingsApiKeySettingsLinkError);
     }
@@ -315,6 +348,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
   Future<void> _pasteFromClipboard() async {
     try {
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      if (!mounted) return;
       if (clipboardData?.text != null && clipboardData!.text!.isNotEmpty) {
         // Clean the pasted text of any unwanted characters
         final cleanedText = clipboardData.text!.trim().replaceAll(
@@ -337,24 +371,20 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         });
 
         // Fetch models if key looks valid
-        if (cleanedText.length > 30) {
-          _fetchAvailableModels(cleanedText);
-        }
+        _scheduleModelFetch(cleanedText);
 
-        // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
         _showSuccessSnackBar(
           localizations.screensSettingsApiKeySettingsPastedFromClipboard,
         );
       } else {
-        // ignore: use_build_context_synchronously
         final localizations = AppLocalizations.of(context);
         _showErrorSnackBar(
           localizations.screensSettingsApiKeySettingsClipboardEmpty,
         );
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       final localizations = AppLocalizations.of(context);
       _showErrorSnackBar(
         localizations.screensSettingsApiKeySettingsFailedToAccessClipboard,
@@ -452,6 +482,10 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
     return null;
   }
+
+  // TODO(l10n): needs ARB key screensSettingsApiKeySettingsInvalidBaseUrl.
+  static const String _invalidBaseUrlMessage =
+      'Base URL must start with https:// (http:// is only allowed for localhost)';
 
   String _getModelInfoText() {
     final localizations = AppLocalizations.of(context);
@@ -609,6 +643,13 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                         (value == null || value.trim().isEmpty)) {
                       return 'Base URL is required for compatibility mode';
                     }
+                    if (_isCompatibilityMode) {
+                      try {
+                        OpenAIService.normalizeBaseUrl(value);
+                      } on OpenAIServiceException {
+                        return _invalidBaseUrlMessage;
+                      }
+                    }
                     return null;
                   },
                   decoration: InputDecoration(
@@ -638,12 +679,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                 controller: _apiKeyController,
                 obscureText: _isObscured,
                 validator: _validateApiKey,
-                onChanged: (value) {
-                  // Fetch models when API key changes
-                  if (value.length > 30) {
-                    _fetchAvailableModels(value);
-                  }
-                },
+                onChanged: _scheduleModelFetch,
                 decoration: InputDecoration(
                   hintText:
                       localizations

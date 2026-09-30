@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../utils/image_utils.dart'; // Adjust the import based on your project structure
+import '../secure_key_store.dart';
 
 class OpenAIModel {
   final String id;
@@ -59,15 +60,36 @@ class OpenAIModel {
   }
 }
 
+enum OpenAIFailure {
+  /// Custom base URL is not an absolute https URL (http only for localhost).
+  invalidBaseUrl,
+  network,
+  server,
+}
+
+class OpenAIServiceException implements Exception {
+  final OpenAIFailure failure;
+  final int? statusCode;
+
+  const OpenAIServiceException(this.failure, {this.statusCode});
+
+  @override
+  String toString() =>
+      'OpenAIServiceException: API ${failure.name}'
+      '${statusCode != null ? ' ($statusCode)' : ''}';
+}
+
 class ApiKeyTestResult {
   final bool success;
   final String message;
   final bool isAuthError;
+  final OpenAIFailure? failure;
 
   const ApiKeyTestResult({
     required this.success,
     required this.message,
     this.isAuthError = false,
+    this.failure,
   });
 }
 
@@ -228,7 +250,6 @@ class ChatCompletionResponse {
 }
 
 class OpenAIService {
-  static const String _apiKeyKey = 'openai_api_key';
   static const String _selectedModelKey = 'openai_selected_model';
   static const String _isCompatibilityModeKey = 'openai_compatibility_mode';
   static const String _customBaseUrlKey = 'openai_custom_base_url';
@@ -246,6 +267,48 @@ class OpenAIService {
   static const Duration visionRequestTimeout = Duration(seconds: 120);
   static const Duration _apiKeyTestTimeout = Duration(seconds: 30);
   static const Duration _modelListTimeout = Duration(seconds: 20);
+
+  static const String _defaultBaseUrl = 'https://api.openai.com/v1';
+  static const Set<String> _localHosts = {
+    'localhost',
+    '127.0.0.1',
+    '10.0.2.2', // Android emulator's alias for the host machine
+    '::1',
+  };
+
+  /// Resolves the API base URL (appending `/v1` like all request paths expect)
+  /// and rejects URLs the bearer key must not be sent to.
+  static Uri normalizeBaseUrl(String? customBaseUrl) {
+    final raw = (customBaseUrl ?? '').trim();
+    if (raw.isEmpty) return Uri.parse(_defaultBaseUrl);
+    final stripped = raw.replaceAll(RegExp(r'/+$'), '');
+    final uri = Uri.tryParse(
+      stripped.endsWith('/v1') ? stripped : '$stripped/v1',
+    );
+    final isHttps = uri?.scheme == 'https';
+    final isLocalHttp =
+        uri?.scheme == 'http' && _localHosts.contains(uri?.host);
+    if (uri == null ||
+        !uri.isAbsolute ||
+        uri.host.isEmpty ||
+        !(isHttps || isLocalHttp)) {
+      throw const OpenAIServiceException(OpenAIFailure.invalidBaseUrl);
+    }
+    return uri;
+  }
+
+  static final RegExp _secretTokenPattern = RegExp(
+    r'(?<![A-Za-z0-9])sk-[A-Za-z0-9_*\-]{4,}',
+  );
+
+  /// Removes [apiKey] and anything shaped like an `sk-` key from [text].
+  static String redactSecrets(String text, [String? apiKey]) {
+    var result = text;
+    if (apiKey != null && apiKey.isNotEmpty) {
+      result = result.replaceAll(apiKey, '[redacted]');
+    }
+    return result.replaceAll(_secretTokenPattern, '[redacted]');
+  }
 
   final http.Client? _httpClient;
 
@@ -278,10 +341,7 @@ class OpenAIService {
     );
   }
 
-  Future<String?> _getApiKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_apiKeyKey);
-  }
+  Future<String?> _getApiKey() => SecureKeyStore.readApiKey();
 
   Future<bool> getIsCompatibilityMode() async {
     final prefs = await SharedPreferences.getInstance();
@@ -357,22 +417,9 @@ class OpenAIService {
     return apiKey != null && apiKey.isNotEmpty;
   }
 
-  Future<String> _getBaseUrl() async {
+  Future<Uri> _getBaseUrl() async {
     final isCompatibility = await getIsCompatibilityMode();
-    if (isCompatibility) {
-      final customUrl = await getCustomBaseUrl();
-      if (customUrl != null && customUrl.isNotEmpty) {
-        // Ensure URL ends with /v1 if it doesn't already have it
-        if (customUrl.endsWith('/v1')) {
-          return customUrl;
-        } else if (customUrl.endsWith('/')) {
-          return '${customUrl}v1';
-        } else {
-          return '$customUrl/v1';
-        }
-      }
-    }
-    return 'https://api.openai.com/v1';
+    return normalizeBaseUrl(isCompatibility ? await getCustomBaseUrl() : null);
   }
 
   /// Helper to check if model requires alternate max_tokens key
@@ -390,14 +437,22 @@ class OpenAIService {
     String model, {
     String? customBaseUrl,
   }) async {
+    // Clean the API key of any unwanted characters
+    final cleanedApiKey = apiKey.trim().replaceAll(
+      RegExp(r'[\x00-\x1F\x7F]'),
+      '',
+    );
+    final Uri baseUrl;
     try {
-      // Clean the API key of any unwanted characters
-      final cleanedApiKey = apiKey.trim().replaceAll(
-        RegExp(r'[\x00-\x1F\x7F]'),
-        '',
+      baseUrl = normalizeBaseUrl(customBaseUrl);
+    } on OpenAIServiceException catch (e) {
+      return ApiKeyTestResult(
+        success: false,
+        message: 'Invalid base URL. Use an https:// address.',
+        failure: e.failure,
       );
-
-      final baseUrl = customBaseUrl ?? 'https://api.openai.com/v1';
+    }
+    try {
       final url = Uri.parse('$baseUrl/chat/completions');
       final headers = {
         'Content-Type': 'application/json',
@@ -460,7 +515,10 @@ class OpenAIService {
         bool isAuthError = false;
         try {
           final errorData = jsonDecode(response.body);
-          errorMessage = errorData['error']?['message'] ?? errorMessage;
+          errorMessage = redactSecrets(
+            errorData['error']?['message'] ?? errorMessage,
+            cleanedApiKey,
+          );
         } catch (_) {}
         // The error message can echo parts of the key, so only log metadata.
         debugPrint(
@@ -489,12 +547,14 @@ class OpenAIService {
           success: false,
           message: errorMessage,
           isAuthError: isAuthError,
+          failure: OpenAIFailure.server,
         );
       }
     } catch (e) {
       return ApiKeyTestResult(
         success: false,
-        message: 'Failed to test API key: $e',
+        message: redactSecrets('Failed to test API key: $e', cleanedApiKey),
+        failure: OpenAIFailure.network,
       );
     }
   }
@@ -613,7 +673,9 @@ class OpenAIService {
     } on TimeoutException {
       rethrow;
     } catch (e) {
-      throw Exception('Failed to send message: $e');
+      throw Exception(
+        redactSecrets('Failed to send message: $e', cleanedApiKey),
+      );
     }
   }
 
@@ -621,53 +683,58 @@ class OpenAIService {
     String apiKey, {
     String? customBaseUrl,
   }) async {
-    try {
-      // Clean the API key of any unwanted characters
-      final cleanedApiKey = apiKey.trim().replaceAll(
-        RegExp(r'[\x00-\x1F\x7F]'),
-        '',
-      );
+    // Clean the API key of any unwanted characters
+    final cleanedApiKey = apiKey.trim().replaceAll(
+      RegExp(r'[\x00-\x1F\x7F]'),
+      '',
+    );
+    if (cleanedApiKey.isEmpty) return _defaultModels;
 
-      final baseUrl = customBaseUrl ?? 'https://api.openai.com/v1';
-      final url = Uri.parse('$baseUrl/models');
-      final headers = {'Authorization': 'Bearer $cleanedApiKey'};
-      final client = _httpClient;
-      final response = await (client != null
+    final url = Uri.parse('${normalizeBaseUrl(customBaseUrl)}/models');
+    final headers = {'Authorization': 'Bearer $cleanedApiKey'};
+    final client = _httpClient;
+    final http.Response response;
+    try {
+      response = await (client != null
               ? client.get(url, headers: headers)
               : http.get(url, headers: headers))
           .timeout(_modelListTimeout);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final models = (data['data'] as List<dynamic>?) ?? [];
-        final filteredModels =
-            models
-                .where(
-                  (model) =>
-                      model['id'] != null &&
-                      model['id'].toString().startsWith('gpt-') &&
-                      !model['id'].toString().contains('instruct') &&
-                      model['id'].toString() != 'gpt',
-                )
-                .map(
-                  (model) => OpenAIModel(
-                    id: model['id'],
-                    displayName: OpenAIModel._formatModelDisplayName(
-                      model['id'],
-                    ),
-                  ),
-                )
-                .toList();
-        filteredModels.sort((a, b) {
-          if (a.id.contains('gpt-4') && !b.id.contains('gpt-4')) return -1;
-          if (!a.id.contains('gpt-4') && b.id.contains('gpt-4')) return 1;
-          return a.displayName.compareTo(b.displayName);
-        });
-        return filteredModels.isEmpty ? _defaultModels : filteredModels;
-      } else {
-        return _defaultModels;
-      }
-    } catch (e) {
-      return _defaultModels;
+    } catch (_) {
+      throw const OpenAIServiceException(OpenAIFailure.network);
+    }
+    if (response.statusCode != 200) {
+      throw OpenAIServiceException(
+        OpenAIFailure.server,
+        statusCode: response.statusCode,
+      );
+    }
+    try {
+      final data = jsonDecode(response.body);
+      final models = (data['data'] as List<dynamic>?) ?? [];
+      final filteredModels =
+          models
+              .where(
+                (model) =>
+                    model['id'] != null &&
+                    model['id'].toString().startsWith('gpt-') &&
+                    !model['id'].toString().contains('instruct') &&
+                    model['id'].toString() != 'gpt',
+              )
+              .map(
+                (model) => OpenAIModel(
+                  id: model['id'],
+                  displayName: OpenAIModel._formatModelDisplayName(model['id']),
+                ),
+              )
+              .toList();
+      filteredModels.sort((a, b) {
+        if (a.id.contains('gpt-4') && !b.id.contains('gpt-4')) return -1;
+        if (!a.id.contains('gpt-4') && b.id.contains('gpt-4')) return 1;
+        return a.displayName.compareTo(b.displayName);
+      });
+      return filteredModels.isEmpty ? _defaultModels : filteredModels;
+    } catch (_) {
+      throw const OpenAIServiceException(OpenAIFailure.server, statusCode: 200);
     }
   }
 
@@ -812,7 +879,9 @@ class OpenAIService {
     } on TimeoutException {
       rethrow;
     } catch (e) {
-      throw Exception('Failed to send chat request: $e');
+      throw Exception(
+        redactSecrets('Failed to send chat request: $e', cleanedApiKey),
+      );
     }
   }
 }
