@@ -1,0 +1,4 @@
+- Registra comidas directamente desde el calendario.
+- Mejoras en la búsqueda de productos, el cálculo nutricional de platos, los objetivos y las estadísticas de peso y calorías.
+- Importaciones más seguras con confirmación, copia de seguridad y opción de deshacer; las claves de API se guardan de forma segura.
+- Cálculo corregido de calorías gastadas en Health Connect y Apple Health, más traducciones y mejoras de accesibilidad.
