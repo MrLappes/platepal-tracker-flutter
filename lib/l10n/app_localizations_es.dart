@@ -110,9 +110,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsCalendarMacroSummaryProtein => 'Proteína';
 
   @override
-  String get componentsCalendarMacroSummaryCompactCalories => 'Cal';
-
-  @override
   String get componentsCalendarMacroSummaryCompactProtein => 'Proteína';
 
   @override

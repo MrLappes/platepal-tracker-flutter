@@ -529,7 +529,8 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                   _buildTelemetryItem(
                     theme,
                     '${dish.nutrition.calories.round()}',
-                    localizations.componentsCalendarMacroSummaryCompactCalories,
+                    localizations
+                        .componentsDishesDishFormIngredientFormModalKcal,
                   ),
                   _buildTelemetryItem(
                     theme,
