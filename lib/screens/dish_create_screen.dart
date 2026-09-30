@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../models/dish.dart';
 import '../models/product.dart';
 import '../services/storage/dish_service.dart';
+import '../themes/app_theme.dart';
 import '../utils/number_parsing.dart';
 import '../utils/unit_conversion.dart';
 import '../components/dishes/dish_form/ingredient_form_modal.dart';
@@ -1103,6 +1104,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   Widget _buildIngredientCard(Ingredient ingredient, int index) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final macroColors = MacroColors.of(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1237,7 +1239,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       Icon(
                         Icons.local_fire_department,
                         size: 16,
-                        color: Colors.orange,
+                        color: macroColors.calories,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -1249,7 +1251,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       Text(
                         '${ingredient.nutrition!.calories.toStringAsFixed(0)} kcal',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.orange,
+                          color: macroColors.calories,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1263,17 +1265,17 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     children: [
                       _buildNutritionChip(
                         '${AppLocalizations.of(context).screensDishCreateProteinAbbreviation}: ${ingredient.nutrition!.protein.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
-                        Colors.blue,
+                        macroColors.protein,
                         theme,
                       ),
                       _buildNutritionChip(
                         '${AppLocalizations.of(context).screensDishCreateCarbsAbbreviation}: ${ingredient.nutrition!.carbs.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
-                        Colors.amber,
+                        macroColors.carbs,
                         theme,
                       ),
                       _buildNutritionChip(
                         '${AppLocalizations.of(context).screensDishCreateFatAbbreviation}: ${ingredient.nutrition!.fat.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
-                        Colors.teal,
+                        macroColors.fat,
                         theme,
                       ),
                     ],

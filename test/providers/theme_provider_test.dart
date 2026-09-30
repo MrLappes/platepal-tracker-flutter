@@ -5,6 +5,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/providers/locale_provider.dart';
 import 'package:platepal_tracker/providers/theme_provider.dart';
 import 'package:platepal_tracker/screens/menu_screen.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +21,57 @@ class _BrokenPrefs extends Fake implements SharedPreferences {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('both brightness variants register macro colors', () {
+    for (final theme in AppThemes.allThemes) {
+      expect(
+        theme.toLight().materialTheme.extension<MacroColors>(),
+        same(MacroColors.light),
+      );
+      expect(
+        theme.toDark().materialTheme.extension<MacroColors>(),
+        same(MacroColors.dark),
+      );
+    }
+  });
+
+  test('macro palette copyWith preserves unspecified nutrient colors', () {
+    final changed = MacroColors.light.copyWith(
+      protein: const Color(0xFF123456),
+    );
+
+    expect(changed.protein, const Color(0xFF123456));
+    expect(changed.calories, MacroColors.light.calories);
+    expect(changed.carbs, MacroColors.light.carbs);
+    expect(changed.fat, MacroColors.light.fat);
+    expect(changed.fiber, MacroColors.light.fiber);
+  });
+
+  test('macro palette interpolates every color', () {
+    final midpoint = MacroColors.light.lerp(MacroColors.dark, 0.5);
+
+    expect(
+      midpoint.calories,
+      Color.lerp(MacroColors.light.calories, MacroColors.dark.calories, 0.5),
+    );
+    expect(
+      midpoint.protein,
+      Color.lerp(MacroColors.light.protein, MacroColors.dark.protein, 0.5),
+    );
+    expect(
+      midpoint.carbs,
+      Color.lerp(MacroColors.light.carbs, MacroColors.dark.carbs, 0.5),
+    );
+    expect(
+      midpoint.fat,
+      Color.lerp(MacroColors.light.fat, MacroColors.dark.fat, 0.5),
+    );
+    expect(
+      midpoint.fiber,
+      Color.lerp(MacroColors.light.fiber, MacroColors.dark.fiber, 0.5),
+    );
+    expect(MacroColors.light.lerp(null, 0.5), same(MacroColors.light));
+  });
 
   test('storage failures keep the chosen theme and never throw', () async {
     final provider = ThemeProvider(prefs: _BrokenPrefs());

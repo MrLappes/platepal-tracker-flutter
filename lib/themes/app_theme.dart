@@ -1,5 +1,72 @@
 import 'package:flutter/material.dart';
 
+/// Identity colors for nutrients, separate from status and progress colors.
+class MacroColors extends ThemeExtension<MacroColors> {
+  final Color calories;
+  final Color protein;
+  final Color carbs;
+  final Color fat;
+  final Color fiber;
+
+  const MacroColors({
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    required this.fiber,
+  });
+
+  static const light = MacroColors(
+    calories: Color(0xFFB45309),
+    protein: Color(0xFF15803D),
+    carbs: Color(0xFF1D4ED8),
+    fat: Color(0xFF946200),
+    fiber: Color(0xFF0F766E),
+  );
+
+  static const dark = MacroColors(
+    calories: Color(0xFFFF9F43),
+    protein: Color(0xFF4ADE80),
+    carbs: Color(0xFF60A5FA),
+    fat: Color(0xFFFBBF24),
+    fiber: Color(0xFF2DD4BF),
+  );
+
+  /// Returns the active palette, including in widgets using a plain ThemeData.
+  static MacroColors of(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.extension<MacroColors>() ??
+        (theme.brightness == Brightness.dark ? dark : light);
+  }
+
+  @override
+  MacroColors copyWith({
+    Color? calories,
+    Color? protein,
+    Color? carbs,
+    Color? fat,
+    Color? fiber,
+  }) => MacroColors(
+    calories: calories ?? this.calories,
+    protein: protein ?? this.protein,
+    carbs: carbs ?? this.carbs,
+    fat: fat ?? this.fat,
+    fiber: fiber ?? this.fiber,
+  );
+
+  @override
+  MacroColors lerp(ThemeExtension<MacroColors>? other, double t) {
+    if (other is! MacroColors) return this;
+    return MacroColors(
+      calories: Color.lerp(calories, other.calories, t)!,
+      protein: Color.lerp(protein, other.protein, t)!,
+      carbs: Color.lerp(carbs, other.carbs, t)!,
+      fat: Color.lerp(fat, other.fat, t)!,
+      fiber: Color.lerp(fiber, other.fiber, t)!,
+    );
+  }
+}
+
 class AppThemeColors {
   final Color primary;
   final Color background;
@@ -85,6 +152,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: isDark ? Brightness.dark : Brightness.light,
+      extensions: [isDark ? MacroColors.dark : MacroColors.light],
       colorScheme: ColorScheme.fromSeed(
         seedColor: colors.primary,
         brightness: isDark ? Brightness.dark : Brightness.light,

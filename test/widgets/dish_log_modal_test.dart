@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/components/modals/dish_log_modal.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/models/dish.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 
 void main() {
   test('combines a selected past date with the chosen meal time', () {
@@ -58,5 +59,47 @@ void main() {
     await tester.tap(find.byIcon(Icons.access_time));
     await tester.pumpAndSettle();
     expect(find.byType(TimePickerDialog), findsOneWidget);
+  });
+
+  testWidgets('log sheet uses the theme macro color for protein values', (
+    tester,
+  ) async {
+    const proteinColor = Color(0xFF123456);
+    final now = DateTime.now();
+    final dish = Dish(
+      id: 'test-dish',
+      name: 'Soup',
+      ingredients: const [],
+      nutrition: const NutritionInfo(
+        calories: 100,
+        protein: 5,
+        carbs: 10,
+        fat: 3,
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppThemes.light.materialTheme.copyWith(
+          extensions: [MacroColors.light.copyWith(protein: proteinColor)],
+        ),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: DishLogModal(dish: dish)),
+      ),
+    );
+
+    final proteinValue = tester.widget<RichText>(
+      find.byWidgetPredicate(
+        (widget) => widget is RichText && widget.text.toPlainText() == '5.0 g',
+      ),
+    );
+    final proteinText = proteinValue.text as TextSpan;
+    expect(
+      (proteinText.children!.first as TextSpan).style?.color,
+      proteinColor,
+    );
   });
 }

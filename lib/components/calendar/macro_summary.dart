@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 
 class MacroSummary extends StatefulWidget {
   final double calories;
@@ -321,7 +322,7 @@ class _MacroSummaryState extends State<MacroSummary> {
             Icon(
               Icons.local_fire_department,
               size: 14,
-              color: Colors.deepOrange,
+              color: MacroColors.of(context).calories,
             ),
             const SizedBox(width: 4),
             Text(

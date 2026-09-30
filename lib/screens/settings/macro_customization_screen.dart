@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user_profile.dart';
 import '../../utils/service_extensions.dart';
@@ -627,6 +628,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     ColorScheme colorScheme,
     Map<String, double> macros,
   ) {
+    final macroColors = MacroColors.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -636,7 +638,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             _buildMacroSlider(
               label: l10n.componentsCalendarMacroSummaryProtein,
               value: _proteinRatio,
-              color: const Color(0xFF4ade80), // Green
+              color: macroColors.protein,
               onChanged: (value) => _adjustRatios('protein', value),
               grams: macros['protein']!,
               theme: theme,
@@ -650,7 +652,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             _buildMacroSlider(
               label: l10n.componentsCalendarMacroSummaryCarbs,
               value: _carbsRatio,
-              color: const Color(0xFF3b82f6), // Blue
+              color: macroColors.carbs,
               onChanged: (value) => _adjustRatios('carbs', value),
               grams: macros['carbs']!,
               theme: theme,
@@ -664,7 +666,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             _buildMacroSlider(
               label: l10n.componentsCalendarMacroSummaryFat,
               value: _fatRatio,
-              color: const Color(0xFFf59e0b), // Amber
+              color: macroColors.fat,
               onChanged: (value) => _adjustRatios('fat', value),
               grams: macros['fat']!,
               theme: theme,
@@ -774,14 +776,22 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 toggled: isPinned,
                 child: IconButton(
                   onPressed: onPinToggle,
-                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
                   tooltip:
                       isPinned
-                          ? l10n.screensSettingsMacroCustomizationUnpinMacro(label)
-                          : l10n.screensSettingsMacroCustomizationPinMacro(label),
+                          ? l10n.screensSettingsMacroCustomizationUnpinMacro(
+                            label,
+                          )
+                          : l10n.screensSettingsMacroCustomizationPinMacro(
+                            label,
+                          ),
                   icon: Icon(
                     isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                    color: isPinned ? color : theme.colorScheme.onSurfaceVariant,
+                    color:
+                        isPinned ? color : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -834,6 +844,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     ColorScheme colorScheme,
     Map<String, double> macros,
   ) {
+    final macroColors = MacroColors.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -858,7 +869,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                   ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF8b5cf6), // Purple
+                    color: macroColors.fiber,
                   ),
                 ),
               ],
@@ -875,12 +886,10 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             const SizedBox(height: 16),
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
-                activeTrackColor: const Color(0xFF8b5cf6),
-                thumbColor: const Color(0xFF8b5cf6),
-                overlayColor: const Color(0xFF8b5cf6).withValues(alpha: 0.2),
-                inactiveTrackColor: const Color(
-                  0xFF8b5cf6,
-                ).withValues(alpha: 0.3),
+                activeTrackColor: macroColors.fiber,
+                thumbColor: macroColors.fiber,
+                overlayColor: macroColors.fiber.withValues(alpha: 0.2),
+                inactiveTrackColor: macroColors.fiber.withValues(alpha: 0.3),
               ),
               child: Slider(
                 value: _fiberPer1000Cal,
@@ -921,6 +930,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     ColorScheme colorScheme,
     Map<String, double> macros,
   ) {
+    final macroColors = MacroColors.of(context);
     return Card(
       color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: Padding(
@@ -942,7 +952,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     l10n.componentsCalendarMacroSummaryProtein,
                     macros['protein']!,
                     'g',
-                    const Color(0xFF4ade80),
+                    macroColors.protein,
                     theme,
                   ),
                 ),
@@ -951,7 +961,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     l10n.componentsCalendarMacroSummaryCarbs,
                     macros['carbs']!,
                     'g',
-                    const Color(0xFF3b82f6),
+                    macroColors.carbs,
                     theme,
                   ),
                 ),
@@ -965,7 +975,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     l10n.componentsCalendarMacroSummaryFat,
                     macros['fat']!,
                     'g',
-                    const Color(0xFFf59e0b),
+                    macroColors.fat,
                     theme,
                   ),
                 ),
@@ -974,7 +984,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     l10n.componentsCalendarMacroSummaryFiber,
                     macros['fiber']!,
                     'g',
-                    const Color(0xFF8b5cf6),
+                    macroColors.fiber,
                     theme,
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import '../../models/dish.dart';
 import '../../models/meal_type.dart';
 import '../../services/storage/dish_service.dart';
@@ -147,6 +148,7 @@ class _DishLogModalState extends State<DishLogModal> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final macroColors = MacroColors.of(context);
     final localizations = AppLocalizations.of(context);
 
     // Calculate nutrition based on portion size
@@ -234,7 +236,8 @@ class _DishLogModalState extends State<DishLogModal> {
                         Icons.close,
                         color: theme.colorScheme.onPrimary,
                       ),
-                      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                      tooltip:
+                          MaterialLocalizations.of(context).closeButtonTooltip,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -507,27 +510,27 @@ class _DishLogModalState extends State<DishLogModal> {
                                     .componentsCalendarMacroSummaryCalories,
                                 calculatedCalories.round().toString(),
                                 'kcal',
-                                Colors.red,
+                                macroColors.calories,
                               ),
                               _buildNutritionItem(
                                 localizations
                                     .componentsCalendarMacroSummaryProtein,
                                 calculatedProtein.toStringAsFixed(1),
                                 'g',
-                                Colors.blue,
+                                macroColors.protein,
                               ),
                               _buildNutritionItem(
                                 localizations
                                     .componentsCalendarMacroSummaryCarbs,
                                 calculatedCarbs.toStringAsFixed(1),
                                 'g',
-                                Colors.orange,
+                                macroColors.carbs,
                               ),
                               _buildNutritionItem(
                                 localizations.componentsCalendarMacroSummaryFat,
                                 calculatedFat.toStringAsFixed(1),
                                 'g',
-                                Colors.purple,
+                                macroColors.fat,
                               ),
                             ],
                           ),
