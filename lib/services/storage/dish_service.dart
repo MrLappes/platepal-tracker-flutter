@@ -57,7 +57,7 @@ class DishService {
     final db = await _databaseService.database;
     final String dishId = dishMap['id'] as String;
     debugPrint(
-      '🔍 _getDishWithRelations: Building dish with id: $dishId, name: ${dishMap['name']}',
+      '🔍 _getDishWithRelations: Building dish with id: $dishId',
     );
     // Get nutrition info
     final List<Map<String, dynamic>> nutritionMaps = await db.query(
@@ -79,17 +79,11 @@ class DishService {
     debugPrint(
       '🔍 _getDishWithRelations: Found ${dishIngredientsMaps.length} ingredient rows for dish $dishId',
     );
-    if (dishIngredientsMaps.isNotEmpty) {
-      debugPrint(
-        '🔍 _getDishWithRelations: ingredient row example: ${dishIngredientsMaps.first}',
-      );
-    }
 
     // Construct ingredients list
     final List<Ingredient> ingredients = [];
 
     for (final diMap in dishIngredientsMaps) {
-      debugPrint('🔍 _getDishWithRelations: processing ingredient row: $diMap');
       final String ingredientId = diMap['ingredient_id'] as String;
 
       // Get ingredient nutrition if available
@@ -163,7 +157,7 @@ class DishService {
       category: dishMap['category'] as String?,
     );
     debugPrint(
-      '🔍 _getDishWithRelations: Returning dish ${result.name} with ${result.ingredients.length} ingredients',
+      '🔍 _getDishWithRelations: Returning dish $dishId with ${result.ingredients.length} ingredients',
     );
     return result;
   }
@@ -171,7 +165,7 @@ class DishService {
   // Save a new dish
   Future<Dish> saveDish(Dish dish) async {
     debugPrint(
-      '🍽️ DishService: Starting to save dish: ${dish.name} (ID: ${dish.id})',
+      '🍽️ DishService: Starting to save dish ID: ${dish.id}',
     );
     final db = await _databaseService.database;
 
@@ -245,7 +239,7 @@ class DishService {
       }
     });
 
-    debugPrint('🍽️ DishService: Dish saved successfully: ${dish.name}');
+    debugPrint('🍽️ DishService: Dish saved successfully: ${dish.id}');
     return dish;
   }
 
@@ -599,6 +593,43 @@ class DishService {
     );
 
     return result.map((row) => int.parse(row['day'] as String)).toList();
+  }
+
+  /// Returns ledger nutrition totals keyed by local day in the half-open range.
+  Future<Map<String, NutritionInfo>> getDailyNutritionTotals(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final start = startDate.toLocal();
+    final end = endDate.toLocal();
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    final endOfDay = DateTime(end.year, end.month, end.day);
+    if (!startOfDay.isBefore(endOfDay)) return {};
+
+    final db = await _databaseService.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT substr(logged_at, 1, 10) AS day,
+        SUM(calories) AS calories, SUM(protein) AS protein,
+        SUM(carbs) AS carbs, SUM(fat) AS fat, SUM(fiber) AS fiber
+      FROM dish_logs
+      WHERE logged_at >= ? AND logged_at < ?
+      GROUP BY substr(logged_at, 1, 10)
+      ORDER BY day
+      ''',
+      [startOfDay.toIso8601String(), endOfDay.toIso8601String()],
+    );
+
+    return {
+      for (final row in rows)
+        row['day'] as String: NutritionInfo(
+          calories: (row['calories'] as num).toDouble(),
+          protein: (row['protein'] as num).toDouble(),
+          carbs: (row['carbs'] as num).toDouble(),
+          fat: (row['fat'] as num).toDouble(),
+          fiber: (row['fiber'] as num).toDouble(),
+        ),
+    };
   }
 
   Future<DailyMacroSummary> getMacroSummaryForDate(DateTime date) async {

@@ -1489,6 +1489,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsApiKeySettingsUpdateApiKey => 'Update API Key';
 
   @override
+  String get screensSettingsApiKeySettingsApiMode => 'API Mode';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibleApi =>
+      'OpenAI Compatible API';
+
+  @override
+  String get screensSettingsApiKeySettingsUsingCustomEndpoint =>
+      'Using custom OpenAI-compatible API endpoint';
+
+  @override
+  String get screensSettingsApiKeySettingsUsingOfficialApi =>
+      'Using official OpenAI API';
+
+  @override
+  String get screensSettingsApiKeySettingsBaseUrl => 'Base URL';
+
+  @override
+  String get screensSettingsApiKeySettingsBaseUrlHelper =>
+      'Enter the base URL for your OpenAI-compatible API';
+
+  @override
+  String get screensSettingsApiKeySettingsBaseUrlRequired =>
+      'Base URL is required for compatibility mode';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyGeneric => 'API Key';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibilityKeyHelper =>
+      'Enter your API key or leave empty to disable AI features';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibilityKeyRequired =>
+      'API key is required for compatibility mode';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibilityKeyTooShort =>
+      'API key seems too short';
+
+  @override
+  String get screensSettingsApiKeySettingsModelName => 'Model Name';
+
+  @override
+  String get screensSettingsApiKeySettingsModelNameHelper =>
+      'Enter the exact model name supported by your API';
+
+  @override
+  String get screensSettingsApiKeySettingsModelNameRequired =>
+      'Model name is required for compatibility mode';
+
+  @override
   String get screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle =>
       'Allow the agent to use deep search for more accurate answers';
 
@@ -1519,6 +1571,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get screensSettingsChatAgentSettingsChatSettingsSaved =>
       'Chat settings saved successfully';
+
+  @override
+  String get screensSettingsChatAgentSettingsSaveFailed =>
+      'Failed to save chat settings';
 
   @override
   String get screensSettingsContributorsBuyMeCreatine => 'Buy Me Creatine';
@@ -2854,5 +2910,169 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String screensSettingsMacroCustomizationSaveFailed(String error) {
     return 'Failed to save macro targets: $error';
+  }
+
+  @override
+  String get screensSettingsStatisticsProfileNotFound =>
+      'User profile not found';
+
+  @override
+  String screensSettingsStatisticsTestDataFailed(String error) {
+    return 'Failed to generate test data: $error';
+  }
+
+  @override
+  String screensSettingsStatisticsPhaseDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '($_temp0)';
+  }
+
+  @override
+  String screensSettingsStatisticsCalPerDay(String value) {
+    return '$value cal/day';
+  }
+
+  @override
+  String screensSettingsStatisticsCalValue(String value) {
+    return '$value cal';
+  }
+
+  @override
+  String screensSettingsStatisticsCoverage(
+    String percent,
+    int healthDays,
+    int totalDays,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalDays,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return 'Calorie expenditure data coverage: $percent% ($healthDays/$totalDays $_temp0)';
+  }
+
+  @override
+  String get screensSettingsStatisticsActualBalance => 'Actual Balance';
+
+  @override
+  String screensSettingsStatisticsChartSummary(
+    String chart,
+    int count,
+    String minimum,
+    String maximum,
+  ) {
+    return '$chart: $count data points, chart scale $minimum to $maximum';
+  }
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisProfileNotFound =>
+      'User profile not found';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisNoData =>
+      'No calorie expenditure data available for analysis';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisIncreaseIntake =>
+      'Your calorie expenditure is significantly higher than your current target suggests. Consider increasing your calorie intake.';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisDecreaseIntake =>
+      'Your calorie expenditure is lower than your current target suggests. Consider adjusting your calorie intake or increasing activity.';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisOnTarget =>
+      'Your current calorie targets seem well-aligned with your activity level.';
+
+  @override
+  String screensSettingsHealthSettingsAnalysisError(String error) {
+    return 'Error occurred during analysis: $error';
+  }
+
+  @override
+  String get servicesChatAgentThinking =>
+      'Analyzing your request and planning approach...';
+
+  @override
+  String get servicesChatAgentThinkingDetail =>
+      'Breaking down your request and determining the best approach';
+
+  @override
+  String get servicesChatAgentContext =>
+      'Gathering relevant context and user data...';
+
+  @override
+  String get servicesChatAgentContextDetail =>
+      'Collecting your profile, preferences, and relevant meal history';
+
+  @override
+  String get servicesChatAgentResponse =>
+      'Crafting your personalized response...';
+
+  @override
+  String get servicesChatAgentResponseDetail =>
+      'Combining all information to create a helpful and personalized answer';
+
+  @override
+  String get servicesChatAgentDish => 'Processing and analyzing dishes...';
+
+  @override
+  String get servicesChatAgentDishDetail =>
+      'Calculating nutrition values, ingredients, and meal details';
+
+  @override
+  String get servicesChatAgentDishValidation =>
+      'Validating and refining dishes...';
+
+  @override
+  String get servicesChatAgentDishValidationDetail =>
+      'Ensuring dishes have accurate nutrition and ingredient data';
+
+  @override
+  String get servicesChatAgentError => 'Handling unexpected error...';
+
+  @override
+  String get servicesChatAgentErrorDetail =>
+      'Attempting to recover from error and provide a helpful response';
+
+  @override
+  String get servicesChatAgentVerify =>
+      'Validating context sufficiency for optimal response...';
+
+  @override
+  String get servicesChatAgentVerifyDetail =>
+      'Analyzing gathered context to ensure we can provide the best possible answer';
+
+  @override
+  String get servicesChatAgentImage => 'Analyzing your uploaded image...';
+
+  @override
+  String get servicesChatAgentImageDetail =>
+      'Extracting food items, ingredients, and portion sizes from your image';
+
+  @override
+  String servicesChatAgentUnknownStep(String step) {
+    return 'Processing step: $step...';
+  }
+
+  @override
+  String servicesChatAgentUnknownDetail(String step) {
+    return 'Processing information for step: $step';
+  }
+
+  @override
+  String servicesChatAgentRestart(int attempt) {
+    return 'Restarting with enhanced strategy (attempt $attempt/3)...';
+  }
+
+  @override
+  String servicesChatAgentFailedStep(String step) {
+    return 'Step \"$step\" encountered an issue, attempting recovery...';
   }
 }

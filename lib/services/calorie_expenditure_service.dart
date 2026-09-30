@@ -198,7 +198,7 @@ class CalorieExpenditureService {
           currentTarget: 0,
           suggestedTarget: 0,
           averageExpenditure: 0,
-          analysisMessage: 'User profile not found',
+          status: CalorieTargetStatus.profileNotFound,
         );
       }
 
@@ -223,7 +223,7 @@ class CalorieExpenditureService {
           currentTarget: userProfile.goals.targetCalories,
           suggestedTarget: userProfile.goals.targetCalories,
           averageExpenditure: 0,
-          analysisMessage: 'No calorie expenditure data available for analysis',
+          status: CalorieTargetStatus.noExpenditureData,
         );
       }
 
@@ -241,7 +241,7 @@ class CalorieExpenditureService {
 
       bool needsAdjustment = false;
       double suggestedTarget = currentTarget;
-      String analysisMessage = '';
+      late CalorieTargetStatus status;
 
       // If user consistently burns more calories than their target intake suggests
       if (expenditureRatio < 0.7) {
@@ -249,8 +249,7 @@ class CalorieExpenditureService {
         // Increase target calories to match expenditure better
         suggestedTarget =
             averageExpenditure * 0.8; // 80% of expenditure for moderate deficit
-        analysisMessage =
-            'Your calorie expenditure is significantly higher than your current target suggests. Consider increasing your calorie intake.';
+        status = CalorieTargetStatus.increaseIntake;
       }
       // If user burns much fewer calories than target suggests
       else if (expenditureRatio > 1.3) {
@@ -259,11 +258,9 @@ class CalorieExpenditureService {
         suggestedTarget =
             averageExpenditure *
             1.1; // 110% of expenditure for moderate surplus
-        analysisMessage =
-            'Your calorie expenditure is lower than your current target suggests. Consider adjusting your calorie intake or increasing activity.';
+        status = CalorieTargetStatus.decreaseIntake;
       } else {
-        analysisMessage =
-            'Your current calorie targets seem well-aligned with your activity level.';
+        status = CalorieTargetStatus.onTarget;
       }
 
       return CalorieTargetAnalysis(
@@ -274,7 +271,7 @@ class CalorieExpenditureService {
                 ? minimumCalorieTarget
                 : suggestedTarget,
         averageExpenditure: averageExpenditure,
-        analysisMessage: analysisMessage,
+        status: status,
         daysAnalyzed: expenditures.length,
       );
     } catch (e) {
@@ -287,7 +284,8 @@ class CalorieExpenditureService {
         currentTarget: 0,
         suggestedTarget: 0,
         averageExpenditure: 0,
-        analysisMessage: 'Error occurred during analysis: $e',
+        status: CalorieTargetStatus.error,
+        errorDetails: e.toString(),
       );
     }
   }
@@ -363,12 +361,23 @@ class CalorieExpenditureService {
       analyzeCalorieTargets();
 }
 
+/// Analysis outcome for the UI to translate without a BuildContext in the service.
+enum CalorieTargetStatus {
+  profileNotFound,
+  noExpenditureData,
+  increaseIntake,
+  decreaseIntake,
+  onTarget,
+  error,
+}
+
 class CalorieTargetAnalysis {
   final bool needsAdjustment;
   final double currentTarget;
   final double suggestedTarget;
   final double averageExpenditure;
-  final String analysisMessage;
+  final CalorieTargetStatus status;
+  final String? errorDetails;
   final int daysAnalyzed;
 
   CalorieTargetAnalysis({
@@ -376,7 +385,8 @@ class CalorieTargetAnalysis {
     required this.currentTarget,
     required this.suggestedTarget,
     required this.averageExpenditure,
-    required this.analysisMessage,
+    required this.status,
+    this.errorDetails,
     this.daysAnalyzed = 0,
   });
 }

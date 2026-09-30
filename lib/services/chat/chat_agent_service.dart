@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui' show Locale, PlatformDispatcher;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/chat_types.dart';
 import '../../models/dish.dart';
 import '../../models/dish_models.dart';
@@ -228,6 +229,7 @@ class ChatAgentService {
     List<String>? previousCompletedSteps,
     int previousTotalStepsExecuted = 0,
   }) async {
+    final l10n = lookupAppLocalizations(Locale(languageCode));
     // Preserve history from previous attempts for continuity and learning
     final List<ChatStepResult> stepResults =
         previousStepResults != null ? [...previousStepResults] : [];
@@ -240,7 +242,7 @@ class ChatAgentService {
     // Add restart markers to the thinking steps for user visibility
     if (restartCount > 0) {
       thinkingSteps.add(
-        '🔄 Restarting with enhanced strategy (attempt ${restartCount + 1}/3)...',
+        '🔄 ${l10n.servicesChatAgentRestart(restartCount + 1)}',
       );
       debugPrint(
         '🔄 Restart $restartCount: Preserving ${previousStepResults?.length ?? 0} step results and ${previousThinkingSteps?.length ?? 0} thinking steps',
@@ -286,10 +288,10 @@ class ChatAgentService {
     try {
       // Step 1: THINKING STEP - Analyze what to do
       debugPrint('🧠 Step 1: Running thinking step...');
-      thinkingSteps.add('🧠 Analyzing your request and planning approach...');
+      thinkingSteps.add('🧠 ${l10n.servicesChatAgentThinking}');
       _onThinkingStep?.call(
-        '🧠 Analyzing your request and planning approach...',
-        'Breaking down your request and determining the best approach',
+        '🧠 ${l10n.servicesChatAgentThinking}',
+        l10n.servicesChatAgentThinkingDetail,
       );
 
       // Enhance input with previous attempts history for better decision making
@@ -332,6 +334,7 @@ class ChatAgentService {
           thinkingResult,
           stepResults,
           thinkingSteps,
+          l10n,
         );
       }
 
@@ -346,10 +349,10 @@ class ChatAgentService {
 
       // Step 2: RUN WHAT THINKING STEP TOLD US TO RUN
       debugPrint('📚 Step 2: Running planned context gathering steps...');
-      thinkingSteps.add('📚 Gathering relevant context and user data...');
+      thinkingSteps.add('📚 ${l10n.servicesChatAgentContext}');
       _onThinkingStep?.call(
-        '📚 Gathering relevant context and user data...',
-        'Collecting your profile, preferences, and relevant meal history',
+        '📚 ${l10n.servicesChatAgentContext}',
+        l10n.servicesChatAgentContextDetail,
       );
 
       final contextResult = await _contextGatheringStep.execute(currentInput);
@@ -375,6 +378,7 @@ class ChatAgentService {
           contextResult,
           stepResults,
           thinkingSteps,
+          l10n,
         );
       }
 
@@ -393,11 +397,11 @@ class ChatAgentService {
           '🔍 Step 3: Running autonomous verification (post-execution)...',
         );
         thinkingSteps.add(
-          '🔍 Validating context sufficiency for optimal response...',
+          '🔍 ${l10n.servicesChatAgentVerify}',
         );
         _onThinkingStep?.call(
-          '🔍 Validating context sufficiency for optimal response...',
-          'Analyzing gathered context to ensure we can provide the best possible answer',
+          '🔍 ${l10n.servicesChatAgentVerify}',
+          l10n.servicesChatAgentVerifyDetail,
         );
 
         final verificationResult = await _autonomousVerificationStep.execute(
@@ -516,10 +520,10 @@ class ChatAgentService {
 
       // Step 4: RESPONSE GENERATION
       debugPrint('✍️ Step 4: Generating response...');
-      thinkingSteps.add('✍️ Crafting your personalized response...');
+      thinkingSteps.add('✍️ ${l10n.servicesChatAgentResponse}');
       _onThinkingStep?.call(
-        '✍️ Crafting your personalized response...',
-        'Combining all information to create a helpful and personalized answer',
+        '✍️ ${l10n.servicesChatAgentResponse}',
+        l10n.servicesChatAgentResponseDetail,
       );
 
       final responseResult = await _responseGenerationStep.execute(
@@ -535,6 +539,7 @@ class ChatAgentService {
           responseResult,
           stepResults,
           thinkingSteps,
+          l10n,
         );
       }
 
@@ -556,10 +561,10 @@ class ChatAgentService {
         responseResult.data?['chatResponse'] as Map<String, dynamic>? ?? {},
       )) {
         debugPrint('🍽️ Running dish processing...');
-        thinkingSteps.add('🍽️ Processing and analyzing dishes...');
+        thinkingSteps.add('🍽️ ${l10n.servicesChatAgentDish}');
         _onThinkingStep?.call(
-          '🍽️ Processing and analyzing dishes...',
-          'Calculating nutrition values, ingredients, and meal details',
+          '🍽️ ${l10n.servicesChatAgentDish}',
+          l10n.servicesChatAgentDishDetail,
         );
 
         // Extract dishes from the response for processing
@@ -597,10 +602,10 @@ class ChatAgentService {
             _deepSearchEnabled &&
             totalStepsExecuted < 20) {
           debugPrint('🔍 Step 5: Running dish validation...');
-          thinkingSteps.add('🔍 Validating and refining dishes...');
+          thinkingSteps.add('🔍 ${l10n.servicesChatAgentDishValidation}');
           _onThinkingStep?.call(
-            '🔍 Validating and refining dishes...',
-            'Ensuring dishes have accurate nutrition and ingredient data',
+            '🔍 ${l10n.servicesChatAgentDishValidation}',
+            l10n.servicesChatAgentDishValidationDetail,
           );
 
           final dishValidationResult = await _dishValidationStep.execute(
@@ -652,6 +657,7 @@ class ChatAgentService {
     String languageCode = 'en',
     Map<String, String>? localizedFallbacks,
   }) async {
+    final l10n = lookupAppLocalizations(Locale(languageCode));
     final List<ChatStepResult> stepResults = [];
     final List<String> thinkingSteps = [];
     final List<String> completedSteps = [];
@@ -700,11 +706,11 @@ class ChatAgentService {
 
       // Show appropriate thinking step message for UI
       final stepEmoji = _getStepEmoji(stepName);
-      final stepDescription = _getStepDescription(stepName);
+      final stepDescription = _getStepDescription(stepName, l10n);
       final thinkingStepText = '$stepEmoji $stepDescription';
 
       thinkingSteps.add(thinkingStepText);
-      _onThinkingStep?.call(thinkingStepText, _getStepDetail(stepName));
+      _onThinkingStep?.call(thinkingStepText, _getStepDetail(stepName, l10n));
 
       // Special handling for verification steps
       if (stepName == 'deep_search_verification') {
@@ -864,6 +870,7 @@ class ChatAgentService {
                     updatedContextResult,
                     stepResults,
                     thinkingSteps,
+                    l10n,
                   );
                 }
 
@@ -1032,6 +1039,7 @@ class ChatAgentService {
           stepResult,
           stepResults,
           thinkingSteps,
+          l10n,
         );
       }
     }
@@ -1043,11 +1051,11 @@ class ChatAgentService {
             .lastOrNull;
     if (responseResult == null) {
       debugPrint('✍️ Running final response generation step...');
-      final responseStepText = '✍️ Crafting your personalized response...';
+      final responseStepText = '✍️ ${l10n.servicesChatAgentResponse}';
       thinkingSteps.add(responseStepText);
       _onThinkingStep?.call(
         responseStepText,
-        'Combining all information to create a helpful and personalized answer',
+        l10n.servicesChatAgentResponseDetail,
       );
 
       final lastContextResult = _findStepResult(
@@ -1107,11 +1115,11 @@ class ChatAgentService {
 
         if (aiResponse != null && _responseHasDishes(aiResponse)) {
           debugPrint('🍽️ Step 5: Processing dishes from AI response...');
-          final dishStepText = '🍽️ Processing and analyzing dishes...';
+          final dishStepText = '🍽️ ${l10n.servicesChatAgentDish}';
           thinkingSteps.add(dishStepText);
           _onThinkingStep?.call(
             dishStepText,
-            'Calculating nutrition values, ingredients, and meal details',
+            l10n.servicesChatAgentDishDetail,
           );
 
           final dishInput = currentInput.copyWith(
@@ -1133,11 +1141,11 @@ class ChatAgentService {
             if (_deepSearchEnabled) {
               debugPrint('🔍 Step 6: Running dish validation...');
               final dishValidationStepText =
-                  '🔍 Validating and refining dishes...';
+                  '🔍 ${l10n.servicesChatAgentDishValidation}';
               thinkingSteps.add(dishValidationStepText);
               _onThinkingStep?.call(
                 dishValidationStepText,
-                'Ensuring dishes have accurate nutrition and ingredient data',
+                l10n.servicesChatAgentDishValidationDetail,
               );
 
               final dishValidationInput = currentInput.copyWith(
@@ -1210,10 +1218,11 @@ class ChatAgentService {
     ChatStepResult failedResult,
     List<ChatStepResult> stepResults,
     List<String> thinkingSteps,
+    AppLocalizations l10n,
   ) {
     debugPrint('❌ Step "$stepName" failed: ${failedResult.error?.message}');
     thinkingSteps.add(
-      '⚠️ Step "$stepName" encountered an issue, attempting recovery...',
+      '⚠️ ${l10n.servicesChatAgentFailedStep(stepName)}',
     );
 
     return ChatResponse(
@@ -1422,46 +1431,50 @@ class ChatAgentService {
   }
 
   /// Gets user-friendly description for each step
-  String _getStepDescription(String stepName) {
+  String _getStepDescription(String stepName, AppLocalizations l10n) {
     switch (stepName) {
       case 'thinking':
-        return 'Analyzing your request and planning approach...';
+        return l10n.servicesChatAgentThinking;
       case 'context_gathering':
-        return 'Gathering relevant context and user data...';
+        return l10n.servicesChatAgentContext;
       case 'response_generation':
-        return 'Crafting your personalized response...';
+        return l10n.servicesChatAgentResponse;
       case 'dish_processing':
-        return 'Processing and analyzing dishes...';
+        return l10n.servicesChatAgentDish;
+      case 'dish_validation':
+        return l10n.servicesChatAgentDishValidation;
       case 'error_handling':
-        return 'Handling unexpected error...';
+        return l10n.servicesChatAgentError;
       case 'deep_search_verification':
-        return 'Validating context sufficiency for optimal response...';
+        return l10n.servicesChatAgentVerify;
       case 'image_processing':
-        return 'Analyzing your uploaded image...';
+        return l10n.servicesChatAgentImage;
       default:
-        return 'Processing step: $stepName...';
+        return l10n.servicesChatAgentUnknownStep(stepName);
     }
   }
 
   /// Gets detailed explanation for each step
-  String _getStepDetail(String stepName) {
+  String _getStepDetail(String stepName, AppLocalizations l10n) {
     switch (stepName) {
       case 'thinking':
-        return 'Breaking down your request and determining the best approach';
+        return l10n.servicesChatAgentThinkingDetail;
       case 'context_gathering':
-        return 'Collecting your profile, preferences, and relevant meal history';
+        return l10n.servicesChatAgentContextDetail;
       case 'response_generation':
-        return 'Combining all information to create a helpful and personalized answer';
+        return l10n.servicesChatAgentResponseDetail;
       case 'dish_processing':
-        return 'Calculating nutrition values, ingredients, and meal details';
+        return l10n.servicesChatAgentDishDetail;
+      case 'dish_validation':
+        return l10n.servicesChatAgentDishValidationDetail;
       case 'error_handling':
-        return 'Attempting to recover from error and provide a helpful response';
+        return l10n.servicesChatAgentErrorDetail;
       case 'deep_search_verification':
-        return 'Analyzing gathered context to ensure we can provide the best possible answer';
+        return l10n.servicesChatAgentVerifyDetail;
       case 'image_processing':
-        return 'Extracting food items, ingredients, and portion sizes from your image';
+        return l10n.servicesChatAgentImageDetail;
       default:
-        return 'Processing information for step: $stepName';
+        return l10n.servicesChatAgentUnknownDetail(stepName);
     }
   }
 

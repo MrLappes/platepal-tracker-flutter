@@ -2653,6 +2653,90 @@ abstract class AppLocalizations {
   /// **'Update API Key'**
   String get screensSettingsApiKeySettingsUpdateApiKey;
 
+  /// API mode section title
+  ///
+  /// In en, this message translates to:
+  /// **'API Mode'**
+  String get screensSettingsApiKeySettingsApiMode;
+
+  /// Compatibility mode toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI Compatible API'**
+  String get screensSettingsApiKeySettingsCompatibleApi;
+
+  /// Compatibility mode enabled description
+  ///
+  /// In en, this message translates to:
+  /// **'Using custom OpenAI-compatible API endpoint'**
+  String get screensSettingsApiKeySettingsUsingCustomEndpoint;
+
+  /// Compatibility mode disabled description
+  ///
+  /// In en, this message translates to:
+  /// **'Using official OpenAI API'**
+  String get screensSettingsApiKeySettingsUsingOfficialApi;
+
+  /// Custom API base URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get screensSettingsApiKeySettingsBaseUrl;
+
+  /// Custom API base URL helper
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the base URL for your OpenAI-compatible API'**
+  String get screensSettingsApiKeySettingsBaseUrlHelper;
+
+  /// Custom API base URL required error
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL is required for compatibility mode'**
+  String get screensSettingsApiKeySettingsBaseUrlRequired;
+
+  /// Generic API key label for compatible endpoints
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get screensSettingsApiKeySettingsApiKeyGeneric;
+
+  /// Compatible API key helper
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your API key or leave empty to disable AI features'**
+  String get screensSettingsApiKeySettingsCompatibilityKeyHelper;
+
+  /// Compatible API key required error
+  ///
+  /// In en, this message translates to:
+  /// **'API key is required for compatibility mode'**
+  String get screensSettingsApiKeySettingsCompatibilityKeyRequired;
+
+  /// Compatible API key length error
+  ///
+  /// In en, this message translates to:
+  /// **'API key seems too short'**
+  String get screensSettingsApiKeySettingsCompatibilityKeyTooShort;
+
+  /// Custom API model name label
+  ///
+  /// In en, this message translates to:
+  /// **'Model Name'**
+  String get screensSettingsApiKeySettingsModelName;
+
+  /// Custom API model name helper
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the exact model name supported by your API'**
+  String get screensSettingsApiKeySettingsModelNameHelper;
+
+  /// Custom API model required error
+  ///
+  /// In en, this message translates to:
+  /// **'Model name is required for compatibility mode'**
+  String get screensSettingsApiKeySettingsModelNameRequired;
+
   /// Switch subtitle for enabling deep search
   ///
   /// In en, this message translates to:
@@ -2700,6 +2784,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chat settings saved successfully'**
   String get screensSettingsChatAgentSettingsChatSettingsSaved;
+
+  /// Snackbar message when saving chat settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save chat settings'**
+  String get screensSettingsChatAgentSettingsSaveFailed;
 
   /// Buy me creatine button text
   ///
@@ -4808,6 +4898,219 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to save macro targets: {error}'**
   String screensSettingsMacroCustomizationSaveFailed(String error);
+
+  /// Statistics missing profile error
+  ///
+  /// In en, this message translates to:
+  /// **'User profile not found'**
+  String get screensSettingsStatisticsProfileNotFound;
+
+  /// Test data error
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate test data: {error}'**
+  String screensSettingsStatisticsTestDataFailed(String error);
+
+  /// Number of days in a calorie phase
+  ///
+  /// In en, this message translates to:
+  /// **'({count, plural, =1{1 day} other{{count} days}})'**
+  String screensSettingsStatisticsPhaseDays(int count);
+
+  /// Daily calorie difference
+  ///
+  /// In en, this message translates to:
+  /// **'{value} cal/day'**
+  String screensSettingsStatisticsCalPerDay(String value);
+
+  /// Calorie value
+  ///
+  /// In en, this message translates to:
+  /// **'{value} cal'**
+  String screensSettingsStatisticsCalValue(String value);
+
+  /// Calorie expenditure coverage
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie expenditure data coverage: {percent}% ({healthDays}/{totalDays} {totalDays, plural, =1{day} other{days}})'**
+  String screensSettingsStatisticsCoverage(
+    String percent,
+    int healthDays,
+    int totalDays,
+  );
+
+  /// Measured calorie balance label
+  ///
+  /// In en, this message translates to:
+  /// **'Actual Balance'**
+  String get screensSettingsStatisticsActualBalance;
+
+  /// Accessible summary of a statistics chart
+  ///
+  /// In en, this message translates to:
+  /// **'{chart}: {count} data points, chart scale {minimum} to {maximum}'**
+  String screensSettingsStatisticsChartSummary(
+    String chart,
+    int count,
+    String minimum,
+    String maximum,
+  );
+
+  /// Analysis requires a saved profile
+  ///
+  /// In en, this message translates to:
+  /// **'User profile not found'**
+  String get screensSettingsHealthSettingsAnalysisProfileNotFound;
+
+  /// Analysis has no expenditure data
+  ///
+  /// In en, this message translates to:
+  /// **'No calorie expenditure data available for analysis'**
+  String get screensSettingsHealthSettingsAnalysisNoData;
+
+  /// Recommendation when target is too low
+  ///
+  /// In en, this message translates to:
+  /// **'Your calorie expenditure is significantly higher than your current target suggests. Consider increasing your calorie intake.'**
+  String get screensSettingsHealthSettingsAnalysisIncreaseIntake;
+
+  /// Recommendation when target is too high
+  ///
+  /// In en, this message translates to:
+  /// **'Your calorie expenditure is lower than your current target suggests. Consider adjusting your calorie intake or increasing activity.'**
+  String get screensSettingsHealthSettingsAnalysisDecreaseIntake;
+
+  /// Recommendation when target matches activity
+  ///
+  /// In en, this message translates to:
+  /// **'Your current calorie targets seem well-aligned with your activity level.'**
+  String get screensSettingsHealthSettingsAnalysisOnTarget;
+
+  /// Analysis error with details
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred during analysis: {error}'**
+  String screensSettingsHealthSettingsAnalysisError(String error);
+
+  /// Thinking step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your request and planning approach...'**
+  String get servicesChatAgentThinking;
+
+  /// Thinking step detail
+  ///
+  /// In en, this message translates to:
+  /// **'Breaking down your request and determining the best approach'**
+  String get servicesChatAgentThinkingDetail;
+
+  /// Context gathering progress
+  ///
+  /// In en, this message translates to:
+  /// **'Gathering relevant context and user data...'**
+  String get servicesChatAgentContext;
+
+  /// Context gathering detail
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting your profile, preferences, and relevant meal history'**
+  String get servicesChatAgentContextDetail;
+
+  /// Response generation progress
+  ///
+  /// In en, this message translates to:
+  /// **'Crafting your personalized response...'**
+  String get servicesChatAgentResponse;
+
+  /// Response generation detail
+  ///
+  /// In en, this message translates to:
+  /// **'Combining all information to create a helpful and personalized answer'**
+  String get servicesChatAgentResponseDetail;
+
+  /// Dish processing progress
+  ///
+  /// In en, this message translates to:
+  /// **'Processing and analyzing dishes...'**
+  String get servicesChatAgentDish;
+
+  /// Dish processing detail
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating nutrition values, ingredients, and meal details'**
+  String get servicesChatAgentDishDetail;
+
+  /// Dish validation progress
+  ///
+  /// In en, this message translates to:
+  /// **'Validating and refining dishes...'**
+  String get servicesChatAgentDishValidation;
+
+  /// Dish validation detail
+  ///
+  /// In en, this message translates to:
+  /// **'Ensuring dishes have accurate nutrition and ingredient data'**
+  String get servicesChatAgentDishValidationDetail;
+
+  /// Error handling progress
+  ///
+  /// In en, this message translates to:
+  /// **'Handling unexpected error...'**
+  String get servicesChatAgentError;
+
+  /// Error handling detail
+  ///
+  /// In en, this message translates to:
+  /// **'Attempting to recover from error and provide a helpful response'**
+  String get servicesChatAgentErrorDetail;
+
+  /// Deep verification progress
+  ///
+  /// In en, this message translates to:
+  /// **'Validating context sufficiency for optimal response...'**
+  String get servicesChatAgentVerify;
+
+  /// Deep verification detail
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing gathered context to ensure we can provide the best possible answer'**
+  String get servicesChatAgentVerifyDetail;
+
+  /// Image processing progress
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your uploaded image...'**
+  String get servicesChatAgentImage;
+
+  /// Image processing detail
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting food items, ingredients, and portion sizes from your image'**
+  String get servicesChatAgentImageDetail;
+
+  /// Unknown step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Processing step: {step}...'**
+  String servicesChatAgentUnknownStep(String step);
+
+  /// Unknown step detail
+  ///
+  /// In en, this message translates to:
+  /// **'Processing information for step: {step}'**
+  String servicesChatAgentUnknownDetail(String step);
+
+  /// Agent restart progress
+  ///
+  /// In en, this message translates to:
+  /// **'Restarting with enhanced strategy (attempt {attempt}/3)...'**
+  String servicesChatAgentRestart(int attempt);
+
+  /// Failed step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Step \"{step}\" encountered an issue, attempting recovery...'**
+  String servicesChatAgentFailedStep(String step);
 }
 
 class _AppLocalizationsDelegate

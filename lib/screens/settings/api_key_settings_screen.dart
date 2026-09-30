@@ -194,7 +194,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
       final localizations = AppLocalizations.of(context);
       setState(() {
         _errorMessage =
-            localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
+            _isCompatibilityMode
+                ? localizations.screensSettingsApiKeySettingsCompatibilityKeyRequired
+                : localizations.screensSettingsApiKeySettingsApiKeyMustStartWith;
       });
       return;
     }
@@ -206,14 +208,16 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
 
       if (customUrl.isEmpty) {
         setState(() {
-          _errorMessage = 'Custom base URL is required for compatibility mode';
+          _errorMessage = AppLocalizations.of(context)
+              .screensSettingsApiKeySettingsBaseUrlRequired;
         });
         return;
       }
 
       if (customModel.isEmpty) {
         setState(() {
-          _errorMessage = 'Model name is required for compatibility mode';
+          _errorMessage = AppLocalizations.of(context)
+              .screensSettingsApiKeySettingsModelNameRequired;
         });
         return;
       }
@@ -466,7 +470,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     // For compatibility mode, be more flexible with API key format
     if (_isCompatibilityMode) {
       if (trimmedValue.length < 10) {
-        return 'API key seems too short';
+        return localizations.screensSettingsApiKeySettingsCompatibilityKeyTooShort;
       }
       return null;
     }
@@ -598,17 +602,19 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'API Mode',
+                        localizations.screensSettingsApiKeySettingsApiMode,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
                       SwitchListTile(
-                        title: const Text('OpenAI Compatible API'),
+                        title: Text(
+                          localizations.screensSettingsApiKeySettingsCompatibleApi,
+                        ),
                         subtitle: Text(
                           _isCompatibilityMode
-                              ? 'Using custom OpenAI-compatible API endpoint'
-                              : 'Using official OpenAI API',
+                              ? localizations.screensSettingsApiKeySettingsUsingCustomEndpoint
+                              : localizations.screensSettingsApiKeySettingsUsingOfficialApi,
                         ),
                         value: _isCompatibilityMode,
                         onChanged: (value) {
@@ -626,7 +632,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
               // Custom Base URL (only in compatibility mode)
               if (_isCompatibilityMode) ...[
                 Text(
-                  'Base URL',
+                  localizations.screensSettingsApiKeySettingsBaseUrl,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -637,7 +643,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   validator: (value) {
                     if (_isCompatibilityMode &&
                         (value == null || value.trim().isEmpty)) {
-                      return 'Base URL is required for compatibility mode';
+                      return localizations.screensSettingsApiKeySettingsBaseUrlRequired;
                     }
                     if (_isCompatibilityMode) {
                       try {
@@ -650,8 +656,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   },
                   decoration: InputDecoration(
                     hintText: 'https://api.example.com/v1',
-                    helperText:
-                        'Enter the base URL for your OpenAI-compatible API',
+                    helperText: localizations.screensSettingsApiKeySettingsBaseUrlHelper,
                     prefixIcon: const Icon(Icons.link),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -664,7 +669,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
               // API Key Input
               Text(
                 _isCompatibilityMode
-                    ? 'API Key'
+                    ? localizations.screensSettingsApiKeySettingsApiKeyGeneric
                     : localizations.screensSettingsApiKeySettingsOpenAiApiKey,
                 style: Theme.of(
                   context,
@@ -681,8 +686,9 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                       localizations
                           .screensSettingsApiKeySettingsApiKeyPlaceholder,
                   helperText:
-                      localizations
-                          .screensSettingsApiKeySettingsApiKeyHelperText,
+                      _isCompatibilityMode
+                        ? localizations.screensSettingsApiKeySettingsCompatibilityKeyHelper
+                        : localizations.screensSettingsApiKeySettingsApiKeyHelperText,
                   prefixIcon: const Icon(Icons.key),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -721,7 +727,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
               // Model Selection
               Text(
                 _isCompatibilityMode
-                    ? 'Model Name'
+                    ? localizations.screensSettingsApiKeySettingsModelName
                     : localizations.screensSettingsApiKeySettingsSelectModel,
                 style: Theme.of(
                   context,
@@ -735,14 +741,13 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                   validator: (value) {
                     if (_isCompatibilityMode &&
                         (value == null || value.trim().isEmpty)) {
-                      return 'Model name is required for compatibility mode';
+                      return localizations.screensSettingsApiKeySettingsModelNameRequired;
                     }
                     return null;
                   },
                   decoration: InputDecoration(
                     hintText: 'gpt-3.5-turbo, claude-3-sonnet, etc.',
-                    helperText:
-                        'Enter the exact model name supported by your API',
+                    helperText: localizations.screensSettingsApiKeySettingsModelNameHelper,
                     prefixIcon: const Icon(Icons.memory),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),

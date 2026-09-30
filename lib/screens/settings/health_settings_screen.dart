@@ -285,6 +285,21 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
     CalorieTargetAnalysis analysis,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final analysisMessage = switch (analysis.status) {
+      CalorieTargetStatus.profileNotFound =>
+        l10n.screensSettingsHealthSettingsAnalysisProfileNotFound,
+      CalorieTargetStatus.noExpenditureData =>
+        l10n.screensSettingsHealthSettingsAnalysisNoData,
+      CalorieTargetStatus.increaseIntake =>
+        l10n.screensSettingsHealthSettingsAnalysisIncreaseIntake,
+      CalorieTargetStatus.decreaseIntake =>
+        l10n.screensSettingsHealthSettingsAnalysisDecreaseIntake,
+      CalorieTargetStatus.onTarget =>
+        l10n.screensSettingsHealthSettingsAnalysisOnTarget,
+      CalorieTargetStatus.error => l10n.screensSettingsHealthSettingsAnalysisError(
+        analysis.errorDetails ?? '',
+      ),
+    };
 
     return showDialog(
       context: context,
@@ -330,7 +345,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                     ),
                   const SizedBox(height: 12),
                   Text(
-                    analysis.analysisMessage,
+                    analysisMessage,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
