@@ -44,6 +44,31 @@ void main() {
     );
   });
 
+  testWidgets('profile load failure shows an error instead of the setup nudge', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+    final db = await DatabaseService.instance.database;
+    await db.execute('DROP TABLE user_profiles');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const CalendarScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text("Your profile couldn't be loaded, so daily targets aren't shown."),
+      findsOneWidget,
+    );
+    expect(find.text('Set up your profile to get daily targets'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Retry'), findsOneWidget);
+  });
+
   testWidgets('calendar navigation exposes localized button actions', (
     tester,
   ) async {

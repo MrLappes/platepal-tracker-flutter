@@ -3358,4 +3358,84 @@ class AppLocalizationsEs extends AppLocalizations {
   String servicesChatAgentFailedStep(String step) {
     return 'Se produjo un problema en el paso \"$step\"; intentando recuperarse...';
   }
+
+  @override
+  String get componentsChatMessageBubbleErrorAuth =>
+      'Tu clave de API fue rechazada. Revísala en los ajustes de la clave de API.';
+
+  @override
+  String get componentsChatMessageBubbleErrorRateLimit =>
+      'Se alcanzó el límite de solicitudes o la cuota de tu proveedor de IA. Espera un momento o revisa tu plan y tu saldo, y vuelve a intentarlo.';
+
+  @override
+  String get componentsChatMessageBubbleErrorNetwork =>
+      'No se pudo conectar con el proveedor de IA o la solicitud tardó demasiado. Comprueba tu conexión a internet y vuelve a intentarlo.';
+
+  @override
+  String get componentsChatMessageBubbleErrorServer =>
+      'El proveedor de IA no está disponible en este momento. Vuelve a intentarlo en un momento.';
+
+  @override
+  String get componentsChatMessageBubbleErrorKeyUnreadable =>
+      'No se pudo leer tu clave de API en este dispositivo. Vuelve a introducirla en los ajustes de la clave de API.';
+
+  @override
+  String get componentsChatMessageBubbleErrorUnknown =>
+      'No se pudo enviar el mensaje. Vuelve a intentarlo.';
+
+  @override
+  String get componentsChatMessageBubbleOpenApiKeySettings =>
+      'Ajustes de la clave de API';
+
+  @override
+  String get componentsChatMessageBubbleNoteContextIncomplete =>
+      'No se pudieron cargar algunos de tus datos; la respuesta puede ser menos personalizada.';
+
+  @override
+  String get componentsChatMessageBubbleNoteImageNotAnalyzed =>
+      'No se pudo analizar la imagen.';
+
+  @override
+  String get screensChatHistoryLoadFailed =>
+      'No se pudo cargar parte de tu historial de chat.';
+
+  @override
+  String get screensChatHistorySaveFailed =>
+      'No se pudo guardar tu historial de chat en este dispositivo.';
+
+  @override
+  String get screensChatSettingsFailed =>
+      'No se pudieron cargar o guardar los ajustes del chat. Por ahora se usan los valores predeterminados.';
+
+  @override
+  String get screensChatProfilesLoadFailed =>
+      'No se pudieron cargar los perfiles del chat. Se muestran los predeterminados; tus perfiles guardados no se modificaron.';
+
+  @override
+  String get screensChatProfileSaveFailed =>
+      'No se pudieron guardar los cambios del perfil.';
+
+  @override
+  String get screensChatApiKeyReadFailedTitle =>
+      'No se pudo leer tu clave de API';
+
+  @override
+  String get screensChatApiKeyReadFailedMessage =>
+      'No se pudo acceder a la clave guardada en este dispositivo. Recarga para volver a intentarlo o introdúcela de nuevo en los ajustes de la clave de API.';
+
+  @override
+  String get screensSettingsStatisticsPartialLoadFailed =>
+      'No se pudieron cargar algunos datos de salud o de calorías, por lo que los gráficos pueden estar incompletos.';
+
+  @override
+  String get screensSettingsHealthSettingsLoadDataFailed =>
+      'No se pudieron cargar los datos de salud de hoy.';
+
+  @override
+  String get screensSettingsHealthSettingsOpenSettingsFailed =>
+      'No se pudieron abrir los ajustes de Health Connect.';
+
+  @override
+  String get screensCalendarProfileLoadFailed =>
+      'No se pudo cargar tu perfil, por eso no se muestran los objetivos diarios.';
 }

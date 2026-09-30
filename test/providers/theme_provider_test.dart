@@ -8,8 +8,30 @@ import 'package:platepal_tracker/screens/menu_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Preferences whose reads and writes always fail.
+class _BrokenPrefs extends Fake implements SharedPreferences {
+  @override
+  String? getString(String key) => throw StateError('prefs unavailable');
+
+  @override
+  Future<bool> setString(String key, String value) async =>
+      throw StateError('prefs unavailable');
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('storage failures keep the chosen theme and never throw', () async {
+    final provider = ThemeProvider(prefs: _BrokenPrefs());
+    addTearDown(provider.dispose);
+    expect(provider.themePreference, ThemePreference.dark);
+
+    await provider.setThemePreference(ThemePreference.light);
+
+    expect(provider.themePreference, ThemePreference.light);
+    expect(provider.isDark, isFalse);
+    expect(provider.lastSaveFailed, isTrue);
+  });
 
   test('applies saved theme synchronously from supplied preferences', () async {
     SharedPreferences.setMockInitialValues({

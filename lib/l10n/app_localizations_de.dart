@@ -3357,4 +3357,84 @@ class AppLocalizationsDe extends AppLocalizations {
   String servicesChatAgentFailedStep(String step) {
     return 'Beim Schritt \"$step\" ist ein Problem aufgetreten; Wiederherstellung läuft...';
   }
+
+  @override
+  String get componentsChatMessageBubbleErrorAuth =>
+      'Dein API-Schlüssel wurde abgelehnt. Prüfe ihn in den API-Schlüssel-Einstellungen.';
+
+  @override
+  String get componentsChatMessageBubbleErrorRateLimit =>
+      'Das Anfragelimit oder Kontingent deines KI-Anbieters ist erreicht. Warte kurz oder prüfe Tarif und Guthaben und versuche es dann erneut.';
+
+  @override
+  String get componentsChatMessageBubbleErrorNetwork =>
+      'Der KI-Anbieter war nicht erreichbar oder die Anfrage hat zu lange gedauert. Prüfe deine Internetverbindung und versuche es erneut.';
+
+  @override
+  String get componentsChatMessageBubbleErrorServer =>
+      'Der KI-Anbieter ist gerade nicht verfügbar. Bitte versuche es gleich noch einmal.';
+
+  @override
+  String get componentsChatMessageBubbleErrorKeyUnreadable =>
+      'Dein API-Schlüssel konnte auf diesem Gerät nicht gelesen werden. Gib ihn in den API-Schlüssel-Einstellungen erneut ein.';
+
+  @override
+  String get componentsChatMessageBubbleErrorUnknown =>
+      'Die Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.';
+
+  @override
+  String get componentsChatMessageBubbleOpenApiKeySettings =>
+      'API-Schlüssel-Einstellungen';
+
+  @override
+  String get componentsChatMessageBubbleNoteContextIncomplete =>
+      'Einige deiner Daten konnten nicht geladen werden; die Antwort ist daher eventuell weniger persönlich.';
+
+  @override
+  String get componentsChatMessageBubbleNoteImageNotAnalyzed =>
+      'Das Bild konnte nicht analysiert werden.';
+
+  @override
+  String get screensChatHistoryLoadFailed =>
+      'Ein Teil deines Chatverlaufs konnte nicht geladen werden.';
+
+  @override
+  String get screensChatHistorySaveFailed =>
+      'Dein Chatverlauf konnte auf diesem Gerät nicht gespeichert werden.';
+
+  @override
+  String get screensChatSettingsFailed =>
+      'Die Chat-Einstellungen konnten nicht geladen oder gespeichert werden. Vorerst werden die Standardwerte verwendet.';
+
+  @override
+  String get screensChatProfilesLoadFailed =>
+      'Die Chat-Profile konnten nicht geladen werden. Es werden Standardprofile angezeigt; deine gespeicherten Profile bleiben unverändert.';
+
+  @override
+  String get screensChatProfileSaveFailed =>
+      'Deine Profiländerungen konnten nicht gespeichert werden.';
+
+  @override
+  String get screensChatApiKeyReadFailedTitle =>
+      'Dein API-Schlüssel konnte nicht gelesen werden';
+
+  @override
+  String get screensChatApiKeyReadFailedMessage =>
+      'Auf den auf diesem Gerät gespeicherten Schlüssel konnte nicht zugegriffen werden. Lade neu, um es erneut zu versuchen, oder gib ihn in den API-Schlüssel-Einstellungen erneut ein.';
+
+  @override
+  String get screensSettingsStatisticsPartialLoadFailed =>
+      'Einige Gesundheits- oder Kaloriendaten konnten nicht geladen werden, daher sind die Diagramme eventuell unvollständig.';
+
+  @override
+  String get screensSettingsHealthSettingsLoadDataFailed =>
+      'Die heutigen Gesundheitsdaten konnten nicht geladen werden.';
+
+  @override
+  String get screensSettingsHealthSettingsOpenSettingsFailed =>
+      'Die Health-Connect-Einstellungen konnten nicht geöffnet werden.';
+
+  @override
+  String get screensCalendarProfileLoadFailed =>
+      'Dein Profil konnte nicht geladen werden, daher werden keine Tagesziele angezeigt.';
 }

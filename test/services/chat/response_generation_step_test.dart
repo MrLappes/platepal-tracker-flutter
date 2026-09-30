@@ -414,4 +414,22 @@ void main() {
     expect(result.success, isFalse);
     expect(result.error!.type, ChatErrorType.networkError);
   });
+
+  test('an unreadable image is flagged instead of silently dropped', () async {
+    final openai = _FakeOpenAIService();
+    final result = await ResponseGenerationStep(openaiService: openai).execute(
+      const ChatStepInput(
+        userMessage: 'What is this?',
+        imageUri: '/does/not/exist.jpg',
+      ),
+    );
+
+    expect(result.success, isTrue);
+    expect(result.data['imageAnalysisFailed'], isTrue);
+
+    final textOnly = await ResponseGenerationStep(
+      openaiService: openai,
+    ).execute(const ChatStepInput(userMessage: 'hi'));
+    expect(textOnly.data.containsKey('imageAnalysisFailed'), isFalse);
+  });
 }

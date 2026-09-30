@@ -65,18 +65,37 @@ enum OpenAIFailure {
   invalidBaseUrl,
   network,
   server,
+
+  /// 401/403: the provider rejected the API key.
+  auth,
+
+  /// 429: rate limit or exhausted quota/credit.
+  rateLimit,
 }
+
+/// What the user should do about a failed chat request; persisted by [name].
+enum ChatErrorKind { auth, rateLimit, network, server, keyUnreadable, unknown }
 
 class OpenAIServiceException implements Exception {
   final OpenAIFailure failure;
   final int? statusCode;
 
-  const OpenAIServiceException(this.failure, {this.statusCode});
+  /// Provider error message with secrets already redacted.
+  final String? detail;
+
+  const OpenAIServiceException(this.failure, {this.statusCode, this.detail});
+
+  static OpenAIFailure failureForStatus(int statusCode) => switch (statusCode) {
+    401 || 403 => OpenAIFailure.auth,
+    429 => OpenAIFailure.rateLimit,
+    _ => OpenAIFailure.server,
+  };
 
   @override
   String toString() =>
       'OpenAIServiceException: API ${failure.name}'
-      '${statusCode != null ? ' ($statusCode)' : ''}';
+      '${statusCode != null ? ' ($statusCode)' : ''}'
+      '${detail != null ? ': $detail' : ''}';
 }
 
 class ApiKeyTestResult {
@@ -309,6 +328,27 @@ class OpenAIService {
     }
     return result.replaceAll(_secretTokenPattern, '[redacted]');
   }
+
+  /// Maps an error thrown by [sendMessage] or [sendChatRequest] to a [ChatErrorKind].
+  static ChatErrorKind errorKindOf(Object error) {
+    if (error is TimeoutException || error is http.ClientException) {
+      return ChatErrorKind.network;
+    }
+    if (error is! OpenAIServiceException) return ChatErrorKind.unknown;
+    return switch (error.failure) {
+      OpenAIFailure.auth => ChatErrorKind.auth,
+      OpenAIFailure.rateLimit => ChatErrorKind.rateLimit,
+      OpenAIFailure.network => ChatErrorKind.network,
+      OpenAIFailure.server =>
+        (error.statusCode ?? 500) >= 500
+            ? ChatErrorKind.server
+            : ChatErrorKind.unknown,
+      OpenAIFailure.invalidBaseUrl => ChatErrorKind.unknown,
+    };
+  }
+
+  /// Kind of the latest failed chat request, even if a caller swallowed it.
+  ChatErrorKind? lastErrorKind;
 
   final http.Client? _httpClient;
 
@@ -663,20 +703,33 @@ class OpenAIService {
           return 'No response received';
         }
       } else {
-        String errorMessage = 'OpenAI API error: ${response.statusCode}';
-        try {
-          final errorData = jsonDecode(response.body);
-          errorMessage = errorData['error']?['message'] ?? errorMessage;
-        } catch (_) {}
-        throw Exception(errorMessage);
+        throw _httpFailure(response, cleanedApiKey);
       }
-    } on TimeoutException {
-      rethrow;
     } catch (e) {
+      lastErrorKind = errorKindOf(e);
+      if (e is TimeoutException || e is OpenAIServiceException) rethrow;
+      if (e is http.ClientException) {
+        throw const OpenAIServiceException(OpenAIFailure.network);
+      }
       throw Exception(
         redactSecrets('Failed to send message: $e', cleanedApiKey),
       );
     }
+  }
+
+  static OpenAIServiceException _httpFailure(
+    http.Response response,
+    String apiKey,
+  ) {
+    String? message;
+    try {
+      message = jsonDecode(response.body)['error']?['message'] as String?;
+    } catch (_) {}
+    return OpenAIServiceException(
+      OpenAIServiceException.failureForStatus(response.statusCode),
+      statusCode: response.statusCode,
+      detail: message == null ? null : redactSecrets(message, apiKey),
+    );
   }
 
   Future<List<OpenAIModel>> getAvailableModels(
@@ -869,16 +922,14 @@ class OpenAIService {
         final data = jsonDecode(response.body);
         return ChatCompletionResponse.fromJson(data);
       } else {
-        String errorMessage = 'OpenAI API error: ${response.statusCode}';
-        try {
-          final errorData = jsonDecode(response.body);
-          errorMessage = errorData['error']?['message'] ?? errorMessage;
-        } catch (_) {}
-        throw Exception(errorMessage);
+        throw _httpFailure(response, cleanedApiKey);
       }
-    } on TimeoutException {
-      rethrow;
     } catch (e) {
+      lastErrorKind = errorKindOf(e);
+      if (e is TimeoutException || e is OpenAIServiceException) rethrow;
+      if (e is http.ClientException) {
+        throw const OpenAIServiceException(OpenAIFailure.network);
+      }
       throw Exception(
         redactSecrets('Failed to send chat request: $e', cleanedApiKey),
       );

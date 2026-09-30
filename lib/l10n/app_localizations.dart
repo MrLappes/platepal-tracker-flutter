@@ -5441,6 +5441,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Step \"{step}\" encountered an issue, attempting recovery...'**
   String servicesChatAgentFailedStep(String step);
+
+  /// Failed chat message: the provider rejected the API key (401/403)
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key was rejected. Check it in the API key settings.'**
+  String get componentsChatMessageBubbleErrorAuth;
+
+  /// Failed chat message: rate limit or quota reached (429)
+  ///
+  /// In en, this message translates to:
+  /// **'Your AI provider\'s rate limit or quota was reached. Wait a moment or check your plan and credit, then try again.'**
+  String get componentsChatMessageBubbleErrorRateLimit;
+
+  /// Failed chat message: network error or timeout
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the AI provider or the request timed out. Check your internet connection and try again.'**
+  String get componentsChatMessageBubbleErrorNetwork;
+
+  /// Failed chat message: provider server error (5xx)
+  ///
+  /// In en, this message translates to:
+  /// **'The AI provider is currently unavailable. Please try again in a moment.'**
+  String get componentsChatMessageBubbleErrorServer;
+
+  /// Failed chat message: the stored API key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key couldn\'t be read on this device. Enter it again in the API key settings.'**
+  String get componentsChatMessageBubbleErrorKeyUnreadable;
+
+  /// Failed chat message: unknown cause
+  ///
+  /// In en, this message translates to:
+  /// **'The message couldn\'t be sent. Please try again.'**
+  String get componentsChatMessageBubbleErrorUnknown;
+
+  /// Button on a failed message that opens the API key settings
+  ///
+  /// In en, this message translates to:
+  /// **'API key settings'**
+  String get componentsChatMessageBubbleOpenApiKeySettings;
+
+  /// Note under an AI answer when profile, dish or meal data failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Some of your data couldn\'t be loaded; the answer may be less personal.'**
+  String get componentsChatMessageBubbleNoteContextIncomplete;
+
+  /// Note under an AI answer when the attached image could not be processed
+  ///
+  /// In en, this message translates to:
+  /// **'The image couldn\'t be analyzed.'**
+  String get componentsChatMessageBubbleNoteImageNotAnalyzed;
+
+  /// Snackbar when saved chat messages could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Some of your chat history couldn\'t be loaded.'**
+  String get screensChatHistoryLoadFailed;
+
+  /// Snackbar when chat messages could not be saved
+  ///
+  /// In en, this message translates to:
+  /// **'Your chat history couldn\'t be saved on this device.'**
+  String get screensChatHistorySaveFailed;
+
+  /// Snackbar when agent mode settings could not be read or written
+  ///
+  /// In en, this message translates to:
+  /// **'Chat settings couldn\'t be loaded or saved. Defaults are used for now.'**
+  String get screensChatSettingsFailed;
+
+  /// Snackbar when chat profiles could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Chat profiles couldn\'t be loaded. Defaults are shown; your saved profiles were not changed.'**
+  String get screensChatProfilesLoadFailed;
+
+  /// Snackbar when a chat profile change could not be saved
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile changes couldn\'t be saved.'**
+  String get screensChatProfileSaveFailed;
+
+  /// Chat screen title when the stored API key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key couldn\'t be read'**
+  String get screensChatApiKeyReadFailedTitle;
+
+  /// Chat screen explanation when the stored API key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'The key stored on this device couldn\'t be accessed. Reload to try again, or enter it again in the API key settings.'**
+  String get screensChatApiKeyReadFailedMessage;
+
+  /// Banner when health or calorie history failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Some health or calorie data couldn\'t be loaded, so the charts may be incomplete.'**
+  String get screensSettingsStatisticsPartialLoadFailed;
+
+  /// Snackbar when today's health data failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s health data couldn\'t be loaded.'**
+  String get screensSettingsHealthSettingsLoadDataFailed;
+
+  /// Snackbar when Health Connect settings could not be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect settings couldn\'t be opened.'**
+  String get screensSettingsHealthSettingsOpenSettingsFailed;
+
+  /// Calendar message when the user profile failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile couldn\'t be loaded, so daily targets aren\'t shown.'**
+  String get screensCalendarProfileLoadFailed;
 }
 
 class _AppLocalizationsDelegate

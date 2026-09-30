@@ -7,6 +7,7 @@ class LocaleProvider extends ChangeNotifier {
   final SharedPreferences? _prefs;
 
   Locale? _selectedLocale;
+  bool _lastSaveFailed = false;
 
   LocaleProvider({SharedPreferences? prefs}) : _prefs = prefs {
     if (prefs == null) {
@@ -17,6 +18,9 @@ class LocaleProvider extends ChangeNotifier {
   }
 
   Locale? get selectedLocale => _selectedLocale;
+
+  /// The latest choice is in effect but could not be persisted.
+  bool get lastSaveFailed => _lastSaveFailed;
   Locale get locale {
     if (_selectedLocale != null) return _selectedLocale!;
     final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
@@ -36,7 +40,13 @@ class LocaleProvider extends ChangeNotifier {
   }
 
   void _restoreLocalePreference(SharedPreferences prefs) {
-    final savedLanguageCode = prefs.getString(_localeKey);
+    final String? savedLanguageCode;
+    try {
+      savedLanguageCode = prefs.getString(_localeKey);
+    } catch (error) {
+      debugPrint('Failed to read locale preference: ${error.runtimeType}');
+      return;
+    }
     if (_supportedLanguages.contains(savedLanguageCode)) {
       _selectedLocale = Locale(savedLanguageCode!);
       notifyListeners();
@@ -53,8 +63,10 @@ class LocaleProvider extends ChangeNotifier {
       } else {
         await prefs.setString(_localeKey, selectedLocale.languageCode);
       }
+      _lastSaveFailed = false;
     } catch (error) {
-      debugPrint('Failed to save locale preference: $error');
+      debugPrint('Failed to save locale preference: ${error.runtimeType}');
+      _lastSaveFailed = true;
     }
   }
 

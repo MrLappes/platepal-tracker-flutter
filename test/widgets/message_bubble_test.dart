@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/components/chat/message_bubble.dart';
 import 'package:platepal_tracker/components/modals/dish_log_modal.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
@@ -42,6 +43,113 @@ void main() {
     expect(tester.getSize(retry).height, greaterThanOrEqualTo(48));
     await tester.tap(retry);
     expect(retries, 1);
+  });
+
+  ChatMessage failedWith(String kind) => ChatMessage(
+    id: 'failed-$kind',
+    content: 'Hi',
+    sender: MessageSender.user,
+    status: MessageStatus.failed,
+    timestamp: DateTime(2026, 9, 1),
+    metadata: {'errorKind': kind},
+  );
+
+  testWidgets('rejected key explains the problem and opens key settings', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder:
+              (context, state) => Scaffold(
+                body: MessageBubble(message: failedWith('auth'), onRetry: () {}),
+              ),
+        ),
+        GoRoute(
+          path: '/settings/api-key',
+          builder: (context, state) => const Text('KEY SETTINGS'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp.router(
+        routerConfig: router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
+    );
+
+    expect(
+      find.text('Your API key was rejected. Check it in the API key settings.'),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(TextButton, 'Retry'), findsOneWidget);
+    final settings = find.widgetWithText(TextButton, 'API key settings');
+    expect(tester.getSize(settings).height, greaterThanOrEqualTo(48));
+    await tester.tap(settings);
+    await tester.pumpAndSettle();
+    expect(find.text('KEY SETTINGS'), findsOneWidget);
+  });
+
+  testWidgets('each error kind shows its own localized guidance', (
+    tester,
+  ) async {
+    Future<void> pump(String kind, Locale locale) => tester.pumpWidget(
+      MaterialApp(
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: MessageBubble(message: failedWith(kind), onRetry: () {}),
+        ),
+      ),
+    );
+
+    await pump('rateLimit', const Locale('en'));
+    expect(find.textContaining('rate limit or quota'), findsOneWidget);
+    expect(find.text('API key settings'), findsNothing);
+
+    await pump('network', const Locale('de'));
+    expect(find.textContaining('Internetverbindung'), findsOneWidget);
+
+    await pump('server', const Locale('es'));
+    expect(find.textContaining('no está disponible'), findsOneWidget);
+
+    await pump('keyUnreadable', const Locale('en'));
+    expect(find.text('API key settings'), findsOneWidget);
+  });
+
+  testWidgets('answers built from incomplete data carry a note', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: MessageBubble(
+            message: ChatMessage(
+              id: 'answer',
+              content: 'Eat oats.',
+              sender: MessageSender.assistant,
+              timestamp: DateTime(2026, 9, 1),
+              metadata: {
+                'responseNotes': ['contextIncomplete', 'imageNotAnalyzed'],
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text(
+        "Some of your data couldn't be loaded; the answer may be less personal.",
+      ),
+      findsOneWidget,
+    );
+    expect(find.text("The image couldn't be analyzed."), findsOneWidget);
   });
 
   testWidgets('invalid suggested dish shows an error and retry action', (

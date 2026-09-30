@@ -8,8 +8,33 @@ import 'package:platepal_tracker/screens/menu_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Preferences whose reads and writes always fail.
+class _BrokenPrefs extends Fake implements SharedPreferences {
+  @override
+  String? getString(String key) => throw StateError('prefs unavailable');
+
+  @override
+  Future<bool> setString(String key, String value) async =>
+      throw StateError('prefs unavailable');
+
+  @override
+  Future<bool> remove(String key) async =>
+      throw StateError('prefs unavailable');
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('storage failures keep the chosen locale and never throw', () async {
+    final provider = LocaleProvider(prefs: _BrokenPrefs());
+    addTearDown(provider.dispose);
+    expect(provider.selectedLocale, isNull);
+
+    await provider.setLocale(const Locale('de'));
+
+    expect(provider.selectedLocale, const Locale('de'));
+    expect(provider.lastSaveFailed, isTrue);
+  });
 
   test(
     'applies saved locale synchronously from supplied preferences',

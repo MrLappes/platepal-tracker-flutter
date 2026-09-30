@@ -83,7 +83,23 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
         _todaysBurnedCalories = todayCalories?.$1;
         _cachedDaysCount = storedData.length;
       });
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('Failed to load health data: ${error.runtimeType}');
+      if (!mounted) return;
+      _showErrorSnackBar(
+        AppLocalizations.of(context).screensSettingsHealthSettingsLoadDataFailed,
+      );
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
   }
 
   Future<void> _connectToHealth() async {
@@ -419,15 +435,25 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   }
 
   Future<void> _openHealthSettings() async {
+    var opened = false;
     try {
       // Try to open Health Connect settings on Android
       final uri = Uri.parse(
         'market://details?id=com.google.android.apps.healthdata',
       );
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('Failed to open Health Connect: ${error.runtimeType}');
+    }
+    if (!opened && mounted) {
+      _showErrorSnackBar(
+        AppLocalizations.of(
+          context,
+        ).screensSettingsHealthSettingsOpenSettingsFailed,
+      );
+    }
   }
 
   void _showErrorDialog(

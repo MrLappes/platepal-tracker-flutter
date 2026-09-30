@@ -17,12 +17,31 @@ import '../services/storage/dish_service.dart';
 import '../services/storage/storage_service_provider.dart';
 import '../services/user_session_service.dart';
 
+/// Storage problems the chat screen reports to the user.
+enum ChatNotice {
+  historyLoadFailed,
+  historySaveFailed,
+  settingsFailed,
+  profilesLoadFailed,
+  profileSaveFailed,
+}
+
+/// A failure the user has to see instead of a fallback reply.
+class _ChatFailure implements Exception {
+  final ChatErrorKind kind;
+  const _ChatFailure(this.kind);
+}
+
 class ChatProvider extends ChangeNotifier {
   final OpenAIService _openAIService = OpenAIService();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   String? _currentTypingMessage;
   bool _isApiKeyConfigured = false;
+  bool _apiKeyReadFailed = false;
+  bool _disposed = false;
+  final List<ChatNotice> _pendingNotices = [];
+  final Set<ChatNotice> _shownNotices = {};
 
   // Agent system components (lazy-initialized)
   ChatAgentService? _chatAgentService;
@@ -39,6 +58,29 @@ class ChatProvider extends ChangeNotifier {
   String? get currentTypingMessage => _currentTypingMessage;
   bool get hasMessages => _messages.isNotEmpty;
   bool get isApiKeyConfigured => _isApiKeyConfigured;
+
+  /// The stored key could not be read (distinct from "no key saved").
+  bool get apiKeyReadFailed => _apiKeyReadFailed;
+
+  /// Returns notices not shown yet; storage notices are shown once per session.
+  List<ChatNotice> takeNotices() {
+    final notices = List.of(_pendingNotices);
+    _pendingNotices.clear();
+    _shownNotices.addAll(notices);
+    return notices;
+  }
+
+  void _addNotice(ChatNotice notice, {bool once = true}) {
+    if (once && _shownNotices.contains(notice)) return;
+    if (!_pendingNotices.contains(notice)) _pendingNotices.add(notice);
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   // Agent system getters and setters
   bool get isAgentModeEnabled => _agentModeEnabled;
@@ -138,6 +180,7 @@ class ChatProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading agent settings: $e');
+      _addNotice(ChatNotice.settingsFailed);
     }
   }
 
@@ -149,6 +192,7 @@ class ChatProvider extends ChangeNotifier {
       await prefs.setBool('deep_search_enabled', _deepSearchEnabled);
     } catch (e) {
       debugPrint('Error saving agent settings: $e');
+      _addNotice(ChatNotice.settingsFailed);
     }
   }
 
@@ -177,11 +221,13 @@ class ChatProvider extends ChangeNotifier {
   Future<void> _checkApiKeyConfiguration() async {
     try {
       _isApiKeyConfigured = await _openAIService.isConfigured();
-      notifyListeners();
+      _apiKeyReadFailed = false;
     } catch (e) {
-      debugPrint('Error checking API key configuration: $e');
-      _isApiKeyConfigured = false;
+      debugPrint('Error checking API key configuration: ${e.runtimeType}');
+      // Keep the last known state instead of silently switching to test mode.
+      _apiKeyReadFailed = true;
     }
+    if (!_disposed) notifyListeners();
   }
 
   Future<void> refreshApiKeyConfiguration() async {
@@ -189,6 +235,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> _loadMessages() async {
+    var skipped = 0;
     try {
       final prefs = await SharedPreferences.getInstance();
       final messagesJson = prefs.getStringList('chat_messages') ?? [];
@@ -199,14 +246,17 @@ class ChatProvider extends ChangeNotifier {
           final message = ChatMessage.fromJson(json.decode(messageJson));
           _messages.add(message);
         } catch (e) {
-          debugPrint('Error loading message: $e');
+          debugPrint('Skipping unreadable chat message (${e.runtimeType})');
+          skipped++;
         }
       }
 
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading chat messages: $e');
+      debugPrint('Error loading chat messages: ${e.runtimeType}');
+      skipped++;
     }
+    if (skipped > 0) _addNotice(ChatNotice.historyLoadFailed);
   }
 
   Future<void> _saveMessages() async {
@@ -217,7 +267,20 @@ class ChatProvider extends ChangeNotifier {
 
       await prefs.setStringList('chat_messages', messagesJson);
     } catch (e) {
-      debugPrint('Error saving chat messages: $e');
+      debugPrint('Error saving chat messages: ${e.runtimeType}');
+      _addNotice(ChatNotice.historySaveFailed);
+    }
+  }
+
+  ChatErrorKind _errorKindOf(Object error) =>
+      error is _ChatFailure ? error.kind : OpenAIService.errorKindOf(error);
+
+  /// Re-reads the key after a read failure; throws if it is still unreadable.
+  Future<void> _ensureApiKeyReadable() async {
+    if (!_apiKeyReadFailed) return;
+    await _checkApiKeyConfiguration();
+    if (_apiKeyReadFailed) {
+      throw const _ChatFailure(ChatErrorKind.keyUnreadable);
     }
   }
 
@@ -286,6 +349,7 @@ class ChatProvider extends ChangeNotifier {
               ? localizations.providersChatProviderAiThinking
               : 'AI is thinking...';
       notifyListeners();
+      await _ensureApiKeyReadable();
       String response;
       Map<String, dynamic>? responseMetadata;
 
@@ -350,16 +414,17 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(assistantMessage);
       await _saveMessages();
     } catch (e) {
-      debugPrint('Error sending message: $e');
-      // Mark message as failed
+      debugPrint('Error sending message: ${e.runtimeType}');
       if (userMessage != null) {
         final failedMessage = userMessage.copyWith(
           status: MessageStatus.failed,
+          metadata: {...?userMessage.metadata, 'errorKind': _errorKindOf(e).name},
         );
         final index = _messages.indexWhere((m) => m.id == failedMessage.id);
         if (index != -1) {
           _messages[index] = failedMessage;
         }
+        await _saveMessages();
       }
     } finally {
       _isLoading = false;
@@ -380,11 +445,12 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _isLoading = true;
+      final localizations =
+          context != null ? AppLocalizations.of(context) : null;
       _currentTypingMessage =
-          context != null
-              ? AppLocalizations.of(context).providersChatProviderAiThinking
-              : 'AI is thinking...';
+          localizations?.providersChatProviderAiThinking ?? 'AI is thinking...';
       notifyListeners();
+      await _ensureApiKeyReadable();
 
       String response;
       if (_isApiKeyConfigured) {
@@ -396,18 +462,18 @@ class ChatProvider extends ChangeNotifier {
       } else {
         // Generate test response
         response =
-            context != null
-                ? AppLocalizations.of(
-                  context,
-                ).providersChatProviderTestChatResponse
-                : 'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
+            localizations?.providersChatProviderTestChatResponse ??
+            'Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.';
 
         // Add a small delay to simulate AI thinking
         await Future.delayed(const Duration(milliseconds: 1500));
       }
 
       // Mark original message as sent
-      _messages[messageIndex] = message.copyWith(status: MessageStatus.sent);
+      _messages[messageIndex] = message.copyWith(
+        status: MessageStatus.sent,
+        metadata: {...?message.metadata}..remove('errorKind'),
+      );
 
       // Add assistant response
       final assistantMessage = ChatMessage(
@@ -421,10 +487,14 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(assistantMessage);
       await _saveMessages();
     } catch (e) {
-      debugPrint('Error retrying message: $e');
+      debugPrint('Error retrying message: ${e.runtimeType}');
 
       // Mark message as failed again
-      _messages[messageIndex] = message.copyWith(status: MessageStatus.failed);
+      _messages[messageIndex] = message.copyWith(
+        status: MessageStatus.failed,
+        metadata: {...?message.metadata, 'errorKind': _errorKindOf(e).name},
+      );
+      await _saveMessages();
     } finally {
       _isLoading = false;
       _currentTypingMessage = null;
@@ -454,60 +524,51 @@ class ChatProvider extends ChangeNotifier {
   Future<void> _loadProfiles() async {
     try {
       _currentChatProfiles = await ChatProfileService.loadChatProfiles();
-      notifyListeners();
     } catch (e) {
-      debugPrint('Error loading chat profiles: $e');
-      // Create default profiles if loading fails
-      _currentChatProfiles = ChatProfiles.createDefault();
-      await ChatProfileService.saveChatProfiles(_currentChatProfiles!);
-      notifyListeners();
+      debugPrint('Error loading chat profiles: ${e.runtimeType}');
+      // Show defaults in memory only; never overwrite saved profiles after a read error.
+      _currentChatProfiles ??= ChatProfiles.createDefault();
+      _addNotice(ChatNotice.profilesLoadFailed);
     }
+    notifyListeners();
   }
 
-  /// Update user profile
-  Future<void> updateUserProfile(ChatUserProfile userProfile) async {
-    if (_currentChatProfiles == null) return;
-
+  /// Saves [profiles] and applies them only if saving worked.
+  Future<bool> _applyProfiles(ChatProfiles profiles) async {
+    var saved = false;
     try {
-      final updatedProfiles = _currentChatProfiles!.copyWith(
-        userProfile: userProfile,
-      );
-
-      await ChatProfileService.saveChatProfiles(updatedProfiles);
-      _currentChatProfiles = updatedProfiles;
-      notifyListeners();
+      saved = await ChatProfileService.saveChatProfiles(profiles);
     } catch (e) {
-      debugPrint('Error updating user profile: $e');
+      debugPrint('Error saving chat profiles: ${e.runtimeType}');
     }
+    if (!saved) {
+      _addNotice(ChatNotice.profileSaveFailed, once: false);
+      return false;
+    }
+    _currentChatProfiles = profiles;
+    notifyListeners();
+    return true;
   }
 
-  /// Update bot profile
-  Future<void> updateBotProfile(ChatBotProfile botProfile) async {
-    if (_currentChatProfiles == null) return;
-
-    try {
-      final updatedProfiles = _currentChatProfiles!.copyWith(
-        botProfile: botProfile,
-      );
-
-      await ChatProfileService.saveChatProfiles(updatedProfiles);
-      _currentChatProfiles = updatedProfiles;
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error updating bot profile: $e');
-    }
+  /// Update user profile; returns false if it could not be saved.
+  Future<bool> updateUserProfile(ChatUserProfile userProfile) async {
+    if (_currentChatProfiles == null) return false;
+    return _applyProfiles(
+      _currentChatProfiles!.copyWith(userProfile: userProfile),
+    );
   }
 
-  /// Reset profiles to default
-  Future<void> resetProfilesToDefault() async {
-    try {
-      _currentChatProfiles = ChatProfiles.createDefault();
-      await ChatProfileService.saveChatProfiles(_currentChatProfiles!);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error resetting profiles: $e');
-    }
+  /// Update bot profile; returns false if it could not be saved.
+  Future<bool> updateBotProfile(ChatBotProfile botProfile) async {
+    if (_currentChatProfiles == null) return false;
+    return _applyProfiles(
+      _currentChatProfiles!.copyWith(botProfile: botProfile),
+    );
   }
+
+  /// Reset profiles to default; returns false if it could not be saved.
+  Future<bool> resetProfilesToDefault() =>
+      _applyProfiles(ChatProfiles.createDefault());
 
   /// Get current chat profiles
   ChatProfiles? get currentChatProfiles => _currentChatProfiles;
@@ -534,6 +595,7 @@ class ChatProvider extends ChangeNotifier {
       // Clear previous thinking steps
       _currentThinkingSteps.clear();
       _currentAgentStep = null;
+      _openAIService.lastErrorKind = null;
       notifyListeners();
 
       // Convert ChatMessage list to agent_types.ChatMessage list for the agent service
@@ -584,19 +646,38 @@ class ChatProvider extends ChangeNotifier {
       _currentAgentStep = null;
       notifyListeners();
 
+      // The pipeline turns request errors into generic replies; report the real cause.
+      final mode = response.metadata?['mode'];
+      final lastErrorKind = _openAIService.lastErrorKind;
+      if ((mode == 'step_failure' || mode == 'error_response') &&
+          lastErrorKind != null &&
+          lastErrorKind != ChatErrorKind.unknown) {
+        throw _ChatFailure(lastErrorKind);
+      }
+
       // Return both response and metadata, including recommendation
+      final notes = responseNotes(response.metadata);
       final combinedMetadata = {
         ...?response.metadata,
         if (response.recommendation != null)
           'recommendation': response.recommendation,
+        if (notes.isNotEmpty) 'responseNotes': notes,
       };
       return {'response': response.replyText, 'metadata': combinedMetadata};
     } catch (e) {
-      debugPrint('❌ Agent service processing failed: $e');
+      debugPrint('❌ Agent service processing failed: ${e.runtimeType}');
       // Clear thinking steps on error
       _currentThinkingSteps.clear();
       _currentAgentStep = null;
       notifyListeners();
+
+      // A second endpoint cannot fix a rejected key, a quota or a dead connection.
+      final kind = _errorKindOf(e);
+      if (kind == ChatErrorKind.auth ||
+          kind == ChatErrorKind.rateLimit ||
+          kind == ChatErrorKind.network) {
+        throw _ChatFailure(kind);
+      }
 
       // Fallback to traditional service
       final fallbackResponse = await _openAIService.sendMessage(
@@ -605,6 +686,28 @@ class ChatProvider extends ChangeNotifier {
       );
       return {'response': fallbackResponse, 'metadata': null};
     }
+  }
+
+  /// Notes for answers built from incomplete data, read from agent step results.
+  @visibleForTesting
+  static List<String> responseNotes(Map<String, dynamic>? metadata) {
+    final steps = metadata?['stepResults'];
+    if (steps is! List) return const [];
+    Map? lastData(String stepName) {
+      final data =
+          steps
+              .whereType<Map>()
+              .where((step) => step['stepName'] == stepName)
+              .lastOrNull?['data'];
+      return data is Map ? data : null;
+    }
+
+    final failedContext = lastData('context_gathering')?['failedContextParts'];
+    return [
+      if (failedContext is List && failedContext.isNotEmpty) 'contextIncomplete',
+      if (lastData('response_generation')?['imageAnalysisFailed'] == true)
+        'imageNotAnalyzed',
+    ];
   }
 
   /// Builds the map of localised fallback strings used by the agent pipeline
