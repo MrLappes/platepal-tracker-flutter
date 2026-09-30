@@ -1,9 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 
-enum HealthConnectionError { platformNotSupported, permissionDenied, unknown }
+enum HealthConnectionError {
+  platformNotSupported,
+  healthConnectNotInstalled,
+  permissionDenied,
+  unknown,
+}
+
+/// Whether the platform health store can be used right now.
+enum HealthAvailability { available, needsInstall, needsUpdate, unsupported }
 
 class HealthConnectionResult {
   final bool success;
@@ -17,28 +27,100 @@ class HealthConnectionResult {
   });
 }
 
+/// Energy burned on one local day as read from Health, in kcal.
+class DailyEnergyBurned {
+  /// Android TOTAL_CALORIES_BURNED; already includes basal energy.
+  final double total;
+  final double active;
+
+  /// iOS BASAL_ENERGY_BURNED.
+  final double basal;
+
+  const DailyEnergyBurned({this.total = 0, this.active = 0, this.basal = 0});
+
+  /// Total daily expenditure as (kcal, isEstimated), or null without usable
+  /// data. Active energy alone only counts when [estimatedBasal] is given.
+  (double, bool)? totalExpenditure({double? estimatedBasal}) {
+    if (total > 0) return (total, false);
+    if (basal > 0) return (basal + active, false);
+    if (active > 0 && estimatedBasal != null && estimatedBasal > 0) {
+      return (estimatedBasal + active, true);
+    }
+    return null;
+  }
+
+  Map<String, double> toJson() => {
+    'total': total,
+    'active': active,
+    'basal': basal,
+  };
+
+  factory DailyEnergyBurned.fromJson(Map<String, dynamic> json) {
+    double read(String key) => (json[key] as num?)?.toDouble() ?? 0;
+    return DailyEnergyBurned(
+      total: read('total'),
+      active: read('active'),
+      basal: read('basal'),
+    );
+  }
+}
+
 /// Overhauled HealthService – focused on:
-///  • READ  calories burned (ACTIVE_ENERGY_BURNED + TOTAL_CALORIES_BURNED)
+///  • READ  energy burned (Android: total + active, iOS: active + basal)
 ///  • WRITE nutrition records via [writeMealToHealth]
 ///
 /// Auto-sync timer removed – callers trigger syncs on-demand
 /// (app launch, screen visits).
 class HealthService {
-  static final HealthService _instance = HealthService._internal();
+  static final HealthService _instance = HealthService._internal(Health());
   factory HealthService() => _instance;
-  HealthService._internal();
+  HealthService._internal(this._health);
+
+  /// A service backed by [health] instead of the app-wide singleton.
+  @visibleForTesting
+  HealthService.withHealth(Health health) : this._internal(health);
+
+  final Health _health;
+
+  static const _energyCacheKey = 'health_energy_burned';
+  // Old cache stored active energy as if it were total expenditure.
+  static const _legacyCacheKey = 'health_calories_burned';
+
+  /// Local-day key (`yyyy-MM-dd`) used by the energy cache.
+  static String dayKey(DateTime date) {
+    final local = date.toLocal();
+    return DateTime(
+      local.year,
+      local.month,
+      local.day,
+    ).toIso8601String().split('T')[0];
+  }
 
   // ── Data types & permissions ────────────────────────────────────────
-  static const List<HealthDataType> _healthDataTypes = [
-    HealthDataType.ACTIVE_ENERGY_BURNED,
-    HealthDataType.TOTAL_CALORIES_BURNED,
+  bool get _isIOS => defaultTargetPlatform == TargetPlatform.iOS;
+
+  // iOS has no TOTAL_CALORIES_BURNED; Android's basal type is a BMR rate.
+  List<HealthDataType> get _energyTypes =>
+      (_isIOS
+              ? const [
+                HealthDataType.ACTIVE_ENERGY_BURNED,
+                HealthDataType.BASAL_ENERGY_BURNED,
+              ]
+              : const [
+                HealthDataType.TOTAL_CALORIES_BURNED,
+                HealthDataType.ACTIVE_ENERGY_BURNED,
+              ])
+          .where(_health.isDataTypeAvailable)
+          .toList();
+
+  List<HealthDataType> get _healthDataTypes => [
+    ..._energyTypes,
     HealthDataType.NUTRITION,
   ];
 
-  static const List<HealthDataAccess> _permissions = [
-    HealthDataAccess.READ, // ACTIVE_ENERGY_BURNED
-    HealthDataAccess.READ, // TOTAL_CALORIES_BURNED
-    HealthDataAccess.READ_WRITE, // NUTRITION
+  List<HealthDataAccess> get _permissions => [
+    for (final _ in _energyTypes) HealthDataAccess.READ,
+    HealthDataAccess.WRITE, // NUTRITION: meals are only written
   ];
 
   // ── State ───────────────────────────────────────────────────────────
@@ -52,23 +134,44 @@ class HealthService {
 
   // ── Platform availability ───────────────────────────────────────────
 
-  /// Check if health data is supported on this platform
-  Future<bool> isHealthDataAvailable() async {
+  /// Whether Health can be used, or Health Connect must be installed/updated.
+  Future<HealthAvailability> getHealthAvailability() async {
     try {
-      return Health().isDataTypeAvailable(HealthDataType.ACTIVE_ENERGY_BURNED);
+      if (_isIOS) {
+        return _health.isDataTypeAvailable(HealthDataType.ACTIVE_ENERGY_BURNED)
+            ? HealthAvailability.available
+            : HealthAvailability.unsupported;
+      }
+      switch (await _health.getHealthConnectSdkStatus()) {
+        case HealthConnectSdkStatus.sdkAvailable:
+          return HealthAvailability.available;
+        case HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired:
+          return HealthAvailability.needsUpdate;
+        case HealthConnectSdkStatus.sdkUnavailable:
+          return HealthAvailability.needsInstall;
+        case null:
+          return HealthAvailability.unsupported;
+      }
     } catch (e) {
       developer.log(
         'Error checking health data availability: $e',
         name: 'HealthService',
       );
-      return false;
+      return HealthAvailability.unsupported;
     }
   }
+
+  /// Check if health data is supported on this platform
+  Future<bool> isHealthDataAvailable() async =>
+      await getHealthAvailability() == HealthAvailability.available;
+
+  /// Opens the store page to install or update Health Connect (Android).
+  Future<void> installHealthConnect() => _health.installHealthConnect();
 
   /// Check if we have permissions for health data
   Future<bool> hasHealthPermissions() async {
     try {
-      return await Health().hasPermissions(
+      return await _health.hasPermissions(
             _healthDataTypes,
             permissions: _permissions,
           ) ??
@@ -87,7 +190,7 @@ class HealthService {
   /// Request permissions and connect to health data
   Future<bool> connectToHealth() async {
     try {
-      bool authorized = await Health().requestAuthorization(
+      bool authorized = await _health.requestAuthorization(
         _healthDataTypes,
         permissions: _permissions,
       );
@@ -120,9 +223,18 @@ class HealthService {
   /// Request permissions and connect to health data with detailed error info
   Future<HealthConnectionResult> connectToHealthWithDetails() async {
     try {
-      bool available = await isHealthDataAvailable();
+      final availability = await getHealthAvailability();
 
-      if (!available) {
+      if (availability == HealthAvailability.needsInstall ||
+          availability == HealthAvailability.needsUpdate) {
+        return HealthConnectionResult(
+          success: false,
+          error: HealthConnectionError.healthConnectNotInstalled,
+          message: 'Health Connect must be installed or updated',
+        );
+      }
+
+      if (availability != HealthAvailability.available) {
         return HealthConnectionResult(
           success: false,
           error: HealthConnectionError.platformNotSupported,
@@ -130,7 +242,7 @@ class HealthService {
         );
       }
 
-      bool authorized = await Health().requestAuthorization(
+      bool authorized = await _health.requestAuthorization(
         _healthDataTypes,
         permissions: _permissions,
       );
@@ -182,155 +294,91 @@ class HealthService {
     developer.log('Disconnected from health data', name: 'HealthService');
   }
 
-  // ── Calories burned (READ) ──────────────────────────────────────────
+  // ── Energy burned (READ) ────────────────────────────────────────────
 
-  /// Get today's burned calories
-  Future<double?> getTodaysBurnedCalories() async {
-    if (!_isConnected) return null;
+  /// Energy burned per local day between [start] and [end] in one Health
+  /// read. Throws if the read fails.
+  Future<Map<String, DailyEnergyBurned>> readEnergyBurnedByDay(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final points = await _health.getHealthDataFromTypes(
+      types: _energyTypes,
+      startTime: start,
+      endTime: end,
+    );
 
-    try {
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      return await _fetchCaloriesBurnedBetween(startOfDay, now);
-    } catch (e) {
-      developer.log(
-        'Error getting today\'s burned calories: $e',
-        name: 'HealthService',
-      );
-      return null;
+    final total = <String, double>{};
+    final active = <String, double>{};
+    final basal = <String, double>{};
+    for (final point in points) {
+      final kcal = _extractNumericValue(point.value);
+      if (kcal == null) continue;
+      final bucket = switch (point.type) {
+        HealthDataType.TOTAL_CALORIES_BURNED => total,
+        HealthDataType.ACTIVE_ENERGY_BURNED => active,
+        HealthDataType.BASAL_ENERGY_BURNED => basal,
+        _ => null,
+      };
+      if (bucket == null) continue;
+      final key = dayKey(point.dateFrom);
+      bucket[key] = (bucket[key] ?? 0) + kcal;
     }
+
+    return {
+      for (final key in {...total.keys, ...active.keys, ...basal.keys})
+        key: DailyEnergyBurned(
+          total: total[key] ?? 0,
+          active: active[key] ?? 0,
+          basal: basal[key] ?? 0,
+        ),
+    };
   }
 
-  /// Get calories burned for a specific date
-  Future<double?> getCaloriesBurnedForDate(DateTime date) async {
+  /// Energy burned on [date]'s local day; null if not connected, without
+  /// data, or if the read fails.
+  Future<DailyEnergyBurned?> getEnergyBurnedForDate(DateTime date) async {
     if (!_isConnected) return null;
 
     try {
       final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-      return await _fetchCaloriesBurnedBetween(startOfDay, endOfDay);
+      final endOfDay = DateTime(date.year, date.month, date.day + 1);
+      final days = await readEnergyBurnedByDay(startOfDay, endOfDay);
+      return days[dayKey(startOfDay)];
     } catch (e) {
-      developer.log(
-        'Error getting calories burned for date ${date.toIso8601String()}: $e',
-        name: 'HealthService',
-      );
+      developer.log('Error reading energy burned: $e', name: 'HealthService');
       return null;
     }
   }
 
-  /// Smart calorie-burn fetch: prefers TOTAL_CALORIES_BURNED,
-  /// falls back to ACTIVE_ENERGY_BURNED.
-  Future<double?> getCaloriesBurnedForDateSmart(DateTime date) async {
-    if (!_isConnected) return null;
-
-    try {
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-
-      List<HealthDataPoint> healthData = await Health().getHealthDataFromTypes(
-        types: [
-          HealthDataType.ACTIVE_ENERGY_BURNED,
-          HealthDataType.TOTAL_CALORIES_BURNED,
-        ],
-        startTime: startOfDay,
-        endTime: endOfDay,
-      );
-
-      double activeCalories = 0.0;
-      double totalCalories = 0.0;
-
-      for (HealthDataPoint point in healthData) {
-        final numericValue = _extractNumericValue(point.value);
-        if (numericValue != null) {
-          if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
-            activeCalories += numericValue;
-          } else if (point.type == HealthDataType.TOTAL_CALORIES_BURNED) {
-            totalCalories += numericValue;
-          }
-        }
-      }
-
-      developer.log(
-        'Smart calories for ${date.toIso8601String().split('T')[0]}: '
-        'Active=$activeCalories, Total=$totalCalories',
-        name: 'HealthService',
-      );
-
-      if (totalCalories > 0) return totalCalories;
-      if (activeCalories > 0) return activeCalories;
-      return null;
-    } catch (e) {
-      developer.log(
-        'Error getting smart calories for ${date.toIso8601String()}: $e',
-        name: 'HealthService',
-      );
-      return null;
-    }
-  }
-
-  /// Refresh the locally-cached calorie-burn data for the last [days] days.
-  /// Call on app launch & screen visits.
-  Future<Map<String, double>> refreshCaloriesBurnedCache({int days = 7}) async {
+  /// Refresh the locally-cached energy data for the last [days] days and
+  /// today. Returns null if the Health read failed.
+  Future<Map<String, DailyEnergyBurned>?> refreshCaloriesBurnedCache({
+    int days = 7,
+  }) async {
     if (!_isConnected) return {};
 
     try {
       final now = DateTime.now();
-      final startDate = now.subtract(Duration(days: days));
+      final startDate = DateTime(now.year, now.month, now.day - days);
+      final daily = await readEnergyBurnedByDay(startDate, now);
 
-      List<HealthDataPoint> healthData = await Health().getHealthDataFromTypes(
-        types: [
-          HealthDataType.ACTIVE_ENERGY_BURNED,
-          HealthDataType.TOTAL_CALORIES_BURNED,
-        ],
-        startTime: startDate,
-        endTime: now,
-      );
+      await storeEnergyBurned(daily);
 
-      // Bucket active vs total per day
-      Map<String, double> activeCalories = {};
-      Map<String, double> totalCalories = {};
-
-      for (HealthDataPoint point in healthData) {
-        final numericValue = _extractNumericValue(point.value);
-        if (numericValue != null) {
-          String dateKey = point.dateFrom.toIso8601String().split('T')[0];
-          if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
-            activeCalories[dateKey] =
-                (activeCalories[dateKey] ?? 0.0) + numericValue;
-          } else if (point.type == HealthDataType.TOTAL_CALORIES_BURNED) {
-            totalCalories[dateKey] =
-                (totalCalories[dateKey] ?? 0.0) + numericValue;
-          }
-        }
-      }
-
-      // Prefer total, fall back to active
-      Map<String, double> dailyCalories = {};
-      Set<String> allDates = {...activeCalories.keys, ...totalCalories.keys};
-      for (String dateKey in allDates) {
-        double total = totalCalories[dateKey] ?? 0.0;
-        double active = activeCalories[dateKey] ?? 0.0;
-        dailyCalories[dateKey] = total > 0 ? total : active;
-      }
-
-      // Persist
-      await storeCaloriesBurnedData(dailyCalories);
-
-      // Update last sync date
       _lastSyncDate = now;
       await _saveLastSyncDate(now);
 
       developer.log(
-        'Refreshed calorie cache for ${dailyCalories.length} days',
+        'Refreshed energy cache for ${daily.length} days',
         name: 'HealthService',
       );
-      return dailyCalories;
+      return daily;
     } catch (e) {
       developer.log(
         'Error refreshing calorie cache: $e',
         name: 'HealthService',
       );
-      return {};
+      return null;
     }
   }
 
@@ -366,7 +414,7 @@ class HealthService {
       final effectiveEndTime =
           endTime ?? startTime.add(const Duration(minutes: 15));
 
-      final success = await Health().writeMeal(
+      final success = await _health.writeMeal(
         mealType: healthMealType,
         startTime: startTime,
         endTime: effectiveEndTime,
@@ -381,7 +429,7 @@ class HealthService {
       );
 
       developer.log(
-        'writeMealToHealth "$name" ($mealType) – success=$success',
+        'writeMealToHealth ($mealType) – success=$success',
         name: 'HealthService',
       );
       return success;
@@ -391,25 +439,23 @@ class HealthService {
     }
   }
 
-  // ── Local cache for calories burned ─────────────────────────────────
+  // ── Local cache for energy burned ───────────────────────────────────
 
-  /// Store calories burned data locally for persistence
-  Future<void> storeCaloriesBurnedData(Map<String, double> caloriesData) async {
+  /// Merge [days] into the locally persisted energy cache.
+  Future<void> storeEnergyBurned(Map<String, DailyEnergyBurned> days) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Merge with existing stored data so we don't lose older entries
-      final existing = await getStoredCaloriesBurnedData();
-      existing.addAll(caloriesData);
+      final existing = await getStoredEnergyBurned();
+      existing.addAll(days);
 
       await prefs.setString(
-        'health_calories_burned',
-        existing.entries.map((e) => '${e.key}:${e.value}').join(','),
+        _energyCacheKey,
+        jsonEncode({
+          for (final entry in existing.entries)
+            entry.key: entry.value.toJson(),
+        }),
       );
-
-      developer.log(
-        'Stored calories burned data for ${existing.length} days',
-        name: 'HealthService',
-      );
+      await prefs.remove(_legacyCacheKey);
     } catch (e) {
       developer.log(
         'Error storing calories burned data: $e',
@@ -418,25 +464,20 @@ class HealthService {
     }
   }
 
-  /// Get stored calories burned data
-  Future<Map<String, double>> getStoredCaloriesBurnedData() async {
+  /// Locally cached energy burned per day key (see [dayKey]).
+  Future<Map<String, DailyEnergyBurned>> getStoredEnergyBurned() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final storedData = prefs.getString('health_calories_burned');
-
+      final storedData = prefs.getString(_energyCacheKey);
       if (storedData == null || storedData.isEmpty) return {};
 
-      Map<String, double> caloriesData = {};
-      final entries = storedData.split(',');
-
-      for (String entry in entries) {
-        final parts = entry.split(':');
-        if (parts.length == 2) {
-          caloriesData[parts[0]] = double.tryParse(parts[1]) ?? 0.0;
-        }
-      }
-
-      return caloriesData;
+      final decoded = jsonDecode(storedData) as Map<String, dynamic>;
+      return decoded.map(
+        (key, value) => MapEntry(
+          key,
+          DailyEnergyBurned.fromJson(value as Map<String, dynamic>),
+        ),
+      );
     } catch (e) {
       developer.log(
         'Error getting stored calories burned data: $e',
@@ -521,31 +562,6 @@ class HealthService {
   }
 
   // ── Private helpers ─────────────────────────────────────────────────
-
-  /// Fetch and sum calorie-burn data between two timestamps.
-  Future<double?> _fetchCaloriesBurnedBetween(
-    DateTime start,
-    DateTime end,
-  ) async {
-    List<HealthDataPoint> healthData = await Health().getHealthDataFromTypes(
-      types: [
-        HealthDataType.ACTIVE_ENERGY_BURNED,
-        HealthDataType.TOTAL_CALORIES_BURNED,
-      ],
-      startTime: start,
-      endTime: end,
-    );
-
-    double totalCalories = 0.0;
-    for (HealthDataPoint point in healthData) {
-      final numericValue = _extractNumericValue(point.value);
-      if (numericValue != null) {
-        totalCalories += numericValue;
-      }
-    }
-
-    return totalCalories > 0 ? totalCalories : null;
-  }
 
   /// Extract numeric value from HealthValue
   double? _extractNumericValue(HealthValue value) {

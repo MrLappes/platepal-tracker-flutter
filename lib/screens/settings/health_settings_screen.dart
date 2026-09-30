@@ -19,6 +19,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
       CalorieExpenditureService();
 
   bool _isHealthAvailable = false;
+  // Health Connect missing/outdated: connecting offers the install instead.
+  bool _canInstallHealth = false;
   bool _isSyncing = false;
   bool _writeMealsEnabled = true;
   double? _todaysBurnedCalories;
@@ -40,9 +42,10 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
 
   Future<void> _initialize() async {
     await _healthService.loadConnectionStatus();
-    final available = await _healthService.isHealthDataAvailable();
+    final availability = await _healthService.getHealthAvailability();
     final prefs = await SharedPreferences.getInstance();
     final writeMeals = prefs.getBool('health_write_meals_enabled') ?? true;
+    if (!mounted) return;
 
     // Subscribe to connection status changes
     _healthConnectionSubscription = _healthService.connectionStatusStream
@@ -54,7 +57,10 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
         });
 
     setState(() {
-      _isHealthAvailable = available;
+      _isHealthAvailable = availability == HealthAvailability.available;
+      _canInstallHealth =
+          availability == HealthAvailability.needsInstall ||
+          availability == HealthAvailability.needsUpdate;
       _writeMealsEnabled = writeMeals;
     });
 
@@ -65,12 +71,16 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
 
   Future<void> _loadHealthData() async {
     try {
-      final storedData = await _healthService.getStoredCaloriesBurnedData();
-      final todayKey = DateTime.now().toIso8601String().split('T')[0];
-      final todayCalories = storedData[todayKey];
+      final storedData = await _healthService.getStoredEnergyBurned();
+      final today = storedData[HealthService.dayKey(DateTime.now())];
+      final todayCalories =
+          today == null
+              ? null
+              : await _calorieExpenditureService.resolveExpenditure(today);
+      if (!mounted) return;
 
       setState(() {
-        _todaysBurnedCalories = todayCalories;
+        _todaysBurnedCalories = todayCalories?.$1;
         _cachedDaysCount = storedData.length;
       });
     } catch (_) {}
@@ -98,6 +108,21 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
         await _syncHealthData();
       } else {
         switch (result.error) {
+          case HealthConnectionError.healthConnectNotInstalled:
+            _showErrorDialog(
+              AppLocalizations.of(
+                context,
+              ).screensSettingsProfileSettingsHealthNotAvailable,
+              AppLocalizations.of(
+                context,
+              ).screensSettingsProfileSettingsHealthNotAvailableMessage,
+              actionLabel:
+                  AppLocalizations.of(
+                    context,
+                  ).screensSettingsHealthSettingsOpenHealthConnect,
+              onAction: _healthService.installHealthConnect,
+            );
+            break;
           case HealthConnectionError.platformNotSupported:
             _showErrorDialog(
               AppLocalizations.of(
@@ -173,6 +198,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
 
     if (confirmed == true) {
       await _healthService.disconnectFromHealth();
+      if (!mounted) return;
       setState(() {
         _todaysBurnedCalories = null;
         _cachedDaysCount = 0;
@@ -186,7 +212,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
     setState(() => _isSyncing = true);
 
     try {
-      await _healthService.refreshCaloriesBurnedCache();
+      final synced = await _healthService.refreshCaloriesBurnedCache();
+      if (synced == null) throw StateError('Health read failed');
       await _loadHealthData();
 
       if (mounted) {
@@ -222,6 +249,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   Future<void> _toggleWriteMeals(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('health_write_meals_enabled', value);
+    if (!mounted) return;
     setState(() => _writeMealsEnabled = value);
   }
 
@@ -387,7 +415,12 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
     } catch (_) {}
   }
 
-  void _showErrorDialog(String title, String message) {
+  void _showErrorDialog(
+    String title,
+    String message, {
+    String? actionLabel,
+    Future<void> Function()? onAction,
+  }) {
     showDialog(
       context: context,
       builder:
@@ -399,6 +432,14 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(AppLocalizations.of(context).componentsCommonOk),
               ),
+              if (actionLabel != null && onAction != null)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    onAction();
+                  },
+                  child: Text(actionLabel),
+                ),
             ],
           ),
     );
@@ -534,7 +575,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                       )
                       : ElevatedButton.icon(
                         onPressed:
-                            _isSyncing || !_isHealthAvailable
+                            _isSyncing ||
+                                    !(_isHealthAvailable || _canInstallHealth)
                                 ? null
                                 : _connectToHealth,
                         icon:
@@ -558,7 +600,9 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                         ),
                       ),
             ),
-            if (!_isHealthAvailable && !_healthService.isConnected) ...[
+            if (!_isHealthAvailable &&
+                !_canInstallHealth &&
+                !_healthService.isConnected) ...[
               const SizedBox(height: 8),
               Text(
                 AppLocalizations.of(
