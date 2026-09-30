@@ -106,7 +106,10 @@ class ChatAgentService {
       debugPrint('🤖 ChatAgentService: Loaded settings from preferences');
       debugPrint('   Deep search: $_deepSearchEnabled');
     } catch (e) {
-      debugPrint('❌ ChatAgentService: Failed to load settings: $e');
+      // Keep the previously loaded settings instead of resetting to defaults.
+      debugPrint(
+        '❌ ChatAgentService: Failed to load settings (${e.runtimeType})',
+      );
     }
   }
 
@@ -129,6 +132,21 @@ class ChatAgentService {
     if (_supportedLanguages.contains(savedCode)) return savedCode!;
     final deviceCode = deviceLocale.languageCode;
     return _supportedLanguages.contains(deviceCode) ? deviceCode : 'en';
+  }
+
+  /// Reads the saved app locale; a failed read falls back like a missing one.
+  @visibleForTesting
+  static Future<String> loadLanguageCode(Locale deviceLocale) async {
+    String? savedCode;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      savedCode = prefs.getString('app_locale');
+    } catch (e) {
+      debugPrint(
+        '❌ ChatAgentService: Failed to load locale (${e.runtimeType})',
+      );
+    }
+    return resolveLanguageCode(savedCode, deviceLocale);
   }
 
   /// Main entry point for processing chat messages with full agent pipeline
@@ -165,14 +183,9 @@ class ChatAgentService {
     // Read the current app locale so steps can localise the system prompt and
     // fall-back error messages.  SharedPreferences is already loaded by
     // initializeFromPreferences(), so this is essentially free.
-    String languageCode = 'en';
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      languageCode = resolveLanguageCode(
-        prefs.getString('app_locale'),
-        PlatformDispatcher.instance.locale,
-      );
-    } catch (_) {}
+    final languageCode = await loadLanguageCode(
+      PlatformDispatcher.instance.locale,
+    );
     debugPrint('   Language code: $languageCode');
 
     // Get the appropriate pipeline configuration based on settings
