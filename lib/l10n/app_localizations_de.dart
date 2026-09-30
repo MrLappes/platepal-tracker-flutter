@@ -2471,4 +2471,140 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback =>
       'Nährwerte eingeben, um die Analyse und Empfehlungen zu sehen.';
+
+  @override
+  String get screensSettingsProfileSettingsPhysicalStats => 'Körperdaten';
+
+  @override
+  String get screensSettingsProfileSettingsBodyFatOptional =>
+      'Körperfett % (optional)';
+
+  @override
+  String get screensSettingsProfileSettingsNameHint => 'Namen eingeben';
+
+  @override
+  String get screensSettingsProfileSettingsCustomizeMacroRatios =>
+      'Makronährstoffverteilung anpassen';
+
+  @override
+  String get screensSettingsProfileSettingsImperialHeightRange =>
+      'Die Größe muss zwischen 39 und 98 Zoll liegen';
+
+  @override
+  String get screensSettingsProfileSettingsImperialWeightRange =>
+      'Das Gewicht muss zwischen 66 und 660 lb liegen';
+
+  @override
+  String get screensSettingsProfileSettingsValidNumber =>
+      'Bitte eine gültige Zahl eingeben';
+
+  @override
+  String get screensSettingsProfileSettingsBodyFatRange =>
+      'Der Körperfettanteil muss zwischen 3 % und 50 % liegen';
+
+  @override
+  String get screensSettingsProfileSettingsBaseMetabolicRate => 'Grundumsatz';
+
+  @override
+  String get screensSettingsProfileSettingsTotalDailyEnergy =>
+      'Täglicher Gesamtenergiebedarf';
+
+  @override
+  String get screensSettingsProfileSettingsResettingAppData =>
+      'App-Daten werden zurückgesetzt...';
+
+  @override
+  String screensSettingsProfileSettingsLoadFailed(String error) {
+    return 'Profildaten konnten nicht geladen werden: $error';
+  }
+
+  @override
+  String screensSettingsProfileSettingsUpdateFailed(String error) {
+    return 'Profil konnte nicht aktualisiert werden: $error';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationDailyCalories(String calories) {
+    return 'Tägliche Kalorien: $calories kcal';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationMacroRatios =>
+      'Makronährstoffverteilung';
+
+  @override
+  String get screensSettingsMacroCustomizationFiberTarget => 'Ballaststoffziel';
+
+  @override
+  String get screensSettingsMacroCustomizationTargetPreview => 'Zielvorschau';
+
+  @override
+  String get screensSettingsMacroCustomizationQuickPresets => 'Schnellvorlagen';
+
+  @override
+  String screensSettingsMacroCustomizationTotalRatio(String value) {
+    return 'Gesamt: $value %';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationPinMacro(String macro) {
+    return '$macro fixieren';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationUnpinMacro(String macro) {
+    return 'Fixierung aufheben: $macro';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationPinnedValue =>
+      'Fixiert: Wert gesperrt';
+
+  @override
+  String get screensSettingsMacroCustomizationTooManyPins =>
+      'Keine Anpassung möglich: zu viele Werte fixiert';
+
+  @override
+  String screensSettingsMacroCustomizationFiberTotal(String grams) {
+    return 'Insgesamt $grams g';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationFiberPer1000Calories(String grams) {
+    return '$grams g pro 1000 Kalorien';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationFiberGuidance =>
+      'Empfehlung: 14 g pro 1000 Kalorien (FDA-Richtlinie). Bereich: 5-35 g pro 1000 Kalorien';
+
+  @override
+  String get screensSettingsMacroCustomizationDailyMacroTargets =>
+      'Tägliche Makronährstoffziele';
+
+  @override
+  String get screensSettingsMacroCustomizationPresetDescription =>
+      'Wähle eine gängige Makronährstoffverteilung';
+
+  @override
+  String get screensSettingsMacroCustomizationBalancedPreset =>
+      'Ausgewogen (30P / 40K / 30F)';
+
+  @override
+  String get screensSettingsMacroCustomizationHighProteinPreset =>
+      'Proteinreich (40P / 30K / 30F)';
+
+  @override
+  String get screensSettingsMacroCustomizationProfileNotFound =>
+      'Profil nicht gefunden. Bitte richte dein Profil ein.';
+
+  @override
+  String screensSettingsMacroCustomizationLoadFailed(String error) {
+    return 'Profil konnte nicht geladen werden: $error';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationSaveFailed(String error) {
+    return 'Makronährstoffziele konnten nicht gespeichert werden: $error';
+  }
 }

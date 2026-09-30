@@ -225,9 +225,6 @@ class _MacroSummaryState extends State<MacroSummary> {
   }
 
   Widget _buildCaloriesBar(BuildContext context, AppLocalizations l10n) {
-    // Use calories burned as max if available, otherwise use calorie target
-    final double? maxCalories = widget.caloriesBurned ?? widget.calorieTarget;
-
     return Column(
       children: [
         Row(
@@ -236,9 +233,9 @@ class _MacroSummaryState extends State<MacroSummary> {
               child: _buildMacroBar(
                 label: l10n.componentsCalendarMacroSummaryCalories,
                 current: widget.calories,
-                target: maxCalories,
+                target: widget.calorieTarget,
                 unit: '',
-                color: _getCaloriesColor(widget.calories, maxCalories),
+                color: _getCaloriesColor(widget.calories, widget.calorieTarget),
                 context: context,
               ),
             ),
