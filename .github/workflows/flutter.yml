@@ -1,41 +1,42 @@
 name: Flutter CI
 
+# Pull requests and pushes only run checks; no secrets are available to them.
+# Signing and Google Play upload run only for version tags (v*) or a manual start,
+# inside the protected "release" environment.
 on:
   push:
     branches: ["main"]
     tags: ["v*"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Google Play track
+        type: choice
+        options: [internal, alpha, beta, production]
+        default: internal
+
+permissions:
+  contents: read
 
 jobs:
-  build-test-and-maybe-release:
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Java (Android)
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          distribution: temurin
-          java-version: "17"
+          persist-credentials: false
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
           cache: true
 
-      - name: Flutter Pub Get
-        run: flutter pub get
-
-      - name: Generate localization (gen-l10n)
-        run: flutter gen-l10n
-
-      - name: Analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests (if present)
         run: |
@@ -45,39 +46,99 @@ jobs:
             echo "No tests found, skipping."
           fi
 
-      - name: Restore keystore
+  release:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter gen-l10n
+
+      - name: Version
+        id: version
+        env:
+          OFFSET: ${{ vars.VERSION_CODE_OFFSET || '100' }}
+        run: |
+          name=$(sed -nE 's/^version: *([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' pubspec.yaml)
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then name="${GITHUB_REF_NAME#v}"; fi
+          if ! [[ "$name" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version '$name' is not MAJOR.MINOR.PATCH"; exit 1
+          fi
+          [[ "$OFFSET" =~ ^[0-9]+$ ]] || { echo "::error::VERSION_CODE_OFFSET must be a number"; exit 1; }
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=$((OFFSET + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+      - name: Signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          for v in KEYSTORE_BASE64 KEY_STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [[ -n "${!v}" ]] || { echo "::error::Secret for $v is missing"; exit 1; }
+          done
           mkdir -p android/app/credentials/android
-          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/credentials/android/keystore.jks
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/credentials/android/keystore.jks
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=credentials/android/keystore.jks\n' \
+            "$KEY_STORE_PASSWORD" "$KEY_PASSWORD" "$KEY_ALIAS" > android/key.properties
 
-      - name: Write key.properties
+      - name: Build APKs and app bundle
+        env:
+          NAME: ${{ steps.version.outputs.name }}
+          CODE: ${{ steps.version.outputs.code }}
         run: |
-          cat > android/key.properties <<EOF
-          storePassword=${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=credentials/android/keystore.jks
-          EOF
+          flutter build apk --split-per-abi --release --build-name="$NAME" --build-number="$CODE"
+          flutter build appbundle --release --build-name="$NAME" --build-number="$CODE"
 
-      - name: Build APK (per-ABI)
-        run: flutter build apk --split-per-abi --release
+      - name: Refuse debug-signed bundle
+        run: |
+          if keytool -printcert -jarfile build/app/outputs/bundle/release/app-release.aab | grep -q "CN=Android Debug"; then
+            echo "::error::Bundle is signed with the debug key"; exit 1
+          fi
 
-      - name: Build AAB
-        run: flutter build appbundle --release
+      - name: Remove signing material
+        if: always()
+        run: rm -rf android/app/credentials android/key.properties
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: android-artifacts
+          name: android-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
           path: |
             build/app/outputs/flutter-apk/*.apk
             build/app/outputs/bundle/release/*.aab
+          retention-days: 30
+
+      - uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.platepal.platepaltracker
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track || vars.PLAY_TRACK || 'internal' }}
+          status: ${{ vars.PLAY_RELEASE_STATUS || 'completed' }}
+          releaseName: ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           files: |
             build/app/outputs/flutter-apk/*.apk
