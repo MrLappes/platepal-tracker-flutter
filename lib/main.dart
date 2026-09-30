@@ -21,6 +21,7 @@ import 'screens/settings/export_data_screen.dart';
 import 'screens/settings/import_data_screen.dart';
 import 'screens/settings/chat_agent_settings_screen.dart';
 import 'screens/settings/health_settings_screen.dart';
+import 'screens/settings/privacy_policy_screen.dart';
 import 'providers/meal_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -120,6 +121,10 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const DishCreateScreenAdvanced(),
     ),
     GoRoute(path: '/menu', builder: (context, state) => const MenuScreen()),
+    GoRoute(
+      path: '/privacy',
+      builder: (context, state) => const PrivacyPolicyScreen(),
+    ),
     GoRoute(
       path: '/calendar',
       builder: (context, state) => const CalendarScreen(),

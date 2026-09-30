@@ -754,29 +754,13 @@
   "@componentsChatMessageBubbleYesterday": {
     "description": "Ayer"
   },
-  "componentsChatNutritionAnalysisCardAddToMeals": "Agregar a Comidas",
-  "@componentsChatNutritionAnalysisCardAddToMeals": {
-    "description": "Agregar a Comidas"
-  },
-  "componentsChatNutritionAnalysisCardCookingInstructions": "Instrucciones de Cocina",
-  "@componentsChatNutritionAnalysisCardCookingInstructions": {
-    "description": "Instrucciones de Cocina"
-  },
   "componentsChatNutritionAnalysisCardDishName": "Nombre del Plato",
   "@componentsChatNutritionAnalysisCardDishName": {
     "description": "Nombre del Plato"
   },
-  "componentsChatNutritionAnalysisCardMealType": "Tipo de Comida",
-  "@componentsChatNutritionAnalysisCardMealType": {
-    "description": "Tipo de Comida"
-  },
   "componentsChatNutritionAnalysisCardNutritionAnalysis": "Análisis Nutricional",
   "@componentsChatNutritionAnalysisCardNutritionAnalysis": {
     "description": "Análisis Nutricional"
-  },
-  "componentsChatNutritionAnalysisCardServingSize": "Tamaño de Porción",
-  "@componentsChatNutritionAnalysisCardServingSize": {
-    "description": "Tamaño de Porción"
   },
   "componentsChatQuickActionsQuickActions": "Acciones Rápidas",
   "@componentsChatQuickActionsQuickActions": {
@@ -1284,10 +1268,6 @@
   },
   "providersStorageError": "No se pudieron cargar tus datos.",
   "providersStorageRetry": "Reintentar",
-  "screensHomeWelcomeToPlatePalTracker": "Bienvenido a PlatePal Tracker",
-  "@screensHomeWelcomeToPlatePalTracker": {
-    "description": "Welcome message for PlatePal Tracker"
-  },
   "screensMealsAddedToFavorites": "Agregado a favoritos",
   "@screensMealsAddedToFavorites": {
     "description": "Agregado a favoritos"
@@ -1481,6 +1461,122 @@
   "screensMenuViewStatistics": "Ver Estadísticas",
   "@screensMenuViewStatistics": {
     "description": "Ver Estadísticas"
+  },
+  "screensPrivacyTitle": "Política de privacidad",
+  "@screensPrivacyTitle": {
+    "description": "Título de la política de privacidad en la aplicación"
+  },
+  "screensPrivacyEffectiveDate": "Fecha de entrada en vigor: 2026-09-30",
+  "@screensPrivacyEffectiveDate": {
+    "description": "Fecha de entrada en vigor de la política de privacidad"
+  },
+  "screensPrivacyOverviewTitle": "En resumen",
+  "@screensPrivacyOverviewTitle": {
+    "description": "Título del resumen de la política de privacidad"
+  },
+  "screensPrivacyOverviewBody": "PlatePal Tracker es una aplicación de seguimiento nutricional que funciona principalmente sin conexión. No operamos servidores para tus datos ni exigimos una cuenta, y la aplicación no incluye herramientas de análisis, publicidad ni rastreo. Las funciones de red opcionales que se describen a continuación contactan con sus proveedores cuando las usas.",
+  "@screensPrivacyOverviewBody": {
+    "description": "Resumen de la política de privacidad"
+  },
+  "screensPrivacyStorageTitle": "Datos en tu dispositivo",
+  "@screensPrivacyStorageTitle": {
+    "description": "Título de la sección de almacenamiento local"
+  },
+  "screensPrivacyStorageBody": "Los platos, registros de comidas, datos de perfil (incluidas las medidas corporales), objetivos, historial del chat y ajustes se guardan en tu dispositivo mediante SQLite o SharedPreferences. Las fotos de alimentos guardadas también pueden conservarse en el almacenamiento de la aplicación. La clave API que introduces se guarda en el almacenamiento seguro del sistema; las claves antiguas de SharedPreferences se migran cuando es posible.",
+  "@screensPrivacyStorageBody": {
+    "description": "Almacenamiento local y tratamiento de la clave API"
+  },
+  "screensPrivacyAiTitle": "Chat con IA",
+  "@screensPrivacyAiTitle": {
+    "description": "Título de la sección del chat con IA opcional"
+  },
+  "screensPrivacyAiBody": "El chat con IA es opcional y requiere tu propia clave API. Al usarlo, tus mensajes, imágenes adjuntas y, cuando corresponde, el historial de la conversación, tu perfil, registros de comidas o resúmenes nutricionales y platos guardados se envían a OpenAI o al servicio compatible con OpenAI que hayas configurado. La clave se envía a ese proveedor para autenticarte. Ese proveedor trata la información según su propia política de privacidad; elige uno en quien confíes. Nosotros no recibimos esas solicitudes.",
+  "@screensPrivacyAiBody": {
+    "description": "Datos enviados al proveedor de IA"
+  },
+  "screensPrivacyFoodFactsTitle": "Open Food Facts",
+  "@screensPrivacyFoodFactsTitle": {
+    "description": "Nombre del servicio Open Food Facts"
+  },
+  "screensPrivacyFoodFactsBody": "Al buscar alimentos o escanear un código de barras, la aplicación envía el texto de búsqueda o el número del código y los filtros elegidos a world.openfoodfacts.org. También puede descargar información e imágenes de productos de Open Food Facts.",
+  "@screensPrivacyFoodFactsBody": {
+    "description": "Datos enviados al buscar alimentos"
+  },
+  "screensPrivacyHealthTitle": "Health Connect y Apple Health",
+  "@screensPrivacyHealthTitle": {
+    "description": "Título de la sección de salud"
+  },
+  "screensPrivacyHealthBody": "Con tu permiso, la aplicación lee las calorías quemadas (totales y activas en Android; activas y basales en iOS) de Health Connect o Apple Health y escribe allí los datos nutricionales de las comidas que registras. Las lecturas se guardan temporalmente en este dispositivo y se usan para cálculos de energía y objetivos dentro de la aplicación; no se incluyen en las solicitudes a la IA ni se envían a un servidor del desarrollador. Health Connect y Apple Health gestionan sus propios registros.",
+  "@screensPrivacyHealthBody": {
+    "description": "Acceso a datos de salud y uso local"
+  },
+  "screensPrivacyExternalTitle": "Enlaces e imágenes externos",
+  "@screensPrivacyExternalTitle": {
+    "description": "Título de la sección de contenido externo"
+  },
+  "screensPrivacyExternalBody": "La pantalla de colaboradores carga avatares de avatars.githubusercontent.com, de GitHub. Al abrir GitHub, la política en línea, otros sitios externos o imágenes de productos remotas, contactas con esos servicios, que pueden conocer tu dirección IP y tratar las solicitudes según sus propias políticas.",
+  "@screensPrivacyExternalBody": {
+    "description": "Imágenes y enlaces de terceros"
+  },
+  "screensPrivacyExportTitle": "Exportación e importación",
+  "@screensPrivacyExportTitle": {
+    "description": "Título de la sección de exportación e importación"
+  },
+  "screensPrivacyExportBody": "Los archivos de exportación (JSON o CSV) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.",
+  "@screensPrivacyExportBody": {
+    "description": "Exportación, importación y copias previas"
+  },
+  "screensPrivacyBackupTitle": "Copia de seguridad de Android",
+  "@screensPrivacyBackupTitle": {
+    "description": "Título de la sección de copias de seguridad de Android"
+  },
+  "screensPrivacyBackupBody": "La copia de seguridad del sistema Android puede copiar la base de datos y las preferencias de la aplicación, incluidos los registros de chat y las calorías de salud guardadas temporalmente, a tu cuenta de Google o transferirlas a otro dispositivo. Las reglas excluyen los archivos de preferencias del almacenamiento seguro, pero una clave API antigua puede permanecer en otras preferencias hasta su migración. Revisa los ajustes de copia de seguridad de Android para controlarlo.",
+  "@screensPrivacyBackupBody": {
+    "description": "Posibles copias en Google de los datos de la aplicación"
+  },
+  "screensPrivacyDeletionTitle": "Eliminar tus datos",
+  "@screensPrivacyDeletionTitle": {
+    "description": "Título de la sección de eliminación de datos"
+  },
+  "screensPrivacyDeletionBody": "En Perfil, Restablecer la aplicación elimina la base de datos SQLite, SharedPreferences y la clave API guardada en este dispositivo. Desinstalarla elimina los datos privados de la aplicación. Restablecerla no elimina las imágenes guardadas, archivos exportados o copias previas a una importación, copias compartidas en otros lugares, registros ya escritos en Health Connect o Apple Health ni copias del sistema; bórralos por separado cuando corresponda.",
+  "@screensPrivacyDeletionBody": {
+    "description": "Restablecer, desinstalar y copias restantes"
+  },
+  "screensPrivacyChildrenTitle": "Menores",
+  "@screensPrivacyChildrenTitle": {
+    "description": "Título de la sección de privacidad de menores"
+  },
+  "screensPrivacyChildrenBody": "PlatePal Tracker no está destinada a menores. La aplicación no verifica la edad; madres, padres o tutores deben supervisar su uso, especialmente antes de activar servicios externos o compartir información sensible.",
+  "@screensPrivacyChildrenBody": {
+    "description": "Aviso de privacidad para menores"
+  },
+  "screensPrivacyChangesTitle": "Cambios en esta política",
+  "@screensPrivacyChangesTitle": {
+    "description": "Título de la sección de cambios"
+  },
+  "screensPrivacyChangesBody": "Podemos actualizar esta política cuando cambie la aplicación. La fecha de entrada en vigor indicada arriba corresponde a esta versión; consulta la política vigente en la aplicación o en el repositorio de GitHub.",
+  "@screensPrivacyChangesBody": {
+    "description": "Cómo consultar cambios en la política"
+  },
+  "screensPrivacyContactTitle": "Contacto",
+  "@screensPrivacyContactTitle": {
+    "description": "Título de la sección de contacto sobre privacidad"
+  },
+  "screensPrivacyContactBody": "Si tienes preguntas sobre privacidad, abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.",
+  "@screensPrivacyContactBody": {
+    "description": "Cómo contactar con el proyecto sobre privacidad"
+  },
+  "screensPrivacyMenuSubtitle": "Qué datos salen del dispositivo y cómo controlarlos",
+  "@screensPrivacyMenuSubtitle": {
+    "description": "Subtítulo de la opción de privacidad en el menú"
+  },
+  "screensPrivacyViewOnline": "Ver en línea",
+  "@screensPrivacyViewOnline": {
+    "description": "Botón para abrir la política en GitHub"
+  },
+  "screensPrivacyLinkError": "No se pudo abrir la política de privacidad.",
+  "@screensPrivacyLinkError": {
+    "description": "Error al abrir la política de privacidad en línea"
   },
   "screensSettingsAboutAboutAppTitle": "Acerca de la Aplicación",
   "@screensSettingsAboutAboutAppTitle": {

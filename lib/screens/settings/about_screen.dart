@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../utils/link_handler.dart';
@@ -149,6 +150,13 @@ class _AboutScreenState extends State<AboutScreen>
                 Icons.public, 
                 localizations.screensSettingsIndustrialOfficialDomain, 
                 () => LinkHandler.openPlatePalWebsite(context)
+              ),
+              const SizedBox(height: 12),
+              _buildLinkCard(
+                context,
+                Icons.privacy_tip_outlined,
+                localizations.screensPrivacyTitle,
+                () => context.push('/privacy'),
               ),
               
               const SizedBox(height: 40),
