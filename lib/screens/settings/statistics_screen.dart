@@ -987,7 +987,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     value:
                         _currentBodyFat != null
                             ? '${_currentBodyFat!.toStringAsFixed(1)}%'
-                            : '-',
+                        : l10n.utilsLinkHandlerNotAvailable,
                   ),
                 ),
               ],
@@ -1041,6 +1041,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildTimeRangeSelector(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -1054,11 +1055,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: _selectedTimeRange,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                fillColor: colorScheme.surface,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
@@ -1126,8 +1126,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
                 Tooltip(
                   message: tooltipText,
                   child: const Icon(Icons.info_outline, size: 18),
@@ -1144,6 +1148,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildWeightChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     if (_metricsHistory.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable),
@@ -1174,8 +1179,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           dateKey: 'recorded_date',
           minValue: _minWeight,
           maxValue: _maxWeight,
-          lineColor: Colors.blue,
-          pointColor: Colors.blue.shade800,
+          lineColor: colorScheme.primary,
+          pointColor: colorScheme.primary,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -1183,6 +1190,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildBMIChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     if (_metricsHistory.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoBmiDataAvailable),
@@ -1230,6 +1238,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           maxValue: _maxBMI,
           lineColor: Colors.green,
           pointColor: Colors.green.shade800,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
           referenceLines: [
             ReferenceLine(
               value: 18.5,
@@ -1254,6 +1264,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildBodyFatChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final bodyFatData =
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
@@ -1279,8 +1290,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           dateKey: 'recorded_date',
           minValue: _minBodyFat,
           maxValue: _maxBodyFat,
-          lineColor: Colors.purple,
-          pointColor: Colors.purple.shade800,
+          lineColor: colorScheme.primary,
+          pointColor: colorScheme.primary,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -1288,6 +1301,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildCalorieChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoCalorieDataAvailable),
@@ -1312,6 +1326,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           minValue: _minCalories,
           maxValue: _maxCalories,
           maintenanceLabel: l10n.screensSettingsStatisticsMaintenance,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -1760,6 +1776,8 @@ class LineChartPainter extends CustomPainter {
   final double maxValue;
   final Color lineColor;
   final Color pointColor;
+  final Color axisColor;
+  final Color labelColor;
   final List<ReferenceLine>? referenceLines;
 
   LineChartPainter({
@@ -1770,6 +1788,8 @@ class LineChartPainter extends CustomPainter {
     required this.maxValue,
     required this.lineColor,
     required this.pointColor,
+    this.axisColor = Colors.grey,
+    this.labelColor = Colors.grey,
     this.referenceLines,
   });
 
@@ -1788,7 +1808,7 @@ class LineChartPainter extends CustomPainter {
     // Draw X and Y axis
     final axisPaint =
         Paint()
-          ..color = Colors.grey
+          ..color = axisColor
           ..strokeWidth = 1;
 
     canvas.drawLine(
@@ -1981,13 +2001,13 @@ class LineChartPainter extends CustomPainter {
       canvas.drawLine(
         Offset(horizontalPadding - 5, yPos),
         Offset(horizontalPadding, yPos),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: value.toStringAsFixed(1),
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(
@@ -2062,13 +2082,13 @@ class LineChartPainter extends CustomPainter {
       canvas.drawLine(
         Offset(xPos, yPos),
         Offset(xPos, yPos + 5),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: dateLabel,
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(canvas, Offset(xPos - textPainter.width / 2, yPos + 8));
@@ -2079,7 +2099,11 @@ class LineChartPainter extends CustomPainter {
   bool shouldRepaint(LineChartPainter oldDelegate) {
     return oldDelegate.data != data ||
         oldDelegate.minValue != minValue ||
-        oldDelegate.maxValue != maxValue;
+        oldDelegate.maxValue != maxValue ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.pointColor != pointColor ||
+        oldDelegate.axisColor != axisColor ||
+        oldDelegate.labelColor != labelColor;
   }
 }
 
@@ -2102,6 +2126,8 @@ class CalorieChartPainter extends CustomPainter {
   final double minValue;
   final double maxValue;
   final String maintenanceLabel;
+  final Color axisColor;
+  final Color labelColor;
 
   CalorieChartPainter({
     required this.data,
@@ -2109,6 +2135,8 @@ class CalorieChartPainter extends CustomPainter {
     required this.minValue,
     required this.maxValue,
     required this.maintenanceLabel,
+    this.axisColor = Colors.grey,
+    this.labelColor = Colors.grey,
   });
 
   @override
@@ -2310,13 +2338,13 @@ class CalorieChartPainter extends CustomPainter {
       canvas.drawLine(
         Offset(horizontalPadding - 5, yPos),
         Offset(horizontalPadding, yPos),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: '${value.round()}',
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(
@@ -2391,13 +2419,13 @@ class CalorieChartPainter extends CustomPainter {
       canvas.drawLine(
         Offset(xPos, yPos),
         Offset(xPos, yPos + 5),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: dateLabel,
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(canvas, Offset(xPos - textPainter.width / 2, yPos + 8));
@@ -2410,6 +2438,8 @@ class CalorieChartPainter extends CustomPainter {
         oldDelegate.maintenanceCalories != maintenanceCalories ||
         oldDelegate.minValue != minValue ||
       oldDelegate.maxValue != maxValue ||
-      oldDelegate.maintenanceLabel != maintenanceLabel;
+      oldDelegate.maintenanceLabel != maintenanceLabel ||
+      oldDelegate.axisColor != axisColor ||
+      oldDelegate.labelColor != labelColor;
   }
 }
