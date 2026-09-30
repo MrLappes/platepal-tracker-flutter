@@ -96,9 +96,7 @@ class ContextGatheringStep extends AgentStep {
                     }
                   }
                 } catch (e) {
-                  debugPrint(
-                    '⚠️ Failed to search dishes for term "$searchTerm": $e',
-                  );
+                  debugPrint('⚠️ Failed to search dishes by name: $e');
                 }
               }
             }
@@ -118,9 +116,7 @@ class ContextGatheringStep extends AgentStep {
                     }
                   }
                 } catch (e) {
-                  debugPrint(
-                    '⚠️ Failed to search ingredients for term "$searchTerm": $e',
-                  );
+                  debugPrint('⚠️ Failed to search dishes by ingredient: $e');
                 }
               }
             }
@@ -129,9 +125,9 @@ class ContextGatheringStep extends AgentStep {
             dishes = searchResults.take(10).toList();
 
             debugPrint(
-              '📊 Found ${dishes.length} dishes using search terms: '
-              'dishes=${contextRequirements.dishSearchTerms}, '
-              'ingredients=${contextRequirements.ingredientSearchTerms}',
+              '📊 Found ${dishes.length} dishes using '
+              '${contextRequirements.dishSearchTerms?.length ?? 0} dish and '
+              '${contextRequirements.ingredientSearchTerms?.length ?? 0} ingredient search terms',
             );
           } else {
             // Fallback to all dishes if no search terms provided
@@ -147,18 +143,8 @@ class ContextGatheringStep extends AgentStep {
             gatheredContextData['existingDishes'] =
                 dishes.map((d) => d.toJson()).toList();
             debugPrint('📊 Added ${dishes.length} existing dishes to context');
-
-            // Log first few dish names for debugging
-            final dishNames = dishes.take(3).map((d) => d.name).join(', ');
-            debugPrint(
-              '📊 Sample dish names: $dishNames${dishes.length > 3 ? ' and ${dishes.length - 3} more...' : ''}',
-            );
           } else {
             debugPrint('⚠️ No existing dishes found matching search criteria');
-            // Log the search terms that were used
-            debugPrint(
-              '⚠️ Search terms used - dishes: ${contextRequirements.dishSearchTerms}, ingredients: ${contextRequirements.ingredientSearchTerms}',
-            );
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get dishes: $e');

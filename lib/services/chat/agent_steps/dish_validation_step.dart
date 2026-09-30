@@ -85,7 +85,7 @@ class DishValidationStep extends AgentStep {
           final storageDish = await ds.getDishById(dish.id);
           if (storageDish != null) {
             debugPrint(
-              '⏭️ DB-backed dish found, skipping validation and using DB data: ${storageDish.name} (ID: ${storageDish.id})',
+              '⏭️ DB-backed dish found, skipping validation (ID: ${storageDish.id})',
             );
 
             // Convert storage Dish -> ProcessedDish
@@ -158,7 +158,7 @@ class DishValidationStep extends AgentStep {
         }
 
         // Validate and potentially edit newly created dish
-        debugPrint('🔍 Validating newly created dish: ${dish.name}');
+        debugPrint('🔍 Validating newly created dish (ID: ${dish.id})');
 
         // First, check for obvious nutrition issues and fix them automatically
         dish = _performQuickFixes(dish);
@@ -332,7 +332,7 @@ class DishValidationStep extends AgentStep {
       try {
         validationData = jsonDecode(content) as Map<String, dynamic>;
       } catch (e) {
-        debugPrint('❌ Failed to parse validation JSON: $e');
+        debugPrint('❌ Failed to parse validation JSON (${e.runtimeType})');
         return {
           'success': false,
           'error': 'Invalid JSON response from validation',
@@ -407,9 +407,7 @@ class DishValidationStep extends AgentStep {
         case 'name':
           if (newValue is String && newValue.trim().isNotEmpty) {
             editedDish = editedDish.copyWith(name: newValue.trim());
-            debugPrint(
-              '✏️ Edited dish name: ${dish.name} → ${newValue.trim()}',
-            );
+            debugPrint('✏️ Edited dish name');
 
             _modificationTracker.recordAiValidation(
               stepName: stepName,
@@ -674,7 +672,7 @@ class DishValidationStep extends AgentStep {
       try {
         filteringData = jsonDecode(content) as Map<String, dynamic>;
       } catch (e) {
-        debugPrint('❌ Failed to parse filtering JSON: $e');
+        debugPrint('❌ Failed to parse filtering JSON (${e.runtimeType})');
         return {
           'dishes': dishes,
           'filteredOut': <ProcessedDish>[],
@@ -689,7 +687,7 @@ class DishValidationStep extends AgentStep {
           filteringData['reasoning'] as String? ?? 'No reasoning provided';
 
       if (!shouldFilter || relevantDishIds.isEmpty) {
-        debugPrint('🎯 AI determined no filtering needed: $reasoning');
+        debugPrint('🎯 AI determined no filtering needed');
         return {
           'dishes': dishes,
           'filteredOut': <ProcessedDish>[],
@@ -716,7 +714,6 @@ class DishValidationStep extends AgentStep {
         debugPrint(
           '   Filtered out: ${filteredOutDishes.length} less relevant dishes',
         );
-        debugPrint('   Reasoning: $reasoning');
 
         // Track this as a pipeline modification
         _modificationTracker.recordModification(
@@ -725,7 +722,7 @@ class DishValidationStep extends AgentStep {
           stepName: stepName,
           description: 'AI filtered dishes for context optimization',
           technicalDetails:
-              'Kept ${filteredDishes.length}/${dishes.length} dishes. Reasoning: $reasoning',
+              'Kept ${filteredDishes.length}/${dishes.length} dishes',
           beforeData: {
             'dishCount': dishes.length,
             'dishNames': dishes.map((d) => d.name).toList(),
@@ -734,6 +731,7 @@ class DishValidationStep extends AgentStep {
             'dishCount': filteredDishes.length,
             'dishNames': filteredDishes.map((d) => d.name).toList(),
             'filteredOutNames': filteredOutDishes.map((d) => d.name).toList(),
+            'reasoning': reasoning,
           },
         );
 

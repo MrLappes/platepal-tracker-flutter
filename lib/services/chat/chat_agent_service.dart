@@ -4,6 +4,8 @@ import 'dart:ui' show Locale, PlatformDispatcher;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/chat_types.dart';
+import '../../models/dish.dart';
+import '../../models/dish_models.dart';
 import '../../models/user_ingredient.dart';
 import '../../repositories/dish_repository.dart';
 import '../../repositories/meal_repository.dart';
@@ -901,7 +903,7 @@ class ChatAgentService {
           return ChatResponse(
             replyText: finalResponse,
             recommendation: recommendation,
-            dishes: extractedDishes.cast(),
+            dishes: _toDishes(extractedDishes),
             metadata: {
               'processingTime': duration.inMilliseconds,
               'mode': 'full_agent_pipeline',
@@ -1183,7 +1185,7 @@ class ChatAgentService {
     return ChatResponse(
       replyText: finalResponse,
       recommendation: recommendation,
-      dishes: extractedDishes.cast(),
+      dishes: _toDishes(extractedDishes),
       metadata: {
         'processingTime': duration.inMilliseconds,
         'mode': 'full_agent_pipeline',
@@ -1240,6 +1242,49 @@ class ChatAgentService {
     );
     return hasDishes;
   }
+
+  /// Dish steps produce [ProcessedDish]es; [ChatResponse.dishes] holds [Dish]es.
+  static List<Dish> _toDishes(List<dynamic> dishes) => [
+    for (final dish in dishes)
+      if (dish is Dish)
+        dish
+      else if (dish is ProcessedDish)
+        _processedToDish(dish),
+  ];
+
+  static NutritionInfo _toNutritionInfo(BasicNutrition n) => NutritionInfo(
+    calories: n.calories,
+    protein: n.protein,
+    carbs: n.carbs,
+    fat: n.fat,
+    fiber: n.fiber,
+    sugar: n.sugar,
+    sodium: n.sodium,
+  );
+
+  static Dish _processedToDish(ProcessedDish dish) => Dish(
+    id: dish.id,
+    name: dish.name,
+    description: dish.description,
+    imageUrl: dish.imageUrl,
+    ingredients: [
+      for (final ing in dish.ingredients)
+        Ingredient(
+          id: ing.id,
+          name: ing.name,
+          amount: ing.amount,
+          unit: ing.unit,
+          nutrition:
+              ing.nutrition == null ? null : _toNutritionInfo(ing.nutrition!),
+          barcode: ing.barcode,
+        ),
+    ],
+    nutrition: _toNutritionInfo(dish.totalNutrition),
+    createdAt: dish.createdAt,
+    updatedAt: dish.updatedAt,
+    isFavorite: dish.isFavorite,
+    category: dish.mealType?.name,
+  );
 
   /// Determines if deep search verification should run based on contextual features
   /// Only runs when there are actual data sources to validate (not just conversation history)
@@ -1741,7 +1786,7 @@ class ChatAgentService {
     return ChatResponse(
       replyText: finalResponse,
       recommendation: recommendation,
-      dishes: extractedDishes.cast(),
+      dishes: _toDishes(extractedDishes),
       metadata: {
         'processingTime': duration.inMilliseconds,
         'mode': 'autonomous_verification_pipeline',

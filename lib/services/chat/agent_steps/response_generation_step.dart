@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:platepal_tracker/models/user_ingredient.dart';
@@ -16,6 +17,12 @@ const _uuid = Uuid();
 class ResponseGenerationStep extends AgentStep {
   final OpenAIService _openaiService;
   final PipelineModificationTracker? _modificationTracker;
+
+  /// Most recent history messages sent with a request.
+  static const int maxHistoryMessages = 20;
+
+  /// Character budget for those history messages.
+  static const int maxHistoryChars = 24000;
 
   ResponseGenerationStep({
     required OpenAIService openaiService,
@@ -40,12 +47,10 @@ class ResponseGenerationStep extends AgentStep {
       final isRetryAttempt = input.metadata?['retryAttempt'] == true;
 
       if (isRetryAttempt) {
-        debugPrint('🔄 ResponseGenerationStep: This is a retry attempt');
         debugPrint(
-          '   Missing requirements: ${missingRequirements?.join(", ") ?? "none"}',
-        );
-        debugPrint(
-          '   Response issues: ${responseIssues?.join(", ") ?? "none"}',
+          '🔄 ResponseGenerationStep: Retry attempt '
+          '(missing requirements: ${missingRequirements?.length ?? 0}, '
+          'response issues: ${responseIssues?.length ?? 0})',
         );
       }
 
@@ -58,6 +63,11 @@ class ResponseGenerationStep extends AgentStep {
       debugPrint(
         '🤖 ResponseGenerationStep: includeConversationHistory=$includeConversationHistory',
       );
+
+      // Custom OpenAI-compatible endpoints (Ollama, LM Studio, ...) often
+      // reject the `tools` field, so they get the JSON-output prompt instead.
+      final isCompatMode = await _openaiService.getIsCompatibilityMode();
+
       final messages = await _buildConversationMessages(
         input.enhancedSystemPrompt ?? '',
         input.conversationHistory,
@@ -79,78 +89,25 @@ class ResponseGenerationStep extends AgentStep {
         isRetryAttempt: isRetryAttempt,
         thinkingResult: input.thinkingResult,
         input: input,
+        useToolCalling: !isCompatMode,
       );
-      debugPrint('🤖 ResponseGenerationStep: Sending request to OpenAI');
-      debugPrint(
-        '🤖 ResponseGenerationStep: Messages count: ${messages.length}',
-      );
-      debugPrint('🤖 ResponseGenerationStep: Prompt/messages:');
-      for (int i = 0; i < messages.length; i++) {
-        final msg = messages[i];
-        final role = msg['role'];
-        final content = msg['content'];
-
-        if (content is String) {
-          // Text-only message
-          final preview =
-              content.length > 200
-                  ? '${content.substring(0, 200)}...'
-                  : content;
-          debugPrint('  [$i] [$role] (text): $preview');
-        } else if (content is List) {
-          // Vision API message with text and image
-          debugPrint(
-            '  [$i] [$role] (vision): ${content.length} content items',
-          );
-          for (int j = 0; j < content.length; j++) {
-            final item = content[j];
-            // Only log type if item is a map (plain data)
-            if (item is Map<String, dynamic> && item.containsKey('type')) {
-              if (item['type'] == 'text') {
-                final text = item['text'] as String;
-                final preview =
-                    text.length > 100 ? '${text.substring(0, 100)}...' : text;
-                debugPrint('    [$j] text: $preview');
-              } else if (item['type'] == 'image_url') {
-                String? url;
-                if (item['url'] is String) {
-                  url = item['url'] as String;
-                } else if (item['image_url'] is Map &&
-                    (item['image_url'] as Map)['url'] is String) {
-                  url = (item['image_url'] as Map)['url'] as String;
-                }
-                if (url != null) {
-                  final preview =
-                      url.length > 100 ? '${url.substring(0, 100)}...' : url;
-                  debugPrint('    [$j] image_url: $preview');
-                } else {
-                  debugPrint('    [$j] image_url: (no url found)');
-                }
-              }
-            } else {
-              // For SDK objects or unknown types, just log the type
-              debugPrint('    [$j] item type: ${item.runtimeType}');
-            }
-          }
-        } else {
-          debugPrint('  [$i] [$role] (unknown): ${content.toString()}');
-        }
-      }
-
       debugPrint(
         '🤖 ResponseGenerationStep: Sending ${messages.length} messages to OpenAI',
       );
+      for (int i = 0; i < messages.length; i++) {
+        final content = messages[i]['content'];
+        final size =
+            content is String
+                ? '${content.length} chars'
+                : content is List
+                ? '${content.length} parts'
+                : content.runtimeType.toString();
+        debugPrint('  [$i] ${messages[i]['role']}: $size');
+      }
 
       final uploadedImageUri =
           input.imageUri ?? input.metadata?['uploadedImageUri'] as String?;
 
-      // Determine which tools to make available for this turn.
-      // Skip tool calling entirely when running against a custom
-      // OpenAI-compatible endpoint (compatibility mode) — most local LLM
-      // servers (Ollama, LM Studio, etc.) return a 400 when they see the
-      // `tools` field rather than ignoring it.  The fallback JSON-parsing
-      // path handles those endpoints transparently.
-      final isCompatMode = await _openaiService.getIsCompatibilityMode();
       final tools =
           isCompatMode
               ? null
@@ -236,7 +193,7 @@ class ResponseGenerationStep extends AgentStep {
           }
         } catch (e) {
           debugPrint(
-            '⚠️ ResponseGenerationStep: Failed to parse JSON response: $e',
+            '⚠️ ResponseGenerationStep: Failed to parse JSON response (${e.runtimeType})',
           );
           replyText = _extractReplyTextFromMalformedJson(openaiResponse);
         }
@@ -350,7 +307,8 @@ class ResponseGenerationStep extends AgentStep {
     for (final call in toolCalls) {
       final args = call.parseArguments();
       debugPrint(
-        '\ud83e\udd16 Tool call: ${call.functionName} args=${call.functionArguments}',
+        '\ud83e\udd16 Tool call: ${call.functionName} '
+        '(${call.functionArguments.length} chars of arguments)',
       );
       toolCallLog.add({'tool': call.functionName, 'args': args});
 
@@ -391,8 +349,7 @@ class ResponseGenerationStep extends AgentStep {
               type: PipelineModificationType.contextModification,
               severity: ModificationSeverity.medium,
               stepName: stepName,
-              description:
-                  'AI referenced existing dish: ${args["dish_name"] ?? dishId}',
+              description: 'AI referenced an existing dish',
               technicalDetails:
                   'Tool: reference_existing_dish | DB ID: $dishId',
               afterData: {'dishId': dishId, 'dishName': args['dish_name']},
@@ -410,7 +367,7 @@ class ResponseGenerationStep extends AgentStep {
               type: PipelineModificationType.dataEnrichment,
               severity: ModificationSeverity.high,
               stepName: stepName,
-              description: 'AI created new dish: ${args["name"] ?? "unknown"}',
+              description: 'AI created a new dish',
               technicalDetails:
                   'Tool: create_new_dish | Ingredients: ${(args["ingredients"] as List?)?.length ?? 0} | '
                   'ID: ${newDish.id}',
@@ -438,7 +395,7 @@ class ResponseGenerationStep extends AgentStep {
             'AI used tool calling (${toolCallLog.length} call${toolCallLog.length == 1 ? "" : "s"}): '
             '${toolCallLog.map((t) => t["tool"]).join(", ")}',
         technicalDetails: toolCallLog
-            .map((t) => '${t["tool"]}: ${t["args"]}')
+            .map((t) => '${t["tool"]} (${(t["args"] as Map).length} args)')
             .join('\n'),
         afterData: {'toolCalls': toolCallLog},
       );
@@ -586,6 +543,7 @@ class ResponseGenerationStep extends AgentStep {
     bool isRetryAttempt = false,
     ThinkingStepResponse? thinkingResult,
     required ChatStepInput input,
+    bool useToolCalling = true,
   }) async {
     final messages = <Map<String, dynamic>>[];
 
@@ -601,7 +559,7 @@ class ResponseGenerationStep extends AgentStep {
       botPersonality: input.metadata?['botPersonality'] as String?,
       needsExistingDishes: needsExistingDishes,
       needsInfoOnDishCreation: needsInfoOnDishCreation,
-      useToolCalling: true,
+      useToolCalling: useToolCalling,
       contextSections: {if (contextSummary != null) 'Context': contextSummary},
     );
 
@@ -617,14 +575,20 @@ class ResponseGenerationStep extends AgentStep {
         fullSystemPrompt += SystemPrompts.verificationSummaryTemplate
             .replaceAll('{verificationSummary}', verificationSummary);
         debugPrint(
-          "🤖 ResponseGenerationStep: Added verification summary to system prompt: $verificationSummary",
+          '🤖 ResponseGenerationStep: Added verification summary '
+          '(${verificationSummary.length} chars)',
         );
       }
     }
 
-    // Add additional system prompt
-    if (systemPrompt.isNotEmpty) {
-      fullSystemPrompt += '\n$systemPrompt';
+    // ContextGatheringStep builds its prompt for tool calling; without tools
+    // those instructions would contradict the JSON format above.
+    final additionalPrompt =
+        useToolCalling
+            ? systemPrompt
+            : systemPrompt.replaceAll(SystemPrompts.toolCallingBasePrompt, '');
+    if (additionalPrompt.trim().isNotEmpty) {
+      fullSystemPrompt += '\n$additionalPrompt';
     }
     if (contextSummary != null && contextSummary.trim().isNotEmpty) {
       fullSystemPrompt += '\n\n[Context Information]\n${contextSummary.trim()}';
@@ -657,42 +621,18 @@ class ResponseGenerationStep extends AgentStep {
     // Add system prompt
     messages.insert(0, {'role': 'system', 'content': fullSystemPrompt});
     debugPrint(
-      '🤖 ResponseGenerationStep: System prompt added: $fullSystemPrompt',
+      '🤖 ResponseGenerationStep: System prompt added '
+      '(${fullSystemPrompt.length} chars, toolCalling=$useToolCalling)',
     );
 
     // Conditionally add conversation history based on needsConversationHistory flag
     if (includeConversationHistory) {
+      final history = _recentHistory(conversationHistory, userMessage);
       debugPrint(
-        '🤖 ResponseGenerationStep: Including full conversation history',
-      ); // Add conversation history (simplified)
-      for (final historyMessage in conversationHistory) {
-        if (historyMessage.role == 'system' || historyMessage.isLoading) {
-          continue;
-        }
-
-        String enhancedContent = historyMessage.content;
-
-        // Add ingredients info if present
-        if (historyMessage.role == 'user' &&
-            historyMessage.ingredients != null &&
-            historyMessage.ingredients!.isNotEmpty) {
-          final ingredientsList = historyMessage.ingredients!
-              .map(
-                (ing) =>
-                    '${ing.name} (${ing.quantity}${ing.unit}, ID: ${ing.id})',
-              )
-              .join(', ');
-          enhancedContent +=
-              '\n\n[User has the following ingredients ready: $ingredientsList]';
-        }
-
-        // Note if message has image
-        if (historyMessage.imageUri != null) {
-          enhancedContent += '\n\n[This message includes an image]';
-        }
-
-        messages.add({'role': historyMessage.role, 'content': enhancedContent});
-      }
+        '🤖 ResponseGenerationStep: Including ${history.length} of '
+        '${conversationHistory.length} history messages',
+      );
+      messages.addAll(history);
     } else {
       debugPrint(
         '🤖 ResponseGenerationStep: Skipping conversation history per thinking step analysis',
@@ -725,10 +665,8 @@ class ResponseGenerationStep extends AgentStep {
       } else {
         // Use OpenAI Vision API format for images (plain map, not SDK)
         debugPrint(
-          '🤖 ResponseGenerationStep: Processing image with vision API',
+          '🤖 ResponseGenerationStep: Processing image with vision API ($currentModel)',
         );
-        debugPrint('🤖 ResponseGenerationStep: Image URI: $imageUri');
-        debugPrint('🤖 ResponseGenerationStep: Using model: $currentModel');
         try {
           final base64Image = await ImageUtils.resizeAndEncodeImage(
             imageUri,
@@ -740,13 +678,7 @@ class ResponseGenerationStep extends AgentStep {
           );
 
           debugPrint(
-            '🤖 ResponseGenerationStep: Successfully converted image to base64',
-          );
-          debugPrint(
-            '🤖 ResponseGenerationStep: Data URL length: ${imageDataUrl.length}',
-          );
-          debugPrint(
-            '🤖 ResponseGenerationStep: Data URL preview: ${imageDataUrl.length > 200 ? imageDataUrl.substring(0, 200) : imageDataUrl}...',
+            '🤖 ResponseGenerationStep: Encoded image (${imageDataUrl.length} chars)',
           );
 
           // Use OpenAI Vision API format for images (plain map, not SDK)
@@ -773,6 +705,56 @@ class ResponseGenerationStep extends AgentStep {
     }
 
     return messages;
+  }
+
+  /// The newest history messages that fit [maxHistoryMessages] and
+  /// [maxHistoryChars], oldest first, without the current user message.
+  List<Map<String, dynamic>> _recentHistory(
+    List<ChatMessage> conversationHistory,
+    String userMessage,
+  ) {
+    final usable =
+        conversationHistory
+            .where((m) => m.role != 'system' && !m.isLoading)
+            .toList();
+    // The caller's history already ends with the message being answered.
+    if (usable.isNotEmpty &&
+        usable.last.role == 'user' &&
+        usable.last.content.trim() == userMessage.trim()) {
+      usable.removeLast();
+    }
+
+    final selected = <Map<String, dynamic>>[];
+    var chars = 0;
+    for (final historyMessage in usable.reversed) {
+      if (selected.length >= maxHistoryMessages) break;
+      final content = _historyContent(historyMessage);
+      chars += content.length;
+      if (chars > maxHistoryChars) break;
+      selected.add({'role': historyMessage.role, 'content': content});
+    }
+    return selected.reversed.toList();
+  }
+
+  String _historyContent(ChatMessage historyMessage) {
+    String enhancedContent = historyMessage.content;
+
+    if (historyMessage.role == 'user' &&
+        historyMessage.ingredients != null &&
+        historyMessage.ingredients!.isNotEmpty) {
+      final ingredientsList = historyMessage.ingredients!
+          .map(
+            (ing) => '${ing.name} (${ing.quantity}${ing.unit}, ID: ${ing.id})',
+          )
+          .join(', ');
+      enhancedContent +=
+          '\n\n[User has the following ingredients ready: $ingredientsList]';
+    }
+
+    if (historyMessage.imageUri != null) {
+      enhancedContent += '\n\n[This message includes an image]';
+    }
+    return enhancedContent;
   }
 
   /// Helper method to create a Dish object from JSON data
@@ -867,15 +849,17 @@ class ResponseGenerationStep extends AgentStep {
         sodium: totalSodium,
       );
 
-      debugPrint(
-        '✅ Created dish: $name with ${ingredients.length} ingredients',
-      );
-      debugPrint(
-        '   Total nutrition: ${totalCalories.round()}cal, ${totalProtein.round()}g protein',
-      );
+      debugPrint('✅ Created dish with ${ingredients.length} ingredients');
+
+      // Legacy JSON references an existing dish by its database id.
+      final referenceId = dishData['id'];
+      final isReference =
+          dishData['reference'] == true &&
+          referenceId is String &&
+          referenceId.isNotEmpty;
 
       return Dish(
-        id: _uuid.v4(),
+        id: isReference ? referenceId : _uuid.v4(),
         name: name.trim(),
         description: description?.trim() ?? '',
         ingredients: ingredients,
@@ -888,9 +872,8 @@ class ResponseGenerationStep extends AgentStep {
       );
     } catch (e) {
       debugPrint(
-        '⚠️ ResponseGenerationStep: Error creating dish from JSON: $e',
+        '⚠️ ResponseGenerationStep: Error creating dish from JSON (${e.runtimeType})',
       );
-      debugPrint('   Dish data: $dishData');
       return null;
     }
   }
@@ -996,6 +979,7 @@ class ResponseGenerationStep extends AgentStep {
   }
 
   ChatErrorType _classifyError(dynamic error) {
+    if (error is TimeoutException) return ChatErrorType.networkError;
     final errorMessage = error.toString().toLowerCase();
 
     if (errorMessage.contains('context length') ||
