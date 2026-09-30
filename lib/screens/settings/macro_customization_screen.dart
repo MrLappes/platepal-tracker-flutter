@@ -642,7 +642,6 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               theme: theme,
               isPinned: _proteinPinned,
               onPinToggle: () => _togglePin('protein'),
-              macroType: 'protein',
             ),
 
             const SizedBox(height: 24),
@@ -657,7 +656,6 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               theme: theme,
               isPinned: _carbsPinned,
               onPinToggle: () => _togglePin('carbs'),
-              macroType: 'carbs',
             ),
 
             const SizedBox(height: 24),
@@ -672,7 +670,6 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               theme: theme,
               isPinned: _fatPinned,
               onPinToggle: () => _togglePin('fat'),
-              macroType: 'fat',
             ),
 
             const SizedBox(height: 16),
@@ -735,7 +732,6 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     required ThemeData theme,
     required bool isPinned,
     required VoidCallback onPinToggle,
-    required String macroType,
   }) {
     final l10n = AppLocalizations.of(context);
     // Calculate pin count to determine if slider should be disabled
@@ -746,57 +742,48 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          runSpacing: 4,
+        Row(
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isPinned ? color : null,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: onPinToggle,
-                  constraints: const BoxConstraints(
-                    minWidth: 48,
-                    minHeight: 48,
-                  ),
-                  tooltip:
-                      isPinned
-                          ? l10n.screensSettingsMacroCustomizationUnpinMacro(
-                            label,
-                          )
-                          : l10n.screensSettingsMacroCustomizationPinMacro(
-                            label,
-                          ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: isPinned ? color : Colors.transparent,
-                    side: BorderSide(color: color, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+            Expanded(
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isPinned ? color : null,
                     ),
                   ),
+                  Text(
+                    '${value.toStringAsFixed(1)}% (${grams.toStringAsFixed(0)}g)',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            MergeSemantics(
+              child: Semantics(
+                toggled: isPinned,
+                child: IconButton(
+                  onPressed: onPinToggle,
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  tooltip:
+                      isPinned
+                          ? l10n.screensSettingsMacroCustomizationUnpinMacro(label)
+                          : l10n.screensSettingsMacroCustomizationPinMacro(label),
                   icon: Icon(
                     isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                    size: 16,
-                    color: isPinned ? Colors.white : color,
+                    color: isPinned ? color : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-              ],
-            ),
-            Text(
-              '${value.toStringAsFixed(1)}% (${grams.toStringAsFixed(0)}g)',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: color,
               ),
             ),
           ],
