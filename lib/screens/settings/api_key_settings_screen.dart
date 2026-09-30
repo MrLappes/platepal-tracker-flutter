@@ -245,7 +245,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
         setState(() {
           _errorMessage =
               testResult.failure == OpenAIFailure.invalidBaseUrl
-                  ? _invalidBaseUrlMessage
+                  ? AppLocalizations.of(context).screensSettingsApiKeySettingsInvalidBaseUrl
                   : testResult.message;
         });
         return;
@@ -483,10 +483,6 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
     return null;
   }
 
-  // TODO(l10n): needs ARB key screensSettingsApiKeySettingsInvalidBaseUrl.
-  static const String _invalidBaseUrlMessage =
-      'Base URL must start with https:// (http:// is only allowed for localhost)';
-
   String _getModelInfoText() {
     final localizations = AppLocalizations.of(context);
     if (_selectedModel.contains('gpt-4')) {
@@ -647,7 +643,7 @@ class _ApiKeySettingsScreenState extends State<ApiKeySettingsScreen> {
                       try {
                         OpenAIService.normalizeBaseUrl(value);
                       } on OpenAIServiceException {
-                        return _invalidBaseUrlMessage;
+                        return AppLocalizations.of(context).screensSettingsApiKeySettingsInvalidBaseUrl;
                       }
                     }
                     return null;

@@ -2563,6 +2563,12 @@ abstract class AppLocalizations {
   /// **'Failed to remove API key'**
   String get screensSettingsApiKeySettingsFailedToRemoveApiKey;
 
+  /// Error message for an insecure or invalid base URL
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL must start with https:// (http:// is only allowed for localhost)'**
+  String get screensSettingsApiKeySettingsInvalidBaseUrl;
+
   /// Button text for opening OpenAI platform
   ///
   /// In en, this message translates to:
@@ -2875,6 +2881,462 @@ abstract class AppLocalizations {
   /// **'Skip Duplicates'**
   String get screensSettingsImportDataSkipDuplicates;
 
+  /// Export preparation status
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your data...'**
+  String get screensSettingsExportDataPreparing;
+
+  /// Export preview heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export preview'**
+  String get screensSettingsExportDataPreview;
+
+  /// Selected export format
+  ///
+  /// In en, this message translates to:
+  /// **'Format: {format}'**
+  String screensSettingsExportDataFormatLabel(String format);
+
+  /// Number of selected export sections
+  ///
+  /// In en, this message translates to:
+  /// **'Selected data types: {count, plural, =1{1 type} other{{count} types}}'**
+  String screensSettingsExportDataTypesSelected(int count);
+
+  /// Export preview status
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to export'**
+  String get screensSettingsExportDataReady;
+
+  /// Dishes section description
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved recipes and dishes'**
+  String get screensSettingsExportDataDishesDescription;
+
+  /// Meal logs section description
+  ///
+  /// In en, this message translates to:
+  /// **'Your meal history and nutrition logs'**
+  String get screensSettingsExportDataMealLogsDescription;
+
+  /// User profiles section description
+  ///
+  /// In en, this message translates to:
+  /// **'User profile and preferences'**
+  String get screensSettingsExportDataUserProfilesDescription;
+
+  /// Ingredients section description
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient database'**
+  String get screensSettingsExportDataIngredientsDescription;
+
+  /// Supplements section description
+  ///
+  /// In en, this message translates to:
+  /// **'Supplement tracking data'**
+  String get screensSettingsExportDataSupplementsDescription;
+
+  /// Goals section description
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness and nutrition goals'**
+  String get screensSettingsExportDataFitnessGoalsDescription;
+
+  /// All data export description
+  ///
+  /// In en, this message translates to:
+  /// **'Export all your data'**
+  String get screensSettingsExportDataAllDataDescription;
+
+  /// Format selection heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export format'**
+  String get screensSettingsExportDataFormatTitle;
+
+  /// JSON format description
+  ///
+  /// In en, this message translates to:
+  /// **'Structured format, best for backups'**
+  String get screensSettingsExportDataJsonDescription;
+
+  /// CSV format description
+  ///
+  /// In en, this message translates to:
+  /// **'Spreadsheet format, good for analysis'**
+  String get screensSettingsExportDataCsvDescription;
+
+  /// Export error heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export error'**
+  String get screensSettingsExportDataError;
+
+  /// Export results heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export results'**
+  String get screensSettingsExportDataResults;
+
+  /// Export or import file name
+  ///
+  /// In en, this message translates to:
+  /// **'File: {fileName}'**
+  String screensSettingsExportDataFileLabel(String fileName);
+
+  /// Export file path
+  ///
+  /// In en, this message translates to:
+  /// **'Location: {path}'**
+  String screensSettingsExportDataLocationLabel(String path);
+
+  /// Export results count label
+  ///
+  /// In en, this message translates to:
+  /// **'Items exported:'**
+  String get screensSettingsExportDataItemsExported;
+
+  /// Share exported file button
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get screensSettingsExportDataShare;
+
+  /// Show export path button
+  ///
+  /// In en, this message translates to:
+  /// **'Show file location'**
+  String get screensSettingsExportDataShowFileLocation;
+
+  /// Export path dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Export location'**
+  String get screensSettingsExportDataLocationTitle;
+
+  /// Export path dialog description
+  ///
+  /// In en, this message translates to:
+  /// **'Your exported file is located at:'**
+  String get screensSettingsExportDataLocationDescription;
+
+  /// Sharing before an export exists
+  ///
+  /// In en, this message translates to:
+  /// **'No file to share. Export your data first.'**
+  String get screensSettingsExportDataNoFileToShare;
+
+  /// Missing exported file message
+  ///
+  /// In en, this message translates to:
+  /// **'Export file not found. Export your data again.'**
+  String get screensSettingsExportDataFileNotFound;
+
+  /// Sharing error
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share file: {error}'**
+  String screensSettingsExportDataShareFailed(String error);
+
+  /// Shared export text
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal data export - {fileName}'**
+  String screensSettingsExportDataShareText(String fileName);
+
+  /// Shared export subject
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal data export'**
+  String get screensSettingsExportDataShareSubject;
+
+  /// Export failure with technical details
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String screensSettingsExportDataFailedDetail(String error);
+
+  /// Restore progress heading
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring from backup...'**
+  String get screensSettingsImportDataRestoring;
+
+  /// Import progress count
+  ///
+  /// In en, this message translates to:
+  /// **'Processing {current} of {total} items'**
+  String screensSettingsImportDataProcessingItems(int current, int total);
+
+  /// Currently imported data section
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {type}'**
+  String screensSettingsImportDataCurrentType(String type);
+
+  /// Restore progress detail
+  ///
+  /// In en, this message translates to:
+  /// **'Undoing the last import...'**
+  String get screensSettingsImportDataUndoing;
+
+  /// File picker section heading
+  ///
+  /// In en, this message translates to:
+  /// **'File selection'**
+  String get screensSettingsImportDataFileSelection;
+
+  /// Tooltip for clearing the selected import file
+  ///
+  /// In en, this message translates to:
+  /// **'Remove selected file'**
+  String get screensSettingsImportDataRemoveFile;
+
+  /// Replace selected import file
+  ///
+  /// In en, this message translates to:
+  /// **'Change file'**
+  String get screensSettingsImportDataChangeFile;
+
+  /// Accepted import file formats
+  ///
+  /// In en, this message translates to:
+  /// **'Supported formats: JSON, CSV'**
+  String get screensSettingsImportDataSupportedFormats;
+
+  /// All data import description
+  ///
+  /// In en, this message translates to:
+  /// **'Import everything from the file'**
+  String get screensSettingsImportDataAllDataDescription;
+
+  /// Skip duplicates description
+  ///
+  /// In en, this message translates to:
+  /// **'Keep existing data; skip imported duplicates'**
+  String get screensSettingsImportDataSkipDescription;
+
+  /// Overwrite duplicates description
+  ///
+  /// In en, this message translates to:
+  /// **'Replace existing data with imported data'**
+  String get screensSettingsImportDataOverwriteDescription;
+
+  /// Import advanced options heading
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced options'**
+  String get screensSettingsImportDataAdvancedOptions;
+
+  /// Always-enabled import validation setting
+  ///
+  /// In en, this message translates to:
+  /// **'Validate data before import'**
+  String get screensSettingsImportDataValidateBeforeImport;
+
+  /// Import validation description
+  ///
+  /// In en, this message translates to:
+  /// **'Check data integrity and show warnings'**
+  String get screensSettingsImportDataValidateDescription;
+
+  /// Always-enabled backup setting
+  ///
+  /// In en, this message translates to:
+  /// **'Create backup before import'**
+  String get screensSettingsImportDataBackupBeforeImport;
+
+  /// Import backup description
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically back up existing data'**
+  String get screensSettingsImportDataBackupDescription;
+
+  /// Import error heading
+  ///
+  /// In en, this message translates to:
+  /// **'Import issues'**
+  String get screensSettingsImportDataIssues;
+
+  /// Import error list heading
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed errors:'**
+  String get screensSettingsImportDataDetailedErrors;
+
+  /// Successful import results heading
+  ///
+  /// In en, this message translates to:
+  /// **'Import results'**
+  String get screensSettingsImportDataResults;
+
+  /// Partial import warning heading
+  ///
+  /// In en, this message translates to:
+  /// **'Import completed with skipped items'**
+  String get screensSettingsImportDataPartialResults;
+
+  /// Partial import totals
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {imported}, skipped {skipped}'**
+  String screensSettingsImportDataImportedSkipped(int imported, int skipped);
+
+  /// Expand skipped item reasons
+  ///
+  /// In en, this message translates to:
+  /// **'Show reasons'**
+  String get screensSettingsImportDataShowReasons;
+
+  /// Section that could not be imported
+  ///
+  /// In en, this message translates to:
+  /// **'Failed section: {section}'**
+  String screensSettingsImportDataFailedSection(String section);
+
+  /// Import confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm import'**
+  String get screensSettingsImportDataConfirmTitle;
+
+  /// Import confirmation section list label
+  ///
+  /// In en, this message translates to:
+  /// **'Selected sections:'**
+  String get screensSettingsImportDataSelectedSections;
+
+  /// Import confirmation duplicate handling
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicates: {strategy}'**
+  String screensSettingsImportDataDuplicatesLabel(String strategy);
+
+  /// Confirm import button
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get screensSettingsImportDataConfirmAction;
+
+  /// Failed safety backup dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed'**
+  String get screensSettingsImportDataBackupFailedTitle;
+
+  /// Failed safety backup warning
+  ///
+  /// In en, this message translates to:
+  /// **'The automatic backup could not be created. Continue importing without a backup?'**
+  String get screensSettingsImportDataBackupFailedDescription;
+
+  /// Explicit unsafe import action
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without backup'**
+  String get screensSettingsImportDataContinueWithoutBackup;
+
+  /// File picker error
+  ///
+  /// In en, this message translates to:
+  /// **'Error selecting file: {error}'**
+  String screensSettingsImportDataFileSelectionFailed(String error);
+
+  /// Import failure count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Import completed with 1 error} other{Import completed with {count} errors}}'**
+  String screensSettingsImportDataCompletedWithErrors(int count);
+
+  /// Import failure with technical details
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String screensSettingsImportDataFailedDetail(String error);
+
+  /// Last import backup heading
+  ///
+  /// In en, this message translates to:
+  /// **'Backup available'**
+  String get screensSettingsImportDataBackupAvailable;
+
+  /// Last import backup description
+  ///
+  /// In en, this message translates to:
+  /// **'A backup from your last import is available.'**
+  String get screensSettingsImportDataBackupAvailableDescription;
+
+  /// Backup creation time
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {date}'**
+  String screensSettingsImportDataBackupCreated(String date);
+
+  /// Backup size in kilobytes
+  ///
+  /// In en, this message translates to:
+  /// **'Size: {size} KB'**
+  String screensSettingsImportDataBackupSize(String size);
+
+  /// Restore backup button
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last import'**
+  String get screensSettingsImportDataUndoLastImport;
+
+  /// Minutes since backup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute ago} other{{count} minutes ago}}'**
+  String screensSettingsImportDataMinutesAgo(int count);
+
+  /// Hours since backup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
+  String screensSettingsImportDataHoursAgo(int count);
+
+  /// Days since backup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String screensSettingsImportDataDaysAgo(int count);
+
+  /// Restore confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from backup'**
+  String get screensSettingsImportDataRestoreTitle;
+
+  /// Restore confirmation warning
+  ///
+  /// In en, this message translates to:
+  /// **'This will restore your data to the state before the last import. All changes made since then will be lost. Are you sure?'**
+  String get screensSettingsImportDataRestoreWarning;
+
+  /// Confirm restore button
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get screensSettingsImportDataRestoreAction;
+
+  /// Successful restore message
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully restored from backup!'**
+  String get screensSettingsImportDataRestoreSuccess;
+
+  /// Restore error details
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String screensSettingsImportDataRestoreFailedDetail(String error);
+
   /// Activity level field label
   ///
   /// In en, this message translates to:
@@ -2898,18 +3360,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Build Muscle'**
   String get screensSettingsImportProfileCompletionBuildMuscle;
-
-  /// Centimeters unit
-  ///
-  /// In en, this message translates to:
-  /// **'cm'**
-  String get screensSettingsImportProfileCompletionCm;
-
-  /// Email field label
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get screensSettingsImportProfileCompletionEmail;
 
   /// Extra active activity level
   ///
@@ -2958,30 +3408,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Imperial (lb, ft)'**
   String get screensSettingsImportProfileCompletionImperial;
-
-  /// Inches unit
-  ///
-  /// In en, this message translates to:
-  /// **'in'**
-  String get screensSettingsImportProfileCompletionInches;
-
-  /// Invalid email validation message
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a valid email address'**
-  String get screensSettingsImportProfileCompletionInvalidEmail;
-
-  /// Kilograms unit
-  ///
-  /// In en, this message translates to:
-  /// **'kg'**
-  String get screensSettingsImportProfileCompletionKg;
-
-  /// Pounds unit
-  ///
-  /// In en, this message translates to:
-  /// **'lb'**
-  String get screensSettingsImportProfileCompletionLb;
 
   /// Lightly active activity level
   ///
@@ -3072,12 +3498,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weight must be between 30-300 kg'**
   String get screensSettingsImportProfileCompletionWeightRange;
-
-  /// Years unit
-  ///
-  /// In en, this message translates to:
-  /// **'years'**
-  String get screensSettingsImportProfileCompletionYears;
 
   /// Discard changes button text
   ///
