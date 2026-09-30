@@ -1122,9 +1122,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get screensChatNoApiKeyConfigured => 'Kein API-Schlüssel konfiguriert';
 
   @override
-  String get screensChatReloadApiKeyButton => 'API-Schlüssel neu laden';
-
-  @override
   String get screensDishCreateBasicInfo => 'Grundinformationen';
 
   @override

@@ -1168,10 +1168,6 @@
   "@screensChatNoApiKeyConfigured": {
     "description": "Kein API-Schlüssel konfiguriert"
   },
-  "screensChatReloadApiKeyButton": "API-Schlüssel neu laden",
-  "@screensChatReloadApiKeyButton": {
-    "description": "API-Schlüssel neu laden"
-  },
   "screensDishCreateBasicInfo": "Grundinformationen",
   "@screensDishCreateBasicInfo": {
     "description": "Grundinformationen"

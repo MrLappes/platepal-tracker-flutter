@@ -1168,10 +1168,6 @@
   "@screensChatNoApiKeyConfigured": {
     "description": "No hay clave API configurada"
   },
-  "screensChatReloadApiKeyButton": "Recargar Clave API",
-  "@screensChatReloadApiKeyButton": {
-    "description": "Recargar Clave API"
-  },
   "screensDishCreateBasicInfo": "Información Básica",
   "@screensDishCreateBasicInfo": {
     "description": "Información Básica"

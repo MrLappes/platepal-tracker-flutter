@@ -486,21 +486,80 @@ class _MacroSummaryState extends State<MacroSummary> {
               },
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tipWidth = min(320.0, constraints.maxWidth * 0.5);
+                    final tipLabel =
+                        l10n.componentsCalendarMacroSummaryGetAiTip;
+                    final tipText = TextPainter(
+                      text: TextSpan(
+                        text: tipLabel,
+                        style: theme.textTheme.labelLarge,
+                      ),
+                      textDirection: Directionality.of(context),
+                      textScaler: MediaQuery.textScalerOf(context),
+                    )..layout();
+                    final useIconOnly = tipText.width + 40 > tipWidth;
+                    return Row(
                       children: [
                         Icon(Icons.bar_chart, color: colorScheme.primary),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            l10n.componentsCalendarMacroSummaryNutritionSummary,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.componentsCalendarMacroSummaryNutritionSummary,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (!_isExpanded)
+                                Text(
+                                  '${widget.calories.toStringAsFixed(0)} ${l10n.componentsCalendarMacroSummaryCalories}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
+                        if (widget.onAiTipPressed != null) ...[
+                          const SizedBox(width: 8),
+                          if (useIconOnly)
+                            IconButton(
+                              onPressed: widget.onAiTipPressed,
+                              tooltip: tipLabel,
+                              constraints: const BoxConstraints(
+                                minWidth: 48,
+                                minHeight: 48,
+                              ),
+                              icon: const Icon(Icons.auto_awesome),
+                            )
+                          else
+                            ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: tipWidth),
+                              child: TextButton.icon(
+                                onPressed: widget.onAiTipPressed,
+                                style: TextButton.styleFrom(
+                                  minimumSize: const Size(48, 48),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                ),
+                                icon: const Icon(Icons.auto_awesome, size: 16),
+                                label: Text(
+                                  tipLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                        ],
                         Icon(
                           _isExpanded
                               ? Icons.keyboard_arrow_up
@@ -508,69 +567,8 @@ class _MacroSummaryState extends State<MacroSummary> {
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ],
-                    ),
-                    if (widget.onAiTipPressed != null || !_isExpanded)
-                      Row(
-                        children: [
-                          if (widget.onAiTipPressed != null) ...[
-                            Semantics(
-                              button: true,
-                              label:
-                                  l10n.componentsCalendarMacroSummaryGetAiTip,
-                              onTap: widget.onAiTipPressed,
-                              excludeSemantics: true,
-                              child: InkWell(
-                                onTap: widget.onAiTipPressed,
-                                borderRadius: BorderRadius.circular(4),
-                                child: Container(
-                                  constraints: const BoxConstraints(
-                                    minWidth: 48,
-                                    minHeight: 48,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.auto_awesome,
-                                        size: 12,
-                                        color: colorScheme.onPrimaryContainer,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        l10n.componentsCalendarMacroSummaryGetAiTip,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                          color: colorScheme.onPrimaryContainer,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          if (!_isExpanded)
-                            Expanded(
-                              child: Text(
-                                '${widget.calories.toStringAsFixed(0)} ${l10n.componentsCalendarMacroSummaryCalories}',
-                                textAlign: TextAlign.end,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ),

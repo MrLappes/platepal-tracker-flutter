@@ -673,15 +673,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    if (hasLogs && !isSelected)
+                                    if (hasLogs)
                                       Container(
                                         width: 6,
                                         height: 6,
                                         decoration: BoxDecoration(
                                           color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              isSelected
+                                                  ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary
+                                                  : Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
                                           shape: BoxShape.circle,
                                         ),
                                       )
