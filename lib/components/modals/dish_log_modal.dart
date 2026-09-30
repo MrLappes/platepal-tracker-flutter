@@ -371,70 +371,77 @@ class _DishLogModalState extends State<DishLogModal> {
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 4,
                                     ),
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedMealType = mealType['type'];
-                                        });
-                                      },
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              isSelected
-                                                  ? mealType['color']
-                                                      .withValues(alpha: 0.2)
-                                                  : theme.colorScheme.surface,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                    child: Semantics(
+                                      button: true,
+                                      selected: isSelected,
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedMealType =
+                                                mealType['type'];
+                                          });
+                                        },
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
                                           ),
-                                          border: Border.all(
+                                          decoration: BoxDecoration(
                                             color:
                                                 isSelected
                                                     ? mealType['color']
-                                                    : theme.colorScheme.outline
-                                                        .withValues(alpha: 0.3),
-                                            width: isSelected ? 2 : 1,
-                                          ),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Icon(
-                                              mealType['icon'],
+                                                        .withValues(alpha: 0.2)
+                                                    : theme.colorScheme.surface,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
                                               color:
                                                   isSelected
                                                       ? mealType['color']
                                                       : theme
                                                           .colorScheme
                                                           .outline,
-                                              size: 24,
+                                              width: isSelected ? 2 : 1,
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              MealType.fromString(
-                                                mealType['type'],
-                                              ).localizedDisplayName(
-                                                localizations,
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Icon(
+                                                mealType['icon'],
+                                                color:
+                                                    isSelected
+                                                        ? mealType['color']
+                                                        : theme
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                size: 24,
                                               ),
-                                              style: theme.textTheme.bodySmall
-                                                  ?.copyWith(
-                                                    color:
-                                                        isSelected
-                                                            ? mealType['color']
-                                                            : theme
-                                                                .colorScheme
-                                                                .outline,
-                                                    fontWeight:
-                                                        isSelected
-                                                            ? FontWeight.w600
-                                                            : FontWeight.normal,
-                                                  ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ],
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                MealType.fromString(
+                                                  mealType['type'],
+                                                ).localizedDisplayName(
+                                                  localizations,
+                                                ),
+                                                style: theme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      color:
+                                                          isSelected
+                                                              ? mealType['color']
+                                                              : theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                      fontWeight:
+                                                          isSelected
+                                                              ? FontWeight.w600
+                                                              : FontWeight
+                                                                  .normal,
+                                                    ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -495,42 +502,49 @@ class _DishLogModalState extends State<DishLogModal> {
                         ),
                         const SizedBox(height: 8),
                         Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Wrap(
-                            alignment: WrapAlignment.spaceAround,
-                            spacing: 12,
-                            runSpacing: 12,
+                          child: Row(
                             children: [
-                              _buildNutritionItem(
-                                localizations
-                                    .componentsCalendarMacroSummaryCalories,
-                                calculatedCalories.round().toString(),
-                                'kcal',
-                                macroColors.calories,
+                              Expanded(
+                                child: _buildNutritionItem(
+                                  localizations
+                                      .componentsCalendarMacroSummaryCalories,
+                                  calculatedCalories.round().toString(),
+                                  'kcal',
+                                  macroColors.calories,
+                                ),
                               ),
-                              _buildNutritionItem(
-                                localizations
-                                    .componentsCalendarMacroSummaryProtein,
-                                calculatedProtein.toStringAsFixed(1),
-                                'g',
-                                macroColors.protein,
+                              Expanded(
+                                child: _buildNutritionItem(
+                                  localizations
+                                      .componentsCalendarMacroSummaryProtein,
+                                  calculatedProtein.toStringAsFixed(1),
+                                  'g',
+                                  macroColors.protein,
+                                ),
                               ),
-                              _buildNutritionItem(
-                                localizations
-                                    .componentsCalendarMacroSummaryCarbs,
-                                calculatedCarbs.toStringAsFixed(1),
-                                'g',
-                                macroColors.carbs,
+                              Expanded(
+                                child: _buildNutritionItem(
+                                  localizations
+                                      .componentsCalendarMacroSummaryCarbs,
+                                  calculatedCarbs.toStringAsFixed(1),
+                                  'g',
+                                  macroColors.carbs,
+                                ),
                               ),
-                              _buildNutritionItem(
-                                localizations.componentsCalendarMacroSummaryFat,
-                                calculatedFat.toStringAsFixed(1),
-                                'g',
-                                macroColors.fat,
+                              Expanded(
+                                child: _buildNutritionItem(
+                                  localizations
+                                      .componentsCalendarMacroSummaryFat,
+                                  calculatedFat.toStringAsFixed(1),
+                                  'g',
+                                  macroColors.fat,
+                                ),
                               ),
                             ],
                           ),
@@ -639,31 +653,38 @@ class _DishLogModalState extends State<DishLogModal> {
   ) {
     final theme = Theme.of(context);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
         const SizedBox(height: 4),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: value,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text: ' $unit',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                TextSpan(
+                  text: ' $unit',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
