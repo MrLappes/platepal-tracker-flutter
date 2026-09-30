@@ -96,7 +96,11 @@ class MessageBubble extends StatelessWidget {
             if (message.hasImage) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: _buildImageWidget(message.imageUrl!, theme),
+                child: _buildImageWidget(
+                  message.imageUrl!,
+                  theme,
+                  localizations.componentsChatChatInputImageAttached,
+                ),
               ),
               const SizedBox(height: 12),
             ],
@@ -142,35 +146,23 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
                   ] else if (message.hasFailed) ...[
-                    GestureDetector(
-                      onTap: onRetry,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.error,
+                    TextButton.icon(
+                      onPressed: onRetry,
+                      style: TextButton.styleFrom(
+                        backgroundColor: theme.colorScheme.error,
+                        foregroundColor: theme.colorScheme.onError,
+                        minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.refresh,
-                              size: 14,
-                              color: theme.colorScheme.onError,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              localizations
-                                  .componentsChatMessageBubbleRetryMessage,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onError,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      ),
+                      icon: const Icon(Icons.refresh, size: 14),
+                      label: Text(
+                        localizations.componentsChatMessageBubbleRetryMessage,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onError,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -442,13 +434,6 @@ class MessageBubble extends StatelessWidget {
   /// Check if this message has processed dishes
   bool _hasDishes() {
     final dishesProcessedRaw = message.metadata?['dishesProcessed'];
-
-    // Debug logging to understand the data structure
-    if (dishesProcessedRaw != null) {
-      debugPrint('dishesProcessed type: ${dishesProcessedRaw.runtimeType}');
-      debugPrint('dishesProcessed value: $dishesProcessedRaw');
-    }
-
     if (dishesProcessedRaw == null ||
         dishesProcessedRaw is! Map<String, dynamic>) {
       return false;
@@ -502,8 +487,32 @@ class MessageBubble extends StatelessWidget {
           ),
         );
       } catch (e) {
-        debugPrint('Error building dish card: $e');
-        return const SizedBox.shrink();
+        debugPrint('Invalid dish suggestion payload');
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).screensMealsErrorLoadingDishes,
+                ),
+              ),
+              if (onRetry != null)
+                TextButton(
+                  onPressed: onRetry,
+                  child: Text(
+                    AppLocalizations.of(context)
+                        .componentsChatMessageBubbleRetryMessage,
+                  ),
+                ),
+            ],
+          ),
+        );
       }
     }).toList();
   }
@@ -590,7 +599,7 @@ class MessageBubble extends StatelessWidget {
         builder: (context) => DishLogModal(dish: storedDish),
       );
     } catch (error) {
-      debugPrint('Error saving suggested dish: $error');
+      debugPrint('Error saving suggested dish: ${error.runtimeType}');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -659,7 +668,7 @@ class MessageBubble extends StatelessWidget {
   }
 
   /// Build image widget that handles both local files and network URLs
-  Widget _buildImageWidget(String imageUrl, ThemeData theme) {
+  Widget _buildImageWidget(String imageUrl, ThemeData theme, String label) {
     // Check if it's a local file path
     if (imageUrl.startsWith('/') ||
         imageUrl.contains('\\') ||
@@ -668,6 +677,7 @@ class MessageBubble extends StatelessWidget {
       final file = File(imageUrl);
       return Image.file(
         file,
+        semanticLabel: label,
         width: double.infinity,
         height: 200,
         fit: BoxFit.cover,
@@ -684,6 +694,7 @@ class MessageBubble extends StatelessWidget {
       // Handle network URL
       return Image.network(
         imageUrl,
+        semanticLabel: label,
         width: double.infinity,
         height: 200,
         fit: BoxFit.cover,
@@ -702,34 +713,28 @@ class MessageBubble extends StatelessWidget {
   /// Build avatar widget based on user/bot profile
   Widget _buildAvatar(BuildContext context, ThemeData theme, bool isUser) {
     final avatarUrl = isUser ? userProfile?.avatarUrl : botProfile?.avatarUrl;
-
-    // Debug logging to check if avatar URLs are being passed correctly
-    debugPrint('MessageBubble avatar debug:');
-    debugPrint('  isUser: $isUser');
-    debugPrint('  userProfile?.avatarUrl: ${userProfile?.avatarUrl}');
-    debugPrint('  botProfile?.avatarUrl: ${botProfile?.avatarUrl}');
-    debugPrint('  final avatarUrl: $avatarUrl');
-
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child:
-            avatarUrl != null
-                ? _buildAvatarImage(avatarUrl, theme, isUser)
-                : _buildDefaultAvatar(theme, isUser),
+    return ExcludeSemantics(
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child:
+              avatarUrl != null
+                  ? _buildAvatarImage(avatarUrl, theme, isUser)
+                  : _buildDefaultAvatar(theme, isUser),
+        ),
       ),
     );
   }
@@ -748,9 +753,7 @@ class MessageBubble extends StatelessWidget {
         height: 36,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          debugPrint(
-            'Local avatar image failed to load: $avatarUrl, error: $error',
-          );
+          debugPrint('Local avatar image failed to load');
           return _buildDefaultAvatar(theme, isUser);
         },
       );
@@ -777,9 +780,7 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
         errorWidget: (context, url, error) {
-          debugPrint(
-            'Network avatar image failed to load: $url, error: $error',
-          );
+          debugPrint('Network avatar image failed to load');
           return _buildDefaultAvatar(theme, isUser);
         },
       );

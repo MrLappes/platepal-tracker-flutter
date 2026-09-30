@@ -252,6 +252,35 @@ void main() {
 
     expect(service.saved?.nutrition.calories, 1.5);
   });
+
+  testWidgets('failed dish lookup stops save and shows an error', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 1);
+    final dish = Dish(
+      id: 'existing-dish',
+      name: 'Salad',
+      ingredients: const [],
+      nutrition: const NutritionInfo(calories: 0, protein: 0, carbs: 0, fat: 0),
+      createdAt: now,
+      updatedAt: now,
+    );
+    final service = _FailingLookupDishService();
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DishCreateScreenAdvanced(dish: dish, dishService: service),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(TextButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(service.saveAttempts, 0);
+    expect(find.byType(DishCreateScreenAdvanced), findsOneWidget);
+    expect(find.text('Error saving dish'), findsOneWidget);
+  });
 }
 
 File _createTestImage() {
@@ -278,6 +307,19 @@ class _RecordingDishService extends DishService {
   @override
   Future<Dish> updateDish(Dish dish) async {
     saved = dish;
+    return dish;
+  }
+}
+
+class _FailingLookupDishService extends DishService {
+  int saveAttempts = 0;
+
+  @override
+  Future<Dish?> getDishById(String id) async => throw StateError('unavailable');
+
+  @override
+  Future<Dish> saveDish(Dish dish) async {
+    saveAttempts++;
     return dish;
   }
 }

@@ -193,6 +193,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   style: IconButton.styleFrom(
                     backgroundColor: colorScheme.surfaceContainerHighest,
                     foregroundColor: colorScheme.onSurfaceVariant,
@@ -750,34 +751,40 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                   return InkWell(
                     onTap: () => setState(() => _selectedUnit = unit),
                     borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? colorScheme.primary
-                                : colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color:
-                              isSelected
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                        ),
-                      ),
-                      child: Text(
-                        unit,
-                        style: TextStyle(
-                          color:
-                              isSelected
-                                  ? colorScheme.onPrimary
-                                  : colorScheme.onSurfaceVariant,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          fontSize: 12,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? colorScheme.primary
+                                    : colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color:
+                                  isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
+                            ),
+                          ),
+                          child: Text(
+                            unit,
+                            style: TextStyle(
+                              color:
+                                  isSelected
+                                      ? colorScheme.onPrimary
+                                      : colorScheme.onSurfaceVariant,
+                              fontWeight:
+                                  isSelected ? FontWeight.w600 : FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ),
                     ),

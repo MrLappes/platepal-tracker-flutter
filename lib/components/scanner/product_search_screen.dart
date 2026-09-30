@@ -427,6 +427,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () {
             widget.onCancel?.call();
             Navigator.of(context).pop();
@@ -475,6 +476,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                     _searchController.text.isNotEmpty
                         ? IconButton(
                           icon: const Icon(Icons.clear, size: 18),
+                          tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
                           onPressed: _searchController.clear,
                         )
                         : null,
@@ -523,7 +525,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   Widget _buildCategoryChips(ThemeData theme, ColorScheme colorScheme) {
     final l10n = AppLocalizations.of(context);
     return SizedBox(
-      height: 38,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -532,7 +534,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         itemBuilder: (context, i) {
           final cat = OFFCategory.all[i];
           final selected = _selectedCategory.tag == cat.tag;
-          return GestureDetector(
+          return _selectableChip(
+            label: _categoryLabel(cat, l10n),
+            selected: selected,
             onTap: () => _onCategoryChanged(cat),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
@@ -575,6 +579,29 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     );
   }
 
+  Widget _selectableChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    required Widget child,
+  }) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Center(widthFactor: 1, child: child),
+        ),
+      ),
+    );
+  }
+
   Widget _buildExpandedFilters(ThemeData theme, ColorScheme colorScheme) {
     final l10n = AppLocalizations.of(context);
     return Container(
@@ -604,7 +631,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   spacing: 6,
                   children: [
                     // "Any" pill
-                    GestureDetector(
+                    _selectableChip(
+                      label: l10n.componentsScannerProductSearchAny,
+                      selected: _selectedNutriScore == null,
                       onTap: () => _onNutriScoreChanged(null),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -642,7 +671,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                     ...NutriScoreGrade.values.map((g) {
                       final selected = _selectedNutriScore == g;
                       final bg = _nutriColor(g);
-                      return GestureDetector(
+                      return _selectableChip(
+                        label: g.label,
+                        selected: selected,
                         onTap: () => _onNutriScoreChanged(selected ? null : g),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -698,7 +729,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                           final selected = _sortBy == s;
                           return Padding(
                             padding: const EdgeInsets.only(right: 6),
-                            child: GestureDetector(
+                            child: _selectableChip(
+                              label: _sortLabel(s, l10n),
+                              selected: selected,
                               onTap: () => _onSortChanged(s),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -930,21 +963,23 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         Navigator.of(context).pop();
         widget.onProductSelected?.call(product);
       },
-      icon:
-          product.imageUrl != null
-              ? CachedNetworkImage(
-                imageUrl: product.imageUrl!,
-                fit: BoxFit.cover,
-                memCacheWidth: thumbnailPixels,
-                memCacheHeight: thumbnailPixels,
-                errorWidget:
-                    (_, __, ___) => Icon(
-                      Icons.fastfood,
-                      size: 22,
-                      color: colorScheme.primary,
-                    ),
-              )
-              : Icon(Icons.fastfood, size: 22, color: colorScheme.primary),
+        icon: ExcludeSemantics(
+          child:
+              product.imageUrl != null
+                  ? CachedNetworkImage(
+                    imageUrl: product.imageUrl!,
+                    fit: BoxFit.cover,
+                    memCacheWidth: thumbnailPixels,
+                    memCacheHeight: thumbnailPixels,
+                    errorWidget:
+                        (_, __, ___) => Icon(
+                          Icons.fastfood,
+                          size: 22,
+                          color: colorScheme.primary,
+                        ),
+                  )
+                  : Icon(Icons.fastfood, size: 22, color: colorScheme.primary),
+        ),
       topRight:
           rawGrade != null
               ? Container(

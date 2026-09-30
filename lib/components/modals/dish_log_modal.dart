@@ -234,6 +234,7 @@ class _DishLogModalState extends State<DishLogModal> {
                         Icons.close,
                         color: theme.colorScheme.onPrimary,
                       ),
+                      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],

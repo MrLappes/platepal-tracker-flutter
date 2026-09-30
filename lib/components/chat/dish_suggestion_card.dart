@@ -107,6 +107,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
 
   bool _loading = false;
   bool _dishExists = false;
+  bool _lookupFailed = false;
   NutritionProfile _nutritionProfile = NutritionProfile.unbalanced;
   @override
   void initState() {
@@ -251,21 +252,34 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
     _pulseController.forward().then((_) => _pulseController.reverse());
   }
 
-  Future<void> _checkDishExists() async {
+  Future<bool> _checkDishExists() async {
     try {
       final existingDishes = await _dishService.getAllDishes();
       final exists = existingDishes.any(
         (existingDish) =>
             existingDish.name.toLowerCase() == widget.dish.name.toLowerCase(),
       );
-      setState(() => _dishExists = exists);
+      if (!mounted) return false;
+      setState(() {
+        _dishExists = exists;
+        _lookupFailed = false;
+      });
+      return true;
     } catch (error) {
-      debugPrint('Error checking if dish exists: $error');
-      setState(() => _dishExists = false);
+      debugPrint('Error checking if dish exists: ${error.runtimeType}');
+      if (!mounted) return false;
+      setState(() => _lookupFailed = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).screensMealsErrorLoadingDishes),
+        ),
+      );
+      return false;
     }
   }
 
   Future<void> _handleInspect() async {
+    if (!await _checkDishExists() || !mounted) return;
     if (widget.isReferenced) {
       // For referenced dishes, check if dish exists in database
       await _handleReferencedDishInspect();
@@ -315,7 +329,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
         }
       }
     } catch (error) {
-      debugPrint('Error opening dish creation screen: $error');
+      debugPrint('Error opening dish creation screen: ${error.runtimeType}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -384,7 +398,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       onDishCreated: (createdDish) {
         // The dish was successfully created/updated
         // The navigation result will handle the main UI updates
-        debugPrint('Dish created/updated: ${createdDish.name}');
+        debugPrint('Dish created/updated ID: ${createdDish.id}');
       },
     );
   }
@@ -772,7 +786,16 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                       SizedBox(
                         width: double.infinity,
                         child:
-                            _dishExists
+                            _lookupFailed
+                                ? SizedBox(
+                                  height: 48,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _checkDishExists,
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(l10n.componentsSharedErrorDisplayRetry),
+                                  ),
+                                )
+                                : _dishExists
                                 ? _buildLogButton(theme, colorScheme, l10n)
                                 : _buildInspectButton(
                                   theme,
@@ -783,7 +806,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                       ),
 
                       // Status badge for dish state
-                      if (widget.isReferenced && !_dishExists) ...[
+                      if (!_lookupFailed && widget.isReferenced && !_dishExists) ...[
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -802,7 +825,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             ),
                           ],
                         ),
-                      ] else if (!widget.isReferenced && _dishExists) ...[
+                      ] else if (!_lookupFailed && !widget.isReferenced && _dishExists) ...[
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -914,7 +937,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
             ];
 
     return Container(
-      height: 40,
+      height: 48,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
@@ -971,7 +994,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
     final profileColor = _nutritionProfile.color;
 
     return Container(
-      height: 40,
+      height: 48,
       decoration: BoxDecoration(
         color:
             isSpecialProfile

@@ -104,7 +104,7 @@ class ChatHeader extends StatelessWidget {
 
           child: Row(
             children: [
-              _buildBotAvatar(context),
+              ExcludeSemantics(child: _buildBotAvatar(context)),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -139,7 +139,7 @@ class ChatHeader extends StatelessWidget {
                     AppLocalizations.of(
                       context,
                     ).componentsChatEditBotProfileTooltip,
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 padding: EdgeInsets.zero,
               ),
             ],
