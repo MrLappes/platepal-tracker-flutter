@@ -82,6 +82,38 @@ void main() {
     expect(find.text('Invalid date'), findsOneWidget);
   });
 
+  testWidgets('capped import reasons say how many more there are', (
+    tester,
+  ) async {
+    for (final (locale, expected) in [
+      (const Locale('en'), '…and 70 more'),
+      (const Locale('es'), '…y 70 más'),
+      (const Locale('de'), '…und 70 weitere'),
+    ]) {
+      final result = ImportExportResult(
+        success: true,
+        message: 'Import completed',
+        itemsProcessed: 1,
+        itemsSkipped: 120,
+        duplicatesFound: 0,
+        errors: const [],
+        detailedResults: ImportDetailedResults(
+          validationErrors: [
+            const ValidationError(field: 'name', error: 'Missing name', value: ''),
+          ],
+          omittedErrors: 70,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _app(ImportResultsCard(key: UniqueKey(), result: result), locale: locale),
+      );
+      await tester.tap(find.byType(ExpansionTile));
+      await tester.pumpAndSettle();
+      expect(find.text(expected), findsOneWidget);
+    }
+  });
+
   testWidgets('partial import localizes its summary and parsing reasons', (
     tester,
   ) async {

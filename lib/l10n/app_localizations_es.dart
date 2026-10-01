@@ -2068,6 +2068,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensSettingsImportDataShowReasons => 'Mostrar motivos';
 
   @override
+  String screensSettingsImportDataMoreReasons(int count) {
+    return '…y $count más';
+  }
+
+  @override
   String screensSettingsImportDataFailedSection(String section) {
     return 'Sección fallida: $section';
   }
