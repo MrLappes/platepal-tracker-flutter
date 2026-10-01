@@ -5981,6 +5981,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t copy. Try again.'**
   String get screensCalendarCopyFailed;
+
+  /// Label of the recipe yield field in the dish form
+  ///
+  /// In en, this message translates to:
+  /// **'This recipe makes'**
+  String get screensDishCreateRecipeMakes;
+
+  /// Unit shown after the recipe yield number
+  ///
+  /// In en, this message translates to:
+  /// **'servings'**
+  String get screensDishCreateServingsSuffix;
+
+  /// Helper text of the recipe yield field
+  ///
+  /// In en, this message translates to:
+  /// **'The nutrition values below are for the whole recipe'**
+  String get screensDishCreateServingsHelper;
+
+  /// Nutrition of one serving shown under the recipe totals
+  ///
+  /// In en, this message translates to:
+  /// **'Per serving (1 of {servings}): {calories} kcal · {protein} g protein · {carbs} g carbs · {fat} g fat'**
+  String screensDishCreatePerServingSummary(
+    String servings,
+    String calories,
+    String protein,
+    String carbs,
+    String fat,
+  );
 }
 
 class _AppLocalizationsDelegate

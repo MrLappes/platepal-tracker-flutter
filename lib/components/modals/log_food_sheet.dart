@@ -434,7 +434,9 @@ class _LogFoodSheetState extends State<LogFoodSheet> {
       ),
       title: Text(dish.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        l10n.screensCalendarCaloriesPerServing(dish.nutrition.calories.round()),
+        l10n.screensCalendarCaloriesPerServing(
+          dish.nutritionPerServing.calories.round(),
+        ),
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => _choose(LogFoodDishChoice(dish)),

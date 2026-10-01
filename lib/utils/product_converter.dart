@@ -22,7 +22,7 @@ class ProductToIngredientConverter {
 
   /// Represent a local dish as one selectable serving.
   static Product productFromDish(Dish dish) =>
-      Product(name: dish.name, servingNutrition: dish.nutrition);
+      Product(name: dish.name, servingNutrition: dish.nutritionPerServing);
 
   /// Convert a Product from Open Food Facts to an Ingredient
   static Ingredient convertProductToIngredient(

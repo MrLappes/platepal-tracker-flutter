@@ -170,6 +170,7 @@ class DishService {
       updatedAt: DateTime.parse(dishMap['updated_at'] as String),
       isFavorite: (dishMap['is_favorite'] as int) == 1,
       category: dishMap['category'] as String?,
+      servings: Dish.normalizeServings(dishMap['servings']),
     );
     debugPrint(
       '🔍 _getDishWithRelations: Returning dish $dishId with ${result.ingredients.length} ingredients',
@@ -194,6 +195,7 @@ class DishService {
         'is_favorite': dish.isFavorite ? 1 : 0,
         'created_at': dish.createdAt.toIso8601String(),
         'updated_at': dish.updatedAt.toIso8601String(),
+        'servings': dish.servings,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
       debugPrint('🍽️ DishService: Inserting dish nutrition...');
       // Insert dish nutrition (only columns that exist in current schema)
@@ -271,6 +273,7 @@ class DishService {
           'category': dish.category,
           'is_favorite': dish.isFavorite ? 1 : 0,
           'updated_at': dish.updatedAt.toIso8601String(),
+          'servings': dish.servings,
         },
         where: 'id = ?',
         whereArgs: [dish.id],
@@ -467,7 +470,7 @@ class DishService {
       throw Exception('Dish not found');
     }
 
-    final nutrition = dish.nutrition;
+    final nutrition = dish.nutritionPerServing;
     final logId = await insertDishLogSnapshot(
       dishId: dishId,
       dishName: dish.name,

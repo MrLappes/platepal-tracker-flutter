@@ -29,25 +29,37 @@ double stepServings(double servings, int direction) {
   return next.clamp(servingStep, maxServings).toDouble();
 }
 
+/// Weight of one serving of [dish] (total ingredient weight / yield), or null
+/// when its ingredients have no common weight.
+({double amount, String unit})? servingWeight(Dish dish) {
+  final total = totalDishWeight(
+    dish.ingredients.map((i) => (amount: i.amount, unit: i.unit)),
+  );
+  if (total == null) return null;
+  return (amount: total.amount / dish.servings, unit: total.unit);
+}
+
 /// The dish a diary entry was logged from, rebuilt from its snapshot so it
 /// can be edited even when the dish was changed or deleted. [current] only
-/// contributes ingredients (for the weight input).
+/// contributes ingredients and yield (for the weight input).
 Dish dishForLog(DishLog log, {Dish? current, required String fallbackName}) {
-  double perServing(double value) =>
-      log.servingSize > 0 ? value / log.servingSize : value;
+  final servings = current?.servings ?? 1;
+  double recipeTotal(double value) =>
+      (log.servingSize > 0 ? value / log.servingSize : value) * servings;
   return Dish(
     id: log.dishId,
     name: log.dishName ?? current?.name ?? fallbackName,
     ingredients: current?.ingredients ?? const [],
     nutrition: NutritionInfo(
-      calories: perServing(log.calories),
-      protein: perServing(log.protein),
-      carbs: perServing(log.carbs),
-      fat: perServing(log.fat),
-      fiber: perServing(log.fiber),
+      calories: recipeTotal(log.calories),
+      protein: recipeTotal(log.protein),
+      carbs: recipeTotal(log.carbs),
+      fat: recipeTotal(log.fat),
+      fiber: recipeTotal(log.fiber),
     ),
     createdAt: log.loggedAt,
     updatedAt: log.loggedAt,
+    servings: servings,
   );
 }
 
@@ -79,8 +91,8 @@ class _DishLogModalState extends State<DishLogModal> {
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _servingsController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
-  late final ({double amount, String unit})? _dishWeight = totalDishWeight(
-    widget.dish.ingredients.map((i) => (amount: i.amount, unit: i.unit)),
+  late final ({double amount, String unit})? _dishWeight = servingWeight(
+    widget.dish,
   );
 
   late DateTime _selectedDate;
@@ -324,10 +336,11 @@ class _DishLogModalState extends State<DishLogModal> {
     final locale = Localizations.localeOf(context).toString();
 
     // Calculate nutrition based on portion size
-    final calculatedCalories = widget.dish.nutrition.calories * _portionSize;
-    final calculatedProtein = widget.dish.nutrition.protein * _portionSize;
-    final calculatedCarbs = widget.dish.nutrition.carbs * _portionSize;
-    final calculatedFat = widget.dish.nutrition.fat * _portionSize;
+    final perServing = widget.dish.nutritionPerServing;
+    final calculatedCalories = perServing.calories * _portionSize;
+    final calculatedProtein = perServing.protein * _portionSize;
+    final calculatedCarbs = perServing.carbs * _portionSize;
+    final calculatedFat = perServing.fat * _portionSize;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9, // 90% of screen height

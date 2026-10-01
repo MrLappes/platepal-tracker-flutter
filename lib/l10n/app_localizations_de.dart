@@ -3705,4 +3705,25 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get screensCalendarCopyFailed =>
       'Kopieren fehlgeschlagen. Versuche es erneut.';
+
+  @override
+  String get screensDishCreateRecipeMakes => 'Dieses Rezept ergibt';
+
+  @override
+  String get screensDishCreateServingsSuffix => 'Portionen';
+
+  @override
+  String get screensDishCreateServingsHelper =>
+      'Die Nährwerte unten gelten für das ganze Rezept';
+
+  @override
+  String screensDishCreatePerServingSummary(
+    String servings,
+    String calories,
+    String protein,
+    String carbs,
+    String fat,
+  ) {
+    return 'Pro Portion (1 von $servings): $calories kcal · $protein g Eiweiß · $carbs g Kohlenhydrate · $fat g Fett';
+  }
 }

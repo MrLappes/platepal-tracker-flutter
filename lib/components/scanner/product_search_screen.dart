@@ -1139,9 +1139,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
               .toUpperCase(),
       subtitleColor: colorScheme.secondary,
       nutrition: _nutritionSummary(
-        calories: dish.nutrition.calories,
-        protein: dish.nutrition.protein,
-        carbs: dish.nutrition.carbs,
+        calories: dish.nutritionPerServing.calories,
+        protein: dish.nutritionPerServing.protein,
+        carbs: dish.nutritionPerServing.carbs,
         locale: locale,
       ),
     );

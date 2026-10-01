@@ -105,11 +105,14 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   final _carbsController = TextEditingController();
   final _fatController = TextEditingController();
   final _fiberController = TextEditingController();
+  final _servingsController = TextEditingController();
 
   // State variables
   bool _isLoading = false;
   bool _isDirty = false;
   bool _isFavorite = false;
+  double _servings = 1;
+  String? _servingsError;
   String _selectedCategory = 'breakfast';
   List<Ingredient> _ingredients = [];
   File? _selectedImage;
@@ -148,6 +151,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       _carbsController,
       _fatController,
       _fiberController,
+      _servingsController,
     ]) {
       controller.addListener(_markDirty);
     }
@@ -176,11 +180,14 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     _carbsController.dispose();
     _fatController.dispose();
     _fiberController.dispose();
+    _servingsController.dispose();
     _recalculatedAnimationController.dispose();
     super.dispose();
   }
 
   void _loadDishData(String locale) {
+    _servings = widget.dish?.servings ?? 1;
+    _servingsController.text = formatAmount(_servings, locale);
     if (widget.dish != null) {
       final dish = widget.dish!;
       _nameController.text = dish.name;
@@ -234,6 +241,26 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
   }
 
+  void _onServingsChanged(String text) {
+    final value = parseLocalizedDouble(text);
+    final locale = Localizations.localeOf(context).toString();
+    setState(() {
+      if (value == null ||
+          value < Dish.minServings ||
+          value > Dish.maxServings) {
+        _servingsError = AppLocalizations.of(
+          context,
+        ).componentsModalsDishLogModalAmountRange(
+          formatAmount(Dish.minServings, locale),
+          formatAmount(Dish.maxServings, locale),
+        );
+        return;
+      }
+      _servingsError = null;
+      _servings = value;
+    });
+  }
+
   Future<void> _confirmDiscardChanges() async {
     final l10n = AppLocalizations.of(context);
     final discard = await showDialog<bool>(
@@ -277,6 +304,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       );
       return;
     }
+    if (_servingsError != null) {
+      _showErrorSnackBar(_servingsError!);
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -311,6 +342,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         updatedAt: DateTime.now(),
         isFavorite: _isFavorite,
         category: _selectedCategory,
+        servings: _servings,
       );
       debugPrint('🍽️ Saving dish ID: ${dishData.id}');
       debugPrint('🍽️ Dish has ${dishData.ingredients.length} ingredients');
@@ -974,6 +1006,35 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 ),
               ),
               const SizedBox(height: 16),
+              TextField(
+                key: const ValueKey('dish-create-servings'),
+                controller: _servingsController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [decimalInputFormatter],
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context).screensDishCreateRecipeMakes,
+                  suffixText:
+                      AppLocalizations.of(
+                        context,
+                      ).screensDishCreateServingsSuffix,
+                  helperText:
+                      AppLocalizations.of(
+                        context,
+                      ).screensDishCreateServingsHelper,
+                  helperMaxLines: 2,
+                  errorText: _servingsError,
+                  errorMaxLines: 2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  prefixIcon: const Icon(Icons.people_outline, size: 18),
+                ),
+                onChanged: _onServingsChanged,
+              ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText:
@@ -1034,15 +1095,58 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   }
 
   Widget _buildNutritionInputs() {
-    return SmartNutritionCard(
-      caloriesController: _caloriesController,
-      proteinController: _proteinController,
-      carbsController: _carbsController,
-      fatController: _fatController,
-      fiberController: _fiberController,
-      justRecalculated: _justRecalculated,
-      recalculatedAnimation: _recalculatedAnimation,
-      onRecalculate: _recalculateNutrition,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SmartNutritionCard(
+          caloriesController: _caloriesController,
+          proteinController: _proteinController,
+          carbsController: _carbsController,
+          fatController: _fatController,
+          fiberController: _fiberController,
+          justRecalculated: _justRecalculated,
+          recalculatedAnimation: _recalculatedAnimation,
+          onRecalculate: _recalculateNutrition,
+        ),
+        if (_servings != 1 && _servingsError == null)
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              _caloriesController,
+              _proteinController,
+              _carbsController,
+              _fatController,
+            ]),
+            builder: (context, _) => _buildPerServingSummary(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPerServingSummary() {
+    final theme = Theme.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    String perServing(TextEditingController controller, int digits) =>
+        formatDecimal(
+          (parseLocalizedDouble(controller.text) ?? 0) / _servings,
+          locale,
+          fractionDigits: digits,
+        );
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        AppLocalizations.of(context).screensDishCreatePerServingSummary(
+          formatAmount(_servings, locale),
+          perServing(_caloriesController, 0),
+          perServing(_proteinController, 1),
+          perServing(_carbsController, 1),
+          perServing(_fatController, 1),
+        ),
+        key: const ValueKey('dish-create-per-serving'),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
