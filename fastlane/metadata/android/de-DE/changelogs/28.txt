@@ -1,0 +1,7 @@
+- Schneller eintragen: Fenster „Essen eintragen“ mit zuletzt gegessenen Gerichten, Favoriten, Schnelleintrag und Mengen in Portionen oder Gramm
+- Einträge bearbeiten und kopieren; Rezepte mit mehreren Portionen
+- Der KI-Assistent schlägt Einträge vor, die du nur bestätigst
+- Automatische Backups und vollständige Backups mit Fotos
+- Gerichte aus der PlatePal-App importieren
+- Feedback senden und lokales Fehlerprotokoll teilen
+- Korrekturen bei Statistik, Barcode-Scanner und Suche

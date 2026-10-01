@@ -4,12 +4,86 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../models/product.dart';
 import '../../services/open_food_facts_service.dart';
+import 'product_search_screen.dart';
+
+enum BarcodeNotFoundAction { searchByName, enterManually, scanAgain }
+
+/// Asks what to do after [barcode] was not found; null if dismissed.
+Future<BarcodeNotFoundAction?> showBarcodeNotFoundSheet(
+  BuildContext context,
+  String barcode, {
+  bool canEnterManually = true,
+}) {
+  return showModalBottomSheet<BarcodeNotFoundAction>(
+    context: context,
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+      final theme = Theme.of(context);
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.componentsScannerBarcodeScannerProductNotFound,
+                style: theme.textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.componentsScannerBarcodeScannerNotFoundMessage(barcode),
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.search),
+                title: Text(l10n.componentsScannerBarcodeScannerSearchByName),
+                onTap:
+                    () => Navigator.of(
+                      context,
+                    ).pop(BarcodeNotFoundAction.searchByName),
+              ),
+              if (canEnterManually)
+                ListTile(
+                  leading: const Icon(Icons.edit_note),
+                  title: Text(
+                    l10n.componentsScannerBarcodeScannerEnterManually,
+                  ),
+                  onTap:
+                      () => Navigator.of(
+                        context,
+                      ).pop(BarcodeNotFoundAction.enterManually),
+                ),
+              ListTile(
+                leading: const Icon(Icons.qr_code_scanner),
+                title: Text(l10n.componentsScannerBarcodeScannerScanAgain),
+                onTap:
+                    () => Navigator.of(
+                      context,
+                    ).pop(BarcodeNotFoundAction.scanAgain),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
 
 class BarcodeScannerScreen extends StatefulWidget {
   final Function(Product)? onProductFound;
   final VoidCallback? onCancel;
 
-  const BarcodeScannerScreen({super.key, this.onProductFound, this.onCancel});
+  /// Opens manual entry for a barcode that is not in Open Food Facts.
+  final void Function(String barcode)? onManualEntry;
+
+  const BarcodeScannerScreen({
+    super.key,
+    this.onProductFound,
+    this.onCancel,
+    this.onManualEntry,
+  });
 
   @override
   State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
@@ -97,21 +171,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       } else {
         debugPrint('Product not found for scanned barcode');
         if (mounted) {
-          setState(() {
-            _errorMessage =
-                AppLocalizations.of(
-                  context,
-                ).componentsScannerBarcodeScannerProductNotFound;
-          });
-
-          // Clear error after 3 seconds
-          Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) {
-              setState(() {
-                _errorMessage = null;
-              });
-            }
-          });
+          setState(() => _isSearching = false);
+          await _handleNotFound(code);
         }
       }
     } catch (e) {
@@ -144,6 +205,37 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           _lastScannedBarcode = null;
         });
       }
+    }
+  }
+
+  Future<void> _handleNotFound(String code) async {
+    await _controller.stop();
+    if (!mounted) return;
+    final action = await showBarcodeNotFoundSheet(
+      context,
+      code,
+      canEnterManually: widget.onManualEntry != null,
+    );
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    switch (action) {
+      case BarcodeNotFoundAction.searchByName:
+        navigator.pushReplacement(
+          MaterialPageRoute(
+            builder:
+                (_) => ProductSearchScreen(
+                  onProductSelected: widget.onProductFound,
+                  onCancel: widget.onCancel,
+                ),
+          ),
+        );
+      case BarcodeNotFoundAction.enterManually:
+        navigator.pop();
+        widget.onManualEntry?.call(code);
+      case BarcodeNotFoundAction.scanAgain:
+      case null:
+        _lastScannedBarcode = null;
+        await _controller.start();
     }
   }
 

@@ -52,5 +52,21 @@
 		<string>PlatePal Tracker saves the nutrition (calories, protein, carbohydrates, fat, fiber, sugar and sodium) of meals you log to Apple Health.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<!-- Dishes shared from the PlatePal app: platepaltracker://import-dish?d=... -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Viewer</string>
+				<key>CFBundleURLName</key>
+				<string>$(PRODUCT_BUNDLE_IDENTIFIER).import</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>platepaltracker</string>
+				</array>
+			</dict>
+		</array>
+		<key>FlutterDeepLinkingEnabled</key>
+		<true/>
 	</dict>
 </plist>

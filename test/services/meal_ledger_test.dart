@@ -328,7 +328,7 @@ void main() {
         path: path,
       );
       final db = await DatabaseService.instance.database;
-      expect(await db.getVersion(), 4);
+      expect(await db.getVersion(), 5);
 
       final logs = {
         for (final row in await db.query('dish_logs')) row['id'] as String: row,
@@ -420,16 +420,55 @@ void main() {
           path: path,
         );
         final db = await DatabaseService.instance.database;
-        expect(await db.getVersion(), 4);
+        expect(await db.getVersion(), 5);
         final ledger = await db.query('dish_logs');
         expect(ledger.single['calories'], 400);
         expect(ledger.single['dish_name'], 'Oats');
+        expect((await db.query('dishes')).single['servings'], 1);
 
         final migrated = await _shape(db);
         await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
         expect(migrated, await _shape(await DatabaseService.instance.database));
       });
     }
+
+    test('v4 -> v5 gives existing dishes a yield of 1', () async {
+      final path = p.join(tempDir.path, 'v4.db');
+      await DatabaseService.useFactoryForTesting(
+        databaseFactoryFfiNoIsolate,
+        path: path,
+      );
+      final fresh = await DatabaseService.instance.database;
+      final freshSchema = await _schema(fresh);
+      await fresh.execute('ALTER TABLE dishes DROP COLUMN servings');
+      await fresh.insert('dishes', {
+        'id': 'oats',
+        'name': 'Oats',
+        'is_favorite': 0,
+        'created_at': '2026-01-01T00:00:00.000',
+        'updated_at': '2026-01-01T00:00:00.000',
+      });
+      await fresh.insert('dish_nutrition', {
+        'dish_id': 'oats',
+        'calories': 200,
+        'protein': 10,
+        'carbs': 30,
+        'fat': 5,
+        'fiber': 4,
+      });
+      await fresh.setVersion(4);
+      await DatabaseService.useFactoryForTesting(
+        databaseFactoryFfiNoIsolate,
+        path: path,
+      );
+
+      final db = await DatabaseService.instance.database;
+      expect(await db.getVersion(), 5);
+      expect(await _schema(db), freshSchema);
+      final dish = await DishService().getDishById('oats');
+      expect(dish!.servings, 1);
+      expect(dish.nutritionPerServing.calories, 200);
+    });
   });
 }
 

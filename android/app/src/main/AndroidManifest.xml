@@ -38,7 +38,16 @@
             <!-- Health Connect Intent Filter -->
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-            </intent-filter>        </activity>
+            </intent-filter>
+            <!-- Dishes shared from the PlatePal app: platepaltracker://import-dish?d=... -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="platepaltracker" android:host="import-dish" />
+            </intent-filter>
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+        </activity>
         
         <!-- Health Connect Privacy Policy Activity Alias -->
         <activity-alias

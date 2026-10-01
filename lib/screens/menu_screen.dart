@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/theme_provider.dart';
 import '../providers/locale_provider.dart';
+import '../services/diagnostic_log_service.dart';
 import '../services/health_service.dart';
+import '../utils/feedback_mail.dart';
+import '../utils/link_handler.dart';
 
 class MenuScreen extends StatelessWidget {
-  const MenuScreen({super.key});
+  const MenuScreen({super.key, this.diagnostics});
+
+  /// Local error log, defaulting to the app-wide instance.
+  final DiagnosticLogService? diagnostics;
+
+  DiagnosticLogService get _diagnostics =>
+      diagnostics ?? DiagnosticLogService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +127,14 @@ class MenuScreen extends StatelessWidget {
                 icon: Icons.file_upload,
                 onTap: () => context.push('/settings/import-data'),
               ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensBackupTitle,
+                subtitle:
+                    AppLocalizations.of(context).screensMenuBackupSubtitle,
+                icon: Icons.backup_outlined,
+                onTap: () => context.push('/settings/backup'),
+              ),
             ],
           ),
           _buildSettingsSection(
@@ -123,6 +142,53 @@ class MenuScreen extends StatelessWidget {
             title: AppLocalizations.of(context).screensMenuHealthAndFitness,
             icon: Icons.health_and_safety,
             children: [_buildHealthTile(context)],
+          ),
+          _buildSettingsSection(
+            context,
+            title: AppLocalizations.of(context).screensMenuSupport,
+            icon: Icons.support_agent,
+            children: [
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensMenuSendFeedback,
+                subtitle:
+                    AppLocalizations.of(context).screensMenuSendFeedbackSubtitle,
+                icon: Icons.mail_outline,
+                onTap: () => _sendFeedback(context),
+              ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensMenuReportProblem,
+                subtitle:
+                    AppLocalizations.of(
+                      context,
+                    ).screensMenuReportProblemSubtitle,
+                icon: Icons.bug_report_outlined,
+                onTap: () => _reportProblem(context),
+              ),
+              _buildSettingsTile(
+                context,
+                title:
+                    AppLocalizations.of(context).screensMenuClearDiagnosticLog,
+                subtitle:
+                    AppLocalizations.of(
+                      context,
+                    ).screensMenuClearDiagnosticLogSubtitle,
+                icon: Icons.delete_sweep_outlined,
+                onTap: () => _clearDiagnosticLog(context),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  AppLocalizations.of(context).screensMenuDiagnosticsNote,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            ],
           ),
           _buildSettingsSection(
             context,
@@ -152,11 +218,78 @@ class MenuScreen extends StatelessWidget {
                 icon: Icons.people,
                 onTap: () => context.push('/settings/contributions'),
               ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensMenuPlatePalPromo,
+                subtitle:
+                    AppLocalizations.of(context).screensMenuPlatePalPromoSubtitle,
+                icon: Icons.groups_outlined,
+                onTap: () => LinkHandler.openPlatePalPlayStore(context),
+              ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _sendFeedback(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final version = await _diagnostics.appVersion();
+    try {
+      if (await launchUrl(
+        feedbackMailUri(l10n.screensMenuFeedbackSubject(version)),
+      )) {
+        return;
+      }
+    } catch (_) {}
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.screensMenuNoEmailApp(developerContactEmail)),
+      ),
+    );
+  }
+
+  Future<void> _reportProblem(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final file = await _diagnostics.shareableFile();
+      if (file == null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.screensMenuDiagnosticLogEmpty)),
+        );
+        return;
+      }
+      final version = await _diagnostics.appVersion();
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'text/plain')],
+        subject: l10n.screensMenuReportProblemSubject(version),
+        text: l10n.screensMenuReportProblemShareText(developerContactEmail),
+      );
+    } catch (e) {
+      debugPrint('Diagnostic log share failed (${e.runtimeType})');
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.screensMenuDiagnosticLogShareFailed)),
+      );
+    }
+  }
+
+  Future<void> _clearDiagnosticLog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await _diagnostics.clear();
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.screensMenuDiagnosticLogCleared)),
+      );
+    } catch (e) {
+      debugPrint('Diagnostic log clear failed (${e.runtimeType})');
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.screensMenuDiagnosticLogClearFailed)),
+      );
+    }
   }
 
   Widget _buildHealthTile(BuildContext context) {

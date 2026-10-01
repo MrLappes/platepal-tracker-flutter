@@ -7,6 +7,9 @@ class EmptyStateWidget extends StatelessWidget {
   final VoidCallback? onAction;
   final String? actionLabel;
 
+  /// Further actions shown below the primary one.
+  final List<Widget> secondaryActions;
+
   const EmptyStateWidget({
     super.key,
     required this.icon,
@@ -14,6 +17,7 @@ class EmptyStateWidget extends StatelessWidget {
     this.subtitle,
     this.onAction,
     this.actionLabel,
+    this.secondaryActions = const [],
   });
 
   @override
@@ -50,6 +54,15 @@ class EmptyStateWidget extends StatelessWidget {
             if (onAction != null && actionLabel != null) ...[
               const SizedBox(height: 32),
               ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+            ],
+            if (secondaryActions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: secondaryActions,
+              ),
             ],
           ],
         ),

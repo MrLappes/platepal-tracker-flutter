@@ -1,14 +1,23 @@
 class Dish {
+  /// Allowed recipe yield, in servings.
+  static const double minServings = 0.5;
+  static const double maxServings = 100;
+
   final String id;
   final String name;
   final String? description;
   final String? imageUrl;
   final List<Ingredient> ingredients;
+
+  /// Nutrition of the whole recipe, i.e. of [servings] servings.
   final NutritionInfo nutrition;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isFavorite;
   final String? category;
+
+  /// How many servings the recipe makes (its yield).
+  final double servings;
 
   const Dish({
     required this.id,
@@ -21,7 +30,21 @@ class Dish {
     required this.updatedAt,
     this.isFavorite = false,
     this.category,
+    this.servings = 1,
   });
+
+  /// A stored or imported yield, clamped to the allowed range; anything that
+  /// is not a positive number becomes 1.
+  static double normalizeServings(Object? value) {
+    final number =
+        value is num ? value.toDouble() : double.tryParse('${value ?? ''}');
+    if (number == null || !number.isFinite || number <= 0) return 1;
+    return number.clamp(minServings, maxServings).toDouble();
+  }
+
+  /// Nutrition of one serving, which is what a log of 1 serving records.
+  NutritionInfo get nutritionPerServing =>
+      servings == 1 ? nutrition : nutrition.scaled(1 / servings);
   factory Dish.fromJson(Map<String, dynamic> json) {
     // Handle nutrition data - can be nested object or direct fields
     NutritionInfo nutrition;
@@ -57,6 +80,7 @@ class Dish {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       isFavorite: json['isFavorite'] as bool? ?? false,
       category: json['category'] as String?,
+      servings: normalizeServings(json['servings']),
     );
   }
 
@@ -72,6 +96,7 @@ class Dish {
       'updatedAt': updatedAt.toIso8601String(),
       'isFavorite': isFavorite,
       'category': category,
+      'servings': servings,
     };
   }
 
@@ -86,6 +111,7 @@ class Dish {
     DateTime? updatedAt,
     bool? isFavorite,
     String? category,
+    double? servings,
   }) {
     return Dish(
       id: id ?? this.id,
@@ -98,6 +124,7 @@ class Dish {
       updatedAt: updatedAt ?? this.updatedAt,
       isFavorite: isFavorite ?? this.isFavorite,
       category: category ?? this.category,
+      servings: servings ?? this.servings,
     );
   }
 }
@@ -187,9 +214,22 @@ class NutritionInfo {
       'sodium': sodium,
     };
   }
+
+  NutritionInfo scaled(double factor) => NutritionInfo(
+    calories: calories * factor,
+    protein: protein * factor,
+    carbs: carbs * factor,
+    fat: fat * factor,
+    fiber: fiber * factor,
+    sugar: sugar * factor,
+    sodium: sodium * factor,
+  );
 }
 
 class DishLog {
+  /// `dish_id` prefix of quick-add entries, which have no catalog dish.
+  static const String quickAddDishIdPrefix = 'quick_add:';
+
   final String id;
   final String dishId;
   final Dish? dish;
@@ -221,6 +261,9 @@ class DishLog {
     this.dishName,
     this.notes,
   });
+
+  bool get isQuickAdd => dishId.startsWith(quickAddDishIdPrefix);
+
   factory DishLog.fromJson(Map<String, dynamic> json) {
     return DishLog(
       id: json['id']?.toString() ?? '',

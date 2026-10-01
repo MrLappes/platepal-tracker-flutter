@@ -850,11 +850,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsScannerBarcodeScannerTorchOff => 'Apagar la linterna';
 
   @override
-  String componentsScannerProductSearchErrorSearchingProduct(String error) {
-    return 'Error al buscar el producto: $error';
-  }
-
-  @override
   String get componentsScannerProductSearchLoadMore => 'Cargar más';
 
   @override
@@ -1376,7 +1371,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyEffectiveDate =>
-      'Fecha de entrada en vigor: 2026-09-30';
+      'Fecha de entrada en vigor: 2026-10-01';
 
   @override
   String get screensPrivacyOverviewTitle => 'En resumen';
@@ -1425,7 +1420,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Los archivos de exportación (JSON o CSV) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.';
+      'Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes. Los enlaces de la app PlatePal solo rellenan un formulario de plato nuevo; no se guarda nada hasta que tú lo guardes.';
 
   @override
   String get screensPrivacyBackupTitle => 'Copia de seguridad de Android';
@@ -1460,7 +1455,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyContactBody =>
-      'Si tienes preguntas sobre privacidad, abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.';
+      'Si tienes preguntas sobre privacidad, escribe a mike.busam@plate-pal.de o abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.';
 
   @override
   String get screensPrivacyMenuSubtitle =>
@@ -2009,7 +2004,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataSupportedFormats =>
-      'Formatos admitidos: JSON, CSV';
+      'Formatos admitidos: JSON, CSV, ZIP (copia completa)';
 
   @override
   String get screensSettingsImportDataAllDataDescription =>
@@ -2215,7 +2210,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataUnsupportedFormat =>
-      'Formato de archivo no admitido. Selecciona un archivo JSON o CSV.';
+      'Formato de archivo no admitido. Selecciona un archivo JSON, CSV o ZIP.';
 
   @override
   String get screensSettingsImportDataInvalidData =>
@@ -3452,4 +3447,451 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsProfileSettingsInvalidCalorieTarget =>
       'Con estos datos no se puede calcular un objetivo calórico. Revisa tu peso, altura y edad.';
+
+  @override
+  String get screensMenuSupport => 'Ayuda y comentarios';
+
+  @override
+  String get screensMenuSendFeedback => 'Enviar comentarios';
+
+  @override
+  String get screensMenuSendFeedbackSubtitle =>
+      'Escribe un correo al desarrollador';
+
+  @override
+  String get screensMenuReportProblem => 'Informar de un problema';
+
+  @override
+  String get screensMenuReportProblemSubtitle =>
+      'Comparte el registro de diagnóstico con la app que elijas';
+
+  @override
+  String get screensMenuClearDiagnosticLog => 'Borrar registro de diagnóstico';
+
+  @override
+  String get screensMenuClearDiagnosticLogSubtitle =>
+      'Elimina los registros de errores guardados en este dispositivo';
+
+  @override
+  String get screensMenuDiagnosticsNote =>
+      'No se envía nada automáticamente: los errores se guardan en un breve registro local sin datos personales y solo salen de tu dispositivo si los compartes.';
+
+  @override
+  String screensMenuFeedbackSubject(String version) {
+    return 'Comentarios sobre PlatePal Tracker (v$version)';
+  }
+
+  @override
+  String screensMenuNoEmailApp(String email) {
+    return 'No se encontró ninguna app de correo. Puedes escribir a $email.';
+  }
+
+  @override
+  String screensMenuReportProblemSubject(String version) {
+    return 'Informe de problema de PlatePal Tracker (v$version)';
+  }
+
+  @override
+  String screensMenuReportProblemShareText(String email) {
+    return 'Registro de diagnóstico de PlatePal Tracker. Contacto del desarrollador: $email';
+  }
+
+  @override
+  String get screensMenuDiagnosticLogEmpty =>
+      'Aún no se ha registrado ningún problema. El registro de diagnóstico está vacío.';
+
+  @override
+  String get screensMenuDiagnosticLogShareFailed =>
+      'No se pudo compartir el registro de diagnóstico. Inténtalo de nuevo.';
+
+  @override
+  String get screensMenuDiagnosticLogCleared =>
+      'Registro de diagnóstico borrado.';
+
+  @override
+  String get screensMenuDiagnosticLogClearFailed =>
+      'No se pudo borrar el registro de diagnóstico. Inténtalo de nuevo.';
+
+  @override
+  String get screensPrivacyDiagnosticsTitle =>
+      'Registro de diagnóstico y comentarios';
+
+  @override
+  String get screensPrivacyDiagnosticsBody =>
+      'Si la app sufre un error inesperado, guarda en tu dispositivo un breve registro técnico: la hora, la versión de la app, el tipo de error, un mensaje de error abreviado y la ubicación en el código. Se elimina el texto que pueda contener datos personales, como valores entre comillas, direcciones de correo, claves y medidas, y solo se conservan las últimas 20 entradas. El registro nunca se envía automáticamente. Solo sale de tu dispositivo si eliges «Informar de un problema» y lo compartes con la app que prefieras; «Borrar registro de diagnóstico» en el menú lo elimina. «Enviar comentarios» abre tu app de correo y no se envía nada hasta que tú mismo envíes el correo.';
+
+  @override
+  String get screensSettingsImportDataInvalidArchive =>
+      'Este archivo ZIP no es una copia de seguridad de PlatePal Tracker.';
+
+  @override
+  String get screensSettingsExportDataExportAsZip => 'Copia completa (.zip)';
+
+  @override
+  String get screensSettingsExportDataZipDescription =>
+      'Datos y fotos de los platos en un solo archivo, para pasar a otro dispositivo';
+
+  @override
+  String screensSettingsStatisticsNotEnoughMetrics(int count) {
+    return 'Registra tus medidas corporales al menos $count veces para ver este gráfico.';
+  }
+
+  @override
+  String componentsScannerBarcodeScannerNotFoundMessage(String barcode) {
+    return 'El código $barcode aún no está en Open Food Facts. Busca por nombre o introduce el alimento tú mismo.';
+  }
+
+  @override
+  String get componentsScannerBarcodeScannerSearchByName => 'Buscar por nombre';
+
+  @override
+  String get componentsScannerBarcodeScannerEnterManually =>
+      'Introducir manualmente';
+
+  @override
+  String get componentsScannerBarcodeScannerScanAgain => 'Escanear de nuevo';
+
+  @override
+  String componentsDishesDishFormIngredientFormModalBarcode(String barcode) {
+    return 'Código de barras: $barcode';
+  }
+
+  @override
+  String get screensMealsScanBarcode => 'Escanear código de barras';
+
+  @override
+  String get screensMealsSearchFood => 'Buscar alimento';
+
+  @override
+  String get componentsScannerProductSearchErrorOffline =>
+      'Estás sin conexión. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerProductSearchErrorTimeout =>
+      'Open Food Facts tardó demasiado en responder. Inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerProductSearchErrorServer =>
+      'Open Food Facts está saturado o no disponible. Espera un momento e inténtalo de nuevo.';
+
+  @override
+  String get componentsModalsLogFoodTitle => 'Registrar comida';
+
+  @override
+  String componentsModalsLogFoodForMealType(String mealType) {
+    return 'Para $mealType';
+  }
+
+  @override
+  String get componentsModalsLogFoodFavorites => 'Favoritos';
+
+  @override
+  String get componentsModalsLogFoodRecent => 'Recientes';
+
+  @override
+  String get componentsModalsLogFoodAllDishes => 'Todos los platos';
+
+  @override
+  String get componentsModalsLogFoodQuickAdd => 'Añadido rápido';
+
+  @override
+  String get componentsModalsLogFoodSearchOpenFoodFacts =>
+      'Buscar en Open Food Facts';
+
+  @override
+  String get componentsModalsQuickAddCalories => 'Calorías (kcal)';
+
+  @override
+  String get componentsModalsQuickAddCaloriesRequired =>
+      'Introduce las calorías';
+
+  @override
+  String get componentsModalsQuickAddInvalidNumber =>
+      'Introduce un número mayor o igual que 0';
+
+  @override
+  String get componentsModalsQuickAddName => 'Nombre (opcional)';
+
+  @override
+  String get componentsModalsQuickAddProtein => 'Proteína (g)';
+
+  @override
+  String get componentsModalsQuickAddCarbs => 'Carbohidratos (g)';
+
+  @override
+  String get componentsModalsQuickAddFat => 'Grasa (g)';
+
+  @override
+  String get componentsModalsQuickAddFiber => 'Fibra (g)';
+
+  @override
+  String get componentsModalsQuickAddSaved => 'Añadido rápido registrado';
+
+  @override
+  String get componentsModalsQuickAddFailed =>
+      'No se pudo guardar el añadido rápido. Inténtalo de nuevo.';
+
+  @override
+  String get componentsModalsDishLogModalServings => 'Raciones';
+
+  @override
+  String get componentsModalsDishLogModalWeight => 'Peso';
+
+  @override
+  String componentsModalsDishLogModalAmountInUnit(String unit) {
+    return 'Cantidad ($unit)';
+  }
+
+  @override
+  String componentsModalsDishLogModalServingWeight(String amount, String unit) {
+    return '1 ración = $amount $unit';
+  }
+
+  @override
+  String get componentsModalsDishLogModalFewerServings => 'Menos raciones';
+
+  @override
+  String get componentsModalsDishLogModalMoreServings => 'Más raciones';
+
+  @override
+  String componentsModalsDishLogModalAmountRange(String min, String max) {
+    return 'Introduce un valor de $min a $max';
+  }
+
+  @override
+  String get componentsModalsDishLogModalEditTitle => 'Editar entrada';
+
+  @override
+  String get componentsModalsDishLogModalEntryUpdated => 'Entrada actualizada';
+
+  @override
+  String get componentsModalsDishLogModalUpdateFailed =>
+      'No se pudo actualizar la entrada. Inténtalo de nuevo.';
+
+  @override
+  String get componentsModalsDishLogModalHealthEditWarning =>
+      'Health Connect conserva la entrada original. Cámbiala o elimínala allí si es necesario.';
+
+  @override
+  String get screensCalendarEntryActions => 'Más acciones';
+
+  @override
+  String get screensCalendarCopyToToday => 'Copiar a hoy';
+
+  @override
+  String get screensCalendarCopyToDate => 'Copiar a fecha…';
+
+  @override
+  String screensCalendarCopyFromPreviousDay(String mealType) {
+    return 'Copiar $mealType del día anterior';
+  }
+
+  @override
+  String screensCalendarAddToMeal(String mealType) {
+    return 'Añadir a $mealType';
+  }
+
+  @override
+  String screensCalendarEntriesCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entradas copiadas',
+      one: '1 entrada copiada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensCalendarNothingToCopy(String mealType) {
+    return 'El día anterior no tiene entradas de $mealType';
+  }
+
+  @override
+  String get screensCalendarCopyFailed =>
+      'No se pudo copiar. Inténtalo de nuevo.';
+
+  @override
+  String get screensDishCreateRecipeMakes => 'Esta receta rinde';
+
+  @override
+  String get screensDishCreateServingsSuffix => 'raciones';
+
+  @override
+  String get screensDishCreateServingsHelper =>
+      'Los valores nutricionales de abajo son para toda la receta';
+
+  @override
+  String screensDishCreatePerServingSummary(
+    String servings,
+    String calories,
+    String protein,
+    String carbs,
+    String fat,
+  ) {
+    return 'Por ración (1 de $servings): $calories kcal · $protein g proteína · $carbs g carbohidratos · $fat g grasa';
+  }
+
+  @override
+  String componentsChatMealLogProposalSummaryOne(
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  ) {
+    return 'Registrar 1 ración de $name como $mealType $day – $calories kcal';
+  }
+
+  @override
+  String componentsChatMealLogProposalSummaryOther(
+    String servings,
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  ) {
+    return 'Registrar $servings raciones de $name como $mealType $day – $calories kcal';
+  }
+
+  @override
+  String get componentsChatMealLogProposalToday => 'hoy';
+
+  @override
+  String get componentsChatMealLogProposalYesterday => 'ayer';
+
+  @override
+  String componentsChatMealLogProposalOnDate(String date) {
+    return 'el $date';
+  }
+
+  @override
+  String get componentsChatMealLogProposalConfirm => 'Confirmar';
+
+  @override
+  String get componentsChatMealLogProposalEdit => 'Editar';
+
+  @override
+  String get componentsChatMealLogProposalDismiss => 'Descartar';
+
+  @override
+  String get componentsChatMealLogProposalLogged => 'Registrado';
+
+  @override
+  String get componentsChatMealLogProposalDismissed => 'Descartado';
+
+  @override
+  String get componentsChatMealLogProposalDishMissing =>
+      'Este plato ya no existe.';
+
+  @override
+  String get componentsChatMealLogProposalInvalid =>
+      'No se pudo leer la entrada del asistente. Vuelve a preguntar.';
+
+  @override
+  String get screensBackupTitle => 'Copia de seguridad';
+
+  @override
+  String get screensMenuBackupSubtitle => 'Copias automáticas con fotos';
+
+  @override
+  String get screensBackupAutomatic => 'Copia de seguridad automática';
+
+  @override
+  String get screensBackupAutomaticSubtitle =>
+      'Guarda una copia completa con fotos al abrir la app cuando toca';
+
+  @override
+  String get screensBackupDaily => 'Diaria';
+
+  @override
+  String get screensBackupWeekly => 'Semanal';
+
+  @override
+  String get screensBackupFolder => 'Carpeta de copias';
+
+  @override
+  String get screensBackupFolderDefault =>
+      'Almacenamiento de la app (se borra al desinstalarla)';
+
+  @override
+  String get screensBackupChooseFolder => 'Elegir';
+
+  @override
+  String get screensBackupUseDefaultFolder => 'Usar almacenamiento de la app';
+
+  @override
+  String get screensBackupFolderPickFailed =>
+      'No se puede usar esa carpeta. Elige otra.';
+
+  @override
+  String screensBackupKeepNote(int count) {
+    return 'Se conservan las $count copias automáticas más recientes; las anteriores se eliminan.';
+  }
+
+  @override
+  String get screensBackupNever => 'Aún no hay copias';
+
+  @override
+  String screensBackupLast(String date) {
+    return 'Última copia: $date';
+  }
+
+  @override
+  String screensBackupLastFailed(String date) {
+    return 'Último intento fallido: $date';
+  }
+
+  @override
+  String get screensBackupNow => 'Hacer copia ahora';
+
+  @override
+  String get screensBackupDone => 'Copia guardada';
+
+  @override
+  String get screensBackupFailed =>
+      'La copia falló. Revisa la carpeta y el espacio libre.';
+
+  @override
+  String get screensBackupFailureNotice => 'La última copia automática falló.';
+
+  @override
+  String get screensBackupOpenSettings => 'Ajustes';
+
+  @override
+  String get screensDishCreateImportedBanner =>
+      'Importado de PlatePal: revisa los ingredientes y las cantidades';
+
+  @override
+  String get screensDishCreateIngredientNeedsDetails =>
+      'Añade cantidad y valores nutricionales';
+
+  @override
+  String get screensDishCreateImportIncomplete =>
+      'Completa o elimina los ingredientes marcados en rojo antes de guardar.';
+
+  @override
+  String get screensPlatePalImportTitle => 'Importar de PlatePal';
+
+  @override
+  String get screensPlatePalImportInvalid =>
+      'Este enlace de PlatePal no es válido o está incompleto. Vuelve a compartir el plato desde PlatePal.';
+
+  @override
+  String get screensPlatePalImportUnsupported =>
+      'Este plato se compartió desde una versión más reciente de PlatePal. Actualiza PlatePal Tracker para importarlo.';
+
+  @override
+  String get screensMenuPlatePalPromo => 'PlatePal: comparte comidas con otros';
+
+  @override
+  String get screensMenuPlatePalPromoSubtitle =>
+      'Consigue la app PlatePal en Google Play';
+
+  @override
+  String get screensCalendarKcalUnit => 'kcal';
+
+  @override
+  String componentsModalsQuickAddTooLarge(String max) {
+    return 'Introduce como máximo $max';
+  }
 }

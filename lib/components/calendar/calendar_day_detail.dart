@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../models/dish.dart';
+import '../../models/meal_type.dart';
 import '../../services/storage/dish_service.dart';
 
 class CalendarDayDetail extends StatefulWidget {
@@ -9,12 +10,18 @@ class CalendarDayDetail extends StatefulWidget {
   final Widget Function(BuildContext, DishLog)? renderLogItem;
   final VoidCallback? onLogMeal;
 
+  /// When set, logs are grouped into one section per meal type (all four
+  /// are shown, even empty ones), each starting with this header.
+  final Widget Function(BuildContext, MealType, List<DishLog>)?
+  mealSectionHeader;
+
   const CalendarDayDetail({
     super.key,
     required this.date,
     this.logs,
     this.renderLogItem,
     this.onLogMeal,
+    this.mealSectionHeader,
   });
 
   @override
@@ -147,39 +154,61 @@ class _CalendarDayDetailState extends State<CalendarDayDetail> {
       );
     }
 
-    if (logs.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.componentsCalendarCalendarDayDetailNoMealsLoggedForDay,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+    Widget renderLog(DishLog log) =>
+        widget.renderLogItem?.call(context, log) ??
+        _defaultRenderItem(context, log);
+
+    final sectionHeader = widget.mealSectionHeader;
+    final emptyMessage =
+        logs.isEmpty
+            ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.componentsCalendarCalendarDayDetailNoMealsLoggedForDay,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (widget.onLogMeal != null) ...[
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: widget.onLogMeal,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                        ),
+                        child: Text(l10n.screensCalendarLogMeal),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              if (widget.onLogMeal != null) ...[
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: widget.onLogMeal,
-                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-                  child: Text(l10n.screensCalendarLogMeal),
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
+            )
+            : null;
+
+    if (sectionHeader == null) {
+      return emptyMessage ?? Column(children: logs.map(renderLog).toList());
     }
 
     return Column(
-      children:
-          logs.map((log) {
-            return widget.renderLogItem?.call(context, log) ??
-                _defaultRenderItem(context, log);
-          }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (emptyMessage != null) emptyMessage,
+        for (final type in MealType.values) ...[
+          sectionHeader(
+            context,
+            type,
+            logs
+                .where((log) => MealType.fromString(log.mealType) == type)
+                .toList(),
+          ),
+          for (final log in logs)
+            if (MealType.fromString(log.mealType) == type) renderLog(log),
+        ],
+      ],
     );
   }
 }

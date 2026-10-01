@@ -1,8 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
+
+/// Non-200 response from Open Food Facts.
+class OffHttpException extends http.ClientException {
+  OffHttpException(this.statusCode, Uri uri) : super('HTTP $statusCode', uri);
+
+  final int statusCode;
+}
+
+/// What went wrong with an Open Food Facts request, for user messages.
+enum OffErrorKind { offline, timeout, server, unknown }
+
+OffErrorKind classifyOffError(Object error) => switch (error) {
+  TimeoutException() => OffErrorKind.timeout,
+  OffHttpException(:final statusCode)
+      when statusCode == 429 || statusCode >= 500 =>
+    OffErrorKind.server,
+  OffHttpException() => OffErrorKind.unknown,
+  SocketException() || HandshakeException() || http.ClientException() =>
+    OffErrorKind.offline,
+  _ => OffErrorKind.unknown,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Data classes for category / sort / filter options
@@ -222,7 +244,7 @@ class OpenFoodFactsService {
     final response = await _get(uri);
     if (response.statusCode == 404) return null;
     if (response.statusCode != 200) {
-      throw http.ClientException('HTTP ${response.statusCode}', uri);
+      throw OffHttpException(response.statusCode, uri);
     }
 
     final data = json.decode(response.body) as Map<String, dynamic>;
@@ -281,24 +303,23 @@ class OpenFoodFactsService {
   }
 
   Future<List<Product>> _fetchAndParse(String url, {bool v2 = false}) async {
+    final uri = Uri.parse(url);
     try {
-      final response = await _get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final products = data['products'] as List<dynamic>? ?? [];
-        debugPrint('✅ Parsed ${products.length} products');
-        return products
-            .map(_parseProduct)
-            .where((p) => p != null && p.isValid)
-            .cast<Product>()
-            .toList();
+      final response = await _get(uri);
+      if (response.statusCode != 200) {
+        throw OffHttpException(response.statusCode, uri);
       }
-      throw Exception('HTTP ${response.statusCode}');
-    } on TimeoutException {
-      rethrow;
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final products = data['products'] as List<dynamic>? ?? [];
+      debugPrint('✅ Parsed ${products.length} products');
+      return products
+          .map(_parseProduct)
+          .where((p) => p != null && p.isValid)
+          .cast<Product>()
+          .toList();
     } catch (e) {
       debugPrint('❌ OFF fetch error: ${e.runtimeType}');
-      throw Exception('Error fetching products: $e');
+      rethrow;
     }
   }
 

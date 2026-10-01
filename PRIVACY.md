@@ -1,6 +1,6 @@
 # PlatePal Tracker Privacy Policy
 
-Effective date: 2026-09-30
+Effective date: 2026-10-01
 
 ## At a glance
 
@@ -28,7 +28,11 @@ The Contributors screen loads avatar images from GitHub's avatars.githubusercont
 
 ## Export and import
 
-Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.
+Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us. If you turn on automatic backup, the app also writes full ZIP backups to a folder you choose (or to app storage) when one is due and keeps the newest five. Links from the PlatePal app only fill in a new dish form; nothing is saved until you save it.
+
+## Diagnostic log and feedback
+
+If the app hits an unexpected error, it saves a short technical record on your device: time, app version, error type, a shortened error message and the code location. Text that may contain personal data, such as quoted values, email addresses, keys and measurements, is removed, and only the last 20 entries are kept. The log is never sent automatically. It leaves your device only if you choose Report a problem in the menu and share it with an app you pick; Clear diagnostic log deletes it. Send feedback opens your email app, and nothing is sent until you send the email yourself.
 
 ## Android backup
 
@@ -48,4 +52,4 @@ We may update this policy when the app changes. The effective date above shows w
 
 ## Contact
 
-For privacy questions, open a GitHub issue at [github.com/MrLappes/platepal-tracker-flutter/issues](https://github.com/MrLappes/platepal-tracker-flutter/issues). We cannot access data kept only on your device; use the app and platform controls above to delete it.
+For privacy questions, email [mike.busam@plate-pal.de](mailto:mike.busam@plate-pal.de) or open a GitHub issue at [github.com/MrLappes/platepal-tracker-flutter/issues](https://github.com/MrLappes/platepal-tracker-flutter/issues). We cannot access data kept only on your device; use the app and platform controls above to delete it.

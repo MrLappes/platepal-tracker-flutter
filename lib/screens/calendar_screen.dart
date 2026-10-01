@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../models/dish.dart';
+import '../models/meal_type.dart';
 import '../models/user_profile.dart';
 import '../services/storage/dish_service.dart';
 import '../services/health_service.dart';
@@ -10,9 +11,9 @@ import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
 import '../services/chat/openai_service.dart';
 import '../components/calendar/calendar_day_detail.dart';
-import '../components/calendar/calendar_dish_picker.dart';
 import '../components/calendar/macro_summary.dart';
 import '../components/modals/dish_log_modal.dart';
+import '../components/modals/log_food_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -157,36 +158,131 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<void> _createDishFromCalendar() async {
     final created = await context.push<bool>('/dishes/create');
     if (!mounted || created != true) return;
-    await _openDishPicker();
+    await _openLogFood();
   }
 
-  Future<void> _openDishPicker() async {
-    final dish = await showModalBottomSheet<Dish>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (sheetContext) => CalendarDishPicker(
-            dishService: _dishService,
-            onCreateDish: () {
-              Navigator.of(sheetContext).pop();
-              _createDishFromCalendar();
-            },
-          ),
+  Future<void> _openLogFood({String? mealType}) async {
+    final logged = await showLogFoodFlow(
+      context,
+      dishService: _dishService,
+      date: _selectedDate,
+      mealType: mealType,
+      onCreateDish: _createDishFromCalendar,
     );
-    if (!mounted || dish == null) return;
-    final logged = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => DishLogModal(dish: dish, initialDate: _selectedDate),
-    );
-    if (!mounted || logged != true) return;
+    if (!mounted || !logged) return;
+    await _refreshSelectedDay();
+  }
+
+  Future<void> _refreshSelectedDay() async {
     await _handleDateSelect(_selectedDate);
     if (mounted) await _loadCalendarDates();
   }
+
+  Future<void> _editLog(DishLog log) async {
+    final l10n = AppLocalizations.of(context);
+    Dish? current;
+    if (!log.isQuickAdd) {
+      try {
+        current = await _dishService.getDishById(log.dishId);
+      } catch (error) {
+        debugPrint('Error loading dish for edit: ${error.runtimeType}');
+      }
+    }
+    if (!mounted) return;
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (_) => DishLogModal(
+            dish: dishForLog(
+              log,
+              current: current,
+              fallbackName: _logName(log, l10n),
+            ),
+            existingLog: log,
+            dishService: _dishService,
+          ),
+    );
+    if (!mounted || saved != true) return;
+    await _refreshSelectedDay();
+  }
+
+  Future<void> _copyLogTo(DishLog log, DateTime day) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      await _dishService.copyDishLog(log, day);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text(l10n.screensCalendarEntriesCopied(1))),
+        );
+      await _refreshSelectedDay();
+    } catch (error) {
+      debugPrint('Error copying log: ${error.runtimeType}');
+      if (!mounted) return;
+      _showCopyFailed();
+    }
+  }
+
+  Future<void> _copyLogToPickedDate(DishLog log) async {
+    final now = DateTime.now();
+    final first = DateTime(now.year - 5);
+    final last = now.add(const Duration(days: 30));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: _selectedDate.isBefore(first) ? _selectedDate : first,
+      lastDate: _selectedDate.isAfter(last) ? _selectedDate : last,
+    );
+    if (!mounted || picked == null) return;
+    await _copyLogTo(log, picked);
+  }
+
+  Future<void> _copyMealFromPreviousDay(MealType type) async {
+    final l10n = AppLocalizations.of(context);
+    final mealName = type.localizedDisplayName(l10n);
+    try {
+      final copied = await _dishService.copyMealFromPreviousDay(
+        day: _selectedDate,
+        mealType: type.toJsonValue(),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              copied == 0
+                  ? l10n.screensCalendarNothingToCopy(mealName)
+                  : l10n.screensCalendarEntriesCopied(copied),
+            ),
+          ),
+        );
+      if (copied > 0) await _refreshSelectedDay();
+    } catch (error) {
+      debugPrint('Error copying meal: ${error.runtimeType}');
+      if (!mounted) return;
+      _showCopyFailed();
+    }
+  }
+
+  void _showCopyFailed() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).screensCalendarCopyFailed),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
+
+  String _logName(DishLog log, AppLocalizations l10n) =>
+      log.dish?.name ??
+      log.dishName ??
+      (log.isQuickAdd
+          ? l10n.componentsModalsLogFoodQuickAdd
+          : l10n.componentsCalendarCalendarDayDetailUnknownDish);
 
   Future<void> _loadCalendarDates() async {
     final requestId = ++_markerRequestId;
@@ -427,7 +523,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         contextMessage += '\n\nMeals eaten today:';
         for (final log in _selectedDayLogs) {
           contextMessage +=
-              '\n- ${log.dish?.name ?? log.dishName ?? l10n.componentsCalendarCalendarDayDetailUnknownDish} (${log.mealType})';
+              '\n- ${_logName(log, l10n)} (${log.mealType})';
         }
       }
 
@@ -705,6 +801,59 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  Widget _buildMealSectionHeader(
+    BuildContext context,
+    MealType type,
+    List<DishLog> logs,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final mealName = type.localizedDisplayName(l10n);
+    final calories = logs.fold<double>(0, (sum, log) => sum + log.calories);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: mealName.toUpperCase(),
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                    if (logs.isNotEmpty)
+                      TextSpan(
+                        text:
+                            '  ${calories.round()} '
+                            '${l10n.screensCalendarKcalUnit.toUpperCase()}',
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
+                  ],
+                ),
+                style: theme.textTheme.labelLarge?.copyWith(letterSpacing: 0.5),
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: l10n.screensCalendarCopyFromPreviousDay(mealName),
+            onPressed: () => _copyMealFromPreviousDay(type),
+            icon: Icon(Icons.copy_all, color: colorScheme.onSurfaceVariant),
+          ),
+          IconButton(
+            tooltip: l10n.screensCalendarAddToMeal(mealName),
+            onPressed: () => _openLogFood(mealType: type.toJsonValue()),
+            icon: Icon(Icons.add, color: colorScheme.primary),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLogItem(BuildContext context, DishLog log) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -712,7 +861,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
@@ -721,70 +869,123 @@ class _CalendarScreenState extends State<CalendarScreen> {
           width: 1,
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  (log.dish?.name ??
-                          log.dishName ??
-                          l10n.componentsCalendarCalendarDayDetailUnknownDish)
-                      .toUpperCase(),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                    fontSize: 13,
-                  ),
+      child: InkWell(
+        onTap: () => _editLog(log),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 4, 16),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                const SizedBox(height: 4),
-                Row(
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      log.mealType.toUpperCase(),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.bold,
+                      _logName(log, l10n).toUpperCase(),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                        fontSize: 13,
                       ),
                     ),
-                    Text(
-                      '  |  ',
-                      style: TextStyle(
-                        color: colorScheme.outline.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    Text(
-                      '${log.calories.round()} KCAL',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.9),
-                      ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          MealType.fromString(
+                            log.mealType,
+                          ).localizedDisplayName(l10n),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '  |  ',
+                          style: TextStyle(
+                            color: colorScheme.outline.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        Text(
+                          TimeOfDay.fromDateTime(log.loggedAt).format(context),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.9),
+                          ),
+                        ),
+                        Text(
+                          '  |  ',
+                          style: TextStyle(
+                            color: colorScheme.outline.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        Text(
+                          '${log.calories.round()} '
+                          '${l10n.screensCalendarKcalUnit.toUpperCase()}',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              PopupMenuButton<String>(
+                tooltip: l10n.screensCalendarEntryActions,
+                icon: Icon(
+                  Icons.more_vert,
+                  size: 18,
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'edit':
+                      _editLog(log);
+                    case 'copy_today':
+                      _copyLogTo(log, DateTime.now());
+                    case 'copy_date':
+                      _copyLogToPickedDate(log);
+                  }
+                },
+                itemBuilder:
+                    (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(l10n.componentsDishesDishCardEdit),
+                      ),
+                      PopupMenuItem(
+                        value: 'copy_today',
+                        child: Text(l10n.screensCalendarCopyToToday),
+                      ),
+                      PopupMenuItem(
+                        value: 'copy_date',
+                        child: Text(l10n.screensCalendarCopyToDate),
+                      ),
+                    ],
+              ),
+              IconButton(
+                onPressed: () => _handleDeleteLog(log),
+                tooltip: l10n.screensCalendarDeleteLog,
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                icon: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () => _handleDeleteLog(log),
-            tooltip: l10n.screensCalendarDeleteLog,
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            icon: Icon(
-              Icons.close,
-              size: 18,
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -796,10 +997,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       floatingActionButton: _initializationFailed ? null : FloatingActionButton.extended(
         heroTag: 'calendar_log_meal',
-        onPressed: _openDishPicker,
-        tooltip: AppLocalizations.of(context).screensCalendarLogMeal,
+        onPressed: _openLogFood,
+        tooltip: AppLocalizations.of(context).componentsModalsLogFoodTitle,
         icon: const Icon(Icons.add),
-        label: Text(AppLocalizations.of(context).screensCalendarLogMeal),
+        label: Text(AppLocalizations.of(context).componentsModalsLogFoodTitle),
       ),
       body: SafeArea(
         child:
@@ -1085,10 +1286,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   CalendarDayDetail(
                                     date: _selectedDate,
                                     logs: _selectedDayLogs,
-                                    onLogMeal: _openDishPicker,
+                                    onLogMeal: _openLogFood,
                                     renderLogItem:
                                         (context, log) =>
                                             _buildLogItem(context, log),
+                                    mealSectionHeader: _buildMealSectionHeader,
                                   ),
                                 // Add some bottom padding to ensure there's enough space to scroll
                                 const SizedBox(height: 100),

@@ -1,0 +1,7 @@
+- Registro más rápido: «Registrar comida» con platos recientes, favoritos, añadido rápido y cantidades en raciones o gramos
+- Edita y copia entradas del diario; recetas con varias raciones
+- El asistente de IA propone entradas que tú confirmas
+- Copias de seguridad automáticas y completas con fotos
+- Importa platos desde la app PlatePal
+- Envía comentarios y comparte un registro de diagnóstico local
+- Correcciones en estadísticas, escáner y búsqueda

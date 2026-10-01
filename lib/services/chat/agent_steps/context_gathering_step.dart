@@ -409,7 +409,14 @@ class ContextGatheringStep extends AgentStep {
 
   String _formatDishes(List<Dish> dishes) {
     if (dishes.isEmpty) return 'No dishes available.';
-    final shown = dishes.take(10).map((d) => '- ${d.name}').join('\n');
+    final shown = dishes
+        .take(10)
+        .map(
+          (d) =>
+              '- ${d.name} (dish_id: ${d.id}, '
+              '${d.nutritionPerServing.calories.round()} kcal per serving)',
+        )
+        .join('\n');
     return 'Available dishes (up to 10 shown):\n$shown${dishes.length > 10 ? '\n...and ${dishes.length - 10} more' : ''}';
   }
 
