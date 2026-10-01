@@ -9,7 +9,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 /// Removes text that could carry personal data (quoted values, keys,
-/// e-mail addresses, URL paths, decimal measurements) and caps the length.
+/// e-mail addresses, URL paths, numbers of two or more digits) and caps the
+/// length. Stack locations (`file.dart:12:5`) and frame numbers (`#12`) stay.
 String sanitizeDiagnosticText(String text, {int maxLength = 500}) {
   var result = text
       .replaceAll(RegExp(r'"[^"\n]*"'), '"…"')
@@ -24,7 +25,14 @@ String sanitizeDiagnosticText(String text, {int maxLength = 500}) {
         RegExp(r'\b(?=[A-Za-z_-]*\d)[A-Za-z0-9_-]{20,}\b'),
         '<redacted>',
       )
-      .replaceAll(RegExp(r'\b\d+[.,]\d+\b'), '<n>');
+      .replaceAll(RegExp(r'\b\d+[.,]\d+\b'), '<n>')
+      .replaceAllMapped(
+        RegExp(
+          r'(\.dart:\d+(?::\d+)?)|(^\s*#\d+)|(?<![A-Za-z_])\d{2,}(?![A-Za-z_])',
+          multiLine: true,
+        ),
+        (m) => m[1] ?? m[2] ?? '<n>',
+      );
   if (result.length > maxLength) {
     result = '${result.substring(0, maxLength)}…';
   }
@@ -68,7 +76,8 @@ class DiagnosticEntry {
       appVersion: appVersion,
       source: source,
       type: error.runtimeType.toString(),
-      message: sanitizeDiagnosticText(error.toString()),
+      // Later lines of a message often repeat input or data.
+      message: sanitizeDiagnosticText(error.toString().split('\n').first),
       stack: frames.join('\n'),
     );
   }
