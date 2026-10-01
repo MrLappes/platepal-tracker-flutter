@@ -247,6 +247,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(service.favorites, {'dish-1': true});
   });
+
+  testWidgets('the list leaves room below the last card for both FABs', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MealsScreen(
+          dishService: _StubDishService([
+            Dish(
+              id: 'dish-1',
+              name: 'Soup',
+              ingredients: const [],
+              nutrition: const NutritionInfo(
+                calories: 100,
+                protein: 5,
+                carbs: 8,
+                fat: 2,
+              ),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          ]),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final fabTop = find
+        .byType(FloatingActionButton)
+        .evaluate()
+        .map((element) => tester.getRect(find.byWidget(element.widget)).top)
+        .reduce((a, b) => a < b ? a : b);
+    final listBottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+    final padding = tester.widget<SliverPadding>(
+      find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(SliverPadding),
+      ),
+    );
+    expect(
+      (padding.padding as EdgeInsets).bottom,
+      greaterThanOrEqualTo(listBottom - fabTop),
+    );
+  });
 }
 
 class _FavoriteRecordingDishService extends _StubDishService {
