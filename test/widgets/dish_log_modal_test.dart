@@ -103,6 +103,43 @@ void main() {
     );
   });
 
+  testWidgets('log sheet shows German decimal separators for nutrition', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final dish = Dish(
+      id: 'test-dish',
+      name: 'Soup',
+      ingredients: const [],
+      nutrition: const NutritionInfo(
+        calories: 100,
+        protein: 30,
+        carbs: 12.5,
+        fat: 4.2,
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('de'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: DishLogModal(dish: dish)),
+      ),
+    );
+
+    for (final value in ['30,0 g', '12,5 g', '4,2 g']) {
+      expect(
+        find.byWidgetPredicate(
+          (widget) => widget is RichText && widget.text.toPlainText() == value,
+        ),
+        findsOneWidget,
+      );
+    }
+  });
+
   testWidgets(
     'unselected meal types remain readable and selectable in dark mode',
     (tester) async {

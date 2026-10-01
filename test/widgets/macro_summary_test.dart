@@ -3,14 +3,46 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/components/calendar/macro_summary.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 
-Widget _app(Widget child) => MaterialApp(
-  locale: const Locale('es'),
+Widget _app(Widget child, {Locale locale = const Locale('es')}) => MaterialApp(
+  locale: locale,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(body: child),
 );
 
 void main() {
+  for (final (locale, amount, status) in [
+    (const Locale('de'), '26,1g / 20g', '6,1 g über dem Ziel'),
+    (const Locale('en'), '26.1g / 20g', 'Over goal by 6.1 g'),
+  ]) {
+    testWidgets(
+      '${locale.languageCode} macro decimals match visible text and semantics',
+      (tester) async {
+        await tester.pumpWidget(
+          _app(
+            const MacroSummary(
+              calories: 800,
+              protein: 26.1,
+              carbs: 70,
+              fat: 20,
+              proteinTarget: 20,
+            ),
+            locale: locale,
+          ),
+        );
+
+        expect(find.text(amount), findsOneWidget);
+        expect(find.text(status), findsOneWidget);
+        final values =
+            tester
+                .widgetList<Semantics>(find.byType(Semantics))
+                .map((widget) => widget.properties.value ?? '')
+                .toList();
+        expect(values, contains(status));
+      },
+    );
+  }
+
   testWidgets(
     'Spanish macro bars state under and over goal in text and semantics',
     (tester) async {

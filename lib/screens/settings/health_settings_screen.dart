@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import '../../services/health_service.dart';
 import '../../services/calorie_expenditure_service.dart';
+import '../../utils/number_parsing.dart';
 
 class HealthSettingsScreen extends StatefulWidget {
   const HealthSettingsScreen({super.key});
@@ -312,6 +313,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
     CalorieTargetAnalysis analysis,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final analysisMessage = switch (analysis.status) {
       CalorieTargetStatus.profileNotFound =>
         l10n.screensSettingsHealthSettingsAnalysisProfileNotFound,
@@ -353,16 +355,16 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                 children: [
                   _buildAnalysisRow(
                     l10n.screensSettingsHealthSettingsCurrentTarget,
-                    '${analysis.currentTarget.toStringAsFixed(0)} kcal',
+                    '${formatDecimal(analysis.currentTarget, locale, fractionDigits: 0)} kcal',
                   ),
                   _buildAnalysisRow(
                     l10n.screensSettingsHealthSettingsAvgExpenditure,
-                    '${analysis.averageExpenditure.toStringAsFixed(0)} kcal',
+                    '${formatDecimal(analysis.averageExpenditure, locale, fractionDigits: 0)} kcal',
                   ),
                   if (analysis.needsAdjustment)
                     _buildAnalysisRow(
                       l10n.screensSettingsHealthSettingsSuggestedTarget,
-                      '${analysis.suggestedTarget.toStringAsFixed(0)} kcal',
+                      '${formatDecimal(analysis.suggestedTarget, locale, fractionDigits: 0)} kcal',
                       isHighlighted: true,
                     ),
                   if (analysis.daysAnalyzed > 0)
@@ -401,6 +403,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
       newTarget,
     );
     if (mounted) {
+      final locale = Localizations.localeOf(context).toString();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -408,7 +411,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                 ? AppLocalizations.of(
                   context,
                 ).screensSettingsHealthSettingsCalorieTargetUpdated(
-                  newTarget.toStringAsFixed(0),
+                  formatDecimal(newTarget, locale, fractionDigits: 0),
                 )
                 : AppLocalizations.of(
                   context,
@@ -694,6 +697,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   }
 
   Widget _buildDataOverviewCard(ThemeData theme, ColorScheme colorScheme) {
+    final locale = Localizations.localeOf(context).toString();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -750,7 +754,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                       ),
                       Text(
                         _todaysBurnedCalories != null
-                            ? '${_todaysBurnedCalories!.toStringAsFixed(0)} kcal'
+                            ? '${formatDecimal(_todaysBurnedCalories!, locale, fractionDigits: 0)} kcal'
                             : AppLocalizations.of(
                               context,
                             ).screensSettingsHealthSettingsNoDataYet,

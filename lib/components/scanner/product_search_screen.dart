@@ -11,6 +11,7 @@ import '../../services/open_food_facts_service.dart';
 import '../../services/storage/database_service.dart';
 import '../../services/storage/dish_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/number_parsing.dart';
 import '../../utils/product_converter.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -949,6 +950,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final thumbnailPixels =
         (48 * MediaQuery.devicePixelRatioOf(context)).round();
 
@@ -1010,6 +1012,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 protein: product.nutrition!.protein,
                 carbs: product.nutrition!.carbs,
                 fat: product.nutrition!.fat,
+                locale: locale,
               )
               : null,
     );
@@ -1020,6 +1023,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     required double protein,
     required double carbs,
     double? fat,
+    required String locale,
   }) {
     final l10n = AppLocalizations.of(context);
     final grams =
@@ -1027,10 +1031,10 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     final fatSummary =
         fat == null
             ? ''
-            : ' | ${l10n.componentsScannerProductSearchFatAbbreviation.toUpperCase()}${fat.toStringAsFixed(1)}$grams';
+            : ' | ${l10n.componentsScannerProductSearchFatAbbreviation.toUpperCase()}${formatDecimal(fat, locale)}$grams';
     return '${calories.round()} ${l10n.componentsScannerProductSearchKcal.toUpperCase()} | '
-        '${l10n.componentsScannerProductSearchProteinAbbreviation.toUpperCase()}${protein.toStringAsFixed(1)}$grams | '
-        '${l10n.componentsScannerProductSearchCarbsAbbreviation.toUpperCase()}${carbs.toStringAsFixed(1)}$grams$fatSummary';
+        '${l10n.componentsScannerProductSearchProteinAbbreviation.toUpperCase()}${formatDecimal(protein, locale)}$grams | '
+        '${l10n.componentsScannerProductSearchCarbsAbbreviation.toUpperCase()}${formatDecimal(carbs, locale)}$grams$fatSummary';
   }
 
   Widget _buildLocalIngredientCard(
@@ -1038,6 +1042,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
+    final locale = Localizations.localeOf(context).toString();
     return _itemCard(
       theme: theme,
       colorScheme: colorScheme,
@@ -1067,7 +1072,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       icon: Icon(Icons.inventory_2, size: 22, color: colorScheme.primary),
       title: ing.name.toUpperCase(),
       subtitle:
-          '${ing.amount.toStringAsFixed(0)}${ing.unit} — ${AppLocalizations.of(context).componentsScannerProductSearchIngredient.toUpperCase()}',
+          '${formatDecimal(ing.amount, locale, fractionDigits: 0)}${ing.unit} — ${AppLocalizations.of(context).componentsScannerProductSearchIngredient.toUpperCase()}',
       subtitleColor: colorScheme.secondary,
       nutrition:
           ing.nutrition != null
@@ -1075,6 +1080,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 calories: ing.nutrition!.calories,
                 protein: ing.nutrition!.protein,
                 carbs: ing.nutrition!.carbs,
+                locale: locale,
               )
               : null,
     );
@@ -1085,6 +1091,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
+    final locale = Localizations.localeOf(context).toString();
     return _itemCard(
       theme: theme,
       colorScheme: colorScheme,
@@ -1107,6 +1114,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         calories: dish.nutrition.calories,
         protein: dish.nutrition.protein,
         carbs: dish.nutrition.carbs,
+        locale: locale,
       ),
     );
   }

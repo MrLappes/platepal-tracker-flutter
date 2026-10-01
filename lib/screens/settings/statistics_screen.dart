@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/number_parsing.dart';
 import '../../utils/nutrition_calculator.dart';
 import '../../utils/service_extensions.dart';
 import '../../models/user_profile.dart';
@@ -871,6 +872,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     BuildContext context,
     AppLocalizations l10n,
   ) {
+    final locale = Localizations.localeOf(context).toString();
     final healthDataDays = _caloriesBurnedData.length;
     final totalDays = _calorieHistory.length;
     final coverage = totalDays > 0 ? (healthDataDays / totalDays * 100) : 0;
@@ -898,7 +900,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             const SizedBox(height: 12),
             Text(
               l10n.screensSettingsStatisticsCoverage(
-                coverage.toStringAsFixed(1),
+                formatDecimal(coverage, locale),
                 healthDataDays,
                 totalDays,
               ),
@@ -926,6 +928,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildCurrentStatsCard(BuildContext context, AppLocalizations l10n) {
+    final locale = Localizations.localeOf(context).toString();
     final String weightUnit =
         _userProfile?.preferredUnit == 'imperial' ? 'lbs' : 'kg';
     final String heightUnit =
@@ -964,7 +967,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsImportProfileCompletionWeight,
                     value:
                         displayWeight != null
-                            ? '${displayWeight.toStringAsFixed(1)} $weightUnit'
+                        ? '${formatDecimal(displayWeight, locale)} $weightUnit'
                             : '-',
                   ),
                 ),
@@ -975,7 +978,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsImportProfileCompletionHeight,
                     value:
                         displayHeight != null
-                            ? '${displayHeight.toStringAsFixed(1)} $heightUnit'
+                        ? '${formatDecimal(displayHeight, locale)} $heightUnit'
                             : '-',
                   ),
                 ),
@@ -991,7 +994,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsProfileSettingsBmi,
                     value:
                         _currentBMI != null
-                            ? _currentBMI!.toStringAsFixed(1)
+                        ? formatDecimal(_currentBMI!, locale)
                             : '-',
                     detail: _getBMICategory(_currentBMI),
                   ),
@@ -1003,7 +1006,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsStatisticsBodyFat,
                     value:
                         _currentBodyFat != null
-                            ? '${_currentBodyFat!.toStringAsFixed(1)}%'
+                        ? '${formatDecimal(_currentBodyFat!, locale)}%'
                             : '–',
                     detail:
                         _currentBodyFat == null
@@ -1169,6 +1172,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildWeightChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final colorScheme = Theme.of(context).colorScheme;
     if (_metricsHistory.isEmpty) {
       return Center(
@@ -1189,8 +1193,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       label: l10n.screensSettingsStatisticsChartSummary(
         l10n.screensSettingsStatisticsWeightHistory,
         medianData.length,
-        _minWeight.toStringAsFixed(1),
-        _maxWeight.toStringAsFixed(1),
+        formatDecimal(_minWeight, locale),
+        formatDecimal(_maxWeight, locale),
       ),
       child: CustomPaint(
         size: const Size(double.infinity, 200),
@@ -1198,7 +1202,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           data: medianData,
           valueKey: 'weight',
           dateKey: 'recorded_date',
-          localeName: Localizations.localeOf(context).toString(),
+          localeName: locale,
           minValue: _minWeight,
           maxValue: _maxWeight,
           lineColor: colorScheme.primary,
@@ -1212,6 +1216,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildBMIChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final colorScheme = Theme.of(context).colorScheme;
     if (_metricsHistory.isEmpty) {
       return Center(
@@ -1247,8 +1252,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       label: l10n.screensSettingsStatisticsChartSummary(
         l10n.screensSettingsStatisticsBmiHistory,
         bmiData.length,
-        _minBMI.toStringAsFixed(1),
-        _maxBMI.toStringAsFixed(1),
+        formatDecimal(_minBMI, locale),
+        formatDecimal(_maxBMI, locale),
       ),
       child: CustomPaint(
         size: const Size(double.infinity, 200),
@@ -1256,7 +1261,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           data: bmiData,
           valueKey: 'bmi',
           dateKey: 'recorded_date',
-          localeName: Localizations.localeOf(context).toString(),
+          localeName: locale,
           minValue: _minBMI,
           maxValue: _maxBMI,
           lineColor: Colors.green,
@@ -1287,6 +1292,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildBodyFatChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final colorScheme = Theme.of(context).colorScheme;
     final bodyFatData =
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
@@ -1302,8 +1308,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       label: l10n.screensSettingsStatisticsChartSummary(
         l10n.screensSettingsStatisticsBodyFatHistory,
         bodyFatData.length,
-        _minBodyFat.toStringAsFixed(1),
-        _maxBodyFat.toStringAsFixed(1),
+        formatDecimal(_minBodyFat, locale),
+        formatDecimal(_maxBodyFat, locale),
       ),
       child: CustomPaint(
         size: const Size(double.infinity, 200),
@@ -1311,7 +1317,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           data: bodyFatData,
           valueKey: 'body_fat',
           dateKey: 'recorded_date',
-          localeName: Localizations.localeOf(context).toString(),
+          localeName: locale,
           minValue: _minBodyFat,
           maxValue: _maxBodyFat,
           lineColor: colorScheme.primary,
@@ -1325,6 +1331,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildCalorieChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final colorScheme = Theme.of(context).colorScheme;
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
       return Center(
@@ -1339,14 +1346,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ? l10n.screensSettingsStatisticsCalorieBalanceTitle
             : l10n.screensSettingsStatisticsCalorieIntakeHistory,
         _calorieHistory.length,
-        _minCalories.toStringAsFixed(0),
-        _maxCalories.toStringAsFixed(0),
+        formatDecimal(_minCalories, locale, fractionDigits: 0),
+        formatDecimal(_maxCalories, locale, fractionDigits: 0),
       ),
       child: CustomPaint(
         size: const Size(double.infinity, 200),
         painter: CalorieChartPainter(
           data: _calorieHistory,
-          localeName: Localizations.localeOf(context).toString(),
+          localeName: locale,
           maintenanceCalories: _maintenanceCalories!,
           minValue: _minCalories,
           maxValue: _maxCalories,
@@ -2035,7 +2042,7 @@ class LineChartPainter extends CustomPainter {
 
       // Draw label
       textPainter.text = TextSpan(
-        text: value.toStringAsFixed(1),
+        text: formatDecimal(value, localeName),
         style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();

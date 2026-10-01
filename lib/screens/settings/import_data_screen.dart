@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../services/data/import_export_service.dart';
+import '../../utils/number_parsing.dart';
 
 String _importErrorMessage(AppLocalizations localizations, ImportExportResult result) {
   switch (result.errorCode) {
@@ -804,9 +805,10 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       return const SizedBox.shrink();
     }
 
+    final locale = Localizations.localeOf(context).toString();
     final backupDate = _backupInfo!['date'] as DateTime;
     final backupSize = _backupInfo!['size'] as int;
-    final formattedSize = (backupSize / 1024).toStringAsFixed(1);
+    final formattedSize = formatDecimal(backupSize / 1024, locale);
 
     return Card(
       elevation: 2,

@@ -53,6 +53,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   late TextEditingController _fatController;
   late TextEditingController _fiberController;
   String? _barcode;
+  bool _didPrefillIngredient = false;
 
   String _selectedUnit = 'g';
   final List<String> _commonUnits = [
@@ -72,28 +73,57 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
     final ingredient = widget.ingredient;
     _barcode = ingredient?.barcode;
     _nameController = TextEditingController(text: ingredient?.name ?? '');
-    _quantityController = TextEditingController(
-      text: ingredient?.amount.toString() ?? '',
-    );
-    _caloriesController = TextEditingController(
-      text: ingredient?.nutrition?.calories.toString() ?? '',
-    );
-    _proteinController = TextEditingController(
-      text: ingredient?.nutrition?.protein.toString() ?? '',
-    );
-    _carbsController = TextEditingController(
-      text: ingredient?.nutrition?.carbs.toString() ?? '',
-    );
-    _fatController = TextEditingController(
-      text: ingredient?.nutrition?.fat.toString() ?? '',
-    );
-    _fiberController = TextEditingController(
-      text: ingredient?.nutrition?.fiber.toString() ?? '',
-    );
+    _quantityController = TextEditingController();
+    _caloriesController = TextEditingController();
+    _proteinController = TextEditingController();
+    _carbsController = TextEditingController();
+    _fatController = TextEditingController();
+    _fiberController = TextEditingController();
 
     if (ingredient?.unit != null) {
       _selectedUnit = ingredient!.unit;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrefillIngredient) return;
+    _didPrefillIngredient = true;
+    final ingredient = widget.ingredient;
+    if (ingredient == null) return;
+    final locale = Localizations.localeOf(context).toString();
+    _quantityController.text = _formatEditableNumber(ingredient.amount, locale);
+    final nutrition = ingredient.nutrition;
+    if (nutrition == null) return;
+    _caloriesController.text = _formatEditableNumber(
+      nutrition.calories,
+      locale,
+    );
+    _proteinController.text = _formatEditableNumber(nutrition.protein, locale);
+    _carbsController.text = _formatEditableNumber(nutrition.carbs, locale);
+    _fatController.text = _formatEditableNumber(nutrition.fat, locale);
+    _fiberController.text = _formatEditableNumber(nutrition.fiber, locale);
+  }
+
+  String _formatEditableNumber(double value, String locale) {
+    final text = value.toString();
+    final exponentIndex = text.indexOf('e');
+    final decimalIndex = text.indexOf('.');
+    final fractionDigits =
+        decimalIndex == -1
+            ? 0
+            : (exponentIndex == -1 ? text.length : exponentIndex) -
+                decimalIndex -
+                1;
+    final exponent =
+        exponentIndex == -1 ? 0 : int.parse(text.substring(exponentIndex + 1));
+    final digits = fractionDigits - exponent;
+    return formatDecimal(
+      value,
+      locale,
+      fractionDigits: digits > 0 ? digits : 1,
+    );
   }
 
   @override
@@ -832,6 +862,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   void _prefillFormWithProduct(Product product) {
     // Check if widget is still mounted before calling setState
     if (!mounted) return;
+    final locale = Localizations.localeOf(context).toString();
 
     // Call the onProductScanned callback if provided (for dish name/image auto-fill)
     widget.onProductScanned?.call(product);
@@ -850,24 +881,26 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
       // Set nutrition data if available
       if (servingNutrition != null || product.hasNutrition) {
         final nutrition = product.nutrition;
-        _caloriesController.text = (servingNutrition?.calories ??
-                nutrition?.calories ??
-                0)
-            .toStringAsFixed(1);
-        _proteinController.text = (servingNutrition?.protein ??
-                nutrition?.protein ??
-                0)
-            .toStringAsFixed(1);
-        _carbsController.text = (servingNutrition?.carbs ??
-                nutrition?.carbs ??
-                0)
-            .toStringAsFixed(1);
-        _fatController.text = (servingNutrition?.fat ?? nutrition?.fat ?? 0)
-            .toStringAsFixed(1);
-        _fiberController.text = (servingNutrition?.fiber ??
-                nutrition?.fiber ??
-                0)
-            .toStringAsFixed(1);
+        _caloriesController.text = formatDecimal(
+          servingNutrition?.calories ?? nutrition?.calories ?? 0,
+          locale,
+        );
+        _proteinController.text = formatDecimal(
+          servingNutrition?.protein ?? nutrition?.protein ?? 0,
+          locale,
+        );
+        _carbsController.text = formatDecimal(
+          servingNutrition?.carbs ?? nutrition?.carbs ?? 0,
+          locale,
+        );
+        _fatController.text = formatDecimal(
+          servingNutrition?.fat ?? nutrition?.fat ?? 0,
+          locale,
+        );
+        _fiberController.text = formatDecimal(
+          servingNutrition?.fiber ?? nutrition?.fiber ?? 0,
+          locale,
+        );
       }
     });
 

@@ -5,6 +5,7 @@ import '../../models/dish.dart';
 import '../../models/meal_type.dart';
 import '../../services/storage/dish_service.dart';
 import '../../services/health_service.dart';
+import '../../utils/number_parsing.dart';
 
 /// Combines a local calendar date with a selected meal time.
 DateTime combineMealDateAndTime(DateTime date, TimeOfDay time) {
@@ -150,6 +151,7 @@ class _DishLogModalState extends State<DishLogModal> {
     final theme = Theme.of(context);
     final macroColors = MacroColors.of(context);
     final localizations = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
 
     // Calculate nutrition based on portion size
     final calculatedCalories = widget.dish.nutrition.calories * _portionSize;
@@ -523,7 +525,7 @@ class _DishLogModalState extends State<DishLogModal> {
                                 child: _buildNutritionItem(
                                   localizations
                                       .componentsCalendarMacroSummaryProtein,
-                                  calculatedProtein.toStringAsFixed(1),
+                                  formatDecimal(calculatedProtein, locale),
                                   'g',
                                   macroColors.protein,
                                 ),
@@ -532,7 +534,7 @@ class _DishLogModalState extends State<DishLogModal> {
                                 child: _buildNutritionItem(
                                   localizations
                                       .componentsCalendarMacroSummaryCarbs,
-                                  calculatedCarbs.toStringAsFixed(1),
+                                  formatDecimal(calculatedCarbs, locale),
                                   'g',
                                   macroColors.carbs,
                                 ),
@@ -541,7 +543,7 @@ class _DishLogModalState extends State<DishLogModal> {
                                 child: _buildNutritionItem(
                                   localizations
                                       .componentsCalendarMacroSummaryFat,
-                                  calculatedFat.toStringAsFixed(1),
+                                  formatDecimal(calculatedFat, locale),
                                   'g',
                                   macroColors.fat,
                                 ),

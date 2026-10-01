@@ -234,6 +234,19 @@ void main() {
     expect(find.text('Not available'), findsOneWidget);
   });
 
+  for (final (locale, expectedWeight) in [
+    (const Locale('de'), '70,0 kg'),
+    (const Locale('en'), '70.0 kg'),
+  ]) {
+    testWidgets('current weight uses the $locale decimal separator', (
+      tester,
+    ) async {
+      await pumpStatisticsWithHistory(tester, locale: locale);
+
+      expect(find.text(expectedWeight), findsOneWidget);
+    });
+  }
+
   testWidgets('unknown body fat fits in German on a narrow screen', (
     tester,
   ) async {

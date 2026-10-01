@@ -173,6 +173,67 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
   });
 
+  testWidgets('German dish ingredient and recalculated values use commas', (
+    tester,
+  ) async {
+    final now = DateTime(2025);
+    final dish = Dish(
+      id: 'dish-ingredient-de',
+      name: 'Salad',
+      ingredients: const [
+        Ingredient(
+          id: 'tomato',
+          name: 'Tomato',
+          amount: 100,
+          unit: 'g',
+          nutrition: NutritionInfo(
+            calories: 100,
+            protein: 30,
+            carbs: 8.5,
+            fat: 2,
+          ),
+        ),
+      ],
+      nutrition: const NutritionInfo(
+        calories: 100,
+        protein: 30,
+        carbs: 8.5,
+        fat: 2,
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('de'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DishCreateScreenAdvanced(dish: dish),
+      ),
+    );
+
+    expect(find.text('100,0 g'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is Text && widget.data?.contains('30,0') == true,
+      ),
+      findsOneWidget,
+    );
+    tester
+        .widget<SmartNutritionCard>(find.byType(SmartNutritionCard))
+        .onRecalculate!();
+    await tester.pump();
+    expect(
+      tester
+          .widget<SmartNutritionCard>(find.byType(SmartNutritionCard))
+          .proteinController
+          .text,
+      '30,0',
+    );
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pump(const Duration(seconds: 4));
+  });
+
   testWidgets('edited dish prompts before leaving and can be discarded', (
     tester,
   ) async {
@@ -365,6 +426,54 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.saved?.nutrition.calories, 1.5);
+  });
+
+  testWidgets('German edit prefills decimals and preserves nutrition on save', (
+    tester,
+  ) async {
+    final now = DateTime(2025);
+    final dish = Dish(
+      id: 'dish-german-edit',
+      name: 'Salad',
+      ingredients: const [],
+      nutrition: const NutritionInfo(
+        calories: 120.75,
+        protein: 30.25,
+        carbs: 8.5,
+        fat: 2,
+        fiber: 0.75,
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+    final service = _RecordingDishService(dish);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('de'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DishCreateScreenAdvanced(dish: dish, dishService: service),
+      ),
+    );
+
+    final nutritionCard = tester.widget<SmartNutritionCard>(
+      find.byType(SmartNutritionCard),
+    );
+    expect(nutritionCard.caloriesController.text, '120,75');
+    expect(nutritionCard.proteinController.text, '30,25');
+    expect(nutritionCard.carbsController.text, '8,5');
+    expect(nutritionCard.fatController.text, '2,0');
+    expect(nutritionCard.fiberController.text, '0,75');
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(service.saved?.nutrition.calories, 120.75);
+    expect(service.saved?.nutrition.protein, 30.25);
+    expect(service.saved?.nutrition.carbs, 8.5);
+    expect(service.saved?.nutrition.fat, 2);
+    expect(service.saved?.nutrition.fiber, 0.75);
+    await tester.pump(const Duration(seconds: 4));
   });
 
   testWidgets('failed dish lookup stops save and shows an error', (

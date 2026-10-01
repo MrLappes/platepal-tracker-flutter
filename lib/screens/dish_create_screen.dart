@@ -106,6 +106,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   File? _selectedImage;
   bool _removeExistingImage = false;
   bool _justRecalculated = false;
+  bool _didLoadDishData = false;
 
   String? get _existingImageUrl =>
       _removeExistingImage || widget.dish?.imageUrl?.isEmpty == true
@@ -130,7 +131,6 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       ),
     );
 
-    _loadDishData();
     for (final controller in [
       _nameController,
       _descriptionController,
@@ -142,6 +142,14 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     ]) {
       controller.addListener(_markDirty);
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didLoadDishData) return;
+    _loadDishData(Localizations.localeOf(context).toString());
+    _didLoadDishData = true;
   }
 
   @override
@@ -157,24 +165,58 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     super.dispose();
   }
 
-  void _loadDishData() {
+  void _loadDishData(String locale) {
     if (widget.dish != null) {
       final dish = widget.dish!;
       _nameController.text = dish.name;
       _descriptionController.text = dish.description ?? '';
-      _caloriesController.text = dish.nutrition.calories.toString();
-      _proteinController.text = dish.nutrition.protein.toString();
-      _carbsController.text = dish.nutrition.carbs.toString();
-      _fatController.text = dish.nutrition.fat.toString();
-      _fiberController.text = dish.nutrition.fiber.toString();
+      _caloriesController.text = _formatEditableNumber(
+        dish.nutrition.calories,
+        locale,
+      );
+      _proteinController.text = _formatEditableNumber(
+        dish.nutrition.protein,
+        locale,
+      );
+      _carbsController.text = _formatEditableNumber(
+        dish.nutrition.carbs,
+        locale,
+      );
+      _fatController.text = _formatEditableNumber(dish.nutrition.fat, locale);
+      _fiberController.text = _formatEditableNumber(
+        dish.nutrition.fiber,
+        locale,
+      );
       _isFavorite = dish.isFavorite;
       _selectedCategory = dish.category ?? 'breakfast';
       _ingredients = List.from(dish.ingredients);
     }
   }
 
+  String _formatEditableNumber(double value, String locale) {
+    final text = value.toString();
+    final exponentIndex = text.indexOf('e');
+    final decimalIndex = text.indexOf('.');
+    final fractionDigits =
+        decimalIndex == -1
+            ? 0
+            : (exponentIndex == -1 ? text.length : exponentIndex) -
+                decimalIndex -
+                1;
+    final exponent =
+        exponentIndex == -1 ? 0 : int.parse(text.substring(exponentIndex + 1));
+    final digits = fractionDigits - exponent;
+    return formatDecimal(
+      value,
+      locale,
+      fractionDigits: digits > 0 ? digits : 1,
+    );
+  }
+
   void _markDirty() {
-    if (mounted && !_isDirty) setState(() => _isDirty = true);
+    if (mounted && _didLoadDishData && !_isDirty) {
+      setState(() => _isDirty = true);
+    }
   }
 
   Future<void> _confirmDiscardChanges() async {
@@ -496,6 +538,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   }
 
   void _recalculateNutrition() {
+    final locale = Localizations.localeOf(context).toString();
     double totalCalories = 0;
     double totalProtein = 0;
     double totalCarbs = 0;
@@ -517,11 +560,11 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
 
     setState(() {
-      _caloriesController.text = totalCalories.toStringAsFixed(1);
-      _proteinController.text = totalProtein.toStringAsFixed(1);
-      _carbsController.text = totalCarbs.toStringAsFixed(1);
-      _fatController.text = totalFat.toStringAsFixed(1);
-      _fiberController.text = totalFiber.toStringAsFixed(1);
+      _caloriesController.text = formatDecimal(totalCalories, locale);
+      _proteinController.text = formatDecimal(totalProtein, locale);
+      _carbsController.text = formatDecimal(totalCarbs, locale);
+      _fatController.text = formatDecimal(totalFat, locale);
+      _fiberController.text = formatDecimal(totalFiber, locale);
       _justRecalculated = true;
     });
 
@@ -1105,6 +1148,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final macroColors = MacroColors.of(context);
+    final locale = Localizations.localeOf(context).toString();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1152,7 +1196,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${ingredient.amount} ${ingredient.unit}',
+                      '${formatDecimal(ingredient.amount, locale)} ${ingredient.unit}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
@@ -1249,7 +1293,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                         ),
                       ),
                       Text(
-                        '${ingredient.nutrition!.calories.toStringAsFixed(0)} kcal',
+                        '${formatDecimal(ingredient.nutrition!.calories, locale, fractionDigits: 0)} kcal',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: macroColors.calories,
                           fontWeight: FontWeight.w600,
@@ -1264,17 +1308,17 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildNutritionChip(
-                        '${AppLocalizations.of(context).screensDishCreateProteinAbbreviation}: ${ingredient.nutrition!.protein.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
+                        '${AppLocalizations.of(context).screensDishCreateProteinAbbreviation}: ${formatDecimal(ingredient.nutrition!.protein, locale)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
                         macroColors.protein,
                         theme,
                       ),
                       _buildNutritionChip(
-                        '${AppLocalizations.of(context).screensDishCreateCarbsAbbreviation}: ${ingredient.nutrition!.carbs.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
+                        '${AppLocalizations.of(context).screensDishCreateCarbsAbbreviation}: ${formatDecimal(ingredient.nutrition!.carbs, locale)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
                         macroColors.carbs,
                         theme,
                       ),
                       _buildNutritionChip(
-                        '${AppLocalizations.of(context).screensDishCreateFatAbbreviation}: ${ingredient.nutrition!.fat.toStringAsFixed(1)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
+                        '${AppLocalizations.of(context).screensDishCreateFatAbbreviation}: ${formatDecimal(ingredient.nutrition!.fat, locale)}${AppLocalizations.of(context).componentsDishesDishFormIngredientFormModalGrams}',
                         macroColors.fat,
                         theme,
                       ),
