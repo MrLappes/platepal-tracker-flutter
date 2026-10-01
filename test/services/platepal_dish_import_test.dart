@@ -125,6 +125,31 @@ void main() {
       final big = _encode(_valid({'description': 'x' * 20000}));
       expect(_errorOf(big), PlatePalImportError.tooLarge);
     });
+
+    test('rejects bidi controls and zero-width characters', () {
+      const hidden = [
+        0x200B, 0x200C, 0x200D, 0x200E, 0x200F, //
+        0x202A, 0x202B, 0x202C, 0x202D, 0x202E, //
+        0x2066, 0x2067, 0x2068, 0x2069, 0xFEFF,
+      ];
+      for (final rune in hidden) {
+        final char = String.fromCharCode(rune);
+        for (final field in [
+          {'name': 'Pasta${char}gnaw'},
+          {'description': 'Baked\n$char'},
+          {
+            'ingredients': ['Salt$char'],
+          },
+        ]) {
+          expect(
+            _errorOf(_encode(_valid(field))),
+            PlatePalImportError.invalidContent,
+            reason: 'U+${rune.toRadixString(16)} in ${field.keys.single}',
+          );
+        }
+      }
+      expect(_errorOf(_encode(_valid({'name': 'Crème brûlée ‑ “Oma”'}))), isNull);
+    });
   });
 
   group('platePalImportRedirect', () {

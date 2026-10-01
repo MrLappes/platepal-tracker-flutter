@@ -44,6 +44,32 @@ void main() {
       expect(sanitizeDiagnosticText(frame, maxLength: 200), frame);
       expect(sanitizeDiagnosticText('x' * 600).length, 501);
     });
+
+    test('redacts numbers of two or more digits outside stack locations', () {
+      expect(
+        sanitizeDiagnosticText('Weight 72 kg, age 34, id 4711, 9 items'),
+        'Weight <n> kg, age <n>, id <n>, 9 items',
+      );
+      expect(sanitizeDiagnosticText('at 12:30 on 2026-10-01'), 'at <n>:<n> on <n>-<n>-<n>');
+      const frame = '#12     main (package:app/a.dart:1234:56)';
+      expect(sanitizeDiagnosticText(frame), frame);
+      const sdkFrame = '#3      _rootRun (dart:async/zone.dart:1525:10)';
+      expect(sanitizeDiagnosticText(sdkFrame), sdkFrame);
+      expect(
+        sanitizeDiagnosticText('Float64List of 365 days'),
+        'Float64List of <n> days',
+      );
+    });
+  });
+
+  test('keeps only the first line of an error message', () async {
+    await service.record(
+      StateError('Load failed\nrow: Chicken curry 450 kcal'),
+      null,
+    );
+
+    final [entry] = await service.readEntries();
+    expect(entry.message, 'Bad state: Load failed');
   });
 
   test('records type, version and sanitized message', () async {

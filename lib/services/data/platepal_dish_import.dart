@@ -50,14 +50,20 @@ const int maxPlatePalIngredientLength = 100;
 
 final RegExp _base64UrlChars = RegExp(r'^[A-Za-z0-9_-]+$');
 
-/// C0/C1 control characters; [allowNewlines] keeps line breaks and tabs.
+/// C0/C1 control characters, bidi overrides/isolates and zero-width
+/// characters (which can disguise text); [allowNewlines] keeps line breaks
+/// and tabs.
 bool _hasControlCharacters(String value, {bool allowNewlines = false}) =>
     value.runes.any(
       (rune) =>
           (rune < 0x20 &&
               !(allowNewlines &&
                   (rune == 0x0A || rune == 0x0D || rune == 0x09))) ||
-          (rune >= 0x7F && rune <= 0x9F),
+          (rune >= 0x7F && rune <= 0x9F) ||
+          (rune >= 0x200B && rune <= 0x200F) ||
+          (rune >= 0x202A && rune <= 0x202E) ||
+          (rune >= 0x2066 && rune <= 0x2069) ||
+          rune == 0xFEFF,
     );
 
 /// The in-app location for an incoming `platepaltracker://import-dish` link,
