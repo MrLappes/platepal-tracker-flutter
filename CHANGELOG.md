@@ -7,6 +7,11 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 ### Changed
 
 - Imports no longer limit how many items a section may contain; large imports write ingredients in one transaction and keep the screen responsive.
+- Import results list at most 50 detailed errors per section and say how many more there are.
+
+### Fixed
+
+- An ingredient with missing or non-numeric nutrition is skipped instead of being imported without it, and a database failure such as a full disk fails the ingredients section instead of reporting rolled-back rows as imported.
 
 ## [1.14.0] - 2026-10-01
 

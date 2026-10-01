@@ -228,6 +228,7 @@ class ImportExportService {
           final csvResult = _convertFromCSVWithErrors(content);
           importData = csvResult.data;
           detailedResults.parsingErrors.addAll(csvResult.errors);
+          detailedResults.omittedErrors += csvResult.omittedErrors;
         } else {
           errorCode = ImportExportErrorCode.importUnsupportedFormat;
           throw Exception('Unsupported file format');
@@ -395,6 +396,7 @@ class ImportExportService {
     if (raw == null) debugPrint('⚠️ No mealLogs found in import data');
 
     final errors = <String>[];
+    int errorCount = 0;
     int processed = 0;
     int duplicates = 0;
     int skipped = 0;
@@ -408,7 +410,8 @@ class ImportExportService {
       } on FormatException catch (e) {
         skipped++;
         final value = entries[i].toString();
-        detailedResults.validationErrors.add(
+        detailedResults.addValidationError(
+          typeName,
           ValidationError(
             field: typeName,
             error: e.message,
@@ -457,9 +460,8 @@ class ImportExportService {
           final (dishName, snapshot) = await _resolveImportedLog(log);
           toInsert.add((index, identifier, log, dishName, snapshot));
         } catch (e) {
-          final errorMsg = 'Error processing meal log item at index $index: $e';
-          errors.add(errorMsg);
-          detailedResults.processingErrors.add(
+          errorCount++;
+          detailedResults.addProcessingError(
             ProcessingError(
               type: typeName,
               index: index,
@@ -467,6 +469,9 @@ class ImportExportService {
               item: identifier,
             ),
           );
+          if (errors.length < ImportDetailedResults.maxErrorsPerSection) {
+            errors.add('Error processing meal log item at index $index: $e');
+          }
           debugPrint('❌ $typeName item $index failed: ${_logError(e)}');
         }
       }
@@ -508,8 +513,9 @@ class ImportExportService {
       } catch (e) {
         final errorMsg =
             'No meal logs imported, writing ${toInsert.length} failed: $e';
+        errorCount++;
         errors.add(errorMsg);
-        detailedResults.processingErrors.add(
+        detailedResults.addProcessingError(
           ProcessingError(
             type: typeName,
             index: toInsert.first.$1,
@@ -528,11 +534,11 @@ class ImportExportService {
       processed: processed,
       duplicates: duplicates,
       skipped: skipped,
-      errors: errors.length,
+      errors: errorCount,
     );
 
     return ImportExportResult(
-      success: errors.isEmpty,
+      success: errorCount == 0,
       message: 'Processed $processed meal logs',
       itemsProcessed: processed,
       duplicatesFound: duplicates,
@@ -959,6 +965,7 @@ class ImportExportService {
       int processed = 0;
       int duplicates = 0;
       int skipped = 0;
+      int errorCount = 0;
       final errors = <String>[];
       final processedItems = <ProcessedItem>[];
 
@@ -969,7 +976,9 @@ class ImportExportService {
           try {
             final itemValidation = _validateItem(type, item, index);
             if (itemValidation.isNotEmpty) {
-              detailedResults.validationErrors.addAll(itemValidation);
+              for (final error in itemValidation) {
+                detailedResults.addValidationError(type.name, error);
+              }
               skipped++;
               continue;
             }
@@ -1012,10 +1021,11 @@ class ImportExportService {
               ),
             );
           } catch (e) {
-            final error =
-                'Error processing ${type.name} item at index $index: $e';
-            errors.add(error);
-            detailedResults.processingErrors.add(
+            // Only a row's own constraint violation is a row error; anything
+            // else (disk full, I/O) must fail and roll back the transaction.
+            if (executor != null && _isFatalDatabaseError(e)) rethrow;
+            errorCount++;
+            detailedResults.addProcessingError(
               ProcessingError(
                 type: type.name,
                 index: index,
@@ -1023,6 +1033,11 @@ class ImportExportService {
                 item: item.toString(),
               ),
             );
+            if (errors.length < ImportDetailedResults.maxErrorsPerSection) {
+              errors.add(
+                'Error processing ${type.name} item at index $index: $e',
+              );
+            }
             skipped++;
           }
         }
@@ -1043,11 +1058,11 @@ class ImportExportService {
         processed: processed,
         duplicates: duplicates,
         skipped: skipped,
-        errors: errors.length,
-      ); // ${type.name} processing complete: $processed processed, ${errors.length} errors
+        errors: errorCount,
+      );
 
       return ImportExportResult(
-        success: errors.isEmpty,
+        success: errorCount == 0,
         message: 'Processed $processed ${type.name} items',
         itemsProcessed: processed,
         duplicatesFound: duplicates,
@@ -1358,6 +1373,10 @@ class ImportExportService {
           ? 'DatabaseException(${e.getResultCode()})'
           : e.runtimeType.toString();
 
+  static bool _isFatalDatabaseError(Object e) =>
+      e is DatabaseException &&
+      !(e.isUniqueConstraintError() || e.isNotNullConstraintError());
+
   double? _safeParseDouble(dynamic value) {
     if (value == null) return null;
 
@@ -1503,6 +1522,45 @@ class ImportExportService {
               field: 'dishId',
               error: 'Dish ID is required for meal logs',
               value: map['dishId']?.toString() ?? '',
+              itemIndex: index,
+            ),
+          );
+        }
+        break;
+      case DataType.ingredients:
+        for (final field in const ['id', 'name']) {
+          final value = map[field];
+          if (value is! String || value.trim().isEmpty) {
+            errors.add(
+              ValidationError(
+                field: field,
+                error: 'Ingredient $field is required',
+                value: value?.toString() ?? '',
+                itemIndex: index,
+              ),
+            );
+          }
+        }
+        final nutrition = map['nutrition'];
+        if (nutrition is Map<String, dynamic>) {
+          for (final nutrient in const ['calories', 'protein', 'carbs', 'fat']) {
+            if (nutrition[nutrient] is! num) {
+              errors.add(
+                ValidationError(
+                  field: 'nutrition.$nutrient',
+                  error: '$nutrient must be a number',
+                  value: nutrition[nutrient]?.toString() ?? '',
+                  itemIndex: index,
+                ),
+              );
+            }
+          }
+        } else if (nutrition != null) {
+          errors.add(
+            ValidationError(
+              field: 'nutrition',
+              error: 'Nutrition must be an object',
+              value: nutrition.toString(),
               itemIndex: index,
             ),
           );
@@ -1723,7 +1781,8 @@ class ImportExportService {
     }
   }
 
-  /// Save an ingredient item to the database
+  /// Save an ingredient item to the database. Existing rows are already
+  /// skipped by the caller for [DuplicateHandling.skip].
   Future<void> _saveIngredientItem(
     Map<String, dynamic> ingredientData,
     DuplicateHandling duplicateHandling, [
@@ -1734,17 +1793,6 @@ class ImportExportService {
       final id = ingredientData['id'] as String;
       final name = ingredientData['name'] as String;
       final barcode = ingredientData['barcode'] as String?;
-
-      // Check if ingredient exists
-      final existing = await db.query(
-        'ingredients',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-
-      if (existing.isNotEmpty && duplicateHandling == DuplicateHandling.skip) {
-        return;
-      }
 
       // Save/update ingredient
       await db.insert(
@@ -1879,6 +1927,14 @@ class ImportExportService {
     final lines = csvContent.split('\n');
     final data = <String, List<dynamic>>{};
     final errors = <ParsingError>[];
+    var omittedErrors = 0;
+    void addError(ParsingError error) {
+      if (errors.length < ImportDetailedResults.maxErrorsPerSection) {
+        errors.add(error);
+      } else {
+        omittedErrors++;
+      }
+    }
 
     for (int i = 1; i < lines.length; i++) {
       final line = lines[i].trim();
@@ -1887,7 +1943,7 @@ class ImportExportService {
       try {
         final commaIndex = line.indexOf(',');
         if (commaIndex == -1) {
-          errors.add(
+          addError(
             ParsingError(
               line: i + 1,
               column: 0,
@@ -1909,7 +1965,7 @@ class ImportExportService {
 
         data.putIfAbsent(type, () => []).add(item);
       } catch (e) {
-        errors.add(
+        addError(
           ParsingError(
             line: i + 1,
             column: 0,
@@ -1920,7 +1976,11 @@ class ImportExportService {
       }
     }
 
-    return CSVParseResult(data: data, errors: errors);
+    return CSVParseResult(
+      data: data,
+      errors: errors,
+      omittedErrors: omittedErrors,
+    );
   }
 
   String _generateId() {
@@ -2534,6 +2594,13 @@ class ImportDetailedResults {
   final List<ProcessedItem> processedItems;
   final Map<String, TypeSummary> summary;
 
+  /// Detailed errors kept per section; further ones are only counted.
+  static const int maxErrorsPerSection = 50;
+
+  /// Errors counted but left out of the detailed lists.
+  int omittedErrors;
+  final Map<String, int> _errorCounts = {};
+
   ImportDetailedResults({
     FileInfo? fileInfo,
     List<ParsingError>? parsingErrors,
@@ -2542,6 +2609,7 @@ class ImportDetailedResults {
     List<DuplicateItem>? duplicates,
     List<ProcessedItem>? processedItems,
     Map<String, TypeSummary>? summary,
+    this.omittedErrors = 0,
   }) : _fileInfo = fileInfo,
        parsingErrors = parsingErrors ?? [],
        validationErrors = validationErrors ?? [],
@@ -2554,6 +2622,25 @@ class ImportDetailedResults {
 
   void setFileInfo(FileInfo info) {
     _fileInfo = info;
+  }
+
+  bool _keepError(String section) {
+    final count = _errorCounts.update(
+      section,
+      (n) => n + 1,
+      ifAbsent: () => 1,
+    );
+    if (count <= maxErrorsPerSection) return true;
+    omittedErrors++;
+    return false;
+  }
+
+  void addValidationError(String section, ValidationError error) {
+    if (_keepError(section)) validationErrors.add(error);
+  }
+
+  void addProcessingError(ProcessingError error) {
+    if (_keepError(error.type)) processingErrors.add(error);
   }
 }
 
@@ -2658,8 +2745,13 @@ class TypeSummary {
 class CSVParseResult {
   final Map<String, List<dynamic>> data;
   final List<ParsingError> errors;
+  final int omittedErrors;
 
-  const CSVParseResult({required this.data, required this.errors});
+  const CSVParseResult({
+    required this.data,
+    required this.errors,
+    this.omittedErrors = 0,
+  });
 }
 
 class DataValidationResult {

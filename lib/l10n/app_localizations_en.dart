@@ -2025,6 +2025,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensSettingsImportDataShowReasons => 'Show reasons';
 
   @override
+  String screensSettingsImportDataMoreReasons(int count) {
+    return '…and $count more';
+  }
+
+  @override
   String screensSettingsImportDataFailedSection(String section) {
     return 'Failed section: $section';
   }

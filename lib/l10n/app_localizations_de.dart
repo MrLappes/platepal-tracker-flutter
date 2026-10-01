@@ -2075,6 +2075,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get screensSettingsImportDataShowReasons => 'Gründe anzeigen';
 
   @override
+  String screensSettingsImportDataMoreReasons(int count) {
+    return '…und $count weitere';
+  }
+
+  @override
   String screensSettingsImportDataFailedSection(String section) {
     return 'Fehlgeschlagener Bereich: $section';
   }
