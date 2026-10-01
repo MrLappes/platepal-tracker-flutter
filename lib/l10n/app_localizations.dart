@@ -1471,12 +1471,6 @@ abstract class AppLocalizations {
   /// **'Turn flashlight off'**
   String get componentsScannerBarcodeScannerTorchOff;
 
-  /// Error message for product search
-  ///
-  /// In en, this message translates to:
-  /// **'Error searching for product: {error}'**
-  String componentsScannerProductSearchErrorSearchingProduct(String error);
-
   /// Loard more
   ///
   /// In en, this message translates to:
@@ -2416,7 +2410,7 @@ abstract class AppLocalizations {
   /// Effective date of the privacy policy
   ///
   /// In en, this message translates to:
-  /// **'Effective date: 2026-09-30'**
+  /// **'Effective date: 2026-10-01'**
   String get screensPrivacyEffectiveDate;
 
   /// Privacy policy overview heading
@@ -2500,7 +2494,7 @@ abstract class AppLocalizations {
   /// Export, import, and pre-import backups
   ///
   /// In en, this message translates to:
-  /// **'Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.'**
+  /// **'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.'**
   String get screensPrivacyExportBody;
 
   /// Android operating system backup section heading
@@ -2560,7 +2554,7 @@ abstract class AppLocalizations {
   /// How to contact the project about privacy
   ///
   /// In en, this message translates to:
-  /// **'For privacy questions, open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.'**
+  /// **'For privacy questions, email mike.busam@plate-pal.de or open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.'**
   String get screensPrivacyContactBody;
 
   /// Privacy policy menu subtitle
@@ -3418,7 +3412,7 @@ abstract class AppLocalizations {
   /// Accepted import file formats
   ///
   /// In en, this message translates to:
-  /// **'Supported formats: JSON, CSV'**
+  /// **'Supported formats: JSON, CSV, ZIP (full backup)'**
   String get screensSettingsImportDataSupportedFormats;
 
   /// All data import description
@@ -3682,7 +3676,7 @@ abstract class AppLocalizations {
   /// Import requires a supported file extension
   ///
   /// In en, this message translates to:
-  /// **'Unsupported file format. Select a JSON or CSV file.'**
+  /// **'Unsupported file format. Select a JSON, CSV or ZIP file.'**
   String get screensSettingsImportDataUnsupportedFormat;
 
   /// Import failed validation before writing any data
@@ -5579,6 +5573,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No calorie target can be calculated from these values. Please check your weight, height and age.'**
   String get screensSettingsProfileSettingsInvalidCalorieTarget;
+
+  /// Menu section for feedback and problem reports
+  ///
+  /// In en, this message translates to:
+  /// **'Help & feedback'**
+  String get screensMenuSupport;
+
+  /// Menu entry that opens an email to the developer
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get screensMenuSendFeedback;
+
+  /// Subtitle of the send feedback entry
+  ///
+  /// In en, this message translates to:
+  /// **'Write an email to the developer'**
+  String get screensMenuSendFeedbackSubtitle;
+
+  /// Menu entry that shares the diagnostic log
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get screensMenuReportProblem;
+
+  /// Subtitle of the report a problem entry
+  ///
+  /// In en, this message translates to:
+  /// **'Share the diagnostic log with an app you choose'**
+  String get screensMenuReportProblemSubtitle;
+
+  /// Menu entry that deletes the local error log
+  ///
+  /// In en, this message translates to:
+  /// **'Clear diagnostic log'**
+  String get screensMenuClearDiagnosticLog;
+
+  /// Subtitle of the clear diagnostic log entry
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the error records stored on this device'**
+  String get screensMenuClearDiagnosticLogSubtitle;
+
+  /// One-sentence note that diagnostics are local and only shared by the user
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is sent automatically: errors are kept in a short local log without personal data and only leave your device when you share them.'**
+  String get screensMenuDiagnosticsNote;
+
+  /// Subject of the feedback email
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker feedback (v{version})'**
+  String screensMenuFeedbackSubject(String version);
+
+  /// Shown when no email app can open the feedback email
+  ///
+  /// In en, this message translates to:
+  /// **'No email app found. You can write to {email}.'**
+  String screensMenuNoEmailApp(String email);
+
+  /// Subject when sharing the diagnostic log
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker problem report (v{version})'**
+  String screensMenuReportProblemSubject(String version);
+
+  /// Text sent along with the shared diagnostic log
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker diagnostic log. Developer contact: {email}'**
+  String screensMenuReportProblemShareText(String email);
+
+  /// Shown when there is no diagnostic log to share
+  ///
+  /// In en, this message translates to:
+  /// **'No problems recorded yet. The diagnostic log is empty.'**
+  String get screensMenuDiagnosticLogEmpty;
+
+  /// Sharing the diagnostic log failed
+  ///
+  /// In en, this message translates to:
+  /// **'The diagnostic log couldn\'t be shared. Try again.'**
+  String get screensMenuDiagnosticLogShareFailed;
+
+  /// Confirmation after clearing the diagnostic log
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostic log cleared.'**
+  String get screensMenuDiagnosticLogCleared;
+
+  /// Clearing the diagnostic log failed
+  ///
+  /// In en, this message translates to:
+  /// **'The diagnostic log couldn\'t be cleared. Try again.'**
+  String get screensMenuDiagnosticLogClearFailed;
+
+  /// Privacy policy section title
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostic log and feedback'**
+  String get screensPrivacyDiagnosticsTitle;
+
+  /// Privacy policy section about the local diagnostic log and feedback
+  ///
+  /// In en, this message translates to:
+  /// **'If the app hits an unexpected error, it saves a short technical record on your device: time, app version, error type, a shortened error message and the code location. Text that may contain personal data, such as quoted values, email addresses, keys and measurements, is removed, and only the last 20 entries are kept. The log is never sent automatically. It leaves your device only if you choose Report a problem and share it with an app you pick; Clear diagnostic log in the menu deletes it. Send feedback opens your email app, and nothing is sent until you send the email yourself.'**
+  String get screensPrivacyDiagnosticsBody;
+
+  /// Import error for an unreadable backup archive
+  ///
+  /// In en, this message translates to:
+  /// **'This ZIP file is not a PlatePal Tracker backup.'**
+  String get screensSettingsImportDataInvalidArchive;
+
+  /// Export option that bundles data and dish photos
+  ///
+  /// In en, this message translates to:
+  /// **'Full backup (.zip)'**
+  String get screensSettingsExportDataExportAsZip;
+
+  /// Full backup format description
+  ///
+  /// In en, this message translates to:
+  /// **'Data plus dish photos in one file, for moving to a new device'**
+  String get screensSettingsExportDataZipDescription;
+
+  /// Shown in a body metric chart with too few records
+  ///
+  /// In en, this message translates to:
+  /// **'Record your body measurements at least {count} times to see this chart.'**
+  String screensSettingsStatisticsNotEnoughMetrics(int count);
+
+  /// Explains options after an unknown barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode {barcode} isn\'t in Open Food Facts yet. Search by name or enter the food yourself.'**
+  String componentsScannerBarcodeScannerNotFoundMessage(String barcode);
+
+  /// Open product search after an unknown barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get componentsScannerBarcodeScannerSearchByName;
+
+  /// Open manual entry after an unknown barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get componentsScannerBarcodeScannerEnterManually;
+
+  /// Return to the scanner after an unknown barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get componentsScannerBarcodeScannerScanAgain;
+
+  /// Barcode attached to the ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode: {barcode}'**
+  String componentsDishesDishFormIngredientFormModalBarcode(String barcode);
+
+  /// Empty meals action that starts a dish from a barcode
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get screensMealsScanBarcode;
+
+  /// Empty meals action that starts a dish from product search
+  ///
+  /// In en, this message translates to:
+  /// **'Search food'**
+  String get screensMealsSearchFood;
+
+  /// Product search failed without a connection
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Check your connection and try again.'**
+  String get componentsScannerProductSearchErrorOffline;
+
+  /// Product search timed out
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts took too long to respond. Try again.'**
+  String get componentsScannerProductSearchErrorTimeout;
+
+  /// Product search hit a rate limit or server error
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts is busy or unavailable. Wait a moment and try again.'**
+  String get componentsScannerProductSearchErrorServer;
 }
 
 class _AppLocalizationsDelegate

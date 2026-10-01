@@ -10,10 +10,13 @@ String _importErrorMessage(AppLocalizations localizations, ImportExportResult re
       return localizations.screensSettingsImportDataFileMissing;
     case ImportExportErrorCode.importFileTooLarge:
       return localizations.screensSettingsImportDataFileTooLarge(
-        ImportExportService.maxImportBytes ~/ (1024 * 1024),
+        ImportExportService.maxImportBytesFor(result.filePath ?? '') ~/
+            (1024 * 1024),
       );
     case ImportExportErrorCode.importInvalidJson:
       return localizations.screensSettingsImportDataInvalidJson;
+    case ImportExportErrorCode.importInvalidArchive:
+      return localizations.screensSettingsImportDataInvalidArchive;
     case ImportExportErrorCode.importUnsupportedFormat:
       return localizations.screensSettingsImportDataUnsupportedFormat;
     case ImportExportErrorCode.importInvalidData:
@@ -648,7 +651,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['json', 'csv'],
+        allowedExtensions: ['json', 'csv', 'zip'],
         allowMultiple: false,
       );
 

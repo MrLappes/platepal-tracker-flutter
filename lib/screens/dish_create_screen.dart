@@ -15,6 +15,11 @@ import '../utils/number_parsing.dart';
 import '../utils/unit_conversion.dart';
 import '../components/dishes/dish_form/ingredient_form_modal.dart';
 import '../components/dishes/dish_form/smart_nutrition_card.dart';
+import '../components/scanner/barcode_scanner_screen.dart';
+import '../components/scanner/product_search_screen.dart';
+
+/// How a new dish starts when opened from a shortcut.
+enum DishCreateEntry { scanBarcode, searchProduct }
 
 /// Copies a selected image into app documents so it outlives picker temp files.
 Future<String> persistDishImage(
@@ -71,6 +76,9 @@ class DishCreateScreenAdvanced extends StatefulWidget {
   final String? heroTag;
   final DishService? dishService;
 
+  /// Opens the scanner or product search right away.
+  final DishCreateEntry? entry;
+
   const DishCreateScreenAdvanced({
     super.key,
     this.dish,
@@ -78,6 +86,7 @@ class DishCreateScreenAdvanced extends StatefulWidget {
     this.onDishCreated,
     this.heroTag,
     this.dishService,
+    this.entry,
   });
 
   @override
@@ -141,6 +150,12 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       _fiberController,
     ]) {
       controller.addListener(_markDirty);
+    }
+    final entry = widget.entry;
+    if (entry != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openEntry(entry);
+      });
     }
   }
 
@@ -443,6 +458,51 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               ],
             ),
           ),
+    );
+  }
+
+  void _addProductIngredient(Ingredient ingredient) {
+    setState(() {
+      _ingredients.add(ingredient);
+      _isDirty = true;
+      _recalculateNutrition();
+    });
+    _showSuccessSnackBar(
+      AppLocalizations.of(context).screensDishCreateProductAddedSuccessfully,
+    );
+  }
+
+  void _openEntry(DishCreateEntry entry) {
+    void addProduct(Product product) {
+      if (!mounted) return;
+      IngredientFormModal.show(
+        context,
+        initialProduct: product,
+        onSave: _addProductIngredient,
+        onProductScanned: _updateDishFromProduct,
+      );
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (_) => switch (entry) {
+              DishCreateEntry.scanBarcode => BarcodeScannerScreen(
+                onProductFound: addProduct,
+                onManualEntry: (barcode) {
+                  if (!mounted) return;
+                  IngredientFormModal.show(
+                    context,
+                    initialBarcode: barcode,
+                    onSave: _addProductIngredient,
+                  );
+                },
+              ),
+              DishCreateEntry.searchProduct => ProductSearchScreen(
+                onProductSelected: addProduct,
+              ),
+            },
+      ),
     );
   }
 

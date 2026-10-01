@@ -850,11 +850,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsScannerBarcodeScannerTorchOff => 'Apagar la linterna';
 
   @override
-  String componentsScannerProductSearchErrorSearchingProduct(String error) {
-    return 'Error al buscar el producto: $error';
-  }
-
-  @override
   String get componentsScannerProductSearchLoadMore => 'Cargar más';
 
   @override
@@ -1376,7 +1371,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyEffectiveDate =>
-      'Fecha de entrada en vigor: 2026-09-30';
+      'Fecha de entrada en vigor: 2026-10-01';
 
   @override
   String get screensPrivacyOverviewTitle => 'En resumen';
@@ -1425,7 +1420,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Los archivos de exportación (JSON o CSV) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.';
+      'Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.';
 
   @override
   String get screensPrivacyBackupTitle => 'Copia de seguridad de Android';
@@ -1460,7 +1455,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyContactBody =>
-      'Si tienes preguntas sobre privacidad, abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.';
+      'Si tienes preguntas sobre privacidad, escribe a mike.busam@plate-pal.de o abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.';
 
   @override
   String get screensPrivacyMenuSubtitle =>
@@ -2009,7 +2004,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataSupportedFormats =>
-      'Formatos admitidos: JSON, CSV';
+      'Formatos admitidos: JSON, CSV, ZIP (copia completa)';
 
   @override
   String get screensSettingsImportDataAllDataDescription =>
@@ -2215,7 +2210,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataUnsupportedFormat =>
-      'Formato de archivo no admitido. Selecciona un archivo JSON o CSV.';
+      'Formato de archivo no admitido. Selecciona un archivo JSON, CSV o ZIP.';
 
   @override
   String get screensSettingsImportDataInvalidData =>
@@ -3452,4 +3447,130 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsProfileSettingsInvalidCalorieTarget =>
       'Con estos datos no se puede calcular un objetivo calórico. Revisa tu peso, altura y edad.';
+
+  @override
+  String get screensMenuSupport => 'Ayuda y comentarios';
+
+  @override
+  String get screensMenuSendFeedback => 'Enviar comentarios';
+
+  @override
+  String get screensMenuSendFeedbackSubtitle =>
+      'Escribe un correo al desarrollador';
+
+  @override
+  String get screensMenuReportProblem => 'Informar de un problema';
+
+  @override
+  String get screensMenuReportProblemSubtitle =>
+      'Comparte el registro de diagnóstico con la app que elijas';
+
+  @override
+  String get screensMenuClearDiagnosticLog => 'Borrar registro de diagnóstico';
+
+  @override
+  String get screensMenuClearDiagnosticLogSubtitle =>
+      'Elimina los registros de errores guardados en este dispositivo';
+
+  @override
+  String get screensMenuDiagnosticsNote =>
+      'No se envía nada automáticamente: los errores se guardan en un breve registro local sin datos personales y solo salen de tu dispositivo si los compartes.';
+
+  @override
+  String screensMenuFeedbackSubject(String version) {
+    return 'Comentarios sobre PlatePal Tracker (v$version)';
+  }
+
+  @override
+  String screensMenuNoEmailApp(String email) {
+    return 'No se encontró ninguna app de correo. Puedes escribir a $email.';
+  }
+
+  @override
+  String screensMenuReportProblemSubject(String version) {
+    return 'Informe de problema de PlatePal Tracker (v$version)';
+  }
+
+  @override
+  String screensMenuReportProblemShareText(String email) {
+    return 'Registro de diagnóstico de PlatePal Tracker. Contacto del desarrollador: $email';
+  }
+
+  @override
+  String get screensMenuDiagnosticLogEmpty =>
+      'Aún no se ha registrado ningún problema. El registro de diagnóstico está vacío.';
+
+  @override
+  String get screensMenuDiagnosticLogShareFailed =>
+      'No se pudo compartir el registro de diagnóstico. Inténtalo de nuevo.';
+
+  @override
+  String get screensMenuDiagnosticLogCleared =>
+      'Registro de diagnóstico borrado.';
+
+  @override
+  String get screensMenuDiagnosticLogClearFailed =>
+      'No se pudo borrar el registro de diagnóstico. Inténtalo de nuevo.';
+
+  @override
+  String get screensPrivacyDiagnosticsTitle =>
+      'Registro de diagnóstico y comentarios';
+
+  @override
+  String get screensPrivacyDiagnosticsBody =>
+      'Si la app sufre un error inesperado, guarda en tu dispositivo un breve registro técnico: la hora, la versión de la app, el tipo de error, un mensaje de error abreviado y la ubicación en el código. Se elimina el texto que pueda contener datos personales, como valores entre comillas, direcciones de correo, claves y medidas, y solo se conservan las últimas 20 entradas. El registro nunca se envía automáticamente. Solo sale de tu dispositivo si eliges «Informar de un problema» y lo compartes con la app que prefieras; «Borrar registro de diagnóstico» en el menú lo elimina. «Enviar comentarios» abre tu app de correo y no se envía nada hasta que tú mismo envíes el correo.';
+
+  @override
+  String get screensSettingsImportDataInvalidArchive =>
+      'Este archivo ZIP no es una copia de seguridad de PlatePal Tracker.';
+
+  @override
+  String get screensSettingsExportDataExportAsZip => 'Copia completa (.zip)';
+
+  @override
+  String get screensSettingsExportDataZipDescription =>
+      'Datos y fotos de los platos en un solo archivo, para pasar a otro dispositivo';
+
+  @override
+  String screensSettingsStatisticsNotEnoughMetrics(int count) {
+    return 'Registra tus medidas corporales al menos $count veces para ver este gráfico.';
+  }
+
+  @override
+  String componentsScannerBarcodeScannerNotFoundMessage(String barcode) {
+    return 'El código $barcode aún no está en Open Food Facts. Busca por nombre o introduce el alimento tú mismo.';
+  }
+
+  @override
+  String get componentsScannerBarcodeScannerSearchByName => 'Buscar por nombre';
+
+  @override
+  String get componentsScannerBarcodeScannerEnterManually =>
+      'Introducir manualmente';
+
+  @override
+  String get componentsScannerBarcodeScannerScanAgain => 'Escanear de nuevo';
+
+  @override
+  String componentsDishesDishFormIngredientFormModalBarcode(String barcode) {
+    return 'Código de barras: $barcode';
+  }
+
+  @override
+  String get screensMealsScanBarcode => 'Escanear código de barras';
+
+  @override
+  String get screensMealsSearchFood => 'Buscar alimento';
+
+  @override
+  String get componentsScannerProductSearchErrorOffline =>
+      'Estás sin conexión. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerProductSearchErrorTimeout =>
+      'Open Food Facts tardó demasiado en responder. Inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerProductSearchErrorServer =>
+      'Open Food Facts está saturado o no disponible. Espera un momento e inténtalo de nuevo.';
 }

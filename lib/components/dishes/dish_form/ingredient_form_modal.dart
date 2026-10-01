@@ -13,11 +13,19 @@ class IngredientFormModal extends StatefulWidget {
   final Function(Ingredient) onSave;
   final Function(Product)? onProductScanned;
 
+  /// Barcode of an unknown product the user enters by hand.
+  final String? initialBarcode;
+
+  /// Product to prefill the form with when it opens.
+  final Product? initialProduct;
+
   const IngredientFormModal({
     super.key,
     this.ingredient,
     required this.onSave,
     this.onProductScanned,
+    this.initialBarcode,
+    this.initialProduct,
   });
 
   @override
@@ -28,6 +36,8 @@ class IngredientFormModal extends StatefulWidget {
     Ingredient? ingredient,
     required Function(Ingredient) onSave,
     Function(Product)? onProductScanned,
+    String? initialBarcode,
+    Product? initialProduct,
   }) {
     showModalBottomSheet(
       context: context,
@@ -38,6 +48,8 @@ class IngredientFormModal extends StatefulWidget {
             ingredient: ingredient,
             onSave: onSave,
             onProductScanned: onProductScanned,
+            initialBarcode: initialBarcode,
+            initialProduct: initialProduct,
           ),
     );
   }
@@ -71,7 +83,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   void initState() {
     super.initState();
     final ingredient = widget.ingredient;
-    _barcode = ingredient?.barcode;
+    _barcode = ingredient?.barcode ?? widget.initialBarcode;
     _nameController = TextEditingController(text: ingredient?.name ?? '');
     _quantityController = TextEditingController();
     _caloriesController = TextEditingController();
@@ -82,6 +94,12 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
 
     if (ingredient?.unit != null) {
       _selectedUnit = ingredient!.unit;
+    }
+    final product = widget.initialProduct;
+    if (product != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _prefillFormWithProduct(product),
+      );
     }
   }
 
@@ -261,6 +279,29 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
               ],
             ),
           ),
+
+          if (_barcode != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.qr_code,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.componentsDishesDishFormIngredientFormModalBarcode(
+                      _barcode!,
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           const SizedBox(height: 24),
 
@@ -838,6 +879,9 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
             (context) => BarcodeScannerScreen(
               onProductFound: (product) {
                 _prefillFormWithProduct(product);
+              },
+              onManualEntry: (barcode) {
+                if (mounted) setState(() => _barcode = barcode);
               },
             ),
       ),

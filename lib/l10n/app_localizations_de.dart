@@ -853,11 +853,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Taschenlampe ausschalten';
 
   @override
-  String componentsScannerProductSearchErrorSearchingProduct(String error) {
-    return 'Fehler bei der Produktsuche: $error';
-  }
-
-  @override
   String get componentsScannerProductSearchLoadMore => 'Mehr laden';
 
   @override
@@ -1379,7 +1374,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get screensPrivacyTitle => 'Datenschutzerklärung';
 
   @override
-  String get screensPrivacyEffectiveDate => 'Gültig ab: 2026-09-30';
+  String get screensPrivacyEffectiveDate => 'Gültig ab: 2026-10-01';
 
   @override
   String get screensPrivacyOverviewTitle => 'Auf einen Blick';
@@ -1428,7 +1423,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Exportdateien (JSON oder CSV) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch.';
+      'Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch.';
 
   @override
   String get screensPrivacyBackupTitle => 'Android-Sicherung';
@@ -1463,7 +1458,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensPrivacyContactBody =>
-      'Bei Fragen zum Datenschutz erstelle ein GitHub-Issue unter github.com/MrLappes/platepal-tracker-flutter/issues. Auf Daten, die nur auf deinem Gerät gespeichert sind, haben wir keinen Zugriff; nutze zum Löschen die oben genannten App- und Systemeinstellungen.';
+      'Bei Fragen zum Datenschutz schreibe an mike.busam@plate-pal.de oder erstelle ein GitHub-Issue unter github.com/MrLappes/platepal-tracker-flutter/issues. Auf Daten, die nur auf deinem Gerät gespeichert sind, haben wir keinen Zugriff; nutze zum Löschen die oben genannten App- und Systemeinstellungen.';
 
   @override
   String get screensPrivacyMenuSubtitle =>
@@ -2016,7 +2011,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataSupportedFormats =>
-      'Unterstützte Formate: JSON, CSV';
+      'Unterstützte Formate: JSON, CSV, ZIP (vollständiges Backup)';
 
   @override
   String get screensSettingsImportDataAllDataDescription =>
@@ -2221,7 +2216,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataUnsupportedFormat =>
-      'Nicht unterstütztes Dateiformat. Wähle eine JSON- oder CSV-Datei.';
+      'Nicht unterstütztes Dateiformat. Wähle eine JSON-, CSV- oder ZIP-Datei.';
 
   @override
   String get screensSettingsImportDataInvalidData =>
@@ -3451,4 +3446,128 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get screensSettingsProfileSettingsInvalidCalorieTarget =>
       'Aus diesen Angaben lässt sich kein Kalorienziel berechnen. Bitte prüfe dein Gewicht, deine Größe und dein Alter.';
+
+  @override
+  String get screensMenuSupport => 'Hilfe & Feedback';
+
+  @override
+  String get screensMenuSendFeedback => 'Feedback senden';
+
+  @override
+  String get screensMenuSendFeedbackSubtitle =>
+      'Schreibe dem Entwickler eine E-Mail';
+
+  @override
+  String get screensMenuReportProblem => 'Problem melden';
+
+  @override
+  String get screensMenuReportProblemSubtitle =>
+      'Teile das Diagnoseprotokoll mit einer App deiner Wahl';
+
+  @override
+  String get screensMenuClearDiagnosticLog => 'Diagnoseprotokoll löschen';
+
+  @override
+  String get screensMenuClearDiagnosticLogSubtitle =>
+      'Löscht die auf diesem Gerät gespeicherten Fehlereinträge';
+
+  @override
+  String get screensMenuDiagnosticsNote =>
+      'Es wird nichts automatisch gesendet: Fehler werden in einem kurzen lokalen Protokoll ohne persönliche Daten gespeichert und verlassen dein Gerät nur, wenn du sie teilst.';
+
+  @override
+  String screensMenuFeedbackSubject(String version) {
+    return 'PlatePal Tracker Feedback (v$version)';
+  }
+
+  @override
+  String screensMenuNoEmailApp(String email) {
+    return 'Keine E-Mail-App gefunden. Du kannst an $email schreiben.';
+  }
+
+  @override
+  String screensMenuReportProblemSubject(String version) {
+    return 'PlatePal Tracker Problembericht (v$version)';
+  }
+
+  @override
+  String screensMenuReportProblemShareText(String email) {
+    return 'PlatePal Tracker Diagnoseprotokoll. Kontakt zum Entwickler: $email';
+  }
+
+  @override
+  String get screensMenuDiagnosticLogEmpty =>
+      'Noch keine Probleme aufgezeichnet. Das Diagnoseprotokoll ist leer.';
+
+  @override
+  String get screensMenuDiagnosticLogShareFailed =>
+      'Das Diagnoseprotokoll konnte nicht geteilt werden. Versuche es erneut.';
+
+  @override
+  String get screensMenuDiagnosticLogCleared => 'Diagnoseprotokoll gelöscht.';
+
+  @override
+  String get screensMenuDiagnosticLogClearFailed =>
+      'Das Diagnoseprotokoll konnte nicht gelöscht werden. Versuche es erneut.';
+
+  @override
+  String get screensPrivacyDiagnosticsTitle => 'Diagnoseprotokoll und Feedback';
+
+  @override
+  String get screensPrivacyDiagnosticsBody =>
+      'Tritt in der App ein unerwarteter Fehler auf, speichert sie einen kurzen technischen Eintrag auf deinem Gerät: Zeitpunkt, App-Version, Fehlertyp, eine gekürzte Fehlermeldung und die Stelle im Code. Text, der persönliche Daten enthalten kann, etwa Werte in Anführungszeichen, E-Mail-Adressen, Schlüssel und Messwerte, wird entfernt, und nur die letzten 20 Einträge bleiben erhalten. Das Protokoll wird nie automatisch gesendet. Es verlässt dein Gerät nur, wenn du „Problem melden“ wählst und es mit einer App deiner Wahl teilst; „Diagnoseprotokoll löschen“ im Menü entfernt es. „Feedback senden“ öffnet deine E-Mail-App, und es wird erst etwas gesendet, wenn du die E-Mail selbst abschickst.';
+
+  @override
+  String get screensSettingsImportDataInvalidArchive =>
+      'Diese ZIP-Datei ist kein PlatePal-Tracker-Backup.';
+
+  @override
+  String get screensSettingsExportDataExportAsZip =>
+      'Vollständiges Backup (.zip)';
+
+  @override
+  String get screensSettingsExportDataZipDescription =>
+      'Daten und Gerichtsfotos in einer Datei, z. B. für ein neues Gerät';
+
+  @override
+  String screensSettingsStatisticsNotEnoughMetrics(int count) {
+    return 'Erfasse deine Körperwerte mindestens $count-mal, um dieses Diagramm zu sehen.';
+  }
+
+  @override
+  String componentsScannerBarcodeScannerNotFoundMessage(String barcode) {
+    return 'Der Barcode $barcode ist noch nicht in Open Food Facts. Suche nach dem Namen oder gib das Lebensmittel selbst ein.';
+  }
+
+  @override
+  String get componentsScannerBarcodeScannerSearchByName => 'Nach Namen suchen';
+
+  @override
+  String get componentsScannerBarcodeScannerEnterManually => 'Manuell eingeben';
+
+  @override
+  String get componentsScannerBarcodeScannerScanAgain => 'Erneut scannen';
+
+  @override
+  String componentsDishesDishFormIngredientFormModalBarcode(String barcode) {
+    return 'Barcode: $barcode';
+  }
+
+  @override
+  String get screensMealsScanBarcode => 'Barcode scannen';
+
+  @override
+  String get screensMealsSearchFood => 'Lebensmittel suchen';
+
+  @override
+  String get componentsScannerProductSearchErrorOffline =>
+      'Du bist offline. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get componentsScannerProductSearchErrorTimeout =>
+      'Open Food Facts hat zu lange nicht geantwortet. Versuche es erneut.';
+
+  @override
+  String get componentsScannerProductSearchErrorServer =>
+      'Open Food Facts ist ausgelastet oder nicht erreichbar. Warte kurz und versuche es erneut.';
 }

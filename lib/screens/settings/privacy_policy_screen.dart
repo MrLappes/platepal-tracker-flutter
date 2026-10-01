@@ -38,6 +38,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
         localizations.screensPrivacyExportBody,
       ),
       (
+        localizations.screensPrivacyDiagnosticsTitle,
+        localizations.screensPrivacyDiagnosticsBody,
+      ),
+      (
         localizations.screensPrivacyBackupTitle,
         localizations.screensPrivacyBackupBody,
       ),

@@ -261,6 +261,112 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final metricRecords in [0, 1]) {
+    testWidgets(
+      'meal logs show calorie history with $metricRecords metric records',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({});
+        await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+        final now = DateTime.now();
+        await UserProfileService().saveUserProfile(
+          UserProfile(
+            id: 'default',
+            name: 'Test',
+            email: 'test@example.com',
+            age: 30,
+            gender: 'other',
+            height: 170,
+            weight: 70,
+            activityLevel: 'moderately_active',
+            goals: const FitnessGoals(
+              goal: 'maintain_weight',
+              targetWeight: 70,
+              targetCalories: 2000,
+              targetProtein: 100,
+              targetCarbs: 200,
+              targetFat: 60,
+              targetFiber: 25,
+            ),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+        final db = await DatabaseService.instance.database;
+        await db.delete('user_metrics_history');
+        if (metricRecords == 1) {
+          await db.insert('user_metrics_history', {
+            'user_id': 'default',
+            'weight': 70.0,
+            'height': 170.0,
+            'recorded_date': now.toIso8601String(),
+          });
+        }
+        for (final daysAgo in [0, 1]) {
+          final day = DateTime(now.year, now.month, now.day - daysAgo, 12);
+          await db.insert('dish_logs', {
+            'id': 'log-$daysAgo',
+            'dish_id': 'dish',
+            'dish_name': 'Lunch',
+            'logged_at': day.toIso8601String(),
+            'meal_type': 'lunch',
+            'serving_size': 1.0,
+            'calories': 1800.0,
+            'protein': 90.0,
+            'carbs': 200.0,
+            'fat': 60.0,
+          });
+        }
+        final storage =
+            StorageServiceProvider()
+              ..userProfileService = UserProfileService()
+              ..dishService = DishService()
+              ..mealLogService = MealLogService();
+
+        await tester.pumpWidget(
+          ChangeNotifierProvider<StorageServiceProvider>.value(
+            value: storage,
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: const StatisticsScreen(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Not Enough Data'), findsNothing);
+        expect(
+          find.text(
+            'Record your body measurements at least 4 times to see this chart.',
+          ),
+          findsWidgets,
+        );
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is CustomPaint && widget.painter is LineChartPainter,
+          ),
+          findsNothing,
+        );
+
+        final calorieChart = find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomPaint && widget.painter is CalorieChartPainter,
+        );
+        await tester.dragUntilVisible(
+          calorieChart,
+          find.byType(ListView),
+          const Offset(0, -300),
+        );
+        expect(calorieChart, findsOneWidget);
+        final painter =
+            tester.widget<CustomPaint>(calorieChart).painter!
+                as CalorieChartPainter;
+        expect(painter.data, hasLength(2));
+      },
+    );
+  }
+
   test('weekly weight medians keep ISO weeks separate across years', () {
     final medians = calculateWeeklyWeightMedian([
       {'recorded_date': '2024-12-30', 'weight': 70.0},

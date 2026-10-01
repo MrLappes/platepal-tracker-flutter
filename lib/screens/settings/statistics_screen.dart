@@ -330,36 +330,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   // Process metrics data to calculate derived values like BMI
   void _processMetricsData() {
-    if (_metricsHistory.isEmpty) {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
+    if (_metricsHistory.isNotEmpty) {
+      // Get the most recent values for current stats
+      final latestEntry = _metricsHistory.last;
+
+      _currentWeight = latestEntry['weight'] as double?;
+      _currentHeight = latestEntry['height'] as double?;
+      _currentBodyFat = latestEntry['body_fat'] as double?;
+
+      // Calculate BMI if both weight and height are available
+      if (_currentWeight != null &&
+          _currentHeight != null &&
+          _currentHeight! > 0) {
+        // BMI = weight(kg) / height²(m²)
+        _currentBMI =
+            _currentWeight! /
+            ((_currentHeight! / 100) * (_currentHeight! / 100));
+      }
     }
 
-    // Get the most recent values for current stats
-    final latestEntry = _metricsHistory.last;
-
-    _currentWeight = latestEntry['weight'] as double?;
-    _currentHeight = latestEntry['height'] as double?;
-    _currentBodyFat = latestEntry['body_fat'] as double?;
-
-    // Calculate BMI if both weight and height are available
-    if (_currentWeight != null &&
-        _currentHeight != null &&
-        _currentHeight! > 0) {
-      // BMI = weight(kg) / height²(m²)
-      _currentBMI =
-          _currentWeight! / ((_currentHeight! / 100) * (_currentHeight! / 100));
-    }
-
-    // Calculate maintenance calories based on user profile
-    if (_userProfile != null &&
-        _currentWeight != null &&
-        _currentHeight != null) {
+    // Maintenance falls back to the profile so calories chart without metrics.
+    final weight = _currentWeight ?? _userProfile?.weight;
+    final height = _currentHeight ?? _userProfile?.height;
+    if (_userProfile != null && weight != null && height != null) {
       final bmr = _calculateBMR(
-        _currentWeight!,
-        _currentHeight!,
+        weight,
+        height,
         _userProfile!.age,
         _userProfile!.gender,
       );
@@ -404,30 +400,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         }
       }
 
-      // Process calorie data for min/max
-      if (_calorieHistory.isNotEmpty) {
-        _minCalories = double.maxFinite;
-        _maxCalories = double.minPositive;
-
-        for (final entry in _calorieHistory) {
-          final calories = entry['calories'] as double?;
-          if (calories != null) {
-            _minCalories = math.min(_minCalories, calories);
-            _maxCalories = math.max(_maxCalories, calories);
-          }
-        }
-
-        // Add maintenance calories to the range
-        if (_maintenanceCalories != null) {
-          _minCalories = math.min(_minCalories, _maintenanceCalories!);
-          _maxCalories = math.max(_maxCalories, _maintenanceCalories!);
-        }
-
-        // Add padding to calorie range
-        _minCalories = _minCalories.isFinite ? (_minCalories * 0.9) : 1200;
-        _maxCalories = _maxCalories.isFinite ? (_maxCalories * 1.1) : 3000;
-      }
-
       // Add padding to min/max values for better visualization
       _minWeight = _minWeight.isFinite ? (_minWeight * 0.95) : 0;
       _maxWeight = _maxWeight.isFinite ? (_maxWeight * 1.05) : 100;
@@ -437,6 +409,30 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       _maxBMI = _maxBMI.isFinite ? (_maxBMI * 1.05) : 40;
       _minBodyFat = _minBodyFat.isFinite ? (_minBodyFat * 0.95) : 0;
       _maxBodyFat = _maxBodyFat.isFinite ? (_maxBodyFat * 1.05) : 40;
+    }
+
+    // Process calorie data for min/max
+    if (_calorieHistory.isNotEmpty) {
+      _minCalories = double.maxFinite;
+      _maxCalories = double.minPositive;
+
+      for (final entry in _calorieHistory) {
+        final calories = entry['calories'] as double?;
+        if (calories != null) {
+          _minCalories = math.min(_minCalories, calories);
+          _maxCalories = math.max(_maxCalories, calories);
+        }
+      }
+
+      // Add maintenance calories to the range
+      if (_maintenanceCalories != null) {
+        _minCalories = math.min(_minCalories, _maintenanceCalories!);
+        _maxCalories = math.max(_maxCalories, _maintenanceCalories!);
+      }
+
+      // Add padding to calorie range
+      _minCalories = _minCalories.isFinite ? (_minCalories * 0.9) : 1200;
+      _maxCalories = _maxCalories.isFinite ? (_maxCalories * 1.1) : 3000;
     }
 
     setState(() {
@@ -658,9 +654,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
         ),
       );
-    } // Empty state check - show empty state if no real data (ignore test data)
+    } // Empty state only when there is neither metric nor meal history
     final bool hasEnoughData =
-        _metricsHistory.length > 3 && !_isShowingTestData;
+        (_hasEnoughMetrics || _calorieHistory.isNotEmpty) &&
+        !_isShowingTestData;
 
     return Scaffold(
       appBar: AppBar(
@@ -1170,10 +1167,38 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
+  /// Body-metric charts need a few readings to show a trend.
+  static const int _minMetricRecords = 4;
+
+  bool get _hasEnoughMetrics =>
+      _isShowingTestData || _metricsHistory.length >= _minMetricRecords;
+
+  Widget _buildNotEnoughMetrics(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.screensSettingsStatisticsNotEnoughMetrics(_minMetricRecords),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            icon: const Icon(Icons.add),
+            label: Text(l10n.screensSettingsStatisticsUpdateMetricsNow),
+            onPressed: () => context.push('/settings/profile'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWeightChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final colorScheme = Theme.of(context).colorScheme;
+    if (!_hasEnoughMetrics) return _buildNotEnoughMetrics(context);
     if (_metricsHistory.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable),
@@ -1218,6 +1243,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final colorScheme = Theme.of(context).colorScheme;
+    if (!_hasEnoughMetrics) return _buildNotEnoughMetrics(context);
     if (_metricsHistory.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoBmiDataAvailable),
@@ -1297,6 +1323,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final bodyFatData =
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
+    if (!_hasEnoughMetrics) return _buildNotEnoughMetrics(context);
     if (bodyFatData.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoBodyFatDataAvailable),

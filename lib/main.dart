@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'services/diagnostic_log_service.dart';
 import 'services/health_service.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
@@ -31,6 +32,7 @@ import 'providers/app_state_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DiagnosticLogService.instance.install();
   final prefs = await SharedPreferences.getInstance();
   _initHealthOnLaunch(); // fire-and-forget
 
