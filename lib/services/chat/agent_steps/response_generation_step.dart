@@ -11,6 +11,7 @@ import '../openai_service.dart';
 import '../../chat/system_prompts.dart';
 import '../../chat/agent_tools.dart';
 import '../../chat/pipeline_modification_tracker.dart';
+import '../meal_log_proposal.dart';
 import '../../../utils/image_utils.dart';
 
 const _uuid = Uuid();
@@ -145,6 +146,7 @@ class ResponseGenerationStep extends AgentStep {
       String replyText;
       List<Dish>? dishes;
       String? recommendation;
+      List<Map<String, dynamic>> mealLogProposals = const [];
 
       if (choice.isToolCall) {
         // ── Tool-call path (preferred) ────────────────────────────────────
@@ -161,6 +163,8 @@ class ResponseGenerationStep extends AgentStep {
         replyText = result['replyText'] as String? ?? '';
         recommendation = result['recommendation'] as String?;
         dishes = result['dishes'] as List<Dish>?;
+        mealLogProposals =
+            result['mealLogProposals'] as List<Map<String, dynamic>>;
       } else {
         // ── Fallback: plain-text / JSON content path ──────────────────────
         // Some OpenAI-compatible endpoints may not support tool calling.
@@ -233,6 +237,7 @@ class ResponseGenerationStep extends AgentStep {
           'conversationHistoryIncluded': includeConversationHistory,
           'usedToolCalling': choice.isToolCall,
           if (_imageProcessingFailed) 'imageAnalysisFailed': true,
+          if (mealLogProposals.isNotEmpty) 'mealLogProposals': mealLogProposals,
           if (choice.isToolCall &&
               (choice.message.toolCalls?.isNotEmpty ?? false))
             'toolCallDetails':
@@ -316,6 +321,7 @@ class ResponseGenerationStep extends AgentStep {
     String replyText = '';
     String? recommendation;
     final dishes = <Dish>[];
+    final mealLogProposals = <Map<String, dynamic>>[];
     final toolCallLog = <Map<String, dynamic>>[];
 
     for (final call in toolCalls) {
@@ -394,6 +400,20 @@ class ResponseGenerationStep extends AgentStep {
             );
           }
 
+        case 'log_meal':
+          replyText = args['reply_text'] as String? ?? replyText;
+          try {
+            mealLogProposals.add(
+              MealLogProposal.fromToolArguments(
+                args,
+                now: DateTime.now(),
+              ).toJson(),
+            );
+          } on MealLogProposalException catch (e) {
+            debugPrint('⚠️ log_meal rejected: ${e.error.name}');
+            mealLogProposals.add({'error': e.error.name});
+          }
+
         default:
           debugPrint('\u26a0\ufe0f Unknown tool call: ${call.functionName}');
       }
@@ -423,6 +443,7 @@ class ResponseGenerationStep extends AgentStep {
       'replyText': replyText,
       'recommendation': recommendation,
       'dishes': dishes.isEmpty ? null : dishes,
+      'mealLogProposals': mealLogProposals,
     };
   }
 

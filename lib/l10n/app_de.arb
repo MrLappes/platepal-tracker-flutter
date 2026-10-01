@@ -3032,5 +3032,17 @@
   "screensDishCreateRecipeMakes": "Dieses Rezept ergibt",
   "screensDishCreateServingsSuffix": "Portionen",
   "screensDishCreateServingsHelper": "Die Nährwerte unten gelten für das ganze Rezept",
-  "screensDishCreatePerServingSummary": "Pro Portion (1 von {servings}): {calories} kcal · {protein} g Eiweiß · {carbs} g Kohlenhydrate · {fat} g Fett"
+  "screensDishCreatePerServingSummary": "Pro Portion (1 von {servings}): {calories} kcal · {protein} g Eiweiß · {carbs} g Kohlenhydrate · {fat} g Fett",
+  "componentsChatMealLogProposalSummaryOne": "1 Portion {name} als {mealType} {day} eintragen – {calories} kcal",
+  "componentsChatMealLogProposalSummaryOther": "{servings} Portionen {name} als {mealType} {day} eintragen – {calories} kcal",
+  "componentsChatMealLogProposalToday": "heute",
+  "componentsChatMealLogProposalYesterday": "gestern",
+  "componentsChatMealLogProposalOnDate": "am {date}",
+  "componentsChatMealLogProposalConfirm": "Bestätigen",
+  "componentsChatMealLogProposalEdit": "Bearbeiten",
+  "componentsChatMealLogProposalDismiss": "Verwerfen",
+  "componentsChatMealLogProposalLogged": "Eingetragen",
+  "componentsChatMealLogProposalDismissed": "Verworfen",
+  "componentsChatMealLogProposalDishMissing": "Dieses Gericht gibt es nicht mehr.",
+  "componentsChatMealLogProposalInvalid": "Der Eintrag des Assistenten konnte nicht gelesen werden. Frag bitte noch einmal."
 }

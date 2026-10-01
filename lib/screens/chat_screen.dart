@@ -314,6 +314,12 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                   ? () =>
                       chatProvider.retryMessage(message.id, context: context)
                   : null,
+          onMealLogProposalStatusChanged:
+              (index, status) => chatProvider.setMealLogProposalStatus(
+                message.id,
+                index,
+                status,
+              ),
         );
       },
     );

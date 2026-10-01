@@ -6011,6 +6011,89 @@ abstract class AppLocalizations {
     String carbs,
     String fat,
   );
+
+  /// Chat card proposing a diary entry of one serving
+  ///
+  /// In en, this message translates to:
+  /// **'Log 1 serving of {name} as {mealType} {day} – {calories} kcal'**
+  String componentsChatMealLogProposalSummaryOne(
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  );
+
+  /// Chat card proposing a diary entry of several or fractional servings
+  ///
+  /// In en, this message translates to:
+  /// **'Log {servings} servings of {name} as {mealType} {day} – {calories} kcal'**
+  String componentsChatMealLogProposalSummaryOther(
+    String servings,
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  );
+
+  /// Day of a proposed diary entry that is today
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get componentsChatMealLogProposalToday;
+
+  /// Day of a proposed diary entry that is yesterday
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get componentsChatMealLogProposalYesterday;
+
+  /// Day of a proposed diary entry on another date
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String componentsChatMealLogProposalOnDate(String date);
+
+  /// Button that logs a meal proposed in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get componentsChatMealLogProposalConfirm;
+
+  /// Button that opens the log sheet prefilled with a proposed meal
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get componentsChatMealLogProposalEdit;
+
+  /// Button that ignores a meal proposed in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get componentsChatMealLogProposalDismiss;
+
+  /// State of a chat meal proposal after it was logged
+  ///
+  /// In en, this message translates to:
+  /// **'Logged'**
+  String get componentsChatMealLogProposalLogged;
+
+  /// State of a chat meal proposal after it was dismissed
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get componentsChatMealLogProposalDismissed;
+
+  /// Chat meal proposal whose dish was deleted or never existed
+  ///
+  /// In en, this message translates to:
+  /// **'This dish no longer exists.'**
+  String get componentsChatMealLogProposalDishMissing;
+
+  /// Chat meal proposal with invalid values
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant\'s entry couldn\'t be read. Try asking again.'**
+  String get componentsChatMealLogProposalInvalid;
 }
 
 class _AppLocalizationsDelegate

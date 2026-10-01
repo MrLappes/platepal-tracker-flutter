@@ -3651,4 +3651,59 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return 'Per serving (1 of $servings): $calories kcal · $protein g protein · $carbs g carbs · $fat g fat';
   }
+
+  @override
+  String componentsChatMealLogProposalSummaryOne(
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  ) {
+    return 'Log 1 serving of $name as $mealType $day – $calories kcal';
+  }
+
+  @override
+  String componentsChatMealLogProposalSummaryOther(
+    String servings,
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  ) {
+    return 'Log $servings servings of $name as $mealType $day – $calories kcal';
+  }
+
+  @override
+  String get componentsChatMealLogProposalToday => 'today';
+
+  @override
+  String get componentsChatMealLogProposalYesterday => 'yesterday';
+
+  @override
+  String componentsChatMealLogProposalOnDate(String date) {
+    return 'on $date';
+  }
+
+  @override
+  String get componentsChatMealLogProposalConfirm => 'Confirm';
+
+  @override
+  String get componentsChatMealLogProposalEdit => 'Edit';
+
+  @override
+  String get componentsChatMealLogProposalDismiss => 'Dismiss';
+
+  @override
+  String get componentsChatMealLogProposalLogged => 'Logged';
+
+  @override
+  String get componentsChatMealLogProposalDismissed => 'Dismissed';
+
+  @override
+  String get componentsChatMealLogProposalDishMissing =>
+      'This dish no longer exists.';
+
+  @override
+  String get componentsChatMealLogProposalInvalid =>
+      'The assistant\'s entry couldn\'t be read. Try asking again.';
 }

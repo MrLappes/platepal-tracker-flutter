@@ -798,6 +798,7 @@ You MUST respond by calling exactly one or more of the provided tools.
 NEVER return raw text or JSON — always use a tool call.
 
 Tool selection guide:
+- Use `log_meal` when the user says they ate something or asks to log/track a meal. It only proposes the entry: the app shows a card and the user must confirm, so never say the meal is already logged. Pass `dish_id` for a dish from the context, otherwise `name` plus calories and macros of ONE serving. Leave out meal_type, date and time unless the user named them (they default to now).
 - Use `create_new_dish` when the user wants a new meal/recipe created.
 - Use `reference_existing_dish` ONLY when you have an exact database ID from the provided context — never guess or fabricate an ID.
 - Use `provide_chat_response` for all other responses: nutrition advice, questions, tracking, etc.

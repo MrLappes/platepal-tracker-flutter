@@ -3002,5 +3002,17 @@
   "screensDishCreateRecipeMakes": "Esta receta rinde",
   "screensDishCreateServingsSuffix": "raciones",
   "screensDishCreateServingsHelper": "Los valores nutricionales de abajo son para toda la receta",
-  "screensDishCreatePerServingSummary": "Por ración (1 de {servings}): {calories} kcal · {protein} g proteína · {carbs} g carbohidratos · {fat} g grasa"
+  "screensDishCreatePerServingSummary": "Por ración (1 de {servings}): {calories} kcal · {protein} g proteína · {carbs} g carbohidratos · {fat} g grasa",
+  "componentsChatMealLogProposalSummaryOne": "Registrar 1 ración de {name} como {mealType} {day} – {calories} kcal",
+  "componentsChatMealLogProposalSummaryOther": "Registrar {servings} raciones de {name} como {mealType} {day} – {calories} kcal",
+  "componentsChatMealLogProposalToday": "hoy",
+  "componentsChatMealLogProposalYesterday": "ayer",
+  "componentsChatMealLogProposalOnDate": "el {date}",
+  "componentsChatMealLogProposalConfirm": "Confirmar",
+  "componentsChatMealLogProposalEdit": "Editar",
+  "componentsChatMealLogProposalDismiss": "Descartar",
+  "componentsChatMealLogProposalLogged": "Registrado",
+  "componentsChatMealLogProposalDismissed": "Descartado",
+  "componentsChatMealLogProposalDishMissing": "Este plato ya no existe.",
+  "componentsChatMealLogProposalInvalid": "No se pudo leer la entrada del asistente. Vuelve a preguntar."
 }
