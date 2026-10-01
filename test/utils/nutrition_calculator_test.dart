@@ -85,11 +85,37 @@ void main() {
       expect(calorieTargetForGoal(2500, 'maintain_weight'), 2500);
     });
 
-    test('never goes below the 1200 kcal floor', () {
-      expect(calorieTargetForGoal(1400, 'lose_weight'), minimumCalorieTarget);
-      expect(calorieTargetForGoal(300, 'maintain_weight'), minimumCalorieTarget);
-      expect(calorieTargetForGoal(-50, 'gain_weight'), minimumCalorieTarget);
-      expect(minimumCalorieTarget, 1200);
+    test('is not clamped to 1200 kcal', () {
+      expect(calorieTargetForGoal(1400, 'lose_weight'), 900);
+      expect(calorieTargetForGoal(1000, 'maintain_weight'), 1000);
+      expect(calorieTargetForGoal(-50, 'gain_weight'), 250);
+    });
+
+    test('never returns a negative or non-finite target', () {
+      expect(calorieTargetForGoal(300, 'lose_weight'), 0);
+      expect(calorieTargetForGoal(-500, 'maintain_weight'), 0);
+      expect(calorieTargetForGoal(double.nan, 'maintain_weight'), 0);
+      expect(calorieTargetForGoal(double.infinity, 'gain_weight'), 0);
+      expect(calorieTargetForGoal(double.negativeInfinity, 'lose_weight'), 0);
+    });
+  });
+
+  group('isLowCalorieTarget', () {
+    test('flags targets below the 1200 kcal warning threshold', () {
+      expect(lowCalorieWarningThreshold, 1200);
+      expect(isLowCalorieTarget(1199.4), isTrue);
+      expect(isLowCalorieTarget(800), isTrue);
+      expect(isLowCalorieTarget(0), isTrue);
+      expect(isLowCalorieTarget(1200), isFalse);
+      expect(isLowCalorieTarget(2500), isFalse);
+      expect(isLowCalorieTarget(double.nan), isFalse);
+      expect(isLowCalorieTarget(double.infinity), isFalse);
+    });
+
+    test('uses the whole-kcal value that is displayed', () {
+      expect(isLowCalorieTarget(1199.6), isFalse);
+      expect(isLowCalorieTarget(1199.5), isFalse);
+      expect(isLowCalorieTarget(1199.49), isTrue);
     });
   });
 

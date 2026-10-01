@@ -271,10 +271,7 @@ class CalorieExpenditureService {
       return CalorieTargetAnalysis(
         needsAdjustment: needsAdjustment,
         currentTarget: currentTarget,
-        suggestedTarget:
-            needsAdjustment && suggestedTarget < minimumCalorieTarget
-                ? minimumCalorieTarget
-                : suggestedTarget,
+        suggestedTarget: nonNegativeCalorieTarget(suggestedTarget),
         averageExpenditure: averageExpenditure,
         status: status,
         daysAnalyzed: expenditures.length,
@@ -297,16 +294,14 @@ class CalorieExpenditureService {
 
   /// Update user's calorie targets based on analysis
   Future<bool> updateCalorieTargets(double newTargetCalories) async {
+    if (!newTargetCalories.isFinite || newTargetCalories <= 0) return false;
     await initialize();
 
     try {
       final userProfile = await _userProfileRepository.getCurrentUserProfile();
       if (userProfile == null) return false;
 
-      final targetCalories =
-          newTargetCalories < minimumCalorieTarget
-              ? minimumCalorieTarget
-              : newTargetCalories;
+      final targetCalories = newTargetCalories;
       final goals = userProfile.goals;
       final double protein;
       final double carbs;
