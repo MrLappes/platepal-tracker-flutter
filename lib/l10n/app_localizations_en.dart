@@ -3495,4 +3495,139 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get componentsScannerProductSearchErrorServer =>
       'Open Food Facts is busy or unavailable. Wait a moment and try again.';
+
+  @override
+  String get componentsModalsLogFoodTitle => 'Log food';
+
+  @override
+  String componentsModalsLogFoodForMealType(String mealType) {
+    return 'For $mealType';
+  }
+
+  @override
+  String get componentsModalsLogFoodFavorites => 'Favorites';
+
+  @override
+  String get componentsModalsLogFoodRecent => 'Recent';
+
+  @override
+  String get componentsModalsLogFoodAllDishes => 'All dishes';
+
+  @override
+  String get componentsModalsLogFoodQuickAdd => 'Quick add';
+
+  @override
+  String get componentsModalsLogFoodSearchOpenFoodFacts =>
+      'Search Open Food Facts';
+
+  @override
+  String get componentsModalsQuickAddCalories => 'Calories (kcal)';
+
+  @override
+  String get componentsModalsQuickAddCaloriesRequired => 'Enter the calories';
+
+  @override
+  String get componentsModalsQuickAddInvalidNumber =>
+      'Enter a number of 0 or more';
+
+  @override
+  String get componentsModalsQuickAddName => 'Name (optional)';
+
+  @override
+  String get componentsModalsQuickAddProtein => 'Protein (g)';
+
+  @override
+  String get componentsModalsQuickAddCarbs => 'Carbs (g)';
+
+  @override
+  String get componentsModalsQuickAddFat => 'Fat (g)';
+
+  @override
+  String get componentsModalsQuickAddFiber => 'Fiber (g)';
+
+  @override
+  String get componentsModalsQuickAddSaved => 'Quick add logged';
+
+  @override
+  String get componentsModalsQuickAddFailed =>
+      'Couldn\'t save the quick add. Try again.';
+
+  @override
+  String get componentsModalsDishLogModalServings => 'Servings';
+
+  @override
+  String get componentsModalsDishLogModalWeight => 'Weight';
+
+  @override
+  String componentsModalsDishLogModalAmountInUnit(String unit) {
+    return 'Amount ($unit)';
+  }
+
+  @override
+  String componentsModalsDishLogModalServingWeight(String amount, String unit) {
+    return '1 serving = $amount $unit';
+  }
+
+  @override
+  String get componentsModalsDishLogModalFewerServings => 'Fewer servings';
+
+  @override
+  String get componentsModalsDishLogModalMoreServings => 'More servings';
+
+  @override
+  String componentsModalsDishLogModalAmountRange(String min, String max) {
+    return 'Enter a value from $min to $max';
+  }
+
+  @override
+  String get componentsModalsDishLogModalEditTitle => 'Edit entry';
+
+  @override
+  String get componentsModalsDishLogModalEntryUpdated => 'Entry updated';
+
+  @override
+  String get componentsModalsDishLogModalUpdateFailed =>
+      'Couldn\'t update the entry. Try again.';
+
+  @override
+  String get componentsModalsDishLogModalHealthEditWarning =>
+      'Health Connect keeps the original entry. Change or delete it there if needed.';
+
+  @override
+  String get screensCalendarEntryActions => 'More actions';
+
+  @override
+  String get screensCalendarCopyToToday => 'Copy to today';
+
+  @override
+  String get screensCalendarCopyToDate => 'Copy to date…';
+
+  @override
+  String screensCalendarCopyFromPreviousDay(String mealType) {
+    return 'Copy $mealType from the previous day';
+  }
+
+  @override
+  String screensCalendarAddToMeal(String mealType) {
+    return 'Add to $mealType';
+  }
+
+  @override
+  String screensCalendarEntriesCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries copied',
+      one: '1 entry copied',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensCalendarNothingToCopy(String mealType) {
+    return 'The previous day has no $mealType entries';
+  }
+
+  @override
+  String get screensCalendarCopyFailed => 'Couldn\'t copy. Try again.';
 }
