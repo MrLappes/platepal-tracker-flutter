@@ -3443,4 +3443,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String componentsLowCalorieWarningMessage(String calories, String threshold) {
     return 'Un objetivo calórico diario de $calories kcal está por debajo de $threshold kcal. Puede que algo no esté bien: revisa los datos de tu perfil, como peso, altura, edad y nivel de actividad. Una ingesta calórica muy baja solo debe seguirse bajo supervisión médica.';
   }
+
+  @override
+  String get screensSettingsProfileSettingsInvalidCalorieTarget =>
+      'Con estos datos no se puede calcular un objetivo calórico. Revisa tu peso, altura y edad.';
 }

@@ -3132,5 +3132,7 @@
       "calories": {"type": "String"},
       "threshold": {"type": "String"}
     }
-  }
+  },
+  "screensSettingsProfileSettingsInvalidCalorieTarget": "No calorie target can be calculated from these values. Please check your weight, height and age.",
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Error when the profile values give a calorie target of 0 kcal or less, so the profile is not saved"}
 }

@@ -3,8 +3,9 @@ import '../models/user_profile.dart';
 /// Targets below this (kcal/day) get a warning; such diets need medical supervision.
 const double lowCalorieWarningThreshold = 1200;
 
-/// Whether [kcal] is a target low enough to warn about.
-bool isLowCalorieTarget(double kcal) => kcal < lowCalorieWarningThreshold;
+/// Whether [kcal], rounded to whole kcal as displayed, is low enough to warn about.
+bool isLowCalorieTarget(double kcal) =>
+    kcal.isFinite && kcal.round() < lowCalorieWarningThreshold;
 
 /// [kcal] as a usable target: non-finite or negative input becomes 0.
 double nonNegativeCalorieTarget(double kcal) =>

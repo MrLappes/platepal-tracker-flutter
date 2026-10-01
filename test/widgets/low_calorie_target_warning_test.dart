@@ -60,8 +60,25 @@ void main() {
     expect(find.textContaining('medical supervision'), findsOneWidget);
   });
 
+  testWidgets('flags 1199.4 kcal and shows it as 1199 kcal', (tester) async {
+    await tester.pumpWidget(_app(const LowCalorieTargetWarning(calories: 1199.4)));
+    expect(find.text(title), findsOneWidget);
+    expect(find.textContaining('of 1199 kcal'), findsOneWidget);
+  });
+
+  testWidgets('is not a live region', (tester) async {
+    await tester.pumpWidget(_app(const LowCalorieTargetWarning(calories: 900)));
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.liveRegion == true,
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('renders nothing at or above 1200 kcal', (tester) async {
-    for (final calories in [1200.0, 1200.4, 2500.0]) {
+    // 1199.6 is displayed as 1200 kcal, so it must not be flagged.
+    for (final calories in [1199.6, 1200.0, 1200.4, 2500.0]) {
       await tester.pumpWidget(
         _app(LowCalorieTargetWarning(calories: calories)),
       );
@@ -112,6 +129,59 @@ void main() {
     expect(find.text(title), findsOneWidget);
   });
 
+  for (final language in ['en', 'de', 'es']) {
+    testWidgets('$language fits an AlertDialog at 320x640', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder:
+                (context) => TextButton(
+                  onPressed:
+                      () => showDialog<void>(
+                        context: context,
+                        builder:
+                            (_) => const AlertDialog(
+                              title: Text('Analyze Targets'),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Suggested target: 1100 kcal'),
+                                    LowCalorieTargetWarning(
+                                      calories: 1100,
+                                      padding: EdgeInsets.only(top: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      ),
+                  child: const Text('open'),
+                ),
+          ),
+          locale: Locale(language),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      final warning = find.byType(LowCalorieTargetWarning);
+      expect(warning, findsOneWidget);
+      final dialogRect = tester.getRect(find.byType(AlertDialog));
+      final warningRect = tester.getRect(warning);
+      expect(warningRect.left, greaterThanOrEqualTo(dialogRect.left));
+      expect(warningRect.right, lessThanOrEqualTo(dialogRect.right));
+      expect(dialogRect.right, lessThanOrEqualTo(320));
+    });
+  }
+
   group('macro customization screen', () {
     Future<void> pumpScreen(WidgetTester tester, double calories) async {
       SharedPreferences.setMockInitialValues({});
@@ -138,6 +208,18 @@ void main() {
     testWidgets('does not warn about a 1200 kcal target', (tester) async {
       await pumpScreen(tester, 1200);
       expect(find.text(title), findsNothing);
+    });
+
+    testWidgets('uses 14 g fiber per 1000 kcal for a 0 kcal target', (
+      tester,
+    ) async {
+      await pumpScreen(tester, 0);
+      final fiberSlider = find.byWidgetPredicate(
+        (widget) => widget is Slider && widget.min == 5 && widget.max == 35,
+        skipOffstage: false,
+      );
+      expect(tester.widget<Slider>(fiberSlider).value, 14.0);
+      expect(tester.takeException(), isNull);
     });
   });
 }
