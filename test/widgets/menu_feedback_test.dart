@@ -142,4 +142,21 @@ void main() {
     expect(diagnostics.cleared, isTrue);
     expect(find.text('Diagnostic log cleared.'), findsOneWidget);
   });
+
+  testWidgets('the PlatePal entry opens its Play Store listing', (
+    tester,
+  ) async {
+    final launcher = _RecordingLauncher(succeeds: true);
+    final previous = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = launcher;
+    addTearDown(() => UrlLauncherPlatform.instance = previous);
+
+    await pumpMenu(tester);
+    await tapTile(tester, 'PLATEPAL – SHARE MEALS WITH OTHERS');
+
+    expect(
+      launcher.launched,
+      'https://play.google.com/store/apps/details?id=com.lappalis.plate_pal',
+    );
+  });
 }

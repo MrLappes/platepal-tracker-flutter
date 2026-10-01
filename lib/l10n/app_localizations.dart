@@ -6250,6 +6250,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This dish was shared by a newer version of PlatePal. Update PlatePal Tracker to import it.'**
   String get screensPlatePalImportUnsupported;
+
+  /// Menu entry promoting the PlatePal sister app
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal – share meals with others'**
+  String get screensMenuPlatePalPromo;
+
+  /// Subtitle of the PlatePal menu entry, which opens its Play Store listing
+  ///
+  /// In en, this message translates to:
+  /// **'Get the PlatePal app on Google Play'**
+  String get screensMenuPlatePalPromoSubtitle;
 }
 
 class _AppLocalizationsDelegate
