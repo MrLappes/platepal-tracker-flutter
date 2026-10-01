@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
+import '../../components/ui/low_calorie_target_warning.dart';
 import '../../models/user_profile.dart';
 import '../../utils/number_parsing.dart';
 import '../../utils/nutrition_calculator.dart';
@@ -769,7 +770,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             // Current Stats Section (Read-only)
             if (_originalProfile != null) ...[
               _buildSectionHeader(l10n.screensMenuCurrentStats),
-              _buildCurrentStatsCard(l10n),
+              // Rebuild on every keystroke so the stats and warning stay live.
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  _ageController,
+                  _heightController,
+                  _weightController,
+                ]),
+                builder: (context, _) => _buildCurrentStatsCard(l10n),
+              ),
               const SizedBox(height: 24),
             ],
 
@@ -1145,6 +1154,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       gender: _selectedGender,
     );
     final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
+    final calorieTarget = calorieTargetForGoal(tdee, _selectedFitnessGoal);
 
     return Card(
       color: Theme.of(
@@ -1179,6 +1189,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   ),
                 ),
               ],
+            ),
+            LowCalorieTargetWarning(
+              calories: calorieTarget,
+              padding: const EdgeInsets.only(top: 16),
             ),
           ],
         ),

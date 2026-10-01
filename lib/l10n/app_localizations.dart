@@ -5555,6 +5555,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your profile couldn\'t be loaded, so daily targets aren\'t shown.'**
   String get screensCalendarProfileLoadFailed;
+
+  /// Title of the warning shown when a daily calorie target is below 1200 kcal
+  ///
+  /// In en, this message translates to:
+  /// **'Very low calorie target'**
+  String get componentsLowCalorieWarningTitle;
+
+  /// Warning shown when a daily calorie target is below the low-calorie threshold
+  ///
+  /// In en, this message translates to:
+  /// **'A daily calorie target of {calories} kcal is below {threshold} kcal. Something may be wrong: please check your profile values such as weight, height, age and activity level. Very low calorie intakes should only be followed under medical supervision.'**
+  String componentsLowCalorieWarningMessage(String calories, String threshold);
 }
 
 class _AppLocalizationsDelegate

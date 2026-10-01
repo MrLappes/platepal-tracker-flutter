@@ -4,6 +4,10 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Changed
+
+- Calorie targets are no longer raised to 1200 kcal; targets below 1200 kcal show a warning to check your profile values and to seek medical supervision instead.
+
 ## [1.14.0] - 2026-10-01
 
 ### Added

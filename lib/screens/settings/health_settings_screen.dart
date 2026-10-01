@@ -3,6 +3,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
+import '../../components/ui/low_calorie_target_warning.dart';
 import '../../services/health_service.dart';
 import '../../services/calorie_expenditure_service.dart';
 import '../../utils/number_parsing.dart';
@@ -377,6 +378,15 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                     analysisMessage,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  // Failed analyses report 0 kcal, which is not a real target.
+                  if (analysis.needsAdjustment || analysis.currentTarget > 0)
+                    LowCalorieTargetWarning(
+                      calories:
+                          analysis.needsAdjustment
+                              ? analysis.suggestedTarget
+                              : analysis.currentTarget,
+                      padding: const EdgeInsets.only(top: 12),
+                    ),
                 ],
               ),
             ),
