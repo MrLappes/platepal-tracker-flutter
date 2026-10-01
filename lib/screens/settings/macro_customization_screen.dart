@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../components/ui/low_calorie_target_warning.dart';
 import '../../models/user_profile.dart';
 import '../../utils/number_parsing.dart';
 import '../../utils/service_extensions.dart';
@@ -82,7 +83,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
 
             // Calculate fiber per 1000 calories with validation
             final calculatedFiber =
-                userProfile.goals.targetFiber / (_dailyCalories / 1000);
+                _dailyCalories > 0
+                    ? userProfile.goals.targetFiber / (_dailyCalories / 1000)
+                    : 14.0;
             _fiberPer1000Cal = calculatedFiber.clamp(5.0, 35.0);
           }
         } else {
@@ -570,6 +573,10 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 ],
               ),
             ),
+          ),
+          LowCalorieTargetWarning(
+            calories: _dailyCalories,
+            padding: const EdgeInsets.only(top: 12),
           ),
 
           const SizedBox(height: 24),

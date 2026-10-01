@@ -3360,4 +3360,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get screensCalendarProfileLoadFailed =>
       'Your profile couldn\'t be loaded, so daily targets aren\'t shown.';
+
+  @override
+  String get componentsLowCalorieWarningTitle => 'Very low calorie target';
+
+  @override
+  String componentsLowCalorieWarningMessage(String calories, String threshold) {
+    return 'A daily calorie target of $calories kcal is below $threshold kcal. Something may be wrong: please check your profile values such as weight, height, age and activity level. Very low calorie intakes should only be followed under medical supervision.';
+  }
+
+  @override
+  String get screensSettingsProfileSettingsInvalidCalorieTarget =>
+      'No calorie target can be calculated from these values. Please check your weight, height and age.';
 }
