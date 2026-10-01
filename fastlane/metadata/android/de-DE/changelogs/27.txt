@@ -1,0 +1,3 @@
+- Kalorienziele unter 1200 kcal werden nicht mehr automatisch angehoben; stattdessen erscheint ein Hinweis, das Profil zu überprüfen.
+- Importe haben keine Mengenbegrenzung mehr und bleiben auch bei sehr großen Backups flüssig.
+- Sichererer Zutatenimport: unvollständige Einträge werden übersprungen und Fehler klar gemeldet.
