@@ -3731,4 +3731,59 @@ class AppLocalizationsEs extends AppLocalizations {
   ) {
     return 'Por ración (1 de $servings): $calories kcal · $protein g proteína · $carbs g carbohidratos · $fat g grasa';
   }
+
+  @override
+  String componentsChatMealLogProposalSummaryOne(
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  ) {
+    return 'Registrar 1 ración de $name como $mealType $day – $calories kcal';
+  }
+
+  @override
+  String componentsChatMealLogProposalSummaryOther(
+    String servings,
+    String name,
+    String mealType,
+    String day,
+    String calories,
+  ) {
+    return 'Registrar $servings raciones de $name como $mealType $day – $calories kcal';
+  }
+
+  @override
+  String get componentsChatMealLogProposalToday => 'hoy';
+
+  @override
+  String get componentsChatMealLogProposalYesterday => 'ayer';
+
+  @override
+  String componentsChatMealLogProposalOnDate(String date) {
+    return 'el $date';
+  }
+
+  @override
+  String get componentsChatMealLogProposalConfirm => 'Confirmar';
+
+  @override
+  String get componentsChatMealLogProposalEdit => 'Editar';
+
+  @override
+  String get componentsChatMealLogProposalDismiss => 'Descartar';
+
+  @override
+  String get componentsChatMealLogProposalLogged => 'Registrado';
+
+  @override
+  String get componentsChatMealLogProposalDismissed => 'Descartado';
+
+  @override
+  String get componentsChatMealLogProposalDishMissing =>
+      'Este plato ya no existe.';
+
+  @override
+  String get componentsChatMealLogProposalInvalid =>
+      'No se pudo leer la entrada del asistente. Vuelve a preguntar.';
 }

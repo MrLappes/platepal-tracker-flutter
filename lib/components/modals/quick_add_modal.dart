@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 
+import '../../models/dish.dart';
 import '../../models/meal_type.dart';
 import '../../services/storage/dish_service.dart';
 import '../../utils/number_parsing.dart';
@@ -12,11 +13,19 @@ class QuickAddModal extends StatefulWidget {
   final String? initialMealType;
   final DishService? dishService;
 
+  /// Prefill, e.g. from a chat proposal: exact time, name and nutrition.
+  final DateTime? initialLoggedAt;
+  final String? initialName;
+  final NutritionInfo? initialNutrition;
+
   const QuickAddModal({
     super.key,
     this.initialDate,
     this.initialMealType,
     this.dishService,
+    this.initialLoggedAt,
+    this.initialName,
+    this.initialNutrition,
   });
 
   @override
@@ -35,6 +44,7 @@ class _QuickAddModalState extends State<QuickAddModal> {
   late DateTime _loggedAt;
   late MealType _mealType;
   bool _isSaving = false;
+  bool _prefilled = false;
 
   @override
   void initState() {
@@ -42,13 +52,31 @@ class _QuickAddModalState extends State<QuickAddModal> {
     final now = DateTime.now();
     final date = widget.initialDate;
     _loggedAt =
-        date == null
+        widget.initialLoggedAt ??
+        (date == null
             ? now
-            : combineMealDateAndTime(date, TimeOfDay.fromDateTime(now));
+            : combineMealDateAndTime(date, TimeOfDay.fromDateTime(now)));
     _mealType =
         widget.initialMealType != null
             ? MealType.fromString(widget.initialMealType!)
             : defaultMealTypeForTime(_loggedAt);
+    _name.text = widget.initialName ?? '';
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final nutrition = widget.initialNutrition;
+    if (_prefilled || nutrition == null) return;
+    _prefilled = true;
+    final locale = Localizations.localeOf(context).toString();
+    String amount(double value) =>
+        formatAmount((value * 10).roundToDouble() / 10, locale);
+    _calories.text = formatAmount(nutrition.calories.roundToDouble(), locale);
+    _protein.text = amount(nutrition.protein);
+    _carbs.text = amount(nutrition.carbs);
+    _fat.text = amount(nutrition.fat);
+    _fiber.text = amount(nutrition.fiber);
   }
 
   @override

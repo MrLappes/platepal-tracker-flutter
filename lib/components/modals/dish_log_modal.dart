@@ -72,6 +72,10 @@ class DishLogModal extends StatefulWidget {
   final DishLog? existingLog;
   final DishService? dishService;
 
+  /// Prefill for a new entry, e.g. from a chat proposal.
+  final DateTime? initialLoggedAt;
+  final double? initialServings;
+
   const DishLogModal({
     super.key,
     required this.dish,
@@ -79,6 +83,8 @@ class DishLogModal extends StatefulWidget {
     this.initialMealType,
     this.existingLog,
     this.dishService,
+    this.initialLoggedAt,
+    this.initialServings,
   });
 
   @override
@@ -122,13 +128,15 @@ class _DishLogModalState extends State<DishLogModal> {
       return;
     }
     final now = DateTime.now();
+    _portionSize = widget.initialServings ?? 1.0;
     _selectedDate =
-        widget.initialDate == null
+        widget.initialLoggedAt ??
+        (widget.initialDate == null
             ? now
             : combineMealDateAndTime(
               widget.initialDate!,
               TimeOfDay.fromDateTime(now),
-            );
+            ));
     _selectedMealType =
         widget.initialMealType != null
             ? MealType.fromString(widget.initialMealType!).toJsonValue()

@@ -11,6 +11,7 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 - Edit diary entries (servings, meal type, date, time, notes), copy an entry to today or another date, and copy a whole meal from the previous day.
 - Star button on dish cards to mark favorites.
 - Recipe yield: set how many servings a dish makes (0.5 to 100). Dish lists and the log sheet show nutrition per serving, logging one serving records the recipe total divided by the yield, and the gram input uses the weight of one serving. Existing dishes keep a yield of 1; exports and backups include the yield.
+- The chat assistant can propose diary entries ("Log 1.5 servings of Pasta as Lunch today – 640 kcal") for saved dishes or as a quick add. Nothing is logged until you tap Confirm; Edit opens the prefilled log sheet and Dismiss discards the proposal. Confirmed entries sync to Health Connect like manual ones.
 
 ### Changed
 

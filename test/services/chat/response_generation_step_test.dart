@@ -432,4 +432,48 @@ void main() {
     ).execute(const ChatStepInput(userMessage: 'hi'));
     expect(textOnly.data.containsKey('imageAnalysisFailed'), isFalse);
   });
+
+  test('log_meal tool calls become proposals, not log entries', () async {
+    Map<String, dynamic> call(String id, Map<String, dynamic> args) => {
+      'id': id,
+      'type': 'function',
+      'function': {'name': 'log_meal', 'arguments': jsonEncode(args)},
+    };
+    final openai = _FakeOpenAIService(
+      finishReason: 'tool_calls',
+      reply: {
+        'role': 'assistant',
+        'content': null,
+        'tool_calls': [
+          call('call_1', {
+            'dish_id': 'pasta',
+            'servings': 1.5,
+            'meal_type': 'lunch',
+            'reply_text': 'Please confirm the entry.',
+          }),
+          call('call_2', {'name': 'Apple', 'servings': 50}),
+        ],
+      },
+    );
+
+    final result = await ResponseGenerationStep(
+      openaiService: openai,
+    ).execute(const ChatStepInput(userMessage: 'I had pasta for lunch'));
+
+    expect(result.success, isTrue);
+    expect(
+      openai.toolsSent.single!.map((t) => t['function']['name']),
+      contains('log_meal'),
+    );
+    final response = ChatResponse.fromJson(
+      result.data['chatResponse'] as Map<String, dynamic>,
+    );
+    expect(response.replyText, 'Please confirm the entry.');
+    final proposals = result.data['mealLogProposals'] as List;
+    expect(proposals, hasLength(2));
+    expect(proposals.first, containsPair('dishId', 'pasta'));
+    expect(proposals.first, containsPair('servings', 1.5));
+    expect(proposals.first, containsPair('mealType', 'lunch'));
+    expect(proposals.last, {'error': 'missingFood'});
+  });
 }

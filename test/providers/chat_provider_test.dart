@@ -19,6 +19,42 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
 
+  test('a logged meal proposal stays logged after reloading', () async {
+    final stored = ChatMessage(
+      id: 'bot-1',
+      content: 'Confirm the entry below.',
+      sender: MessageSender.assistant,
+      timestamp: DateTime(2026, 9, 20),
+      metadata: const {
+        'mealLogProposals': [
+          {'dishId': 'pasta'},
+        ],
+      },
+    );
+    SecureKeyStore.resetForTesting();
+    FlutterSecureStorage.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'chat_messages': [jsonEncode(stored.toJson())],
+    });
+    final provider = ChatProvider();
+    addTearDown(provider.dispose);
+    await pumpEventQueue(times: 200);
+    expect(provider.messages, hasLength(1));
+
+    await provider.setMealLogProposalStatus('bot-1', 0, 'logged');
+
+    final prefs = await SharedPreferences.getInstance();
+    final saved = ChatMessage.fromJson(
+      jsonDecode(prefs.getStringList('chat_messages')!.single),
+    );
+    expect(saved.metadata!['mealLogProposalStatus'], {'0': 'logged'});
+    expect(saved.metadata!['mealLogProposals'], hasLength(1));
+    expect(
+      provider.messages.single.metadata!['mealLogProposalStatus'],
+      {'0': 'logged'},
+    );
+  });
+
   testWidgets('concurrent sends add only one user message', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final provider = ChatProvider();
