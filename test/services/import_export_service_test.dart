@@ -1121,4 +1121,27 @@ void main() {
       );
     });
   });
+
+  test('a log without snapshot uses the per-serving nutrition', () async {
+    await dishService.saveDish(
+      _dish('stew', 'Stew', 800).copyWith(servings: 4),
+    );
+
+    final result = await import({
+      'mealLogs': [
+        {
+          'dishId': 'stew',
+          'loggedAt': '2026-09-20T12:00:00.000',
+          'mealType': 'lunch',
+          'servingSize': 2,
+        },
+      ],
+    });
+
+    expect(result.errors, isEmpty);
+    final row = (await _ledger()).single;
+    expect(row['calories'], 400);
+    expect(row['protein'], 5);
+    expect(row['fiber'], 2);
+  });
 }
