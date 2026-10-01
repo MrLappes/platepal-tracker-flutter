@@ -4,6 +4,10 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Fixed
+
+- Enable the HealthKit entitlement on iOS so Apple Health sync can be authorized; iOS 14 is now the minimum, and devices without HealthKit can still install the app.
+
 ## [1.14.0] - 2026-10-01
 
 ### Added
