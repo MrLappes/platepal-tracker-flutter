@@ -1,0 +1,7 @@
+- Faster logging: new "Log food" sheet with recent dishes and favorites, quick add, and portions in servings or grams
+- Edit and copy diary entries; set how many servings a recipe makes
+- The AI assistant can suggest diary entries for you to confirm
+- Automatic backups and full backups with photos
+- Import dishes shared from the PlatePal app
+- Send feedback and share a local diagnostic log
+- Fixes for statistics, the barcode scanner and food search
