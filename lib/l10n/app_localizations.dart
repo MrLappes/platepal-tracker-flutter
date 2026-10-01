@@ -5765,6 +5765,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Food Facts is busy or unavailable. Wait a moment and try again.'**
   String get componentsScannerProductSearchErrorServer;
+
+  /// Title of the log food sheet and the main add button on the diary and meals screens
+  ///
+  /// In en, this message translates to:
+  /// **'Log food'**
+  String get componentsModalsLogFoodTitle;
+
+  /// Subtitle of the log food sheet when it was opened from a meal section
+  ///
+  /// In en, this message translates to:
+  /// **'For {mealType}'**
+  String componentsModalsLogFoodForMealType(String mealType);
+
+  /// Log food sheet section with favorite dishes
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get componentsModalsLogFoodFavorites;
+
+  /// Log food sheet section with recently logged dishes
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get componentsModalsLogFoodRecent;
+
+  /// Log food sheet section with the remaining dishes
+  ///
+  /// In en, this message translates to:
+  /// **'All dishes'**
+  String get componentsModalsLogFoodAllDishes;
+
+  /// Logs calories and macros without creating a dish; also the default name of such an entry
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get componentsModalsLogFoodQuickAdd;
+
+  /// Log food sheet action that searches the Open Food Facts product database
+  ///
+  /// In en, this message translates to:
+  /// **'Search Open Food Facts'**
+  String get componentsModalsLogFoodSearchOpenFoodFacts;
+
+  /// Required calories field of the quick add form
+  ///
+  /// In en, this message translates to:
+  /// **'Calories (kcal)'**
+  String get componentsModalsQuickAddCalories;
+
+  /// Validation error when quick add calories are empty
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the calories'**
+  String get componentsModalsQuickAddCaloriesRequired;
+
+  /// Validation error for a negative or invalid number
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number of 0 or more'**
+  String get componentsModalsQuickAddInvalidNumber;
+
+  /// Optional name field of the quick add form
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get componentsModalsQuickAddName;
+
+  /// Optional protein field of the quick add form
+  ///
+  /// In en, this message translates to:
+  /// **'Protein (g)'**
+  String get componentsModalsQuickAddProtein;
+
+  /// Optional carbs field of the quick add form
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs (g)'**
+  String get componentsModalsQuickAddCarbs;
+
+  /// Optional fat field of the quick add form
+  ///
+  /// In en, this message translates to:
+  /// **'Fat (g)'**
+  String get componentsModalsQuickAddFat;
+
+  /// Optional fiber field of the quick add form
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber (g)'**
+  String get componentsModalsQuickAddFiber;
+
+  /// Shown after a quick add was saved
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add logged'**
+  String get componentsModalsQuickAddSaved;
+
+  /// Shown when saving a quick add failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the quick add. Try again.'**
+  String get componentsModalsQuickAddFailed;
+
+  /// Portion input mode: number of servings
+  ///
+  /// In en, this message translates to:
+  /// **'Servings'**
+  String get componentsModalsDishLogModalServings;
+
+  /// Portion input mode: amount in grams or millilitres
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get componentsModalsDishLogModalWeight;
+
+  /// Label of the portion amount field
+  ///
+  /// In en, this message translates to:
+  /// **'Amount ({unit})'**
+  String componentsModalsDishLogModalAmountInUnit(String unit);
+
+  /// Weight of one serving of the dish
+  ///
+  /// In en, this message translates to:
+  /// **'1 serving = {amount} {unit}'**
+  String componentsModalsDishLogModalServingWeight(String amount, String unit);
+
+  /// Tooltip of the button that lowers the servings by a quarter
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer servings'**
+  String get componentsModalsDishLogModalFewerServings;
+
+  /// Tooltip of the button that raises the servings by a quarter
+  ///
+  /// In en, this message translates to:
+  /// **'More servings'**
+  String get componentsModalsDishLogModalMoreServings;
+
+  /// Validation error for a portion outside the allowed range
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a value from {min} to {max}'**
+  String componentsModalsDishLogModalAmountRange(String min, String max);
+
+  /// Title of the log sheet when editing a diary entry
+  ///
+  /// In en, this message translates to:
+  /// **'Edit entry'**
+  String get componentsModalsDishLogModalEditTitle;
+
+  /// Shown after a diary entry was edited
+  ///
+  /// In en, this message translates to:
+  /// **'Entry updated'**
+  String get componentsModalsDishLogModalEntryUpdated;
+
+  /// Shown when editing a diary entry failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the entry. Try again.'**
+  String get componentsModalsDishLogModalUpdateFailed;
+
+  /// Note in the edit sheet: edits are not synced to Health Connect
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect keeps the original entry. Change or delete it there if needed.'**
+  String get componentsModalsDishLogModalHealthEditWarning;
+
+  /// Tooltip of the diary entry menu
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get screensCalendarEntryActions;
+
+  /// Diary entry action that logs the same entry again today
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to today'**
+  String get screensCalendarCopyToToday;
+
+  /// Diary entry action that logs the same entry on a picked date
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to date…'**
+  String get screensCalendarCopyToDate;
+
+  /// Meal section action that copies all entries of this meal from the day before
+  ///
+  /// In en, this message translates to:
+  /// **'Copy {mealType} from the previous day'**
+  String screensCalendarCopyFromPreviousDay(String mealType);
+
+  /// Meal section action that opens the log food sheet for this meal
+  ///
+  /// In en, this message translates to:
+  /// **'Add to {mealType}'**
+  String screensCalendarAddToMeal(String mealType);
+
+  /// Shown after diary entries were copied
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry copied} other{{count} entries copied}}'**
+  String screensCalendarEntriesCopied(int count);
+
+  /// Shown when copying a meal from the previous day finds nothing
+  ///
+  /// In en, this message translates to:
+  /// **'The previous day has no {mealType} entries'**
+  String screensCalendarNothingToCopy(String mealType);
+
+  /// Shown when copying diary entries failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t copy. Try again.'**
+  String get screensCalendarCopyFailed;
 }
 
 class _AppLocalizationsDelegate

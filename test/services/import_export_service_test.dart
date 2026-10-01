@@ -305,6 +305,47 @@ void main() {
     expect(health.writes, hasLength(2), reason: 'only the two logDish calls');
   });
 
+  test('quick adds round-trip through JSON and CSV exports', () async {
+    await dishService.logQuickAdd(
+      name: 'Office cake',
+      loggedAt: DateTime(2026, 9, 20, 15, 30),
+      mealType: 'snack',
+      calories: 350,
+      protein: 4,
+      carbs: 40,
+      fat: 18,
+      fiber: 1,
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    final before = await _ledger();
+    final db = await DatabaseService.instance.database;
+
+    for (final format in [ExportFormat.json, ExportFormat.csv]) {
+      final result = await service.exportData(
+        dataTypes: [DataType.mealLogs],
+        format: format,
+      );
+      expect(result.success, isTrue, reason: result.message);
+      final file = tempDir.listSync().whereType<File>().single;
+
+      await db.delete('dish_logs');
+      final reimport = await service.importData(
+        filePath: file.path,
+        dataTypes: [DataType.mealLogs],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+      expect(reimport.errors, isEmpty, reason: format.name);
+      expect(_withoutId(await _ledger()), _withoutId(before));
+      expect(
+        (await _ledger()).single['dish_id'],
+        startsWith(DishLog.quickAddDishIdPrefix),
+      );
+      expect(await dishService.getAllDishes(), hasLength(2));
+      file.deleteSync();
+    }
+    expect(health.writes, ['Office cake']);
+  });
+
   test('a failed write rolls back the whole meal-log import', () async {
     final db = await DatabaseService.instance.database;
     await db.execute('''

@@ -190,6 +190,9 @@ class NutritionInfo {
 }
 
 class DishLog {
+  /// `dish_id` prefix of quick-add entries, which have no catalog dish.
+  static const String quickAddDishIdPrefix = 'quick_add:';
+
   final String id;
   final String dishId;
   final Dish? dish;
@@ -221,6 +224,9 @@ class DishLog {
     this.dishName,
     this.notes,
   });
+
+  bool get isQuickAdd => dishId.startsWith(quickAddDishIdPrefix);
+
   factory DishLog.fromJson(Map<String, dynamic> json) {
     return DishLog(
       id: json['id']?.toString() ?? '',

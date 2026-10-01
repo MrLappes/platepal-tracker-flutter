@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 import '../../models/dish.dart';
 import '../calorie_expenditure_service.dart';
 import '../health_service.dart';
@@ -482,14 +483,167 @@ class DishService {
     );
 
     // Write nutrition to Health Connect (fire-and-forget)
-    _writeNutritionToHealth(
-      dish: dish,
-      servingSize: servingSize,
+    _writeLogToHealth(
+      name: dish.name,
       mealType: mealType,
+      calories: nutrition.calories * servingSize,
+      protein: nutrition.protein * servingSize,
+      carbs: nutrition.carbs * servingSize,
+      fat: nutrition.fat * servingSize,
+      fiber: nutrition.fiber * servingSize,
+      sugar: nutrition.sugar * servingSize,
+      sodium: nutrition.sodium * servingSize,
       loggedAt: loggedAt,
     );
 
     return logId;
+  }
+
+  /// Logs nutrition without a catalog dish. The row gets its own
+  /// [DishLog.quickAddDishIdPrefix] id, so it never shows up as a dish.
+  Future<String> logQuickAdd({
+    required String name,
+    required DateTime loggedAt,
+    required String mealType,
+    required double calories,
+    double protein = 0,
+    double carbs = 0,
+    double fat = 0,
+    double fiber = 0,
+    String? notes,
+  }) async {
+    final logId = await insertDishLogSnapshot(
+      dishId: '${DishLog.quickAddDishIdPrefix}${const Uuid().v4()}',
+      dishName: name,
+      loggedAt: loggedAt,
+      mealType: mealType,
+      servingSize: 1,
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      fiber: fiber,
+      notes: notes,
+    );
+    _writeLogToHealth(
+      name: name,
+      mealType: mealType,
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      fiber: fiber,
+      loggedAt: loggedAt,
+    );
+    return logId;
+  }
+
+  /// Changes servings, time, meal type and notes of a ledger row. Nutrition
+  /// is rescaled from the row's own snapshot, so this also works for quick
+  /// adds and deleted dishes. Health Connect is not touched: the app can
+  /// only insert records there.
+  Future<void> updateDishLog(
+    DishLog log, {
+    required double servingSize,
+    required DateTime loggedAt,
+    required String mealType,
+    String? notes,
+  }) async {
+    final db = await _databaseService.database;
+    final factor = log.servingSize > 0 ? servingSize / log.servingSize : 1.0;
+    final trimmedNotes = notes?.trim();
+    await db.update(
+      'dish_logs',
+      {
+        'logged_at': loggedAt.toLocal().toIso8601String(),
+        'meal_type': mealType,
+        'serving_size': servingSize,
+        'calories': log.calories * factor,
+        'protein': log.protein * factor,
+        'carbs': log.carbs * factor,
+        'fat': log.fat * factor,
+        'fiber': log.fiber * factor,
+        'notes':
+            trimmedNotes == null || trimmedNotes.isEmpty ? null : trimmedNotes,
+      },
+      where: 'id = ?',
+      whereArgs: [log.id],
+    );
+  }
+
+  /// Copies [log] (its snapshot, at the same time of day) to [day] and
+  /// mirrors the copy to Health Connect. Returns the new log id.
+  Future<String> copyDishLog(DishLog log, DateTime day) async {
+    final ids = await _copyLogs([log], day);
+    return ids.single;
+  }
+
+  /// Copies every [mealType] entry of the day before [day] to [day].
+  /// Returns the number of copied entries.
+  Future<int> copyMealFromPreviousDay({
+    required DateTime day,
+    required String mealType,
+  }) async {
+    final previous = await getDishLogsForDate(
+      DateTime(day.year, day.month, day.day - 1),
+    );
+    final type = mealType.toLowerCase();
+    final logs =
+        previous.where((log) => log.mealType.toLowerCase() == type).toList();
+    if (logs.isEmpty) return 0;
+    return (await _copyLogs(logs, day)).length;
+  }
+
+  Future<List<String>> _copyLogs(List<DishLog> logs, DateTime day) async {
+    final db = await _databaseService.database;
+    final copies = <(DishLog, DateTime)>[
+      for (final log in logs)
+        (
+          log,
+          DateTime(
+            day.year,
+            day.month,
+            day.day,
+            log.loggedAt.hour,
+            log.loggedAt.minute,
+            log.loggedAt.second,
+          ),
+        ),
+    ];
+    final ids = <String>[];
+    await db.transaction((txn) async {
+      for (final (log, loggedAt) in copies) {
+        ids.add(
+          await insertDishLogSnapshot(
+            dishId: log.dishId,
+            dishName: log.dishName,
+            loggedAt: loggedAt,
+            mealType: log.mealType,
+            servingSize: log.servingSize,
+            calories: log.calories,
+            protein: log.protein,
+            carbs: log.carbs,
+            fat: log.fat,
+            fiber: log.fiber,
+            notes: log.notes,
+            executor: txn,
+          ),
+        );
+      }
+    });
+    for (final (log, loggedAt) in copies) {
+      _writeLogToHealth(
+        name: log.dishName ?? '',
+        mealType: log.mealType,
+        calories: log.calories,
+        protein: log.protein,
+        carbs: log.carbs,
+        fat: log.fat,
+        fiber: log.fiber,
+        loggedAt: loggedAt,
+      );
+    }
+    return ids;
   }
 
   /// Inserts a `dish_logs` row with an explicit snapshot (values already
@@ -534,12 +688,18 @@ class DishService {
     return logId;
   }
 
-  /// Write the dish's nutrition data to Health Connect / Google Fit.
-  /// Non-blocking – errors are logged but never block meal logging.
-  Future<void> _writeNutritionToHealth({
-    required Dish dish,
-    required double servingSize,
+  /// Writes one logged meal (already scaled values) to Health Connect /
+  /// Apple Health. Non-blocking – errors are logged but never block logging.
+  Future<void> _writeLogToHealth({
+    required String name,
     required String mealType,
+    required double calories,
+    required double protein,
+    required double carbs,
+    required double fat,
+    required double fiber,
+    double sugar = 0,
+    double sodium = 0,
     required DateTime loggedAt,
   }) async {
     try {
@@ -551,19 +711,16 @@ class DishService {
           prefs.getBool('health_write_meals_enabled') ?? true;
       if (!writeMealsEnabled) return;
 
-      final nutrition = dish.nutrition;
-      final scale = servingSize;
-
       await _healthService.writeMealToHealth(
-        name: dish.name,
+        name: name,
         mealType: mealType,
-        calories: nutrition.calories * scale,
-        protein: nutrition.protein * scale,
-        carbs: nutrition.carbs * scale,
-        fat: nutrition.fat * scale,
-        fiber: nutrition.fiber > 0 ? nutrition.fiber * scale : null,
-        sugar: nutrition.sugar > 0 ? nutrition.sugar * scale : null,
-        sodium: nutrition.sodium > 0 ? nutrition.sodium * scale : null,
+        calories: calories,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
+        fiber: fiber > 0 ? fiber : null,
+        sugar: sugar > 0 ? sugar : null,
+        sodium: sodium > 0 ? sodium : null,
         startTime: loggedAt,
       );
     } catch (e) {

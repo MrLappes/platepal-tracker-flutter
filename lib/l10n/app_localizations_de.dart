@@ -3570,4 +3570,139 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get componentsScannerProductSearchErrorServer =>
       'Open Food Facts ist ausgelastet oder nicht erreichbar. Warte kurz und versuche es erneut.';
+
+  @override
+  String get componentsModalsLogFoodTitle => 'Essen eintragen';
+
+  @override
+  String componentsModalsLogFoodForMealType(String mealType) {
+    return 'Für $mealType';
+  }
+
+  @override
+  String get componentsModalsLogFoodFavorites => 'Favoriten';
+
+  @override
+  String get componentsModalsLogFoodRecent => 'Zuletzt gegessen';
+
+  @override
+  String get componentsModalsLogFoodAllDishes => 'Alle Gerichte';
+
+  @override
+  String get componentsModalsLogFoodQuickAdd => 'Schnelleintrag';
+
+  @override
+  String get componentsModalsLogFoodSearchOpenFoodFacts =>
+      'Open Food Facts durchsuchen';
+
+  @override
+  String get componentsModalsQuickAddCalories => 'Kalorien (kcal)';
+
+  @override
+  String get componentsModalsQuickAddCaloriesRequired => 'Gib die Kalorien ein';
+
+  @override
+  String get componentsModalsQuickAddInvalidNumber => 'Gib eine Zahl ab 0 ein';
+
+  @override
+  String get componentsModalsQuickAddName => 'Name (optional)';
+
+  @override
+  String get componentsModalsQuickAddProtein => 'Eiweiß (g)';
+
+  @override
+  String get componentsModalsQuickAddCarbs => 'Kohlenhydrate (g)';
+
+  @override
+  String get componentsModalsQuickAddFat => 'Fett (g)';
+
+  @override
+  String get componentsModalsQuickAddFiber => 'Ballaststoffe (g)';
+
+  @override
+  String get componentsModalsQuickAddSaved => 'Schnelleintrag gespeichert';
+
+  @override
+  String get componentsModalsQuickAddFailed =>
+      'Der Schnelleintrag konnte nicht gespeichert werden. Versuche es erneut.';
+
+  @override
+  String get componentsModalsDishLogModalServings => 'Portionen';
+
+  @override
+  String get componentsModalsDishLogModalWeight => 'Gewicht';
+
+  @override
+  String componentsModalsDishLogModalAmountInUnit(String unit) {
+    return 'Menge ($unit)';
+  }
+
+  @override
+  String componentsModalsDishLogModalServingWeight(String amount, String unit) {
+    return '1 Portion = $amount $unit';
+  }
+
+  @override
+  String get componentsModalsDishLogModalFewerServings => 'Weniger Portionen';
+
+  @override
+  String get componentsModalsDishLogModalMoreServings => 'Mehr Portionen';
+
+  @override
+  String componentsModalsDishLogModalAmountRange(String min, String max) {
+    return 'Gib einen Wert von $min bis $max ein';
+  }
+
+  @override
+  String get componentsModalsDishLogModalEditTitle => 'Eintrag bearbeiten';
+
+  @override
+  String get componentsModalsDishLogModalEntryUpdated => 'Eintrag aktualisiert';
+
+  @override
+  String get componentsModalsDishLogModalUpdateFailed =>
+      'Der Eintrag konnte nicht aktualisiert werden. Versuche es erneut.';
+
+  @override
+  String get componentsModalsDishLogModalHealthEditWarning =>
+      'Health Connect behält den ursprünglichen Eintrag. Ändere oder lösche ihn dort bei Bedarf.';
+
+  @override
+  String get screensCalendarEntryActions => 'Weitere Aktionen';
+
+  @override
+  String get screensCalendarCopyToToday => 'Nach heute kopieren';
+
+  @override
+  String get screensCalendarCopyToDate => 'An Datum kopieren…';
+
+  @override
+  String screensCalendarCopyFromPreviousDay(String mealType) {
+    return '$mealType vom Vortag kopieren';
+  }
+
+  @override
+  String screensCalendarAddToMeal(String mealType) {
+    return 'Zu $mealType hinzufügen';
+  }
+
+  @override
+  String screensCalendarEntriesCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge kopiert',
+      one: '1 Eintrag kopiert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensCalendarNothingToCopy(String mealType) {
+    return 'Am Vortag gibt es keine Einträge für $mealType';
+  }
+
+  @override
+  String get screensCalendarCopyFailed =>
+      'Kopieren fehlgeschlagen. Versuche es erneut.';
 }
