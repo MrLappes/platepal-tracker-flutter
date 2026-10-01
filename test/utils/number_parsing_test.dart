@@ -10,6 +10,28 @@ void main() {
     expect(parseLocalizedDouble(' 2.5 '), 2.5);
   });
 
+  group('formatDecimal', () {
+    test('uses the decimal separator of the locale', () {
+      expect(formatDecimal(24.04, 'de'), '24,0');
+      expect(formatDecimal(24.04, 'es'), '24,0');
+      expect(formatDecimal(24.04, 'en'), '24.0');
+    });
+
+    test('respects the requested fraction digits', () {
+      expect(formatDecimal(26.149, 'de', fractionDigits: 2), '26,15');
+      expect(formatDecimal(26.6, 'en', fractionDigits: 0), '27');
+    });
+
+    test('does not add grouping separators', () {
+      expect(formatDecimal(2150, 'de', fractionDigits: 0), '2150');
+      expect(formatDecimal(12345.5, 'en'), '12345.5');
+    });
+
+    test('round-trips through parseLocalizedDouble', () {
+      expect(parseLocalizedDouble(formatDecimal(72.5, 'de')), 72.5);
+    });
+  });
+
   test('does not treat non-finite input as nutrition', () {
     expect(parseLocalizedDouble('NaN'), isNull);
     expect(parseLocalizedDouble('Infinity'), isNull);
