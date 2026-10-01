@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:platepal_tracker/components/calendar/calendar_dish_picker.dart';
+import 'package:platepal_tracker/components/modals/log_food_sheet.dart';
 import 'package:platepal_tracker/components/calendar/macro_summary.dart';
 import 'package:platepal_tracker/components/modals/dish_log_modal.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
@@ -415,7 +415,7 @@ void main() {
 
     final tiles = tester.widgetList<ListTile>(
       find.descendant(
-        of: find.byType(CalendarDishPicker),
+        of: find.byType(LogFoodSheet),
         matching: find.byType(ListTile),
       ),
     );
