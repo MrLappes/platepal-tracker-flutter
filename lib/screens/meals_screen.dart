@@ -3,6 +3,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../components/ui/empty_state_widget.dart';
 import '../components/ui/loading_widget.dart';
 import '../components/modals/dish_log_modal.dart';
+import '../components/modals/log_food_sheet.dart';
 import '../models/dish.dart';
 import '../services/storage/dish_service.dart';
 import 'dish_create_screen.dart';
@@ -202,13 +203,34 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       floatingActionButton:
           !_isLoading && _error == null && _dishes.isEmpty
               ? null
-              : FloatingActionButton.extended(
-                heroTag: "meals_fab", // Unique hero tag to avoid conflicts
-                onPressed: _createNewDish,
-                tooltip: localizations.screensDishCreateCreateDish,
-                icon: const Icon(Icons.add),
-                label: Text(localizations.screensDishCreateCreateDish),
+              : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton.small(
+                    heroTag: 'meals_create_fab',
+                    onPressed: _createNewDish,
+                    tooltip: localizations.screensDishCreateCreateDish,
+                    child: const Icon(Icons.add),
+                  ),
+                  const SizedBox(height: 12),
+                  FloatingActionButton.extended(
+                    heroTag: 'meals_fab',
+                    onPressed: _openLogFood,
+                    tooltip: localizations.componentsModalsLogFoodTitle,
+                    icon: const Icon(Icons.restaurant_menu),
+                    label: Text(localizations.componentsModalsLogFoodTitle),
+                  ),
+                ],
               ),
+    );
+  }
+
+  Future<void> _openLogFood() async {
+    await showLogFoodFlow(
+      context,
+      dishService: _dishService,
+      onCreateDish: _createNewDish,
     );
   }
 
@@ -434,8 +456,18 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                     ),
                   ),
                   const Spacer(),
-                  if (dish.isFavorite)
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
+                  IconButton(
+                    tooltip:
+                        dish.isFavorite
+                            ? localizations.screensMealsRemoveFromFavorites
+                            : localizations.screensMealsAddToFavorites,
+                    onPressed: () => _toggleFavorite(dish),
+                    icon: Icon(
+                      dish.isFavorite ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
+                  ),
                   PopupMenuButton<String>(
                     icon: Icon(
                       Icons.more_vert,
@@ -636,7 +668,7 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       context: context,
       isScrollControlled: true, // Allows modal to take up more space
       backgroundColor: Colors.transparent, // Makes the modal look better
-      builder: (context) => DishLogModal(dish: dish),
+      builder: (context) => DishLogModal(dish: dish, dishService: _dishService),
     );
   }
 

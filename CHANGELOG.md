@@ -4,6 +4,18 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Added
+
+- "Log food" button on the diary and meals screens: search saved dishes, pick from favorites or the 10 most recently logged dishes, scan a barcode, search Open Food Facts, or quick add.
+- Quick add: log calories (and optional name, macros, fiber, meal type, date and time) without creating a dish.
+- Edit diary entries (servings, meal type, date, time, notes), copy an entry to today or another date, and copy a whole meal from the previous day.
+- Star button on dish cards to mark favorites.
+
+### Changed
+
+- Portions are entered as servings (steps of 0.25, up to 20) or, when the dish weight is known, in grams or millilitres, with nutrition updating as you type.
+- The diary groups entries by meal and shows localized meal names.
+
 ## [1.15.0] - 2026-10-01
 
 ### Changed
