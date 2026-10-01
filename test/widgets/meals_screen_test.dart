@@ -102,6 +102,35 @@ void main() {
     expect(service.loadCount, greaterThan(previousLoads));
   });
 
+  testWidgets('first-run empty state offers scan and search too', (
+    tester,
+  ) async {
+    for (final (locale, labels) in [
+      (const Locale('en'), ['Create Dish', 'Scan barcode', 'Search food']),
+      (
+        const Locale('de'),
+        ['Barcode scannen', 'Lebensmittel suchen'],
+      ),
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: UniqueKey(),
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MealsScreen(dishService: _StubDishService([])),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      for (final label in labels) {
+        expect(find.text(label), findsWidgets);
+      }
+      expect(find.byIcon(Icons.qr_code_scanner), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('short dish list stays refreshable and labels are localized', (
     tester,
   ) async {
@@ -175,4 +204,105 @@ void main() {
     expect(find.text('kcal'), findsOneWidget);
     expect(find.text('Cal'), findsNothing);
   });
+
+  testWidgets('dish list offers log food first and a favorite star', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final service = _FavoriteRecordingDishService([
+      Dish(
+        id: 'dish-1',
+        name: 'Soup',
+        ingredients: const [],
+        nutrition: const NutritionInfo(
+          calories: 100,
+          protein: 5,
+          carbs: 8,
+          fat: 2,
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MealsScreen(dishService: service),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final logFood = find.widgetWithText(FloatingActionButton, 'Log food');
+    final createDish = find.byTooltip('Create Dish');
+    expect(logFood, findsOneWidget);
+    expect(createDish, findsOneWidget);
+    expect(
+      tester.getTopLeft(createDish).dy,
+      lessThan(tester.getTopLeft(logFood).dy),
+    );
+
+    await tester.tap(find.byTooltip('Add to Favorites'));
+    await tester.pumpAndSettle();
+    expect(service.favorites, {'dish-1': true});
+  });
+
+  testWidgets('the list leaves room below the last card for both FABs', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MealsScreen(
+          dishService: _StubDishService([
+            Dish(
+              id: 'dish-1',
+              name: 'Soup',
+              ingredients: const [],
+              nutrition: const NutritionInfo(
+                calories: 100,
+                protein: 5,
+                carbs: 8,
+                fat: 2,
+              ),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          ]),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final fabTop = find
+        .byType(FloatingActionButton)
+        .evaluate()
+        .map((element) => tester.getRect(find.byWidget(element.widget)).top)
+        .reduce((a, b) => a < b ? a : b);
+    final listBottom = tester.getRect(find.byType(CustomScrollView)).bottom;
+    final padding = tester.widget<SliverPadding>(
+      find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(SliverPadding),
+      ),
+    );
+    expect(
+      (padding.padding as EdgeInsets).bottom,
+      greaterThanOrEqualTo(listBottom - fabTop),
+    );
+  });
+}
+
+class _FavoriteRecordingDishService extends _StubDishService {
+  _FavoriteRecordingDishService(super.dishes);
+
+  final Map<String, bool> favorites = {};
+
+  @override
+  Future<void> setFavorite(String dishId, bool isFavorite) async {
+    favorites[dishId] = isFavorite;
+  }
 }

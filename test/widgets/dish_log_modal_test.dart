@@ -3,9 +3,301 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/components/modals/dish_log_modal.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/models/dish.dart';
+import 'package:platepal_tracker/services/storage/database_service.dart';
+import 'package:platepal_tracker/services/storage/dish_service.dart';
 import 'package:platepal_tracker/themes/app_theme.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+Dish _soup({List<Ingredient> ingredients = const []}) {
+  final now = DateTime(2026, 1, 1);
+  return Dish(
+    id: 'soup',
+    name: 'Soup',
+    ingredients: ingredients,
+    nutrition: const NutritionInfo(
+      calories: 100,
+      protein: 5,
+      carbs: 10,
+      fat: 3,
+    ),
+    createdAt: now,
+    updatedAt: now,
+  );
+}
+
+Finder _richText(String text) => find.byWidgetPredicate(
+  (widget) => widget is RichText && widget.text.toPlainText() == text,
+);
+
+Widget _app(Widget body, {Locale locale = const Locale('en')}) => MaterialApp(
+  locale: locale,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: body),
+);
 
 void main() {
+  sqfliteFfiInit();
+
+  group('stepServings', () {
+    test('moves to the next quarter in each direction', () {
+      expect(stepServings(1, 1), 1.25);
+      expect(stepServings(1, -1), 0.75);
+      expect(stepServings(1.1, 1), 1.25);
+      expect(stepServings(1.1, -1), 1.0);
+      expect(stepServings(0.5000000001, -1), 0.25);
+    });
+
+    test('stays within a quarter and twenty servings', () {
+      expect(stepServings(0.25, -1), 0.25);
+      expect(stepServings(0.1, -1), 0.25);
+      expect(stepServings(0.1, 1), 0.25);
+      expect(stepServings(20, 1), 20);
+    });
+  });
+
+  test('dishForLog rebuilds per-serving nutrition from the snapshot', () {
+    final log = DishLog(
+      id: 'l',
+      dishId: 'soup',
+      dishName: 'Old soup',
+      loggedAt: DateTime(2026, 9, 20, 12),
+      mealType: 'lunch',
+      servingSize: 2,
+      calories: 300,
+      protein: 10,
+      carbs: 20,
+      fat: 6,
+      fiber: 4,
+    );
+    final current = _soup(
+      ingredients: const [
+        Ingredient(id: 'i', name: 'Water', amount: 300, unit: 'ml'),
+      ],
+    );
+    final dish = dishForLog(log, current: current, fallbackName: 'x');
+    expect(dish.name, 'Old soup');
+    expect(dish.nutrition.calories, 150);
+    expect(dish.nutrition.fiber, 2);
+    // The soup now has 100 kcal per serving, not 150: no weight input.
+    expect(dish.ingredients, isEmpty);
+    expect(servingWeight(dish), isNull);
+
+    final unchanged = log.copyWith(calories: 201);
+    expect(
+      dishForLog(unchanged, current: current, fallbackName: 'x').ingredients,
+      current.ingredients,
+    );
+    expect(
+      dishForLog(
+        log.copyWith(calories: 204),
+        current: current,
+        fallbackName: 'x',
+      ).ingredients,
+      isEmpty,
+    );
+    expect(
+      dishForLog(unchanged.copyWith(), fallbackName: 'x').ingredients,
+      isEmpty,
+    );
+  });
+
+  testWidgets('editing an entry of a changed dish hides the weight input', (
+    tester,
+  ) async {
+    final log = DishLog(
+      id: 'l',
+      dishId: 'soup',
+      dishName: 'Soup',
+      loggedAt: DateTime(2026, 9, 20, 12),
+      mealType: 'lunch',
+      servingSize: 1,
+      calories: 150,
+      protein: 5,
+      carbs: 10,
+      fat: 3,
+      fiber: 0,
+    );
+    final current = _soup(
+      ingredients: const [
+        Ingredient(id: 'i', name: 'Water', amount: 300, unit: 'ml'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      _app(
+        DishLogModal(
+          dish: dishForLog(log, current: current, fallbackName: 'x'),
+          existingLog: log,
+        ),
+      ),
+    );
+    expect(find.text('Weight'), findsNothing);
+
+    await tester.pumpWidget(
+      _app(
+        DishLogModal(
+          key: const ValueKey('same'),
+          dish: dishForLog(
+            log.copyWith(calories: 100),
+            current: current,
+            fallbackName: 'x',
+          ),
+          existingLog: log.copyWith(calories: 100),
+        ),
+      ),
+    );
+    expect(find.text('Weight'), findsOneWidget);
+  });
+
+  testWidgets('servings stepper moves in quarters and updates nutrition', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(DishLogModal(dish: _soup())));
+
+    final servings = find.byKey(const ValueKey('dish-log-servings'));
+    expect(tester.widget<TextField>(servings).controller!.text, '1');
+    expect(_richText('100 kcal'), findsOneWidget);
+    expect(find.text('Weight'), findsNothing);
+
+    await tester.ensureVisible(find.byTooltip('More servings'));
+    await tester.tap(find.byTooltip('More servings'));
+    await tester.pump();
+    expect(tester.widget<TextField>(servings).controller!.text, '1.25');
+    expect(_richText('125 kcal'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Fewer servings'));
+    await tester.tap(find.byTooltip('Fewer servings'));
+    await tester.tap(find.byTooltip('Fewer servings'));
+    await tester.pump();
+    expect(tester.widget<TextField>(servings).controller!.text, '0.5');
+    expect(_richText('50 kcal'), findsOneWidget);
+
+    await tester.enterText(servings, '2,5');
+    await tester.pump();
+    expect(_richText('250 kcal'), findsOneWidget);
+  });
+
+  testWidgets('servings outside 0.01 to 20 block saving', (tester) async {
+    await tester.pumpWidget(_app(DishLogModal(dish: _soup())));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('dish-log-servings')),
+      '25',
+    );
+    await tester.pump();
+
+    expect(find.text('Enter a value from 0.01 to 20'), findsOneWidget);
+    expect(
+      tester.widget<ElevatedButton>(find.byType(ElevatedButton)).onPressed,
+      isNull,
+    );
+    // The last valid portion stays in effect.
+    expect(_richText('100 kcal'), findsOneWidget);
+  });
+
+  testWidgets('known dish weight allows entering grams', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        DishLogModal(
+          dish: _soup(
+            ingredients: const [
+              Ingredient(id: 'a', name: 'Broth', amount: 300, unit: 'ml'),
+              Ingredient(id: 'b', name: 'Noodles', amount: 100, unit: 'g'),
+            ],
+          ),
+        ),
+        locale: const Locale('de'),
+      ),
+    );
+
+    await tester.ensureVisible(find.text('Gewicht'));
+    await tester.tap(find.text('Gewicht'));
+    await tester.pump();
+    expect(find.text('1 Portion = 400 g'), findsOneWidget);
+    final weight = find.byKey(const ValueKey('dish-log-weight'));
+    expect(tester.widget<TextField>(weight).controller!.text, '400');
+
+    await tester.enterText(weight, '100');
+    await tester.pump();
+    expect(_richText('25 kcal'), findsOneWidget);
+    expect(_richText('2,5 g'), findsOneWidget);
+
+    await tester.tap(find.text('Portionen'));
+    await tester.pump();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const ValueKey('dish-log-servings')))
+          .controller!
+          .text,
+      '0,25',
+    );
+  });
+
+  testWidgets('editing an entry prefills it and saves the new portion', (
+    tester,
+  ) async {
+    await DatabaseService.useFactoryForTesting(databaseFactoryFfiNoIsolate);
+    final service = DishService();
+    await service.insertDishLogSnapshot(
+      dishId: 'soup',
+      dishName: 'Soup',
+      loggedAt: DateTime(2026, 9, 20, 12, 30),
+      mealType: 'lunch',
+      servingSize: 2,
+      calories: 200,
+      protein: 10,
+      carbs: 20,
+      fat: 6,
+      notes: 'spicy',
+    );
+    final log =
+        (await service.getDishLogsForDate(DateTime(2026, 9, 20))).single;
+
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder:
+              (context) => TextButton(
+                onPressed:
+                    () => showModalBottomSheet<bool>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder:
+                          (_) => DishLogModal(
+                            dish: dishForLog(log, fallbackName: 'x'),
+                            existingLog: log,
+                            dishService: service,
+                          ),
+                    ),
+                child: const Text('open'),
+              ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit entry'), findsOneWidget);
+    expect(find.text('spicy'), findsOneWidget);
+    expect(_richText('200 kcal'), findsOneWidget);
+    await tester.ensureVisible(find.byTooltip('Fewer servings'));
+    await tester.tap(find.byTooltip('Fewer servings'));
+    await tester.pump();
+    expect(_richText('175 kcal'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    final edited =
+        (await service.getDishLogsForDate(DateTime(2026, 9, 20))).single;
+    expect(edited.id, log.id);
+    expect(edited.servingSize, 1.75);
+    expect(edited.calories, 175);
+    expect(edited.loggedAt, DateTime(2026, 9, 20, 12, 30));
+    expect(edited.notes, 'spicy');
+    expect(find.text('Entry updated'), findsOneWidget);
+  });
   test('combines a selected past date with the chosen meal time', () {
     expect(
       combineMealDateAndTime(

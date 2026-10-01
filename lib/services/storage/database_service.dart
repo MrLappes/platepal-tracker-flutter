@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 /// and `dish_logs` is a self-contained ledger that must outlive its dish.
 class DatabaseService {
   static const String _databaseName = 'platepal.db';
-  static const int _databaseVersion = 4;
+  static const int _databaseVersion = 5;
 
   // Private constructor for singleton pattern
   DatabaseService._();
@@ -155,7 +155,8 @@ class DatabaseService {
         category TEXT,
         is_favorite INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        servings REAL NOT NULL DEFAULT 1
       )
     ''');
 
@@ -286,6 +287,13 @@ class DatabaseService {
 
     if (oldVersion < 4) {
       await _migrateToV4(db);
+    }
+
+    if (oldVersion < 5) {
+      // Recipe yield; existing dishes keep their nutrition as one serving.
+      await db.execute(
+        'ALTER TABLE dishes ADD COLUMN servings REAL NOT NULL DEFAULT 1',
+      );
     }
   }
 

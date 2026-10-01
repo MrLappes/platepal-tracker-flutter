@@ -18,7 +18,8 @@ class AgentTools {
       'name': 'create_new_dish',
       'description':
           'Creates a brand-new dish with ingredients and nutrition data. '
-          'Use ONLY when the user wants to create a new dish or log a custom meal. '
+          'Use ONLY when the user wants to create a new dish or recipe. '
+          'To log something the user ate, use log_meal instead. '
           'Do NOT use this when referencing a dish that already exists in the database.',
       'parameters': {
         'type': 'object',
@@ -210,11 +211,96 @@ class AgentTools {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Tool: log_meal
+  // ─────────────────────────────────────────────────────────────────────────
+  /// Proposes a diary entry. The app shows it as a confirmation card and
+  /// only writes the log after the user confirms.
+  static const Map<String, dynamic> logMealTool = {
+    'type': 'function',
+    'function': {
+      'name': 'log_meal',
+      'description':
+          'Proposes logging a meal to the user\'s food diary. Nothing is saved '
+          'until the user taps Confirm on the card the app shows, so call this '
+          'whenever the user says they ate or want to log something. Either '
+          'pass dish_id of a dish from the provided context, or name plus '
+          'calories (and macros if known) per serving for food that is not '
+          'saved as a dish. Never invent a dish_id.',
+      'parameters': {
+        'type': 'object',
+        'properties': {
+          'dish_id': {
+            'type': 'string',
+            'description':
+                'Exact database ID of an existing dish from context. Omit for '
+                'food that is not saved as a dish.',
+          },
+          'name': {
+            'type': 'string',
+            'description':
+                'Food name (max 100 characters). Required without dish_id.',
+          },
+          'calories': {
+            'type': 'number',
+            'description':
+                'Kilocalories of ONE serving. Required without dish_id, '
+                'ignored with dish_id.',
+          },
+          'protein': {
+            'type': 'number',
+            'description': 'Protein grams of one serving (without dish_id).',
+          },
+          'carbs': {
+            'type': 'number',
+            'description': 'Carbohydrate grams of one serving (without dish_id).',
+          },
+          'fat': {
+            'type': 'number',
+            'description': 'Fat grams of one serving (without dish_id).',
+          },
+          'fiber': {
+            'type': 'number',
+            'description': 'Fiber grams of one serving (without dish_id).',
+          },
+          'servings': {
+            'type': 'number',
+            'description': 'Number of servings eaten, 0.01 to 20 (default 1).',
+          },
+          'meal_type': {
+            'type': 'string',
+            'enum': ['breakfast', 'lunch', 'dinner', 'snack'],
+            'description':
+                'Meal of the entry. Omit to pick it from the time of day.',
+          },
+          'date': {
+            'type': 'string',
+            'description':
+                'Local date as YYYY-MM-DD. Omit for today. At most one year '
+                'back and 30 days ahead.',
+          },
+          'time': {
+            'type': 'string',
+            'description': 'Local time as HH:MM (24h). Omit for now.',
+          },
+          'reply_text': {
+            'type': 'string',
+            'description':
+                'Short reply asking the user to confirm the entry on the card. '
+                'Do not claim it is already logged.',
+          },
+        },
+        'required': ['reply_text'],
+      },
+    },
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
   // All tools (used as default set)
   // ─────────────────────────────────────────────────────────────────────────
   static const List<Map<String, dynamic>> allTools = [
     createNewDishTool,
     referenceExistingDishTool,
+    logMealTool,
     provideChatResponseTool,
     askClarificationTool,
   ];
@@ -233,9 +319,10 @@ class AgentTools {
     final ctx = thinkingResult.contextRequirements;
     final tools = <Map<String, dynamic>>[];
 
-    // Always include the base chat response and clarification tools
+    // Always include the base chat response, clarification and logging tools
     tools.add(provideChatResponseTool);
     tools.add(askClarificationTool);
+    tools.add(logMealTool);
 
     // Dish creation requested
     if (ctx.needsInfoOnDishCreation) {

@@ -7,6 +7,47 @@ import '../pipeline_modification_tracker.dart';
 import '../system_prompts.dart';
 import '../../../utils/image_utils.dart';
 import '../../../services/storage/dish_service.dart';
+import '../../../models/dish.dart' show Dish, NutritionInfo;
+
+/// A stored dish as shown on a chat dish card. The card shows the nutrition
+/// of one serving, like the log sheet it opens.
+@visibleForTesting
+ProcessedDish processedDishFromStorage(Dish storageDish) {
+  BasicNutrition basic(NutritionInfo n) => BasicNutrition(
+    calories: n.calories,
+    protein: n.protein,
+    carbs: n.carbs,
+    fat: n.fat,
+    fiber: n.fiber,
+    sugar: n.sugar,
+    sodium: n.sodium,
+  );
+  return ProcessedDish(
+    id: storageDish.id,
+    name: storageDish.name,
+    description: storageDish.description,
+    ingredients: [
+      for (final ing in storageDish.ingredients)
+        FoodIngredient(
+          id: ing.id,
+          name: ing.name,
+          amount: ing.amount,
+          unit: ing.unit,
+          nutrition: ing.nutrition == null ? null : basic(ing.nutrition!),
+          brand: null,
+          barcode: ing.barcode,
+        ),
+    ],
+    totalNutrition: basic(storageDish.nutritionPerServing),
+    servings: 1.0,
+    imageUrl: storageDish.imageUrl,
+    tags: <String>[],
+    mealType: null,
+    createdAt: storageDish.createdAt,
+    updatedAt: storageDish.updatedAt,
+    isFavorite: storageDish.isFavorite,
+  );
+}
 
 /// Validates and edits newly created dishes with AI-powered corrections
 /// Skips validation for dishes retrieved from database by ID
@@ -88,59 +129,7 @@ class DishValidationStep extends AgentStep {
               '⏭️ DB-backed dish found, skipping validation (ID: ${storageDish.id})',
             );
 
-            // Convert storage Dish -> ProcessedDish
-            final convertedIngredients = <FoodIngredient>[];
-            for (final ing in storageDish.ingredients) {
-              BasicNutrition? convertedNut;
-              if (ing.nutrition != null) {
-                convertedNut = BasicNutrition(
-                  calories: ing.nutrition!.calories,
-                  protein: ing.nutrition!.protein,
-                  carbs: ing.nutrition!.carbs,
-                  fat: ing.nutrition!.fat,
-                  fiber: ing.nutrition!.fiber,
-                  sugar: ing.nutrition!.sugar,
-                  sodium: ing.nutrition!.sodium,
-                );
-              }
-
-              convertedIngredients.add(
-                FoodIngredient(
-                  id: ing.id,
-                  name: ing.name,
-                  amount: ing.amount,
-                  unit: ing.unit,
-                  nutrition: convertedNut,
-                  brand: null,
-                  barcode: ing.barcode,
-                ),
-              );
-            }
-
-            final convertedDishNut = BasicNutrition(
-              calories: storageDish.nutrition.calories,
-              protein: storageDish.nutrition.protein,
-              carbs: storageDish.nutrition.carbs,
-              fat: storageDish.nutrition.fat,
-              fiber: storageDish.nutrition.fiber,
-              sugar: storageDish.nutrition.sugar,
-              sodium: storageDish.nutrition.sodium,
-            );
-
-            final dbProcessed = ProcessedDish(
-              id: storageDish.id,
-              name: storageDish.name,
-              description: storageDish.description,
-              ingredients: convertedIngredients,
-              totalNutrition: convertedDishNut,
-              servings: 1.0,
-              imageUrl: storageDish.imageUrl,
-              tags: <String>[],
-              mealType: null,
-              createdAt: storageDish.createdAt,
-              updatedAt: storageDish.updatedAt,
-              isFavorite: storageDish.isFavorite,
-            );
+            final dbProcessed = processedDishFromStorage(storageDish);
 
             finalDishes.add(dbProcessed);
             validationResults.add({

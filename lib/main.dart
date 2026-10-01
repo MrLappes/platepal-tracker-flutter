@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'services/diagnostic_log_service.dart';
 import 'services/health_service.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
@@ -22,6 +23,10 @@ import 'screens/settings/import_data_screen.dart';
 import 'screens/settings/chat_agent_settings_screen.dart';
 import 'screens/settings/health_settings_screen.dart';
 import 'screens/settings/privacy_policy_screen.dart';
+import 'screens/settings/backup_settings_screen.dart';
+import 'components/ui/auto_backup_runner.dart';
+import 'screens/platepal_import_screen.dart';
+import 'services/data/platepal_dish_import.dart';
 import 'providers/meal_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -31,6 +36,7 @@ import 'providers/app_state_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DiagnosticLogService.instance.install();
   final prefs = await SharedPreferences.getInstance();
   _initHealthOnLaunch(); // fire-and-forget
 
@@ -93,6 +99,11 @@ class PlatePalApp extends StatelessWidget {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: _router,
+          builder:
+              (context, child) => AutoBackupRunner(
+                onOpenSettings: () => _router.push('/settings/backup'),
+                child: child ?? const SizedBox.shrink(),
+              ),
         );
       },
     );
@@ -111,10 +122,22 @@ class PlatePalApp extends StatelessWidget {
 }
 
 final GoRouter _router = GoRouter(
+  // platepaltracker://import-dish?d=... arrives as a location with that
+  // scheme and host; send it to the import route on top of home.
+  redirect: (context, state) => platePalImportRedirect(state.uri),
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => const MainNavigationScreen(),
+      routes: [
+        GoRoute(
+          path: platePalImportRoute.substring(1),
+          builder:
+              (context, state) => PlatePalImportScreen(
+                payload: state.uri.queryParameters['d'],
+              ),
+        ),
+      ],
     ),
     GoRoute(path: '/meals', builder: (context, state) => const MealsScreen()),
     GoRoute(
@@ -174,6 +197,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/settings/health',
       builder: (context, state) => const HealthSettingsScreen(),
+    ),
+    GoRoute(
+      path: '/settings/backup',
+      builder: (context, state) => const BackupSettingsScreen(),
     ),
   ],
 );

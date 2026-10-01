@@ -476,6 +476,61 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
   });
 
+  testWidgets('recipe yield shows per-serving values and is saved', (
+    tester,
+  ) async {
+    final now = DateTime(2025);
+    final dish = Dish(
+      id: 'dish-yield',
+      name: 'Stew',
+      ingredients: const [],
+      nutrition: const NutritionInfo(
+        calories: 2000,
+        protein: 160,
+        carbs: 80,
+        fat: 100,
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+    final service = _RecordingDishService(dish);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DishCreateScreenAdvanced(dish: dish, dishService: service),
+      ),
+    );
+
+    final servingsField = find.byKey(const ValueKey('dish-create-servings'));
+    expect(
+      tester.widget<TextField>(servingsField).controller!.text,
+      '1',
+    );
+    expect(find.byKey(const ValueKey('dish-create-per-serving')), findsNothing);
+
+    await tester.enterText(servingsField, '4');
+    await tester.pump();
+    expect(
+      find.textContaining('Per serving (1 of 4): 500 kcal · 40.0 g protein'),
+      findsOneWidget,
+    );
+
+    await tester.enterText(servingsField, '0.2');
+    await tester.pump();
+    expect(find.text('Enter a value from 0.5 to 100'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Save Dish'));
+    await tester.pump();
+    expect(service.saved, isNull);
+
+    await tester.enterText(servingsField, '4');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Save Dish'));
+    await tester.pumpAndSettle();
+    expect(service.saved?.servings, 4);
+    expect(service.saved?.nutrition.calories, 2000);
+  });
+
   testWidgets('failed dish lookup stops save and shows an error', (
     tester,
   ) async {

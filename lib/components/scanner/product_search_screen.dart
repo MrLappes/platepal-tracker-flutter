@@ -71,7 +71,15 @@ class ProductSearchScreen extends StatefulWidget {
   final Function(Product)? onProductSelected;
   final VoidCallback? onCancel;
 
-  const ProductSearchScreen({super.key, this.onProductSelected, this.onCancel});
+  /// Product source, defaulting to the public Open Food Facts API.
+  final OpenFoodFactsService? service;
+
+  const ProductSearchScreen({
+    super.key,
+    this.onProductSelected,
+    this.onCancel,
+    this.service,
+  });
 
   @override
   State<ProductSearchScreen> createState() => _ProductSearchScreenState();
@@ -83,7 +91,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   final ScrollController _scrollController = ScrollController();
 
   // Services
-  final OpenFoodFactsService _offService = OpenFoodFactsService();
+  late final OpenFoodFactsService _offService =
+      widget.service ?? const OpenFoodFactsService();
   final DatabaseService _databaseService = DatabaseService.instance;
   final DishService _dishService = DishService();
 
@@ -103,7 +112,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   bool _hasMoreResults = false;
   bool _isSearching = false;
   bool _isBrowsing = false; // category browse without text
-  bool _browseFailed = false;
+  // Last remote failure; cleared when a new request starts.
+  OffErrorKind? _loadError;
   int _requestGeneration = 0;
 
   // Debounce
@@ -143,7 +153,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     setState(() {
       _localIngredients = [];
       _localDishes = [];
-      _browseFailed = false;
+      _loadError = null;
       _searchResults = [];
       _hasMoreResults = false;
       _isSearching = q.length >= 2;
@@ -271,7 +281,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     setState(() {
       _isSearching = true;
       _isBrowsing = false;
-      _browseFailed = false;
+      _loadError = null;
       if (isNewSearch) {
         _currentPage = 1;
         _searchResults = [];
@@ -303,15 +313,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       });
     } catch (e) {
       if (!mounted || generation != _requestGeneration) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(
-              context,
-            ).componentsScannerProductSearchErrorSearchingProduct(e.toString()),
-          ),
-        ),
-      );
+      setState(() => _loadError = classifyOffError(e));
     } finally {
       if (mounted && generation == _requestGeneration) {
         setState(() => _isSearching = false);
@@ -325,7 +327,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     setState(() {
       _isBrowsing = true;
       _isSearching = true;
-      _browseFailed = false;
+      _loadError = null;
       _localIngredients = [];
       _localDishes = [];
       _searchResults = [];
@@ -348,10 +350,10 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         _searchResults = products;
         _hasMoreResults = products.length == 20;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted || generation != _requestGeneration) return;
       setState(() {
-        _browseFailed = true;
+        _loadError = classifyOffError(e);
       });
     } finally {
       if (mounted && generation == _requestGeneration) {
@@ -364,7 +366,10 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   }
 
   void _loadMore() {
-    if (_isSearching || _isBrowsing || _browseFailed || !_hasMoreResults) {
+    if (_isSearching ||
+        _isBrowsing ||
+        _loadError != null ||
+        !_hasMoreResults) {
       return;
     }
     final query = _searchController.text.trim();
@@ -381,7 +386,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
     setState(() {
       _isSearching = true;
-      _browseFailed = false;
+      _loadError = null;
     });
 
     try {
@@ -399,12 +404,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         _searchResults.addAll(products);
         _hasMoreResults = products.length == 20;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted || generation != _requestGeneration) return;
-      setState(() {
-        _browseFailed = true;
-        _hasMoreResults = false;
-      });
+      setState(() => _loadError = classifyOffError(e));
     } finally {
       if (mounted && generation == _requestGeneration) {
         setState(() => _isSearching = false);
@@ -506,11 +508,11 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                         _localIngredients.isEmpty &&
                         _localDishes.isEmpty
                     ? const Center(child: CircularProgressIndicator())
-                    : _browseFailed &&
+                    : _loadError != null &&
                         _searchResults.isEmpty &&
                         _localIngredients.isEmpty &&
                         _localDishes.isEmpty
-                    ? _buildBrowseErrorState(theme, colorScheme)
+                    ? _buildLoadErrorState(theme, colorScheme)
                     : _searchResults.isEmpty &&
                         _localIngredients.isEmpty &&
                         _localDishes.isEmpty &&
@@ -843,9 +845,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
               child: Center(child: CircularProgressIndicator()),
             ),
           ),
-        if (_browseFailed)
-          SliverToBoxAdapter(child: _buildBrowseErrorState(theme, colorScheme)),
-        if (!_browseFailed &&
+        if (_loadError != null)
+          SliverToBoxAdapter(child: _buildLoadErrorState(theme, colorScheme)),
+        if (_loadError == null &&
             !_isSearching &&
             !_hasMoreResults &&
             _searchResults.isNotEmpty)
@@ -917,24 +919,50 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     );
   }
 
-  Widget _buildBrowseErrorState(ThemeData theme, ColorScheme colorScheme) {
+  void _retry() {
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      _triggerSearch(query, isNewSearch: _currentPage == 1);
+    } else if (_currentPage > 1) {
+      _loadMoreBrowse();
+    } else {
+      _triggerBrowse();
+    }
+  }
+
+  Widget _buildLoadErrorState(ThemeData theme, ColorScheme colorScheme) {
     final l10n = AppLocalizations.of(context);
+    final (icon, message) = switch (_loadError) {
+      OffErrorKind.offline => (
+        Icons.wifi_off,
+        l10n.componentsScannerProductSearchErrorOffline,
+      ),
+      OffErrorKind.timeout => (
+        Icons.hourglass_empty,
+        l10n.componentsScannerProductSearchErrorTimeout,
+      ),
+      OffErrorKind.server => (
+        Icons.cloud_off,
+        l10n.componentsScannerProductSearchErrorServer,
+      ),
+      _ => (Icons.cloud_off, l10n.componentsScannerProductSearchBrowseUnavailable),
+    };
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off, size: 48, color: colorScheme.error),
+            Icon(icon, size: 48, color: colorScheme.error),
             const SizedBox(height: 12),
             Text(
-              l10n.componentsScannerProductSearchBrowseUnavailable,
+              message,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: _currentPage > 1 ? _loadMoreBrowse : _triggerBrowse,
+              onPressed: _retry,
               icon: const Icon(Icons.refresh),
               label: Text(l10n.componentsSharedErrorDisplayRetry),
             ),
@@ -1111,9 +1139,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
               .toUpperCase(),
       subtitleColor: colorScheme.secondary,
       nutrition: _nutritionSummary(
-        calories: dish.nutrition.calories,
-        protein: dish.nutrition.protein,
-        carbs: dish.nutrition.carbs,
+        calories: dish.nutritionPerServing.calories,
+        protein: dish.nutritionPerServing.protein,
+        carbs: dish.nutritionPerServing.carbs,
         locale: locale,
       ),
     );

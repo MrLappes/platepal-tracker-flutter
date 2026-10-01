@@ -10,11 +10,17 @@ import 'package:uuid/uuid.dart';
 import '../models/dish.dart';
 import '../models/product.dart';
 import '../services/storage/dish_service.dart';
+import '../services/data/platepal_dish_import.dart';
 import '../themes/app_theme.dart';
 import '../utils/number_parsing.dart';
 import '../utils/unit_conversion.dart';
 import '../components/dishes/dish_form/ingredient_form_modal.dart';
 import '../components/dishes/dish_form/smart_nutrition_card.dart';
+import '../components/scanner/barcode_scanner_screen.dart';
+import '../components/scanner/product_search_screen.dart';
+
+/// How a new dish starts when opened from a shortcut.
+enum DishCreateEntry { scanBarcode, searchProduct }
 
 /// Copies a selected image into app documents so it outlives picker temp files.
 Future<String> persistDishImage(
@@ -71,6 +77,12 @@ class DishCreateScreenAdvanced extends StatefulWidget {
   final String? heroTag;
   final DishService? dishService;
 
+  /// Opens the scanner or product search right away.
+  final DishCreateEntry? entry;
+
+  /// A dish shared from PlatePal; prefills a new, unsaved dish.
+  final PlatePalDishDraft? importedDraft;
+
   const DishCreateScreenAdvanced({
     super.key,
     this.dish,
@@ -78,6 +90,8 @@ class DishCreateScreenAdvanced extends StatefulWidget {
     this.onDishCreated,
     this.heroTag,
     this.dishService,
+    this.entry,
+    this.importedDraft,
   });
 
   @override
@@ -96,13 +110,19 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   final _carbsController = TextEditingController();
   final _fatController = TextEditingController();
   final _fiberController = TextEditingController();
+  final _servingsController = TextEditingController();
 
   // State variables
   bool _isLoading = false;
   bool _isDirty = false;
   bool _isFavorite = false;
+  double _servings = 1;
+  String? _servingsError;
   String _selectedCategory = 'breakfast';
   List<Ingredient> _ingredients = [];
+
+  /// Imported ingredients that still need an amount and nutrition.
+  final Set<String> _incompleteIngredientIds = {};
   File? _selectedImage;
   bool _removeExistingImage = false;
   bool _justRecalculated = false;
@@ -139,8 +159,15 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       _carbsController,
       _fatController,
       _fiberController,
+      _servingsController,
     ]) {
       controller.addListener(_markDirty);
+    }
+    final entry = widget.entry;
+    if (entry != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openEntry(entry);
+      });
     }
   }
 
@@ -161,11 +188,31 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     _carbsController.dispose();
     _fatController.dispose();
     _fiberController.dispose();
+    _servingsController.dispose();
     _recalculatedAnimationController.dispose();
     super.dispose();
   }
 
   void _loadDishData(String locale) {
+    final draft = widget.importedDraft;
+    _servings = widget.dish?.servings ?? draft?.servings?.toDouble() ?? 1;
+    _servingsController.text = formatAmount(_servings, locale);
+    if (widget.dish == null && draft != null) {
+      _nameController.text = draft.name;
+      _descriptionController.text = draft.description ?? '';
+      _ingredients = [
+        for (final name in draft.ingredients)
+          Ingredient(
+            id: const Uuid().v4(),
+            name: name,
+            amount: 0,
+            unit: 'g',
+          ),
+      ];
+      _incompleteIngredientIds.addAll(_ingredients.map((i) => i.id));
+      // Never saved without the user: leaving asks to discard.
+      _isDirty = true;
+    }
     if (widget.dish != null) {
       final dish = widget.dish!;
       _nameController.text = dish.name;
@@ -219,6 +266,26 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
   }
 
+  void _onServingsChanged(String text) {
+    final value = parseLocalizedDouble(text);
+    final locale = Localizations.localeOf(context).toString();
+    setState(() {
+      if (value == null ||
+          value < Dish.minServings ||
+          value > Dish.maxServings) {
+        _servingsError = AppLocalizations.of(
+          context,
+        ).componentsModalsDishLogModalAmountRange(
+          formatAmount(Dish.minServings, locale),
+          formatAmount(Dish.maxServings, locale),
+        );
+        return;
+      }
+      _servingsError = null;
+      _servings = value;
+    });
+  }
+
   Future<void> _confirmDiscardChanges() async {
     final l10n = AppLocalizations.of(context);
     final discard = await showDialog<bool>(
@@ -262,6 +329,16 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       );
       return;
     }
+    if (_servingsError != null) {
+      _showErrorSnackBar(_servingsError!);
+      return;
+    }
+    if (_ingredients.any((i) => _incompleteIngredientIds.contains(i.id))) {
+      _showErrorSnackBar(
+        AppLocalizations.of(context).screensDishCreateImportIncomplete,
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -296,6 +373,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
         updatedAt: DateTime.now(),
         isFavorite: _isFavorite,
         category: _selectedCategory,
+        servings: _servings,
       );
       debugPrint('🍽️ Saving dish ID: ${dishData.id}');
       debugPrint('🍽️ Dish has ${dishData.ingredients.length} ingredients');
@@ -443,6 +521,51 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               ],
             ),
           ),
+    );
+  }
+
+  void _addProductIngredient(Ingredient ingredient) {
+    setState(() {
+      _ingredients.add(ingredient);
+      _isDirty = true;
+      _recalculateNutrition();
+    });
+    _showSuccessSnackBar(
+      AppLocalizations.of(context).screensDishCreateProductAddedSuccessfully,
+    );
+  }
+
+  void _openEntry(DishCreateEntry entry) {
+    void addProduct(Product product) {
+      if (!mounted) return;
+      IngredientFormModal.show(
+        context,
+        initialProduct: product,
+        onSave: _addProductIngredient,
+        onProductScanned: _updateDishFromProduct,
+      );
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (_) => switch (entry) {
+              DishCreateEntry.scanBarcode => BarcodeScannerScreen(
+                onProductFound: addProduct,
+                onManualEntry: (barcode) {
+                  if (!mounted) return;
+                  IngredientFormModal.show(
+                    context,
+                    initialBarcode: barcode,
+                    onSave: _addProductIngredient,
+                  );
+                },
+              ),
+              DishCreateEntry.searchProduct => ProductSearchScreen(
+                onProductSelected: addProduct,
+              ),
+            },
+      ),
     );
   }
 
@@ -602,6 +725,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       ingredient: _ingredients[index],
       onSave: (ingredient) {
         setState(() {
+          _incompleteIngredientIds.remove(_ingredients[index].id);
           _ingredients[index] = ingredient;
           _isDirty = true;
           _recalculateNutrition();
@@ -653,6 +777,31 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildImportBanner() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      key: const ValueKey('platepal-import-banner'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.download_done, color: colorScheme.onSecondaryContainer),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).screensDishCreateImportedBanner,
+              style: TextStyle(color: colorScheme.onSecondaryContainer),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -914,6 +1063,35 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                 ),
               ),
               const SizedBox(height: 16),
+              TextField(
+                key: const ValueKey('dish-create-servings'),
+                controller: _servingsController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [decimalInputFormatter],
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context).screensDishCreateRecipeMakes,
+                  suffixText:
+                      AppLocalizations.of(
+                        context,
+                      ).screensDishCreateServingsSuffix,
+                  helperText:
+                      AppLocalizations.of(
+                        context,
+                      ).screensDishCreateServingsHelper,
+                  helperMaxLines: 2,
+                  errorText: _servingsError,
+                  errorMaxLines: 2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  prefixIcon: const Icon(Icons.people_outline, size: 18),
+                ),
+                onChanged: _onServingsChanged,
+              ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText:
@@ -974,15 +1152,58 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   }
 
   Widget _buildNutritionInputs() {
-    return SmartNutritionCard(
-      caloriesController: _caloriesController,
-      proteinController: _proteinController,
-      carbsController: _carbsController,
-      fatController: _fatController,
-      fiberController: _fiberController,
-      justRecalculated: _justRecalculated,
-      recalculatedAnimation: _recalculatedAnimation,
-      onRecalculate: _recalculateNutrition,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SmartNutritionCard(
+          caloriesController: _caloriesController,
+          proteinController: _proteinController,
+          carbsController: _carbsController,
+          fatController: _fatController,
+          fiberController: _fiberController,
+          justRecalculated: _justRecalculated,
+          recalculatedAnimation: _recalculatedAnimation,
+          onRecalculate: _recalculateNutrition,
+        ),
+        if (_servings != 1 && _servingsError == null)
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              _caloriesController,
+              _proteinController,
+              _carbsController,
+              _fatController,
+            ]),
+            builder: (context, _) => _buildPerServingSummary(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPerServingSummary() {
+    final theme = Theme.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    String perServing(TextEditingController controller, int digits) =>
+        formatDecimal(
+          (parseLocalizedDouble(controller.text) ?? 0) / _servings,
+          locale,
+          fractionDigits: digits,
+        );
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        AppLocalizations.of(context).screensDishCreatePerServingSummary(
+          formatAmount(_servings, locale),
+          perServing(_caloriesController, 0),
+          perServing(_proteinController, 1),
+          perServing(_carbsController, 1),
+          perServing(_fatController, 1),
+        ),
+        key: const ValueKey('dish-create-per-serving'),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -1195,13 +1416,24 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      '${formatDecimal(ingredient.amount, locale)} ${ingredient.unit}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                    if (_incompleteIngredientIds.contains(ingredient.id))
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).screensDishCreateIngredientNeedsDetails,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    else
+                      Text(
+                        '${formatDecimal(ingredient.amount, locale)} ${ingredient.unit}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -1389,6 +1621,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           ),
           child: Column(
             children: [
+              if (widget.importedDraft != null) ...[
+                _buildImportBanner(),
+                const SizedBox(height: 16),
+              ],
               _buildImageSelector(),
               const SizedBox(height: 16),
               _buildQuickActions(),

@@ -16,6 +16,7 @@ import '../../utils/number_parsing.dart';
 import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
+import 'meal_log_proposal_card.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -23,12 +24,16 @@ class MessageBubble extends StatelessWidget {
   final ChatUserProfile? userProfile;
   final ChatBotProfile? botProfile;
 
+  /// Persists that the user logged or dismissed a proposal card.
+  final void Function(int index, String status)? onMealLogProposalStatusChanged;
+
   const MessageBubble({
     super.key,
     required this.message,
     this.onRetry,
     this.userProfile,
     this.botProfile,
+    this.onMealLogProposalStatusChanged,
   });
 
   @override
@@ -252,6 +257,18 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
             ],
+            if (!isUser)
+              for (final (index, proposal) in _mealLogProposals().indexed) ...[
+                const SizedBox(height: 12),
+                MealLogProposalCard(
+                  key: ValueKey('${message.id}-proposal-$index'),
+                  proposal: proposal,
+                  status: _mealLogProposalStatus(index),
+                  onStatusChanged:
+                      (status) =>
+                          onMealLogProposalStatusChanged?.call(index, status),
+                ),
+              ],
             if (!isUser && _hasRecommendation()) ...[
               const SizedBox(height: 12),
               Container(
@@ -534,6 +551,20 @@ class MessageBubble extends StatelessWidget {
 
     final validatedDishes = dishesProcessedRaw['validatedDishes'];
     return validatedDishes is List && validatedDishes.isNotEmpty;
+  }
+
+  List<Map<String, dynamic>> _mealLogProposals() {
+    final proposals = message.metadata?['mealLogProposals'];
+    if (proposals is! List) return const [];
+    return [
+      for (final proposal in proposals)
+        if (proposal is Map) Map<String, dynamic>.from(proposal),
+    ];
+  }
+
+  String? _mealLogProposalStatus(int index) {
+    final statuses = message.metadata?['mealLogProposalStatus'];
+    return statuses is Map ? statuses['$index'] as String? : null;
   }
 
   /// Check if this message has user ingredients

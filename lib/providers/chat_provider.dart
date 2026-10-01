@@ -657,11 +657,13 @@ class ChatProvider extends ChangeNotifier {
 
       // Return both response and metadata, including recommendation
       final notes = responseNotes(response.metadata);
+      final proposals = mealLogProposals(response.metadata);
       final combinedMetadata = {
         ...?response.metadata,
         if (response.recommendation != null)
           'recommendation': response.recommendation,
         if (notes.isNotEmpty) 'responseNotes': notes,
+        if (proposals.isNotEmpty) 'mealLogProposals': proposals,
       };
       return {'response': response.replyText, 'metadata': combinedMetadata};
     } catch (e) {
@@ -708,6 +710,46 @@ class ChatProvider extends ChangeNotifier {
       if (lastData('response_generation')?['imageAnalysisFailed'] == true)
         'imageNotAnalyzed',
     ];
+  }
+
+  /// `log_meal` proposals of the final response, read from agent step results.
+  @visibleForTesting
+  static List<Map<String, dynamic>> mealLogProposals(
+    Map<String, dynamic>? metadata,
+  ) {
+    final steps = metadata?['stepResults'];
+    if (steps is! List) return const [];
+    final data =
+        steps
+            .whereType<Map>()
+            .where((step) => step['stepName'] == 'response_generation')
+            .lastOrNull?['data'];
+    final proposals = data is Map ? data['mealLogProposals'] : null;
+    if (proposals is! List) return const [];
+    return [
+      for (final proposal in proposals)
+        if (proposal is Map) Map<String, dynamic>.from(proposal),
+    ];
+  }
+
+  /// Remembers that the user logged or dismissed proposal [index] of
+  /// [messageId], so the card stays resolved after a restart.
+  Future<void> setMealLogProposalStatus(
+    String messageId,
+    int index,
+    String status,
+  ) async {
+    final position = _messages.indexWhere((m) => m.id == messageId);
+    if (position == -1) return;
+    final message = _messages[position];
+    final statuses = Map<String, dynamic>.from(
+      message.metadata?['mealLogProposalStatus'] as Map? ?? const {},
+    )..['$index'] = status;
+    _messages[position] = message.copyWith(
+      metadata: {...?message.metadata, 'mealLogProposalStatus': statuses},
+    );
+    notifyListeners();
+    await _saveMessages();
   }
 
   /// Builds the map of localised fallback strings used by the agent pipeline
