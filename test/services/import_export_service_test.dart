@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/models/dish.dart';
 import 'package:platepal_tracker/models/user_profile.dart';
+import 'package:platepal_tracker/services/data/backup_archive.dart';
 import 'package:platepal_tracker/services/data/import_export_service.dart';
 import 'package:platepal_tracker/services/health_service.dart';
 import 'package:platepal_tracker/services/storage/database_service.dart';
@@ -1120,6 +1122,115 @@ void main() {
         ImportExportService.maxImportBytes,
       );
     });
+
+    test('bundles only image files from the app photo folder', () async {
+      final secret = File('${tempDir.path}/shared_prefs/secret.jpg');
+      await secret.create(recursive: true);
+      await secret.writeAsString('api key');
+      final notImage = File('${tempDir.path}/dish_images/notes.xml');
+      await notImage.create(recursive: true);
+      await notImage.writeAsString('private');
+      final link = Link('${tempDir.path}/dish_images/link.jpg');
+      await link.create(secret.path);
+      final own = File('${tempDir.path}/dish_images/own.png');
+      await own.writeAsBytes([5, 6, 7]);
+      for (final (id, path) in [
+        ('a', secret.path),
+        ('b', '${tempDir.path}/dish_images/../shared_prefs/secret.jpg'),
+        ('c', notImage.path),
+        ('d', link.path),
+        ('e', own.path),
+      ]) {
+        await dishService.saveDish(
+          _dish(id, 'Dish $id', 100).copyWith(imageUrl: path),
+        );
+      }
+
+      final result = await service.exportData(
+        dataTypes: [DataType.dishes],
+        format: ExportFormat.zip,
+      );
+
+      final archive = ZipDecoder().decodeBytes(
+        await File(result.filePath!).readAsBytes(),
+      );
+      final images = archive.files.where((f) => f.name.startsWith('images/'));
+      expect(images.map((f) => f.content), [
+        [5, 6, 7],
+      ]);
+    });
+
+    test('photos of dishes skipped as duplicates are not copied', () async {
+      final zipPath = await exportWithPhoto();
+      final photos = Directory('${tempDir.path}/dish_images');
+      expect(photos.listSync(), hasLength(1));
+
+      final result = await service.importData(
+        filePath: zipPath,
+        dataTypes: [DataType.dishes],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+
+      expect(result.duplicatesFound, greaterThan(0));
+      expect(photos.listSync().map((e) => e.path), [
+        '${tempDir.path}/dish_images/photo.jpg',
+      ]);
+    });
+
+    test('a hostile local path in a zip is dropped on import', () async {
+      final zip = File('${tempDir.path}/hostile.zip');
+      await zip.writeAsBytes(
+        encodeBackupArchive({
+          'dishes': [
+            {
+              ..._dish('evil', 'Evil', 100).toJson(),
+              'imageUrl': '/data/user/0/app/shared_prefs/prefs.xml',
+            },
+          ],
+        }, {}),
+      );
+
+      final result = await service.importData(
+        filePath: zip.path,
+        dataTypes: [DataType.dishes],
+        duplicateHandling: DuplicateHandling.overwrite,
+      );
+
+      expect(result.success, isTrue);
+      expect((await dishService.getDishById('evil'))!.imageUrl, isNull);
+    });
+  });
+
+  test('JSON import keeps only web URLs and own photos as dish images', () async {
+    final photos = '${tempDir.path}/dish_images';
+    final dishes = {
+      'web': 'https://images.example/a.jpg',
+      'own': '$photos/a.jpg',
+      'prefs': '${tempDir.path}/shared_prefs/FlutterSharedPreferences.xml',
+      'escape': '$photos/../databases/platepal.jpg',
+      'db': '/data/user/0/app/databases/platepal.db',
+    };
+
+    final result = await service.importData(
+      filePath: '',
+      jsonData: {
+        'dishes': [
+          for (final MapEntry(key: id, value: url) in dishes.entries)
+            {..._dish(id, 'Dish $id', 100).toJson(), 'imageUrl': url},
+        ],
+      },
+      dataTypes: [DataType.dishes],
+      duplicateHandling: DuplicateHandling.overwrite,
+    );
+
+    expect(result.success, isTrue);
+    Future<String?> imageOf(String id) async =>
+        (await dishService.getDishById(id))!.imageUrl;
+    expect(await imageOf('web'), 'https://images.example/a.jpg');
+    expect(await imageOf('own'), '$photos/a.jpg');
+    expect(await imageOf('prefs'), isNull);
+    expect(await imageOf('escape'), isNull);
+    expect(await imageOf('db'), isNull);
   });
 
   test('a log without snapshot uses the per-serving nutrition', () async {

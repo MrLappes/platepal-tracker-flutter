@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platepal_tracker/services/data/backup_archive.dart';
 
@@ -93,4 +94,98 @@ void main() {
       ..add(ArchiveFile.string(backupArchiveDataFile, '[1, 2]'));
     expect(() => readBackupArchive(notObject), throwsFormatException);
   });
+
+  test('decompressed sizes are checked, not only the zip headers', () {
+    final data = {
+      'dishes': [
+        {'id': 'a', 'name': 'x' * 400, 'imageUrl': 'images/0.png'},
+      ],
+    };
+    final honest = encodeBackupArchive(data, {'/p/a.png': List.filled(500, 7)});
+    var zip = _withDeclaredSize(honest, backupArchiveDataFile, 50);
+    zip = _withDeclaredSize(zip, 'images/0.png', 50);
+    final archive = ZipDecoder().decodeBytes(zip);
+    expect(archive.find(backupArchiveDataFile)!.size, 50);
+
+    expect(
+      () => readBackupArchive(archive, maxDataBytes: 100),
+      throwsA(
+        isA<FormatException>().having(
+          (e) => e.message,
+          'message',
+          'Backup data file too large',
+        ),
+      ),
+    );
+
+    final contents = readBackupArchive(archive, maxImageBytes: 100);
+    final image = contents.images['images/0.png']!;
+    expect(image.size, 50, reason: 'the header passes the size filter');
+    expect(readBackupImage(image, maxBytes: 100), isNull);
+    expect(readBackupImage(image, maxBytes: 500), hasLength(500));
+  });
+
+  group('dish photo paths', () {
+    const dir = '/data/user/0/app/app_flutter/dish_images';
+
+    test('only image files inside the photo folder count as own photos', () {
+      expect(isDishImageInDirectory('$dir/a.jpg', dir), isTrue);
+      expect(isDishImageInDirectory('$dir/sub/a.PNG', dir), isTrue);
+      expect(isDishImageInDirectory('$dir/../shared_prefs/x.jpg', dir), isFalse);
+      expect(isDishImageInDirectory('$dir/notes.xml', dir), isFalse);
+      expect(isDishImageInDirectory('${dir}_evil/a.jpg', dir), isFalse);
+      expect(isDishImageInDirectory(dir, dir), isFalse);
+      expect(isDishImageInDirectory('dish_images/a.jpg', dir), isFalse);
+    });
+
+    test('imports keep web URLs and own photos only', () {
+      expect(
+        sanitizeImportedImageUrl('https://images.example/a.jpg', dir),
+        'https://images.example/a.jpg',
+      );
+      expect(
+        sanitizeImportedImageUrl('http://images.example/a.jpg', dir),
+        'http://images.example/a.jpg',
+      );
+      expect(sanitizeImportedImageUrl('$dir/a.jpg', dir), '$dir/a.jpg');
+      for (final hostile in [
+        '/data/user/0/app/shared_prefs/FlutterSharedPreferences.xml',
+        '/data/user/0/app/databases/platepal.db',
+        '$dir/../databases/platepal.jpg',
+        '/etc/passwd',
+        'file:///data/user/0/app/shared_prefs/x.jpg',
+        'images/0.jpg',
+        'https:///no-host.jpg',
+        '',
+        null,
+      ]) {
+        expect(sanitizeImportedImageUrl(hostile, dir), isNull, reason: hostile);
+      }
+    });
+  });
+}
+
+/// [zip] with the uncompressed size of entry [name] set to [size] in its
+/// local and central headers, as a crafted archive could do.
+List<int> _withDeclaredSize(List<int> zip, String name, int size) {
+  final bytes = Uint8List.fromList(zip);
+  final view = ByteData.sublistView(bytes);
+  final nameBytes = utf8.encode(name);
+  for (var i = 0; i + 46 <= bytes.length; i++) {
+    final signature = view.getUint32(i, Endian.little);
+    final (sizeAt, nameLengthAt, nameAt) = switch (signature) {
+      0x04034b50 => (i + 22, i + 26, i + 30),
+      0x02014b50 => (i + 24, i + 28, i + 46),
+      _ => (-1, -1, -1),
+    };
+    if (sizeAt < 0) continue;
+    final nameLength = view.getUint16(nameLengthAt, Endian.little);
+    if (nameLength != nameBytes.length ||
+        nameAt + nameLength > bytes.length ||
+        !listEquals(bytes.sublist(nameAt, nameAt + nameLength), nameBytes)) {
+      continue;
+    }
+    view.setUint32(sizeAt, size, Endian.little);
+  }
+  return bytes;
 }
