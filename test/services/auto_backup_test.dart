@@ -99,6 +99,24 @@ void main() {
       expect(autoBackupsToDelete(backups.take(5)), isEmpty);
       expect(autoBackupsToDelete(backups, keep: 6), [backups[0]]);
     });
+
+    test('the backup just written is never deleted', () {
+      final older = [
+        for (var day = 10; day <= 14; day++)
+          autoBackupFileName(DateTime(2026, 9, day, 12)),
+      ];
+      // The clock went back: the new backup sorts as the oldest.
+      final written = autoBackupFileName(DateTime(2026, 9, 1, 12));
+
+      final deleted = autoBackupsToDelete([...older, written], written: written);
+
+      expect(deleted, isNot(contains(written)));
+      expect(deleted, [older.first]);
+      expect(
+        autoBackupsToDelete(older, written: 'platepal_auto_backup_x.zip'),
+        isEmpty,
+      );
+    });
   });
 
   group('AutoBackupService', () {
@@ -226,6 +244,33 @@ void main() {
       await service.setDirectory(null);
       expect((await service.backUpNow()).success, isTrue);
       expect((await service.loadSettings()).lastFailureAt, isNull);
+    });
+
+    test('after a failed automatic run, retries wait until tomorrow', () async {
+      final blocker = File(p.join(tempDir.path, 'not_a_folder'))
+        ..writeAsStringSync('x');
+      await service.setDirectory(blocker.path);
+      await service.setEnabled(true);
+
+      expect((await service.runIfDue())?.success, isFalse);
+      final failedAt = (await service.loadSettings()).lastFailureAt;
+
+      expect(await service.runIfDue(), isNull, reason: 'resume, same day');
+      expect((await service.loadSettings()).lastFailureAt, failedAt);
+
+      final tomorrow = DateTime.now().add(const Duration(days: 1));
+      expect((await service.runIfDue(now: tomorrow))?.success, isFalse);
+    });
+
+    test('canWriteTo probes the folder and leaves nothing behind', () async {
+      final folder = await Directory(p.join(tempDir.path, 'ok')).create();
+      expect(await service.canWriteTo(folder.path), isTrue);
+      expect(folder.listSync(), isEmpty);
+
+      final file = File(p.join(tempDir.path, 'plain_file'))
+        ..writeAsStringSync('x');
+      expect(await service.canWriteTo(file.path), isFalse);
+      expect(await service.canWriteTo(p.join(tempDir.path, 'missing')), isFalse);
     });
   });
 }

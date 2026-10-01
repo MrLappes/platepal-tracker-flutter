@@ -3025,7 +3025,7 @@
   "screensBackupFolderDefault": "Almacenamiento de la app (se borra al desinstalarla)",
   "screensBackupChooseFolder": "Elegir",
   "screensBackupUseDefaultFolder": "Usar almacenamiento de la app",
-  "screensBackupFolderPickFailed": "No se pudo abrir el selector de carpetas.",
+  "screensBackupFolderPickFailed": "No se puede usar esa carpeta. Elige otra.",
   "screensBackupKeepNote": "Se conservan las {count} copias automáticas más recientes; las anteriores se eliminan.",
   "screensBackupNever": "Aún no hay copias",
   "screensBackupLast": "Última copia: {date}",
@@ -3042,5 +3042,7 @@
   "screensPlatePalImportInvalid": "Este enlace de PlatePal no es válido o está incompleto. Vuelve a compartir el plato desde PlatePal.",
   "screensPlatePalImportUnsupported": "Este plato se compartió desde una versión más reciente de PlatePal. Actualiza PlatePal Tracker para importarlo.",
   "screensMenuPlatePalPromo": "PlatePal: comparte comidas con otros",
-  "screensMenuPlatePalPromoSubtitle": "Consigue la app PlatePal en Google Play"
+  "screensMenuPlatePalPromoSubtitle": "Consigue la app PlatePal en Google Play",
+  "screensCalendarKcalUnit": "kcal",
+  "componentsModalsQuickAddTooLarge": "Introduce como máximo {max}"
 }

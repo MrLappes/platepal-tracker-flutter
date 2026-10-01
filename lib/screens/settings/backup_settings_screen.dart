@@ -45,18 +45,26 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
           await (widget.pickDirectory ??
               () => FilePicker.platform.getDirectoryPath())();
       if (path == null || path.isEmpty) return;
+      if (!await _service.canWriteTo(path)) {
+        _showPickFailed();
+        return;
+      }
       await _update(() => _service.setDirectory(path));
     } catch (e) {
       debugPrint('Choosing a backup folder failed: ${e.runtimeType}');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).screensBackupFolderPickFailed,
-          ),
-        ),
-      );
+      _showPickFailed();
     }
+  }
+
+  void _showPickFailed() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context).screensBackupFolderPickFailed,
+        ),
+      ),
+    );
   }
 
   Future<void> _backUpNow() async {

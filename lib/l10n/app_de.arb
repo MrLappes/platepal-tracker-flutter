@@ -3055,7 +3055,7 @@
   "screensBackupFolderDefault": "App-Speicher (wird beim Deinstallieren gelöscht)",
   "screensBackupChooseFolder": "Auswählen",
   "screensBackupUseDefaultFolder": "App-Speicher verwenden",
-  "screensBackupFolderPickFailed": "Die Ordnerauswahl konnte nicht geöffnet werden.",
+  "screensBackupFolderPickFailed": "Dieser Ordner kann nicht verwendet werden. Wähle einen anderen.",
   "screensBackupKeepNote": "Die neuesten {count} automatischen Sicherungen werden behalten, ältere werden gelöscht.",
   "screensBackupNever": "Noch keine Sicherung",
   "screensBackupLast": "Letzte Sicherung: {date}",
@@ -3072,5 +3072,7 @@
   "screensPlatePalImportInvalid": "Dieser PlatePal-Link ist ungültig oder unvollständig. Teile das Gericht erneut aus PlatePal.",
   "screensPlatePalImportUnsupported": "Dieses Gericht wurde von einer neueren PlatePal-Version geteilt. Aktualisiere PlatePal Tracker, um es zu importieren.",
   "screensMenuPlatePalPromo": "PlatePal – Mahlzeiten mit anderen teilen",
-  "screensMenuPlatePalPromoSubtitle": "Hol dir die PlatePal-App bei Google Play"
+  "screensMenuPlatePalPromoSubtitle": "Hol dir die PlatePal-App bei Google Play",
+  "screensCalendarKcalUnit": "kcal",
+  "componentsModalsQuickAddTooLarge": "Gib höchstens {max} ein"
 }

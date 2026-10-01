@@ -3821,7 +3821,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensBackupFolderPickFailed =>
-      'No se pudo abrir el selector de carpetas.';
+      'No se puede usar esa carpeta. Elige otra.';
 
   @override
   String screensBackupKeepNote(int count) {
@@ -3886,4 +3886,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensMenuPlatePalPromoSubtitle =>
       'Consigue la app PlatePal en Google Play';
+
+  @override
+  String get screensCalendarKcalUnit => 'kcal';
+
+  @override
+  String componentsModalsQuickAddTooLarge(String max) {
+    return 'Introduce como máximo $max';
+  }
 }

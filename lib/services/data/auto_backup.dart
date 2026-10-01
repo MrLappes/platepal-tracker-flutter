@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' show max;
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
@@ -32,6 +33,14 @@ bool isAutoBackupDue({
   return days >= (frequency == AutoBackupFrequency.daily ? 1 : 7);
 }
 
+bool _isSameDay(DateTime? time, DateTime now) {
+  if (time == null) return false;
+  final local = time.toLocal();
+  return local.year == now.year &&
+      local.month == now.month &&
+      local.day == now.day;
+}
+
 /// File name of an automatic backup made at [time] (local time, sortable).
 String autoBackupFileName(DateTime time) {
   String two(int v) => v.toString().padLeft(2, '0');
@@ -41,15 +50,22 @@ String autoBackupFileName(DateTime time) {
 }
 
 /// Automatic backups among [fileNames] beyond the newest [keep]. Other files
-/// in the folder are never returned.
+/// in the folder are never returned, nor is [written] (the backup just made,
+/// which sorts as old when the clock went back); it counts towards [keep].
 List<String> autoBackupsToDelete(
   Iterable<String> fileNames, {
   int keep = autoBackupsToKeep,
+  String? written,
 }) {
   final backups =
-      fileNames.where(_autoBackupName.hasMatch).toList()
+      fileNames
+          .where((name) => name != written && _autoBackupName.hasMatch(name))
+          .toList()
         ..sort((a, b) => b.compareTo(a));
-  return backups.length <= keep ? const [] : backups.sublist(keep);
+  final others = written != null && fileNames.contains(written)
+      ? keep - 1
+      : keep;
+  return backups.length <= others ? const [] : backups.sublist(max(0, others));
 }
 
 class AutoBackupSettings {
@@ -154,6 +170,25 @@ class AutoBackupService {
     }
   }
 
+  /// Whether files can be written to [directory]: writes and deletes a
+  /// probe file. Picked folders can be readable but not writable.
+  Future<bool> canWriteTo(String directory) async {
+    final probe = File(
+      p.join(
+        directory,
+        '.platepal_write_test_${DateTime.now().microsecondsSinceEpoch}',
+      ),
+    );
+    try {
+      await probe.writeAsString('ok', flush: true);
+      await probe.delete();
+      return true;
+    } catch (e) {
+      debugPrint('Backup folder is not writable: ${e.runtimeType}');
+      return false;
+    }
+  }
+
   /// Returns true once if a failure was recorded since the last call.
   Future<bool> takeFailureNotice() async {
     final prefs = await SharedPreferences.getInstance();
@@ -162,15 +197,18 @@ class AutoBackupService {
     return pending;
   }
 
-  /// Runs a backup when automatic backups are on and one is due.
+  /// Runs a backup when automatic backups are on and one is due. After a
+  /// failed run, automatic retries wait until the next day.
   Future<AutoBackupResult?> runIfDue({DateTime? now}) async {
     try {
       final settings = await loadSettings();
+      final time = now ?? DateTime.now();
       if (!settings.enabled ||
+          _isSameDay(settings.lastFailureAt, time) ||
           !isAutoBackupDue(
             lastBackup: settings.lastBackupAt,
             frequency: settings.frequency,
-            now: now ?? DateTime.now(),
+            now: time,
           )) {
         return null;
       }
@@ -217,7 +255,10 @@ class AutoBackupService {
         for (final entity in folder.listSync())
           if (entity is File) p.basename(entity.path),
       ];
-      for (final name in autoBackupsToDelete(names)) {
+      for (final name in autoBackupsToDelete(
+        names,
+        written: p.basename(target),
+      )) {
         try {
           await File(p.join(folder.path, name)).delete();
         } catch (e) {
