@@ -2,6 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../services/data/import_export_service.dart';
+import '../../utils/number_parsing.dart';
+
+String _importErrorMessage(AppLocalizations localizations, ImportExportResult result) {
+  switch (result.errorCode) {
+    case ImportExportErrorCode.importFileMissing:
+      return localizations.screensSettingsImportDataFileMissing;
+    case ImportExportErrorCode.importFileTooLarge:
+      return localizations.screensSettingsImportDataFileTooLarge(
+        ImportExportService.maxImportBytes ~/ (1024 * 1024),
+      );
+    case ImportExportErrorCode.importInvalidJson:
+      return localizations.screensSettingsImportDataInvalidJson;
+    case ImportExportErrorCode.importUnsupportedFormat:
+      return localizations.screensSettingsImportDataUnsupportedFormat;
+    case ImportExportErrorCode.importInvalidData:
+      return localizations.screensSettingsImportDataInvalidData;
+    case ImportExportErrorCode.restoreBackupMissing:
+      return localizations.screensSettingsImportDataBackupMissing;
+    case ImportExportErrorCode.restoreBackupUnreadable:
+      return localizations.screensSettingsImportDataBackupUnreadable;
+    case ImportExportErrorCode.restoreSnapshotFailed:
+      return localizations.screensSettingsImportDataSnapshotFailed;
+    case ImportExportErrorCode.restoreRolledBack:
+      return localizations.screensSettingsImportDataRestoreRolledBack;
+    case ImportExportErrorCode.restoreRollbackFailed:
+      return result.filePath == null
+          ? localizations.screensSettingsImportDataRestoreProblem
+          : localizations.screensSettingsImportDataRestoreCopySaved(result.filePath!);
+    case ImportExportErrorCode.restoreFailed:
+      return localizations.screensSettingsImportDataRestoreProblem;
+    case ImportExportErrorCode.importFailed:
+    case ImportExportErrorCode.exportSectionFailed:
+    case ImportExportErrorCode.exportFailed:
+    case null:
+      return localizations.screensSettingsImportDataImportFailed;
+  }
+}
 
 class ImportDataScreen extends StatefulWidget {
   const ImportDataScreen({super.key});
@@ -17,11 +54,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
   bool _hasBackupAvailable = false;
   Map<String, dynamic>? _backupInfo;
   final Set<DataType> _selectedDataTypes = {DataType.dishes, DataType.mealLogs};
-  DuplicateHandling _duplicateHandling = DuplicateHandling.overwrite;
+  DuplicateHandling _duplicateHandling = DuplicateHandling.skip;
   String? _selectedFilePath;
   String? _lastError;
   List<String> _importErrors = [];
-  ImportDetailedResults? _lastResults;
+  ImportExportResult? _lastResult;
   bool _showAdvancedOptions = false;
 
   // Progress tracking
@@ -94,7 +131,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           const SizedBox(height: 24),
           Text(
             _isRestoring
-                ? 'Restoring from backup...'
+                ? AppLocalizations.of(context).screensSettingsImportDataRestoring
                 : AppLocalizations.of(
                   context,
                 ).screensSettingsImportDataImportProgress,
@@ -103,7 +140,10 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           const SizedBox(height: 8),
           if (_totalItems > 0 && !_isRestoring) ...[
             Text(
-              'Processing $_currentProgress of $_totalItems items',
+              AppLocalizations.of(context).screensSettingsImportDataProcessingItems(
+                _currentProgress,
+                _totalItems,
+              ),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -111,7 +151,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             if (_currentType.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
-                'Current: $_currentType',
+                AppLocalizations.of(
+                  context,
+                ).screensSettingsImportDataCurrentType(
+                  _dataTypeName(DataType.values.byName(_currentType)),
+                ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
@@ -121,8 +165,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           ] else
             Text(
               _isRestoring
-                  ? 'Undoing the last import...'
-                  : 'Preparing your data...',
+                  ? AppLocalizations.of(context).screensSettingsImportDataUndoing
+                  : AppLocalizations.of(context).screensSettingsExportDataPreparing,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -153,9 +197,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             const SizedBox(height: 16),
             _buildErrorCard(),
           ],
-          if (_lastResults != null) ...[
+          if (_lastResult != null) ...[
             const SizedBox(height: 16),
-            _buildResultsCard(),
+            ImportResultsCard(result: _lastResult!),
           ],
           const SizedBox(height: 24),
           _buildImportButton(),
@@ -177,7 +221,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 Icon(Icons.file_upload, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  'File Selection',
+                  AppLocalizations.of(context).screensSettingsImportDataFileSelection,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -211,6 +255,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                     ),
                     IconButton(
                       onPressed: () => setState(() => _selectedFilePath = null),
+                      tooltip:
+                          AppLocalizations.of(context).screensSettingsImportDataRemoveFile,
                       icon: Icon(
                         Icons.close,
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -228,7 +274,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 icon: const Icon(Icons.folder_open),
                 label: Text(
                   _selectedFilePath != null
-                      ? 'Change File'
+                      ? AppLocalizations.of(context).screensSettingsImportDataChangeFile
                       : AppLocalizations.of(
                         context,
                       ).screensSettingsImportDataSelectFile,
@@ -240,7 +286,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Supported formats: JSON, CSV',
+              AppLocalizations.of(context).screensSettingsImportDataSupportedFormats,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -263,12 +309,14 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               children: [
                 Icon(Icons.checklist, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  ).screensSettingsImportDataSelectDataToImport,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).screensSettingsImportDataSelectDataToImport,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -313,29 +361,33 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
     switch (dataType) {
       case DataType.dishes:
         title = AppLocalizations.of(context).screensSettingsExportDataDishes;
-        subtitle = 'Your saved recipes and dishes';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataDishesDescription;
         break;
       case DataType.mealLogs:
         title = AppLocalizations.of(context).screensSettingsExportDataMealLogs;
-        subtitle = 'Your meal history and nutrition logs';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataMealLogsDescription;
         break;
       case DataType.userProfiles:
         title =
             AppLocalizations.of(context).screensSettingsExportDataUserProfiles;
-        subtitle = 'User profile and preferences';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataUserProfilesDescription;
         break;
       case DataType.ingredients:
         title =
             AppLocalizations.of(context).componentsChatMessageBubbleIngredients;
-        subtitle = 'Ingredient database';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataIngredientsDescription;
         break;
       case DataType.allData:
         title = AppLocalizations.of(context).screensSettingsExportDataAllData;
-        subtitle = 'Import everything from the file';
+        subtitle = AppLocalizations.of(context).screensSettingsImportDataAllDataDescription;
         break;
-      default:
-        title = dataType.name;
-        subtitle = '';
+      case DataType.supplements:
+        title = AppLocalizations.of(context).screensSettingsExportDataSupplements;
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataSupplementsDescription;
+        break;
+      case DataType.fitnessGoals:
+        title = AppLocalizations.of(context).screensSettingsExportDataNutritionGoalsData;
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataFitnessGoalsDescription;
         break;
     }
 
@@ -380,12 +432,14 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               children: [
                 Icon(Icons.merge_type, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  ).screensSettingsImportDataHowToHandleDuplicates,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).screensSettingsImportDataHowToHandleDuplicates,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -404,8 +458,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                         context,
                       ).screensSettingsImportDataSkipDuplicates,
                     ),
-                    subtitle: const Text(
-                      'Keep existing data, skip imported duplicates',
+                    subtitle: Text(
+                      AppLocalizations.of(context).screensSettingsImportDataSkipDescription,
                     ),
                     value: DuplicateHandling.skip,
                     secondary: const Icon(Icons.skip_next, color: Colors.blue),
@@ -416,24 +470,11 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                         context,
                       ).screensSettingsImportDataOverwriteDuplicates,
                     ),
-                    subtitle: const Text(
-                      'Replace existing data with imported data',
+                    subtitle: Text(
+                      AppLocalizations.of(context).screensSettingsImportDataOverwriteDescription,
                     ),
                     value: DuplicateHandling.overwrite,
                     secondary: const Icon(Icons.update, color: Colors.orange),
-                  ),
-                  RadioListTile<DuplicateHandling>(
-                    title: Text(
-                      AppLocalizations.of(
-                        context,
-                      ).screensSettingsImportDataMergeDuplicates,
-                    ),
-                    subtitle: const Text('Merge data intelligently'),
-                    value: DuplicateHandling.merge,
-                    secondary: const Icon(
-                      Icons.call_merge,
-                      color: Colors.green,
-                    ),
                   ),
                 ],
               ),
@@ -462,7 +503,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                   Icon(Icons.settings, color: Theme.of(context).primaryColor),
                   const SizedBox(width: 8),
                   Text(
-                    'Advanced Options',
+                    AppLocalizations.of(context).screensSettingsImportDataAdvancedOptions,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -480,15 +521,15 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             if (_showAdvancedOptions) ...[
               const SizedBox(height: 16),
               SwitchListTile(
-                title: const Text('Validate data before import'),
-                subtitle: const Text('Check data integrity and show warnings'),
+                title: Text(AppLocalizations.of(context).screensSettingsImportDataValidateBeforeImport),
+                subtitle: Text(AppLocalizations.of(context).screensSettingsImportDataValidateDescription),
                 value: true,
                 onChanged: null, // Always enabled for now
                 secondary: const Icon(Icons.verified, color: Colors.green),
               ),
               SwitchListTile(
-                title: const Text('Create backup before import'),
-                subtitle: const Text('Automatically backup existing data'),
+                title: Text(AppLocalizations.of(context).screensSettingsImportDataBackupBeforeImport),
+                subtitle: Text(AppLocalizations.of(context).screensSettingsImportDataBackupDescription),
                 value: true,
                 onChanged: null, // Always enabled for now
                 secondary: const Icon(Icons.backup, color: Colors.blue),
@@ -517,7 +558,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Import Issues',
+                  AppLocalizations.of(context).screensSettingsImportDataIssues,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onErrorContainer,
@@ -538,7 +579,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             ],
             if (_importErrors.isNotEmpty) ...[
               Text(
-                'Detailed Errors:',
+                AppLocalizations.of(context).screensSettingsImportDataTechnicalDetails,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onErrorContainer,
                   fontWeight: FontWeight.w500,
@@ -571,84 +612,6 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                 ),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResultsCard() {
-    if (_lastResults == null) return const SizedBox.shrink();
-
-    return Card(
-      elevation: 2,
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Import Results',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_lastResults!.fileInfo != null) ...[
-              Row(
-                children: [
-                  Icon(
-                    Icons.description,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'File: ${_lastResults!.fileInfo!.fileName}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-            ...(_lastResults!.summary.entries.map((entry) {
-              final summary = entry.value;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      entry.key,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      '${summary.processed}/${summary.total}',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList()),
           ],
         ),
       ),
@@ -689,6 +652,7 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
         allowMultiple: false,
       );
 
+      if (!mounted) return;
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         if (file.path != null) {
@@ -696,24 +660,40 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             _selectedFilePath = file.path;
             _lastError = null;
             _importErrors.clear();
-            _lastResults = null;
+            _lastResult = null;
           });
         }
       }
     } catch (e) {
+      if (!mounted) return;
+      debugPrint('ImportDataScreen: File selection failed (${e.runtimeType})');
       setState(() {
-        _lastError = 'Error selecting file: $e';
+        _lastError = AppLocalizations.of(context).screensSettingsImportDataFileSelectionProblem;
       });
     }
   }
 
   Future<void> _performImport() async {
     if (_selectedFilePath == null || _selectedDataTypes.isEmpty) return;
+    final filePath = _selectedFilePath!;
+    final dataTypes = _selectedDataTypes.toList();
+    final duplicateHandling = _duplicateHandling;
+    final localizations = AppLocalizations.of(context);
+    final confirmed = await showImportConfirmationDialog(
+      context,
+      sectionNames: dataTypes.map((type) => _dataTypeName(type)).toList(),
+      duplicateHandlingLabel:
+          duplicateHandling == DuplicateHandling.skip
+              ? localizations.screensSettingsImportDataSkipDuplicates
+              : localizations.screensSettingsImportDataOverwriteDuplicates,
+    );
+    if (!mounted || !confirmed) return;
+
     setState(() {
       _isImporting = true;
       _lastError = null;
       _importErrors.clear();
-      _lastResults = null;
+      _lastResult = null;
       _currentProgress = 0;
       _totalItems = 0;
       _currentType = '';
@@ -723,13 +703,17 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       // Create backup before import
       final backupCreated =
           await _importExportService.createBackupBeforeImport();
+      if (!mounted) return;
       if (!backupCreated) {
-        debugPrint('Warning: Failed to create backup before import');
+        setState(() => _isImporting = false);
+        final continueWithoutBackup = await showBackupFailureDialog(context);
+        if (!mounted || !continueWithoutBackup) return;
+        setState(() => _isImporting = true);
       }
       final result = await _importExportService.importData(
-        filePath: _selectedFilePath!,
-        dataTypes: _selectedDataTypes.toList(),
-        duplicateHandling: _duplicateHandling,
+        filePath: filePath,
+        dataTypes: dataTypes,
+        duplicateHandling: duplicateHandling,
         onProgress: (current, total, currentType) {
           if (mounted) {
             setState(() {
@@ -744,51 +728,75 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       if (mounted) {
         setState(() {
           _isImporting = false;
-          _lastResults = result.detailedResults;
+          _lastResult = result;
         });
 
-        if (result.success) {
+        if (result.success || result.isPartial) {
           // Refresh backup availability after successful import
           await _checkBackupAvailability();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  AppLocalizations.of(
-                    context,
-                  ).screensSettingsImportDataImportedItemsCount(
-                    result.itemsProcessed,
-                  ),
+                  result.isPartial
+                      ? AppLocalizations.of(context).screensSettingsImportDataImportedSkipped(
+                        result.itemsProcessed,
+                        result.itemsSkipped,
+                      )
+                      : AppLocalizations.of(
+                        context,
+                      ).screensSettingsImportDataImportedItemsCount(
+                        result.itemsProcessed,
+                      ),
                 ),
-                backgroundColor: Colors.green,
+                backgroundColor: result.isPartial ? Colors.orange : Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
             );
           }
 
-          // Close the screen after successful import
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) Navigator.of(context).pop(true);
-          });
+          if (!result.isPartial) {
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) Navigator.of(context).pop(true);
+            });
+          }
         } else {
           setState(() {
-            _importErrors = result.errors;
-            _lastError =
-                result.errors.isNotEmpty
-                    ? 'Import completed with ${result.errors.length} errors'
-                    : AppLocalizations.of(
-                      context,
-                    ).screensSettingsImportDataImportFailed;
+            _importErrors = result.errorCode == ImportExportErrorCode.importInvalidData
+                ? result.errors
+                : [];
+            _lastError = _importErrorMessage(AppLocalizations.of(context), result);
           });
         }
       }
     } catch (e) {
       if (mounted) {
+        debugPrint('ImportDataScreen: Import failed (${e.runtimeType})');
         setState(() {
           _isImporting = false;
-          _lastError = 'Import failed: $e';
+          _lastError = AppLocalizations.of(context).screensSettingsImportDataImportFailed;
         });
       }
+    }
+  }
+
+  String _dataTypeName(DataType type) {
+    final localizations = AppLocalizations.of(context);
+    switch (type) {
+      case DataType.dishes:
+        return localizations.screensSettingsExportDataDishes;
+      case DataType.mealLogs:
+        return localizations.screensSettingsExportDataMealLogs;
+      case DataType.userProfiles:
+        return localizations.screensSettingsExportDataUserProfiles;
+      case DataType.ingredients:
+        return localizations.componentsChatMessageBubbleIngredients;
+      case DataType.allData:
+        return localizations.screensSettingsExportDataAllData;
+      case DataType.supplements:
+        return localizations.screensSettingsExportDataSupplements;
+      case DataType.fitnessGoals:
+        return localizations.screensSettingsExportDataNutritionGoalsData;
     }
   }
 
@@ -797,9 +805,10 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       return const SizedBox.shrink();
     }
 
+    final locale = Localizations.localeOf(context).toString();
     final backupDate = _backupInfo!['date'] as DateTime;
     final backupSize = _backupInfo!['size'] as int;
-    final formattedSize = (backupSize / 1024).toStringAsFixed(1);
+    final formattedSize = formatDecimal(backupSize / 1024, locale);
 
     return Card(
       elevation: 2,
@@ -816,18 +825,20 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                   color: Theme.of(context).colorScheme.onSecondaryContainer,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Backup Available',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context).screensSettingsImportDataBackupAvailable,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
-              'A backup from your last import is available.',
+              AppLocalizations.of(context).screensSettingsImportDataBackupAvailableDescription,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
@@ -835,31 +846,25 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                ),
+                Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.onSecondaryContainer),
                 const SizedBox(width: 4),
-                Text(
-                  'Created: ${_formatDate(backupDate)}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context).screensSettingsImportDataBackupCreated(_formatDate(backupDate)),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSecondaryContainer),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.storage,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.storage, size: 16, color: Theme.of(context).colorScheme.onSecondaryContainer),
                 const SizedBox(width: 4),
-                Text(
-                  'Size: ${formattedSize}KB',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context).screensSettingsImportDataBackupSize(formattedSize),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSecondaryContainer),
                   ),
                 ),
               ],
@@ -870,9 +875,9 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
               child: ElevatedButton.icon(
                 onPressed: _performRestore,
                 icon: const Icon(Icons.undo),
-                label: const Text(
-                  'Ah Shit, Go Back!',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                label: Text(
+                  AppLocalizations.of(context).screensSettingsImportDataUndoLastImport,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -892,13 +897,13 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
     final difference = now.difference(date);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return AppLocalizations.of(context).screensSettingsHealthSettingsJustNow;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes} minutes ago';
+      return AppLocalizations.of(context).screensSettingsImportDataMinutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return '${difference.inHours} hours ago';
+      return AppLocalizations.of(context).screensSettingsImportDataHoursAgo(difference.inHours);
     } else {
-      return '${difference.inDays} days ago';
+      return AppLocalizations.of(context).screensSettingsImportDataDaysAgo(difference.inDays);
     }
   }
 
@@ -908,15 +913,14 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Restore from Backup'),
-            content: const Text(
-              'This will restore your data to the state before the last import. '
-              'All changes made since then will be lost. Are you sure?',
+            title: Text(AppLocalizations.of(context).screensSettingsImportDataRestoreTitle),
+            content: Text(
+              AppLocalizations.of(context).screensSettingsImportDataRestoreWarning,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context).screensSettingsProfileSettingsResetAppCancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -924,13 +928,13 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
                   backgroundColor: Theme.of(context).colorScheme.error,
                   foregroundColor: Theme.of(context).colorScheme.onError,
                 ),
-                child: const Text('Restore'),
+                child: Text(AppLocalizations.of(context).screensSettingsImportDataRestoreAction),
               ),
             ],
           ),
     );
 
-    if (confirmed != true) return;
+    if (!mounted || confirmed != true) return;
 
     setState(() {
       _isRestoring = true;
@@ -951,8 +955,8 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           await _checkBackupAvailability();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Successfully restored from backup!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).screensSettingsImportDataRestoreSuccess),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -965,18 +969,182 @@ class _ImportDataScreenState extends State<ImportDataScreen> {
           });
         } else {
           setState(() {
-            _lastError = result.message;
-            _importErrors = result.errors;
+            _lastError = _importErrorMessage(AppLocalizations.of(context), result);
+            _importErrors = [];
           });
         }
       }
     } catch (e) {
       if (mounted) {
+        debugPrint('ImportDataScreen: Restore failed (${e.runtimeType})');
         setState(() {
           _isRestoring = false;
-          _lastError = 'Restore failed: $e';
+          _lastError = AppLocalizations.of(context).screensSettingsImportDataRestoreProblem;
         });
       }
     }
   }
 }
+
+/// Summarizes an import without hiding skipped items or their reasons.
+class ImportResultsCard extends StatelessWidget {
+  const ImportResultsCard({super.key, required this.result});
+
+  final ImportExportResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final isPartial = result.isPartial;
+    final details = result.detailedResults;
+    final reasons = <String>{
+      ...?details?.parsingErrors.map((error) => error.error),
+      ...?details?.validationErrors.map((error) => error.error),
+      ...?details?.processingErrors.map((error) => error.error),
+      ...result.errors,
+      ...result.failedSections.map(
+        (section) => localizations.screensSettingsImportDataFailedSection(section),
+      ),
+    }.toList();
+    final colorScheme = Theme.of(context).colorScheme;
+    final foregroundColor =
+        isPartial
+            ? colorScheme.onTertiaryContainer
+            : colorScheme.onPrimaryContainer;
+
+    return Card(
+      elevation: 2,
+      color:
+          isPartial ? colorScheme.tertiaryContainer : colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  isPartial ? Icons.warning_amber_rounded : Icons.check_circle,
+                  color: foregroundColor,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isPartial
+                        ? localizations.screensSettingsImportDataPartialResults
+                        : localizations.screensSettingsImportDataResults,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: foregroundColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (isPartial) ...[
+              Text(
+                localizations.screensSettingsImportDataImportedSkipped(
+                  result.itemsProcessed,
+                  result.itemsSkipped,
+                ),
+              ),
+              if (reasons.isNotEmpty)
+                ExpansionTile(
+                  title: Text(localizations.screensSettingsImportDataShowReasons),
+                  children: [
+                    Text(localizations.screensSettingsImportDataTechnicalDetails),
+                    for (final reason in reasons)
+                      ListTile(dense: true, title: Text(reason)),
+                  ],
+                ),
+            ] else if (!result.success)
+              Text(_importErrorMessage(localizations, result))
+            else
+              Text(
+                localizations.screensSettingsImportDataImportedItemsCount(
+                  result.itemsProcessed,
+                ),
+              ),
+            if (details?.fileInfo != null)
+              Text(
+                localizations.screensSettingsExportDataFileLabel(
+                  details!.fileInfo!.fileName,
+                ),
+              ),
+            for (final entry in details?.summary.entries ?? <MapEntry<String, TypeSummary>>[])
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(entry.key),
+                    Text('${entry.value.processed}/${entry.value.total}'),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Confirms the sections and duplicate strategy before any data is written.
+Future<bool> showImportConfirmationDialog(
+  BuildContext context, {
+  required List<String> sectionNames,
+  required String duplicateHandlingLabel,
+}) async {
+  final localizations = AppLocalizations.of(context);
+  return await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.screensSettingsImportDataConfirmTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(localizations.screensSettingsImportDataSelectedSections),
+            for (final section in sectionNames) Text(section),
+            const SizedBox(height: 12),
+            Text(localizations.screensSettingsImportDataDuplicatesLabel(duplicateHandlingLabel)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(localizations.screensSettingsProfileSettingsResetAppCancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(localizations.screensSettingsImportDataConfirmAction),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
+/// Requires explicit consent when a safety backup could not be created.
+Future<bool> showBackupFailureDialog(BuildContext context) async {
+  final localizations = AppLocalizations.of(context);
+  return await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.screensSettingsImportDataBackupFailedTitle),
+        content: Text(
+          localizations.screensSettingsImportDataBackupFailedDescription,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(localizations.screensSettingsProfileSettingsResetAppCancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(localizations.screensSettingsImportDataContinueWithoutBackup),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }

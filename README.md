@@ -1,262 +1,66 @@
 # PlatePal Tracker
 
-A comprehensive Flutter nutrition tracking application that helps users log meals, track nutrition intake, and achieve their fitness goals through AI-powered insights and personalized recommendations.
+PlatePal Tracker is an open-source, local-first nutrition diary. Log meals, compare daily nutrition with your goals, and keep control of your data without an account.
 
 ## Features
 
-### Core Functionality
-- **Meal Logging**: Easy-to-use interface for logging breakfast, lunch, dinner, and snacks
-- **Nutrition Tracking**: Track calories, proteins, carbs, fats, and micronutrients
-- **Barcode Scanning**: Quickly add food items by scanning product barcodes
-- **AI Chat Assistant**: Get meal suggestions and nutrition advice through ChatGPT integration
-- **Calendar View**: Visual representation of your meal history and nutrition trends
-- **Goal Setting**: Set and track personalized fitness and nutrition goals
-- **Health Connect Integration**: Sync with Google Health Connect (Android) and Apple Health (iOS) for a complete activity + nutrition picture
+- **Meals and dishes:** Create dishes from ingredients and log them for breakfast, lunch, dinner, or snacks. Scan barcodes or search Open Food Facts for products.
+- **Calendar diary:** Review meals and daily calories, protein, carbs, fat, and fiber against your targets; use **Log meal** to add an entry for a selected day.
+- **Personal goals:** Calculate calorie and macro targets from your profile with the Mifflin-St Jeor formula, then customize the macro split.
+- **Statistics:** See weight trends and calorie intake over time.
+- **Optional AI chat:** Bring your own OpenAI or OpenAI-compatible API key for dish suggestions.
+- **Optional health connection:** Read calories burned from Health Connect (Android) or Apple Health (iOS), and write logged meal nutrition with your permission.
+- **Your data:** Export and import JSON or CSV. Imports create a local backup for undo; if backup creation fails, you can choose whether to continue without one.
+- **Your preferences:** Choose English, Spanish, or German and a light, dark, or system theme.
 
-### User Experience
-- **Multi-language Support**: Available in English, Spanish, and German
-- **Dark/Light Theme**: Automatic theme switching based on system preferences
-- **Offline Support**: Continue tracking even without internet connection
-- **Data Export/Import**: Backup and restore your nutrition data
-- **Profile Management**: Customize your dietary preferences and restrictions
+Meal logging and your data work locally. Product lookup, AI chat, and health integrations depend on their respective services and permissions. Nutrition targets and AI suggestions are informational, not medical advice.
 
-### Health Connect & Apple Health
-PlatePal integrates with the platform health data layer to bridge nutrition and activity data:
+## Screenshots
 
-- **Read calories burned** from fitness tracking (active energy + total calories burned)
-- **Write meal nutrition data** automatically to Health Connect / Apple Health after logging
-- **Net calorie balance** displayed in the calendar — consumed vs. actually burned, no estimates
-- **Calorie target recommendations** derived from real energy expenditure
-- **On-demand sync** — data is refreshed on app launch and when visiting the health screen
-- **Connection managed** from Settings → Profile → Manage Health Connect, or via the dedicated Health Connect settings screen
-- When connected, Health Connect becomes the single source of truth for burned calories; estimated values are replaced by real sensor data
-
-**Permissions requested at runtime:**
-| Permission | Access |
-|---|---|
-| `ACTIVE_ENERGY_BURNED` | Read |
-| `TOTAL_CALORIES_BURNED` | Read |
-| `NUTRITION` | Read + Write |
-
-> Health Connect is available on Android 9+ (Play Store install required on Android 9–13; built-in from Android 14). On iOS the same `health` package bridges to Apple Health.
+Store screenshots will be added to `fastlane/metadata/android/en-US/images/phoneScreenshots/`. See the [store image requirements](fastlane/metadata/android/en-US/images/README.md); no screenshots are included yet.
 
 ## Getting Started
 
-### Prerequisites
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (version 3.7.0 or higher)
-- [Dart SDK](https://dart.dev/get-dart) (included with Flutter)
-- Android Studio / VS Code with Flutter extensions
-- A physical device or emulator for testing
+Use [Flutter stable 3.35 or newer](https://docs.flutter.dev/get-started/install) and a configured Android device or emulator (or an iOS development setup). CI installs Flutter from the stable channel. The project declares Dart SDK `^3.7.0`; Flutter includes Dart.
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/platepal-tracker-flutter.git
-   cd platepal-tracker-flutter
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Generate localization files**
-   ```bash
-   flutter gen-l10n
-   ```
-
-4. **Run the application**
-   ```bash
-   flutter run
-   ```
-
-## Project Structure
-
-```
-lib/
-├── components/          # Reusable UI components
-│   ├── animations/      # Custom animations and transitions
-│   ├── calendar/        # Calendar-specific components
-│   │   ├── calendar_day_detail.dart
-│   │   └── macro_summary.dart
-│   ├── chat/            # Chat interface components
-│   │   ├── agent_steps_modal.dart
-│   │   ├── bot_profile_customization_dialog.dart
-│   │   ├── chat_input.dart
-│   │   ├── chat_welcome.dart
-│   │   ├── dish_suggestion_card.dart
-│   │   ├── message_bubble.dart
-│   │   ├── nutrition_analysis_card.dart
-│   │   ├── quick_actions.dart
-│   │   └── user_profile_customization_dialog.dart
-│   ├── dishes/          # Meal and dish related components
-│   │   ├── dish_card.dart
-│   │   └── dish_form/
-│   │       ├── ingredient_form_modal.dart
-│   │       └── smart_nutrition_card.dart
-│   ├── meals/           # Meal-related components
-│   │   └── meal_card.dart
-│   ├── modals/          # Shared modal dialogs
-│   │   └── dish_log_modal.dart
-│   ├── scanner/         # Barcode scanning components
-│   │   ├── barcode_scanner_screen.dart
-│   │   └── product_search_screen.dart
-│   ├── shared/          # Shared small components
-│   │   └── error_display.dart
-│   └── ui/              # Generic UI components
-│       └── custom_tab_bar.dart
-├── constants/           # App-wide constants and configuration
-├── models/              # Data models and classes
-├── providers/           # State management (Provider pattern)
-│   └── chat_provider.dart
-├── repositories/        # Data access layer
-├── screens/             # Application screens
-│   ├── onboarding/      # Initial user setup screens
-│   ├── tabs/            # Main tab navigation screens
-│   ├── calendar_screen.dart
-│   ├── chat_screen.dart
-│   ├── dish_create_screen.dart
-│   ├── home_screen.dart
-│   ├── meals_screen.dart
-│   ├── menu_screen.dart
-│   └── settings/
-│       ├── about_screen.dart
-│       ├── api_key_settings_screen.dart
-│       ├── chat_agent_settings_screen.dart
-│       ├── contributors_screen.dart
-│       ├── export_data_screen.dart
-│       ├── health_settings_screen.dart
-│       ├── import_data_screen.dart
-│       ├── import_profile_completion_screen.dart
-│       ├── macro_customization_screen.dart
-│       ├── profile_settings_screen.dart
-│       └── statistics_screen.dart
-├── services/            # Business logic and external services
-│   ├── api/             # API integration (GPT, nutrition databases)
-│   ├── auth/            # Authentication services
-│   ├── chat/            # AI chat functionality
-│   ├── health_service.dart          # Health Connect / Apple Health integration
-│   ├── calorie_expenditure_service.dart  # Net calorie calculations
-│   └── storage/         # Local data storage
-├── themes/              # App theming and styling
-├── types/               # Type definitions and interfaces
-└── utils/               # Helper functions and utilities
-```
-
-## Development
-
-### Code Organization
-- **Models**: Define data structures using Dart classes with JSON serialization
-- **Providers**: Manage application state using the Provider pattern
-- **Services**: Handle business logic, API calls, and data processing
-- **Components**: Build reusable UI components following Material Design principles
-- **Screens**: Implement full-screen views with proper navigation handling
-
-### State Management
-This project uses the **Provider** pattern for state management:
-- `MealProvider`: Manages meal logging and dish data
-- `LocaleProvider`: Handles language and localization settings
-- Additional providers for user profile, settings, and chat functionality
-
-### Localization
-The app supports multiple languages using Flutter's built-in internationalization:
-- ARB files located in `lib/l10n/`
-- Generated localization code in `.dart_tool/flutter_gen/gen_l10n/`
-- Language switching available in settings
-
-### Navigation
-Uses **GoRouter** for declarative routing:
-- Type-safe navigation
-- Deep linking support
-- Nested routing for complex navigation structures
-
-## Configuration
-
-### API Keys
-For full functionality, you'll need to configure API keys:
-
-1. **OpenAI API Key** (for AI chat features)
-   - Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-   - Add to your app's settings or environment configuration
-
-2. **Open Food Facts API** (for barcode scanning)
-   - Free API for food product information
-   - No API key required for basic usage
-   - Website: [Open Food Facts](https://de.openfoodfacts.org/)
-
-3. **Health Connect / Apple Health** (for activity data)
-   - No API key required — permissions are granted by the user at runtime
-   - Android: Install [Health Connect](https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata) from the Play Store (pre-installed on Android 14+)
-   - iOS: Uses Apple HealthKit — no additional app required
-
-### Environment Setup
-Create a `.env` file in the project root (not included in version control):
-```
-OPENAI_API_KEY=your_openai_api_key_here
-```
-
-## Testing
-
-### Running Tests
 ```bash
-# Run all tests
-flutter test
-
-# Run tests with coverage
-flutter test --coverage
-
-# Run specific test file
-flutter test test/models/dish_test.dart
+git clone https://github.com/MrLappes/platepal-tracker-flutter.git
+cd platepal-tracker-flutter
+flutter pub get
+flutter gen-l10n
+flutter run
 ```
 
-### Test Structure
-- **Unit Tests**: Test business logic and data models
-- **Widget Tests**: Test UI components in isolation
-- **Integration Tests**: Test complete user workflows
+Run the tests with `flutter test`. App code lives in `lib/`, localization sources in `lib/l10n/`, and unit/widget tests in `test/`.
 
-## Platform Support
+## AI Setup
 
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Android  | Full Support | Minimum SDK: API 21 (Android 5.0); Health Connect requires Android 9+ |
-| iOS      | Full Support | Minimum Version: iOS 12.0; Apple Health integration via the `health` package |
-| Web      | Limited | Basic functionality; Health Connect not available |
+AI chat is optional. In the app's API key settings, enter your own OpenAI API key or an API key for an OpenAI-compatible service and choose a model. The key is kept in platform secure storage; no project-root `.env` file is needed. Custom endpoints must use HTTPS; HTTP is allowed only for local development hosts (localhost, loopback, or the Android emulator's `10.0.2.2` alias). Provider charges and their own privacy terms may apply. Scanning/searching Open Food Facts does not require an OpenAI key.
+
+## Health Connect and Apple Health
+
+With your permission, PlatePal reads calories burned and writes nutrition from logged meals to Health Connect on Android or Apple Health on iOS. On Android it reads total and active energy when available; on iOS it reads active and basal energy. Availability depends on the device and health service configuration. Health access is optional and does not require an API key.
+
+## Privacy
+
+There is no account, advertising, or tracking. Meals, profile information, and settings are stored locally, but optional AI chat sends relevant messages and context to the chosen provider, and product searches/barcodes go to Open Food Facts. Platform backups may also copy local data. Read the [privacy policy](PRIVACY.md) for details and deletion guidance.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-- Follow the existing code style and architecture
-- Add tests for new functionality
-- Update documentation as needed
-- Ensure all tests pass before submitting PR
-- Use meaningful commit messages
+Open an issue to discuss bugs or proposed changes. To contribute code, fork the repository, work on a feature branch, add or update relevant tests and localization strings, run `flutter test` and `flutter analyze`, then open a pull request.
 
 ## License
 
-This project is licensed under the GPL 2.0 License - see the [LICENSE](LICENSE) file for details.
+PlatePal Tracker is licensed under GPL-2.0. See [LICENSE](LICENSE).
 
 ## Acknowledgments
 
 - Flutter team for the framework
-- OpenAI for AI-powered features
-- Open Food Facts for nutrition database
-- Material Design for UI/UX guidelines
-- Community contributors and testers
+- OpenAI for the optional AI integration
+- Open Food Facts for product data
+- Material Design for UI guidelines
+- Community contributors
 
 ## Support
 
-If you encounter any issues or have questions:
-- Open an issue on GitHub
-- Check the documentation
-- Join community discussions
-
----
-
-Happy tracking.
+For problems or questions, [open an issue](https://github.com/MrLappes/platepal-tracker-flutter/issues).

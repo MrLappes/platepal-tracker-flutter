@@ -3,22 +3,25 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'services/health_service.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/meals_screen.dart';
+import 'screens/dish_create_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/settings/about_screen.dart';
 import 'screens/settings/api_key_settings_screen.dart';
+import 'screens/settings/macro_customization_screen.dart';
 import 'screens/settings/profile_settings_screen.dart';
 import 'screens/settings/statistics_screen.dart';
-import 'screens/settings/nutrition_goals_screen.dart';
 import 'screens/settings/contributors_screen.dart';
 import 'screens/settings/export_data_screen.dart';
 import 'screens/settings/import_data_screen.dart';
 import 'screens/settings/chat_agent_settings_screen.dart';
 import 'screens/settings/health_settings_screen.dart';
+import 'screens/settings/privacy_policy_screen.dart';
 import 'providers/meal_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -26,16 +29,17 @@ import 'providers/chat_provider.dart';
 import 'providers/storage_provider.dart';
 import 'providers/app_state_provider.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
   _initHealthOnLaunch(); // fire-and-forget
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(prefs: prefs)),
         ChangeNotifierProvider(create: (_) => MealProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider(prefs: prefs)),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AppStateProvider()),
       ],
@@ -64,11 +68,23 @@ class PlatePalApp extends StatelessWidget {
     return Consumer2<LocaleProvider, ThemeProvider>(
       builder: (context, localeProvider, themeProvider, child) {
         return MaterialApp.router(
-          title: 'PlatePal Tracker',
-          theme: themeProvider.materialTheme,
-          darkTheme: themeProvider.materialTheme,
+          debugShowCheckedModeBanner: false,
+          onGenerateTitle:
+              (context) => AppLocalizations.of(context).screensHomeAppTitle,
+          theme: themeProvider.lightTheme,
+          darkTheme: themeProvider.darkTheme,
           themeMode: _getThemeMode(themeProvider.themePreference),
-          locale: localeProvider.locale,
+          locale: localeProvider.selectedLocale,
+          localeResolutionCallback: (locale, supportedLocales) {
+            if (locale != null) {
+              for (final supportedLocale in supportedLocales) {
+                if (supportedLocale.languageCode == locale.languageCode) {
+                  return supportedLocale;
+                }
+              }
+            }
+            return const Locale('en');
+          },
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -101,7 +117,15 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const MainNavigationScreen(),
     ),
     GoRoute(path: '/meals', builder: (context, state) => const MealsScreen()),
+    GoRoute(
+      path: '/dishes/create',
+      builder: (context, state) => const DishCreateScreenAdvanced(),
+    ),
     GoRoute(path: '/menu', builder: (context, state) => const MenuScreen()),
+    GoRoute(
+      path: '/privacy',
+      builder: (context, state) => const PrivacyPolicyScreen(),
+    ),
     GoRoute(
       path: '/calendar',
       builder: (context, state) => const CalendarScreen(),
@@ -124,8 +148,8 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const ProfileSettingsScreen(),
     ),
     GoRoute(
-      path: '/settings/nutrition-goals',
-      builder: (context, state) => const NutritionGoalsScreen(),
+      path: '/settings/macro-customization',
+      builder: (context, state) => const MacroCustomizationScreen(),
     ),
     GoRoute(
       path: '/settings/contributors',

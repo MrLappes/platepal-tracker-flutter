@@ -91,9 +91,7 @@ class DishProcessingStep extends AgentStep {
       for (int i = 0; i < dishesData.length; i++) {
         try {
           final dishData = dishesData[i] as Map<String, dynamic>;
-          debugPrint(
-            '   Processing dish ${i + 1}: ${dishData['name'] ?? dishData['dishName']}',
-          );
+          debugPrint('   Processing dish ${i + 1}');
 
           // If the AI referenced an existing DB dish by id (or minimal record),
           // attempt to load the full dish from the local DishService so we can
@@ -117,12 +115,12 @@ class DishProcessingStep extends AgentStep {
 
           if (processedDish != null) {
             validatedDishes.add(processedDish);
-            debugPrint('   ✅ Successfully processed: ${processedDish.name}');
+            debugPrint('   ✅ Successfully processed: ${processedDish.id}');
           } else {
             final dishName =
                 dishData['name'] ?? dishData['dishName'] ?? 'Unknown dish';
             processingErrors.add('Failed to process dish: $dishName');
-            debugPrint('   ❌ Failed to process: $dishName');
+            debugPrint('   ❌ Failed to process dish ${i + 1}');
           }
         } catch (dishError) {
           processingErrors.add('Error processing dish ${i + 1}: $dishError');
@@ -401,7 +399,7 @@ class DishProcessingStep extends AgentStep {
 
       // Save the dish (if dish service supports ProcessedDish)
       // await _dishService.saveDish(dish);
-      debugPrint('✅ Created new dish: ${dish.name}');
+      debugPrint('✅ Created new dish: ${dish.id}');
 
       return dish;
     } catch (error) {
@@ -681,12 +679,8 @@ class DishProcessingStep extends AgentStep {
       }
     }
     debugPrint(
-      '📊 Calculated nutrition from ${ingredients.length} ingredients (per-100g values multiplied by amounts):',
+      '📊 Calculated nutrition from ${ingredients.length} ingredients',
     );
-    debugPrint('   Calories: ${totalCalories.toStringAsFixed(1)}');
-    debugPrint('   Protein: ${totalProtein.toStringAsFixed(1)}g');
-    debugPrint('   Carbs: ${totalCarbs.toStringAsFixed(1)}g');
-    debugPrint('   Fat: ${totalFat.toStringAsFixed(1)}g');
 
     return BasicNutrition(
       calories: totalCalories,
@@ -803,7 +797,7 @@ class DishProcessingStep extends AgentStep {
       }
 
       debugPrint(
-        '🔍 _tryLoadDishFromDatabaseReference: Loaded DB dish: ${storageDish.name} (${storageDish.id})',
+        '🔍 _tryLoadDishFromDatabaseReference: Loaded DB dish ${storageDish.id}',
       );
 
       // Convert storage Ingredient → FoodIngredient

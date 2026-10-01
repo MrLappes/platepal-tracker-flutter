@@ -16,7 +16,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   late ChatProvider _chatProvider;
   bool _isUserAtBottom =
@@ -25,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _chatProvider = ChatProvider();
 
     // Listen to user scroll to detect if they scrolled up (so we don't force-scroll)
@@ -36,12 +37,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.removeListener(_onScroll);
     _chatProvider.removeListener(_onMessagesUpdated);
     _scrollController.dispose();
     // Dispose provider instance we created locally
     _chatProvider.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _chatProvider.refreshApiKeyConfiguration();
+    }
   }
 
   @override
@@ -105,7 +114,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 8),
-                              Text('Edit Profile'),
+                              Text(
+                                localizations
+                                    .componentsChatUserProfileCustomizationDialogEditUserProfile,
+                              ),
                             ],
                           ),
                         ),
@@ -201,6 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildNoApiKeyState(BuildContext context) {
     final theme = Theme.of(context);
     final localizations = AppLocalizations.of(context);
+    final readFailed = _chatProvider.apiKeyReadFailed;
 
     return Container(
       decoration: BoxDecoration(
@@ -234,14 +247,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.key_off,
+                  readFailed ? Icons.error_outline : Icons.key_off,
                   size: 60,
                   color: theme.colorScheme.onPrimary,
                 ),
               ),
               const SizedBox(height: 32),
               Text(
-                localizations.screensChatNoApiKeyConfigured,
+                readFailed
+                    ? localizations.screensChatApiKeyReadFailedTitle
+                    : localizations.screensChatNoApiKeyConfigured,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -249,7 +264,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.screensChatConfigureApiKeyToUseChat,
+                readFailed
+                    ? localizations.screensChatApiKeyReadFailedMessage
+                    : localizations.screensChatConfigureApiKeyToUseChat,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -257,36 +274,14 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 40),
               ElevatedButton.icon(
-                onPressed: () {
-                  context.push('/settings/api-key');
+                onPressed: () async {
+                  await context.push('/settings/api-key');
+                  if (!mounted) return;
+                  await _chatProvider.refreshApiKeyConfiguration();
                 },
                 icon: const Icon(Icons.settings),
                 label: Text(localizations.screensChatConfigureApiKeyButton),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () {
-                  _chatProvider.refreshApiKeyConfiguration();
-                  // Show loading indicator
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(localizations.screensChatLoading),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(localizations.screensChatReloadApiKeyButton),
-                style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,
@@ -331,7 +326,10 @@ class _ChatScreenState extends State<ChatScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final currentStep = chatProvider.currentAgentStep;
-    final message = chatProvider.currentTypingMessage ?? 'AI is thinking...';
+    final localizations = AppLocalizations.of(context);
+    final message =
+        chatProvider.currentTypingMessage ??
+        localizations.providersChatProviderAiThinking;
     final thinkingSteps = chatProvider.currentThinkingSteps;
 
     return Container(
@@ -354,7 +352,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(width: 12),
               Text(
-                'SYSTEM ANALYZING ::',
+                localizations.screensChatSystemAnalyzing,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w900,
@@ -487,10 +485,31 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onMessagesUpdated() {
     if (!mounted) return;
+    _showPendingNotices();
     // If user is at/near bottom, attempt to scroll to bottom. Use multiple attempts to
     // handle layout changes (e.g. thinking indicator or images that change the extent after build).
     if (_isUserAtBottom) {
       _scrollToBottom(retryAttempts: 3);
+    }
+  }
+
+  void _showPendingNotices() {
+    final notices = _chatProvider.takeNotices();
+    if (notices.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    for (final notice in notices) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(switch (notice) {
+            ChatNotice.historyLoadFailed => l10n.screensChatHistoryLoadFailed,
+            ChatNotice.historySaveFailed => l10n.screensChatHistorySaveFailed,
+            ChatNotice.settingsFailed => l10n.screensChatSettingsFailed,
+            ChatNotice.profilesLoadFailed => l10n.screensChatProfilesLoadFailed,
+            ChatNotice.profileSaveFailed => l10n.screensChatProfileSaveFailed,
+          }),
+        ),
+      );
     }
   }
 

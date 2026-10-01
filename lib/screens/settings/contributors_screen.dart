@@ -135,6 +135,8 @@ class _ContributorsScreenState extends State<ContributorsScreen>
                 ),
                 if (contributor.github != null)
                   IconButton(
+                    tooltip: AppLocalizations.of(context).screensSettingsContributorsOpenGitHubProfile(contributor.name),
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                     onPressed:
                         () => LinkHandler.openGitHubProfile(
                           context,
@@ -173,6 +175,8 @@ class _ContributorsScreenState extends State<ContributorsScreen>
         title: Text('${l10n.screensMenuContributors.toUpperCase()} //'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

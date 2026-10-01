@@ -1,5 +1,26 @@
 {
   "@@locale": "en",
+  "screensCalendarHasMealsLogged": "has meals logged",
+  "@screensCalendarHasMealsLogged": {"description": "Appended to a calendar day's accessible date when meals are logged"},
+  "screensCalendarFailedToLoadDates": "Could not load calendar dates",
+  "@screensCalendarFailedToLoadDates": {"description": "Error loading meal markers for the visible week"},
+  "screensCalendarFailedToLoadSummary": "Could not load nutrition summary",
+  "@screensCalendarFailedToLoadSummary": {"description": "Error loading the selected day's nutrition summary"},
+  "screensCalendarProfileNudge": "Set up your profile to get daily targets",
+  "@screensCalendarProfileNudge": {"description": "Calendar prompt shown when there is no calorie target"},
+  "screensCalendarSetUpProfile": "Set up profile",
+  "@screensCalendarSetUpProfile": {"description": "Opens profile settings from the calendar"},
+  "screensCalendarLogMeal": "Log meal",
+  "@screensCalendarLogMeal": {"description": "Opens the calendar quick-log dish picker"},
+  "screensCalendarCaloriesPerServing": "{calories} kcal per serving",
+  "@screensCalendarCaloriesPerServing": {
+    "description": "Calories in a dish serving in the calendar picker",
+    "placeholders": {"calories": {"type": "int"}}
+  },
+  "componentsCalendarCalendarDayDetailErrorLoadingMeals": "Could not load meals for this day",
+  "@componentsCalendarCalendarDayDetailErrorLoadingMeals": {
+    "description": "Error shown when the selected day's meal logs cannot be loaded"
+  },
   "componentsCalendarCalendarDayDetailNoMealsLoggedForDay": "No meals logged for this day",
   "@componentsCalendarCalendarDayDetailNoMealsLoggedForDay": {
     "description": "Message shown when no meals are logged for selected day"
@@ -44,6 +65,10 @@
   "@componentsCalendarMacroSummaryGetAiTip": {
     "description": "Button text to get AI nutrition tip"
   },
+  "componentsCalendarMacroSummaryPercentOfGoal": "{percent}% of goal",
+  "@componentsCalendarMacroSummaryPercentOfGoal": {"description": "Progress toward a daily nutrition goal", "placeholders": {"percent": {"type": "int"}}},
+  "componentsCalendarMacroSummaryOverBy": "Over goal by {amount} {unit}",
+  "@componentsCalendarMacroSummaryOverBy": {"description": "Nutrition amount above a daily goal", "placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}}},
   "componentsCalendarMacroSummaryHealthDataMessage": "This data was gathered from health data on your phone, providing accurate calories burned information from your fitness activities for this complete day.",
   "@componentsCalendarMacroSummaryHealthDataMessage": {
     "description": "Message explaining health data source for complete days"
@@ -67,10 +92,6 @@
   "componentsCalendarMacroSummaryProtein": "Protein",
   "@componentsCalendarMacroSummaryProtein": {
     "description": "Protein label"
-  },
-  "componentsCalendarMacroSummaryCompactCalories": "Cal",
-  "@componentsCalendarMacroSummaryCompactCalories": {
-    "description": "Short label for calories used in compact macro view"
   },
   "componentsCalendarMacroSummaryCompactProtein": "Protein",
   "@componentsCalendarMacroSummaryCompactProtein": {
@@ -330,6 +351,22 @@
   "@componentsChatAgentStepsModalFailed": {
     "description": "Generic failed label"
   },
+  "componentsChatAgentStepsModalSeverityLow": "Low",
+  "@componentsChatAgentStepsModalSeverityLow": {
+    "description": "Low severity label for agent modifications"
+  },
+  "componentsChatAgentStepsModalSeverityMedium": "Medium",
+  "@componentsChatAgentStepsModalSeverityMedium": {
+    "description": "Medium severity label for agent modifications"
+  },
+  "componentsChatAgentStepsModalSeverityHigh": "High",
+  "@componentsChatAgentStepsModalSeverityHigh": {
+    "description": "High severity label for agent modifications"
+  },
+  "componentsChatAgentStepsModalSeverityCritical": "Critical",
+  "@componentsChatAgentStepsModalSeverityCritical": {
+    "description": "Critical severity label for agent modifications"
+  },
   "componentsChatAgentStepsModalBadgeEmergencyOverrides": "Emergency overrides",
   "@componentsChatAgentStepsModalBadgeEmergencyOverrides": {
     "description": "Label for emergency override badge"
@@ -388,6 +425,33 @@
         "type": "String"
       }
     }
+  },
+  "componentsChatAgentStepsModalUnknownStep": "Unknown Step",
+  "@componentsChatAgentStepsModalUnknownStep": {
+    "description": "Fallback label when a processing step has no name"
+  },
+  "componentsChatAgentStepsModalNoReasonProvided": "No reason provided",
+  "@componentsChatAgentStepsModalNoReasonProvided": {
+    "description": "Fallback explanation for a skipped processing step"
+  },
+  "componentsChatAgentStepsModalNoSummaryAvailable": "No summary available",
+  "@componentsChatAgentStepsModalNoSummaryAvailable": {
+    "description": "Fallback when a processing step has no modification summary"
+  },
+  "componentsChatAgentStepsModalListItems": "List with {count} items",
+  "@componentsChatAgentStepsModalListItems": {
+    "description": "Summary of a list value in agent data",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMapKeys": "Map with {count} keys",
+  "@componentsChatAgentStepsModalMapKeys": {
+    "description": "Summary of a map value in agent data",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsChatAgentStepsModalMoreItems": "... and {count} more items",
+  "@componentsChatAgentStepsModalMoreItems": {
+    "description": "Summary of additional hidden agent data entries",
+    "placeholders": {"count": {"type": "int"}}
   },
   "componentsCommonCopyToClipboard": "Copy to clipboard",
   "@componentsCommonCopyToClipboard": {
@@ -534,6 +598,16 @@
   "componentsChatChatInputIngredientsAdded": "Ingredients Added",
   "@componentsChatChatInputIngredientsAdded": {
     "description": "Label for added ingredients preview in chat"
+  },
+  "componentsChatChatInputRemoveIngredient": "Remove {name}",
+  "@componentsChatChatInputRemoveIngredient": {"description": "Tooltip for removing an attached chat ingredient", "placeholders": {"name": {"type": "String"}}},
+  "componentsChatChatInputIngredientAdded": "Ingredient added to chat",
+  "@componentsChatChatInputIngredientAdded": {
+    "description": "Confirmation after adding a product as a chat ingredient"
+  },
+  "componentsChatChatInputAttachments": "Add attachments",
+  "@componentsChatChatInputAttachments": {
+    "description": "Accessibility label for opening the chat attachment menu"
   },
   "componentsChatChatInputScanBarcode": "Scan Barcode",
   "@componentsChatChatInputScanBarcode": {
@@ -682,29 +756,13 @@
   "@componentsChatMessageBubbleYesterday": {
     "description": "Label for yesterday in date formatting"
   },
-  "componentsChatNutritionAnalysisCardAddToMeals": "Add to Meals",
-  "@componentsChatNutritionAnalysisCardAddToMeals": {
-    "description": "Add to meals button text"
-  },
-  "componentsChatNutritionAnalysisCardCookingInstructions": "Cooking Instructions",
-  "@componentsChatNutritionAnalysisCardCookingInstructions": {
-    "description": "Cooking instructions label"
-  },
   "componentsChatNutritionAnalysisCardDishName": "Dish Name",
   "@componentsChatNutritionAnalysisCardDishName": {
     "description": "Dish name label"
   },
-  "componentsChatNutritionAnalysisCardMealType": "Meal Type",
-  "@componentsChatNutritionAnalysisCardMealType": {
-    "description": "Meal type label"
-  },
   "componentsChatNutritionAnalysisCardNutritionAnalysis": "Nutrition Analysis",
   "@componentsChatNutritionAnalysisCardNutritionAnalysis": {
     "description": "Nutrition analysis section title"
-  },
-  "componentsChatNutritionAnalysisCardServingSize": "Serving Size",
-  "@componentsChatNutritionAnalysisCardServingSize": {
-    "description": "Serving size label"
   },
   "componentsChatQuickActionsQuickActions": "Quick Actions",
   "@componentsChatQuickActionsQuickActions": {
@@ -830,6 +888,10 @@
   "@componentsModalsDishLogModalSelectMealType": {
     "description": "Label for meal type selection"
   },
+  "componentsModalsDishLogModalSelectTime": "Select Time",
+  "@componentsModalsDishLogModalSelectTime": {
+    "description": "Label for selecting the time of a dish log"
+  },
   "componentsModalsDishLogModalSnack": "Snack",
   "@componentsModalsDishLogModalSnack": {
     "description": "Snack meal type"
@@ -863,6 +925,33 @@
   "componentsScannerBarcodeScannerScanningBarcode": "Scanning barcode...",
   "@componentsScannerBarcodeScannerScanningBarcode": {
     "description": "Status message while scanning"
+  },
+  "componentsScannerBarcodeScannerClose": "Close",
+  "@componentsScannerBarcodeScannerClose": {
+    "description": "Close scanner after camera permission is denied"
+  },
+  "componentsScannerBarcodeScannerPermissionHint": "Allow camera access for this app in system settings.",
+  "@componentsScannerBarcodeScannerPermissionHint": {
+    "description": "Instructions when camera permission is denied"
+  },
+  "componentsScannerBarcodeScannerScannerError": "Scanner error: {errorCode}",
+  "@componentsScannerBarcodeScannerScannerError": {
+    "description": "Camera scanner error",
+    "placeholders": {
+      "errorCode": {"type": "String"}
+    }
+  },
+  "componentsScannerBarcodeScannerServiceUnavailable": "Food data is unavailable. Try again.",
+  "@componentsScannerBarcodeScannerServiceUnavailable": {
+    "description": "Barcode product service failed"
+  },
+  "componentsScannerBarcodeScannerTorchOn": "Turn flashlight on",
+  "@componentsScannerBarcodeScannerTorchOn": {
+    "description": "Turn on the scanner flashlight"
+  },
+  "componentsScannerBarcodeScannerTorchOff": "Turn flashlight off",
+  "@componentsScannerBarcodeScannerTorchOff": {
+    "description": "Turn off the scanner flashlight"
   },
   "componentsScannerProductSearchErrorSearchingProduct": "Error searching for product: {error}",
   "@componentsScannerProductSearchErrorSearchingProduct": {
@@ -898,6 +987,101 @@
   "@componentsScannerProductSearchSearchProducts": {
     "description": "Placeholder text for product search"
   },
+  "componentsScannerProductSearchFiltersAndSort": "Filters & Sort",
+  "@componentsScannerProductSearchFiltersAndSort": {"description": "Open product filters and sorting"},
+  "componentsScannerProductSearchNutriScore": "NUTRI-SCORE",
+  "@componentsScannerProductSearchNutriScore": {"description": "Nutrition grade filter heading"},
+  "componentsScannerProductSearchAny": "Any",
+  "@componentsScannerProductSearchAny": {"description": "Any nutrition grade"},
+  "componentsScannerProductSearchSortBy": "Sort by",
+  "@componentsScannerProductSearchSortBy": {"description": "Sorting heading"},
+  "componentsScannerProductSearchPopular": "Popular",
+  "@componentsScannerProductSearchPopular": {"description": "Popular products section"},
+  "componentsScannerProductSearchResultsFor": "Results for \"{query}\"",
+  "@componentsScannerProductSearchResultsFor": {
+    "description": "Search results heading",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "componentsScannerProductSearchMyDatabase": "My database",
+  "@componentsScannerProductSearchMyDatabase": {"description": "Locally saved items section"},
+  "componentsScannerProductSearchGlobalFeed": "Global feed",
+  "@componentsScannerProductSearchGlobalFeed": {"description": "Open Food Facts products section"},
+  "componentsScannerProductSearchEndOfResults": "End of results",
+  "@componentsScannerProductSearchEndOfResults": {"description": "Last page of search results"},
+  "componentsScannerProductSearchSelectCategoryOrSearch": "Select a category or type to search",
+  "@componentsScannerProductSearchSelectCategoryOrSearch": {"description": "Empty browse screen prompt"},
+  "componentsScannerProductSearchNoResultsFor": "No results for \"{query}\"",
+  "@componentsScannerProductSearchNoResultsFor": {
+    "description": "Empty search results prompt",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "componentsScannerProductSearchUnknown": "Unknown",
+  "@componentsScannerProductSearchUnknown": {"description": "Unnamed product"},
+  "componentsScannerProductSearchKcal": "kcal",
+  "@componentsScannerProductSearchKcal": {"description": "Calories unit"},
+  "componentsScannerProductSearchProteinAbbreviation": "P:",
+  "@componentsScannerProductSearchProteinAbbreviation": {"description": "Protein abbreviation in result summaries"},
+  "componentsScannerProductSearchCarbsAbbreviation": "C:",
+  "@componentsScannerProductSearchCarbsAbbreviation": {"description": "Carbohydrate abbreviation in result summaries"},
+  "componentsScannerProductSearchFatAbbreviation": "F:",
+  "@componentsScannerProductSearchFatAbbreviation": {"description": "Fat abbreviation in result summaries"},
+  "componentsScannerProductSearchGramsAbbreviation": "g",
+  "@componentsScannerProductSearchGramsAbbreviation": {"description": "Gram unit in result summaries"},
+  "componentsScannerProductSearchIngredient": "Ingredient",
+  "@componentsScannerProductSearchIngredient": {"description": "Local ingredient result type"},
+  "componentsScannerProductSearchDishIngredients": "{count, plural, =1{1 ingredient — dish} other{{count} ingredients — dish}}",
+  "@componentsScannerProductSearchDishIngredients": {
+    "description": "Number of ingredients in a local dish result",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "componentsScannerProductSearchBrowseUnavailable": "Products are unavailable. Try again.",
+  "@componentsScannerProductSearchBrowseUnavailable": {"description": "Failed to load browse results"},
+  "componentsScannerProductSearchUnknownProduct": "Unknown product",
+  "@componentsScannerProductSearchUnknownProduct": {"description": "Name of a product with no identifying data"},
+  "componentsScannerProductSearchCategoryAll": "All",
+  "@componentsScannerProductSearchCategoryAll": {"description": "All product categories"},
+  "componentsScannerProductSearchCategoryFruits": "Fruits",
+  "@componentsScannerProductSearchCategoryFruits": {"description": "Fruit category"},
+  "componentsScannerProductSearchCategoryVegetables": "Vegetables",
+  "@componentsScannerProductSearchCategoryVegetables": {"description": "Vegetable category"},
+  "componentsScannerProductSearchCategoryDairy": "Dairy",
+  "@componentsScannerProductSearchCategoryDairy": {"description": "Dairy category"},
+  "componentsScannerProductSearchCategoryMeat": "Meat",
+  "@componentsScannerProductSearchCategoryMeat": {"description": "Meat category"},
+  "componentsScannerProductSearchCategorySeafood": "Seafood",
+  "@componentsScannerProductSearchCategorySeafood": {"description": "Seafood category"},
+  "componentsScannerProductSearchCategoryBeverages": "Beverages",
+  "@componentsScannerProductSearchCategoryBeverages": {"description": "Beverage category"},
+  "componentsScannerProductSearchCategoryCereals": "Cereals",
+  "@componentsScannerProductSearchCategoryCereals": {"description": "Cereal category"},
+  "componentsScannerProductSearchCategoryBreads": "Breads",
+  "@componentsScannerProductSearchCategoryBreads": {"description": "Bread category"},
+  "componentsScannerProductSearchCategorySnacks": "Snacks",
+  "@componentsScannerProductSearchCategorySnacks": {"description": "Snack category"},
+  "componentsScannerProductSearchCategorySweets": "Sweets",
+  "@componentsScannerProductSearchCategorySweets": {"description": "Sweets category"},
+  "componentsScannerProductSearchCategoryLegumes": "Legumes",
+  "@componentsScannerProductSearchCategoryLegumes": {"description": "Legume category"},
+  "componentsScannerProductSearchCategoryNuts": "Nuts",
+  "@componentsScannerProductSearchCategoryNuts": {"description": "Nut category"},
+  "componentsScannerProductSearchCategoryCondiments": "Condiments",
+  "@componentsScannerProductSearchCategoryCondiments": {"description": "Condiment category"},
+  "componentsScannerProductSearchCategoryOilsAndFats": "Oils & Fats",
+  "@componentsScannerProductSearchCategoryOilsAndFats": {"description": "Oil and fat category"},
+  "componentsScannerProductSearchCategoryFrozen": "Frozen",
+  "@componentsScannerProductSearchCategoryFrozen": {"description": "Frozen foods category"},
+  "componentsScannerProductSearchCategoryReadyMeals": "Ready Meals",
+  "@componentsScannerProductSearchCategoryReadyMeals": {"description": "Prepared meals category"},
+  "componentsScannerProductSearchCategoryBabyFoods": "Baby Foods",
+  "@componentsScannerProductSearchCategoryBabyFoods": {"description": "Baby food category"},
+  "componentsScannerProductSearchSortPopularity": "Most Popular",
+  "@componentsScannerProductSearchSortPopularity": {"description": "Sort by popularity"},
+  "componentsScannerProductSearchSortName": "Name A–Z",
+  "@componentsScannerProductSearchSortName": {"description": "Sort by name"},
+  "componentsScannerProductSearchSortNewest": "Newest",
+  "@componentsScannerProductSearchSortNewest": {"description": "Sort by date"},
+  "componentsScannerProductSearchSortCompleteness": "Most Complete",
+  "@componentsScannerProductSearchSortCompleteness": {"description": "Sort by completeness"},
   "componentsSharedErrorDisplayRetry": "Retry",
   "@componentsSharedErrorDisplayRetry": {
     "description": "Retry button text"
@@ -921,6 +1105,10 @@
   "providersChatProviderAiThinking": "AI is thinking...",
   "@providersChatProviderAiThinking": {
     "description": "AI thinking status message"
+  },
+  "providersChatProviderIngredientsPrompt": "What can I make with these ingredients?",
+  "@providersChatProviderIngredientsPrompt": {
+    "description": "Default chat message when only ingredients are attached"
   },
   "providersChatProviderTestChatResponse": "Thanks for trying PlatePal! This is a test response to show you how our AI assistant works. To get real nutrition advice and meal suggestions, please configure your OpenAI API key in settings.",
   "@providersChatProviderTestChatResponse": {
@@ -970,6 +1158,10 @@
   "@screensChatChatAssistant": {
     "description": "Chat assistant title"
   },
+  "screensChatSystemAnalyzing": "SYSTEM ANALYZING ::",
+  "@screensChatSystemAnalyzing": {
+    "description": "Header for the chat processing indicator"
+  },
   "screensChatChatCleared": "Chat history cleared",
   "@screensChatChatCleared": {
     "description": "Chat cleared success message"
@@ -997,10 +1189,6 @@
   "screensChatNoApiKeyConfigured": "No API key configured",
   "@screensChatNoApiKeyConfigured": {
     "description": "No API key error title"
-  },
-  "screensChatReloadApiKeyButton": "Reload API Key",
-  "@screensChatReloadApiKeyButton": {
-    "description": "Button text for reloading API key configuration"
   },
   "screensDishCreateBasicInfo": "Basic Information",
   "@screensDishCreateBasicInfo": {
@@ -1102,9 +1290,13 @@
   "@screensHomeAppTitle": {
     "description": "The title of the application"
   },
-  "screensHomeWelcomeToPlatePalTracker": "Welcome to PlatePal Tracker",
-  "@screensHomeWelcomeToPlatePalTracker": {
-    "description": "Welcome message for PlatePal Tracker"
+  "providersStorageError": "Unable to load your data.",
+  "@providersStorageError": {
+    "description": "Message when local data storage fails to initialize"
+  },
+  "providersStorageRetry": "Retry",
+  "@providersStorageRetry": {
+    "description": "Button to retry initializing local data storage"
   },
   "screensMealsAddedToFavorites": "Added to favorites",
   "@screensMealsAddedToFavorites": {
@@ -1148,6 +1340,8 @@
   "@screensMealsErrorLoadingDishes": {
     "description": "Error message when dishes fail to load"
   },
+  "screensMealsLoadFailedHint": "Could not load your dishes. Please try again.",
+  "@screensMealsLoadFailedHint": {"description": "Advice shown after a meal list load error"},
   "screensMealsErrorUpdatingDish": "Error updating dish",
   "@screensMealsErrorUpdatingDish": {
     "description": "Error message when dish update fails"
@@ -1163,6 +1357,10 @@
   "screensMealsNoDishesFound": "No dishes found",
   "@screensMealsNoDishesFound": {
     "description": "Message when search returns no results"
+  },
+  "screensMealsOtherCategory": "Other",
+  "@screensMealsOtherCategory": {
+    "description": "Dish category shown when no meal category is assigned"
   },
   "screensMealsRemovedFromFavorites": "Removed from favorites",
   "@screensMealsRemovedFromFavorites": {
@@ -1252,6 +1450,10 @@
   "@screensMenuLanguage": {
     "description": "Language selector label"
   },
+  "screensMenuSystemDefault": "System default",
+  "@screensMenuSystemDefault": {
+    "description": "Language choice that follows the device language"
+  },
   "screensMenuLearnMorePlatePal": "Learn more about PlatePal",
   "@screensMenuLearnMorePlatePal": {
     "description": "Subtitle for about option"
@@ -1267,6 +1469,18 @@
   "screensMenuNutritionGoals": "Nutrition Goals",
   "@screensMenuNutritionGoals": {
     "description": "Nutrition goals settings"
+  },
+  "screensMenuOceanic": "Oceanic",
+  "@screensMenuOceanic": {
+    "description": "Display name of the Oceanic color theme"
+  },
+  "screensMenuForest": "Forest",
+  "@screensMenuForest": {
+    "description": "Display name of the Forest color theme"
+  },
+  "screensMenuPlatePal": "PlatePal",
+  "@screensMenuPlatePal": {
+    "description": "Display name of the PlatePal color theme"
   },
   "screensMenuProfile": "Profile",
   "@screensMenuProfile": {
@@ -1295,6 +1509,122 @@
   "screensMenuViewStatistics": "View Statistics",
   "@screensMenuViewStatistics": {
     "description": "View statistics button text"
+  },
+  "screensPrivacyTitle": "Privacy policy",
+  "@screensPrivacyTitle": {
+    "description": "Title of the in-app privacy policy"
+  },
+  "screensPrivacyEffectiveDate": "Effective date: 2026-09-30",
+  "@screensPrivacyEffectiveDate": {
+    "description": "Effective date of the privacy policy"
+  },
+  "screensPrivacyOverviewTitle": "At a glance",
+  "@screensPrivacyOverviewTitle": {
+    "description": "Privacy policy overview heading"
+  },
+  "screensPrivacyOverviewBody": "PlatePal Tracker is an offline-first nutrition tracker. We do not run servers for your app data or require an account, and the app has no analytics, advertising, or tracking SDKs. The optional network features below contact their providers when used.",
+  "@screensPrivacyOverviewBody": {
+    "description": "Privacy policy overview"
+  },
+  "screensPrivacyStorageTitle": "Data on your device",
+  "@screensPrivacyStorageTitle": {
+    "description": "Local storage section heading"
+  },
+  "screensPrivacyStorageBody": "Dishes, meal logs, profile information (including body measurements), goals, chat history, and settings are stored on your device in SQLite or SharedPreferences. Saved food photos may also be kept in app storage. The API key you enter is stored using the platform's secure storage; legacy keys in SharedPreferences are migrated when possible.",
+  "@screensPrivacyStorageBody": {
+    "description": "Local storage and API key handling"
+  },
+  "screensPrivacyAiTitle": "AI chat",
+  "@screensPrivacyAiTitle": {
+    "description": "Optional AI chat section heading"
+  },
+  "screensPrivacyAiBody": "AI chat is optional and requires your own API key. When used, your chat messages, attached images, and, when relevant, conversation history, your profile, meal logs or nutrition summaries, and saved dishes are sent to OpenAI or the OpenAI-compatible endpoint you configured. The key is sent to that provider for authentication. That provider handles this information under its own privacy policy; choose an endpoint you trust. We do not receive these requests.",
+  "@screensPrivacyAiBody": {
+    "description": "AI provider data sharing"
+  },
+  "screensPrivacyFoodFactsTitle": "Open Food Facts",
+  "@screensPrivacyFoodFactsTitle": {
+    "description": "Open Food Facts section heading"
+  },
+  "screensPrivacyFoodFactsBody": "When you search for food or scan a barcode, the app sends your search text or barcode number and selected filters to world.openfoodfacts.org. Product information and images can be downloaded from Open Food Facts.",
+  "@screensPrivacyFoodFactsBody": {
+    "description": "Food lookup data sharing"
+  },
+  "screensPrivacyHealthTitle": "Health Connect and Apple Health",
+  "@screensPrivacyHealthTitle": {
+    "description": "Health integration section heading"
+  },
+  "screensPrivacyHealthBody": "With your permission, the app reads calories burned (total and active on Android, active and basal on iOS) from Health Connect or Apple Health and writes nutrition for meals you log to that service. Readings are cached on this device and used for in-app energy and goal calculations; the app does not include Health readings in AI requests or send them to a developer server. Health Connect and Apple Health control their own stored records.",
+  "@screensPrivacyHealthBody": {
+    "description": "Health access and local use"
+  },
+  "screensPrivacyExternalTitle": "External links and images",
+  "@screensPrivacyExternalTitle": {
+    "description": "External content section heading"
+  },
+  "screensPrivacyExternalBody": "The Contributors screen loads avatar images from GitHub's avatars.githubusercontent.com. Opening GitHub, the online policy, other external websites, or remote product images contacts those services, which may see your IP address and process requests under their own policies.",
+  "@screensPrivacyExternalBody": {
+    "description": "Third-party images and links"
+  },
+  "screensPrivacyExportTitle": "Export and import",
+  "@screensPrivacyExportTitle": {
+    "description": "Manual export and import section heading"
+  },
+  "screensPrivacyExportBody": "Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.",
+  "@screensPrivacyExportBody": {
+    "description": "Export, import, and pre-import backups"
+  },
+  "screensPrivacyBackupTitle": "Android backup",
+  "@screensPrivacyBackupTitle": {
+    "description": "Android operating system backup section heading"
+  },
+  "screensPrivacyBackupBody": "Android's system backup may copy the app's database and preferences, including cached Health calorie readings and chat history, to your Google account or transfer them to another device. The backup rules exclude secure-storage preference files, but a legacy API key may be present in other preferences until migration. Check your Android backup settings to control this.",
+  "@screensPrivacyBackupBody": {
+    "description": "Possible Google backup of app data and Health cache"
+  },
+  "screensPrivacyDeletionTitle": "Delete your data",
+  "@screensPrivacyDeletionTitle": {
+    "description": "Data deletion section heading"
+  },
+  "screensPrivacyDeletionBody": "In Profile, Reset App deletes the SQLite database, SharedPreferences, and saved API key on this device. Uninstalling removes app-private data. Reset does not remove saved images, exported or pre-import backup files, copies shared elsewhere, Health Connect or Apple Health records already written, or system backups; remove those separately where applicable.",
+  "@screensPrivacyDeletionBody": {
+    "description": "Reset, uninstall, and remaining copies"
+  },
+  "screensPrivacyChildrenTitle": "Children",
+  "@screensPrivacyChildrenTitle": {
+    "description": "Children's privacy section heading"
+  },
+  "screensPrivacyChildrenBody": "PlatePal Tracker is not intended for children. The app has no age verification; a parent or guardian should supervise use, especially before enabling external services or sharing sensitive information.",
+  "@screensPrivacyChildrenBody": {
+    "description": "Children's privacy notice"
+  },
+  "screensPrivacyChangesTitle": "Changes to this policy",
+  "@screensPrivacyChangesTitle": {
+    "description": "Policy changes section heading"
+  },
+  "screensPrivacyChangesBody": "We may update this policy when the app changes. The effective date above shows when this version took effect; review the current policy in the app or GitHub repository.",
+  "@screensPrivacyChangesBody": {
+    "description": "How changes to the policy are announced"
+  },
+  "screensPrivacyContactTitle": "Contact",
+  "@screensPrivacyContactTitle": {
+    "description": "Privacy contact section heading"
+  },
+  "screensPrivacyContactBody": "For privacy questions, open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.",
+  "@screensPrivacyContactBody": {
+    "description": "How to contact the project about privacy"
+  },
+  "screensPrivacyMenuSubtitle": "What leaves the device and how to control your data",
+  "@screensPrivacyMenuSubtitle": {
+    "description": "Privacy policy menu subtitle"
+  },
+  "screensPrivacyViewOnline": "View online",
+  "@screensPrivacyViewOnline": {
+    "description": "Button to open the privacy policy on GitHub"
+  },
+  "screensPrivacyLinkError": "Could not open the privacy policy.",
+  "@screensPrivacyLinkError": {
+    "description": "Error shown when the online privacy policy cannot be opened"
   },
   "screensSettingsAboutAboutAppTitle": "About the App",
   "@screensSettingsAboutAboutAppTitle": {
@@ -1404,6 +1734,10 @@
   "@screensSettingsApiKeySettingsFailedToRemoveApiKey": {
     "description": "Error message for removing API key"
   },
+  "screensSettingsApiKeySettingsInvalidBaseUrl": "Base URL must start with https:// (http:// is only allowed for localhost)",
+  "@screensSettingsApiKeySettingsInvalidBaseUrl": {
+    "description": "Error message for an insecure or invalid base URL"
+  },
   "screensSettingsApiKeySettingsGetApiKeyFromOpenAi": "Get API Key from OpenAI",
   "@screensSettingsApiKeySettingsGetApiKeyFromOpenAi": {
     "description": "Button text for opening OpenAI platform"
@@ -1440,6 +1774,12 @@
   "@screensSettingsApiKeySettingsRemoveApiKey": {
     "description": "Title for remove API key confirmation dialog"
   },
+  "screensSettingsApiKeySettingsShowKey": "Show API key",
+  "@screensSettingsApiKeySettingsShowKey": {"description": "Tooltip for revealing the API key"},
+  "screensSettingsApiKeySettingsHideKey": "Hide API key",
+  "@screensSettingsApiKeySettingsHideKey": {"description": "Tooltip for concealing the API key"},
+  "screensSettingsApiKeySettingsDeleteKey": "Delete API key",
+  "@screensSettingsApiKeySettingsDeleteKey": {"description": "Tooltip for deleting the saved API key"},
   "screensSettingsApiKeySettingsRemoveApiKeyConfirmation": "Are you sure you want to remove your API key? This will disable AI features.",
   "@screensSettingsApiKeySettingsRemoveApiKeyConfirmation": {
     "description": "Confirmation message for removing API key"
@@ -1460,6 +1800,34 @@
   "@screensSettingsApiKeySettingsUpdateApiKey": {
     "description": "Button text for updating existing API key"
   },
+  "screensSettingsApiKeySettingsApiMode": "API Mode",
+  "@screensSettingsApiKeySettingsApiMode": {"description": "API mode section title"},
+  "screensSettingsApiKeySettingsCompatibleApi": "OpenAI Compatible API",
+  "@screensSettingsApiKeySettingsCompatibleApi": {"description": "Compatibility mode toggle label"},
+  "screensSettingsApiKeySettingsUsingCustomEndpoint": "Using custom OpenAI-compatible API endpoint",
+  "@screensSettingsApiKeySettingsUsingCustomEndpoint": {"description": "Compatibility mode enabled description"},
+  "screensSettingsApiKeySettingsUsingOfficialApi": "Using official OpenAI API",
+  "@screensSettingsApiKeySettingsUsingOfficialApi": {"description": "Compatibility mode disabled description"},
+  "screensSettingsApiKeySettingsBaseUrl": "Base URL",
+  "@screensSettingsApiKeySettingsBaseUrl": {"description": "Custom API base URL label"},
+  "screensSettingsApiKeySettingsBaseUrlHelper": "Enter the base URL for your OpenAI-compatible API",
+  "@screensSettingsApiKeySettingsBaseUrlHelper": {"description": "Custom API base URL helper"},
+  "screensSettingsApiKeySettingsBaseUrlRequired": "Base URL is required for compatibility mode",
+  "@screensSettingsApiKeySettingsBaseUrlRequired": {"description": "Custom API base URL required error"},
+  "screensSettingsApiKeySettingsApiKeyGeneric": "API Key",
+  "@screensSettingsApiKeySettingsApiKeyGeneric": {"description": "Generic API key label for compatible endpoints"},
+  "screensSettingsApiKeySettingsCompatibilityKeyHelper": "Enter your API key or leave empty to disable AI features",
+  "@screensSettingsApiKeySettingsCompatibilityKeyHelper": {"description": "Compatible API key helper"},
+  "screensSettingsApiKeySettingsCompatibilityKeyRequired": "API key is required for compatibility mode",
+  "@screensSettingsApiKeySettingsCompatibilityKeyRequired": {"description": "Compatible API key required error"},
+  "screensSettingsApiKeySettingsCompatibilityKeyTooShort": "API key seems too short",
+  "@screensSettingsApiKeySettingsCompatibilityKeyTooShort": {"description": "Compatible API key length error"},
+  "screensSettingsApiKeySettingsModelName": "Model Name",
+  "@screensSettingsApiKeySettingsModelName": {"description": "Custom API model name label"},
+  "screensSettingsApiKeySettingsModelNameHelper": "Enter the exact model name supported by your API",
+  "@screensSettingsApiKeySettingsModelNameHelper": {"description": "Custom API model name helper"},
+  "screensSettingsApiKeySettingsModelNameRequired": "Model name is required for compatibility mode",
+  "@screensSettingsApiKeySettingsModelNameRequired": {"description": "Custom API model required error"},
   "screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle": "Allow the agent to use deep search for more accurate answers",
   "@screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle": {
     "description": "Switch subtitle for enabling deep search"
@@ -1492,6 +1860,10 @@
   "@screensSettingsChatAgentSettingsChatSettingsSaved": {
     "description": "Snackbar message when chat settings are saved"
   },
+  "screensSettingsChatAgentSettingsSaveFailed": "Failed to save chat settings",
+  "@screensSettingsChatAgentSettingsSaveFailed": {
+    "description": "Snackbar message when saving chat settings fails"
+  },
   "screensSettingsContributorsBuyMeCreatine": "Buy Me Creatine",
   "@screensSettingsContributorsBuyMeCreatine": {
     "description": "Buy me creatine button text"
@@ -1500,6 +1872,8 @@
   "@screensSettingsContributorsCheckGitHub": {
     "description": "GitHub repository button text"
   },
+  "screensSettingsContributorsOpenGitHubProfile": "Open {name} on GitHub",
+  "@screensSettingsContributorsOpenGitHubProfile": {"description": "Tooltip on a contributor profile link", "placeholders": {"name": {"type": "String"}}},
   "screensSettingsContributorsContributorPlural": "Contributors",
   "@screensSettingsContributorsContributorPlural": {
     "description": "Plural form for contributor count"
@@ -1624,6 +1998,190 @@
   "@screensSettingsImportDataSkipDuplicates": {
     "description": "Skip duplicates option"
   },
+  "screensSettingsExportDataPreparing": "Preparing your data...",
+  "@screensSettingsExportDataPreparing": {"description": "Export preparation status"},
+  "screensSettingsExportDataPreview": "Export preview",
+  "@screensSettingsExportDataPreview": {"description": "Export preview heading"},
+  "screensSettingsExportDataFormatLabel": "Format: {format}",
+  "@screensSettingsExportDataFormatLabel": {"description": "Selected export format", "placeholders": {"format": {"type": "String"}}},
+  "screensSettingsExportDataTypesSelected": "Selected data types: {count, plural, =1{1 type} other{{count} types}}",
+  "@screensSettingsExportDataTypesSelected": {"description": "Number of selected export sections", "placeholders": {"count": {"type": "int"}}},
+  "screensSettingsExportDataReady": "Ready to export",
+  "@screensSettingsExportDataReady": {"description": "Export preview status"},
+  "screensSettingsExportDataDishesDescription": "Your saved recipes and dishes",
+  "@screensSettingsExportDataDishesDescription": {"description": "Dishes section description"},
+  "screensSettingsExportDataMealLogsDescription": "Your meal history and nutrition logs",
+  "@screensSettingsExportDataMealLogsDescription": {"description": "Meal logs section description"},
+  "screensSettingsExportDataUserProfilesDescription": "User profile and preferences",
+  "@screensSettingsExportDataUserProfilesDescription": {"description": "User profiles section description"},
+  "screensSettingsExportDataIngredientsDescription": "Ingredient database",
+  "@screensSettingsExportDataIngredientsDescription": {"description": "Ingredients section description"},
+  "screensSettingsExportDataSupplementsDescription": "Supplement tracking data",
+  "@screensSettingsExportDataSupplementsDescription": {"description": "Supplements section description"},
+  "screensSettingsExportDataFitnessGoalsDescription": "Fitness and nutrition goals",
+  "@screensSettingsExportDataFitnessGoalsDescription": {"description": "Goals section description"},
+  "screensSettingsExportDataAllDataDescription": "Export all your data",
+  "@screensSettingsExportDataAllDataDescription": {"description": "All data export description"},
+  "screensSettingsExportDataFormatTitle": "Export format",
+  "@screensSettingsExportDataFormatTitle": {"description": "Format selection heading"},
+  "screensSettingsExportDataJsonDescription": "Structured format, best for backups",
+  "@screensSettingsExportDataJsonDescription": {"description": "JSON format description"},
+  "screensSettingsExportDataCsvDescription": "Spreadsheet format, good for analysis",
+  "@screensSettingsExportDataCsvDescription": {"description": "CSV format description"},
+  "screensSettingsExportDataError": "Export error",
+  "@screensSettingsExportDataError": {"description": "Export error heading"},
+  "screensSettingsExportDataResults": "Export results",
+  "@screensSettingsExportDataResults": {"description": "Export results heading"},
+  "screensSettingsExportDataFileLabel": "File: {fileName}",
+  "@screensSettingsExportDataFileLabel": {"description": "Export or import file name", "placeholders": {"fileName": {"type": "String"}}},
+  "screensSettingsExportDataLocationLabel": "Location: {path}",
+  "@screensSettingsExportDataLocationLabel": {"description": "Export file path", "placeholders": {"path": {"type": "String"}}},
+  "screensSettingsExportDataItemsExported": "Items exported:",
+  "@screensSettingsExportDataItemsExported": {"description": "Export results count label"},
+  "screensSettingsExportDataShare": "Share",
+  "@screensSettingsExportDataShare": {"description": "Share exported file button"},
+  "screensSettingsExportDataShowFileLocation": "Show file location",
+  "@screensSettingsExportDataShowFileLocation": {"description": "Show export path button"},
+  "screensSettingsExportDataLocationTitle": "Export location",
+  "@screensSettingsExportDataLocationTitle": {"description": "Export path dialog title"},
+  "screensSettingsExportDataLocationDescription": "Your exported file is located at:",
+  "@screensSettingsExportDataLocationDescription": {"description": "Export path dialog description"},
+  "screensSettingsExportDataNoFileToShare": "No file to share. Export your data first.",
+  "@screensSettingsExportDataNoFileToShare": {"description": "Sharing before an export exists"},
+  "screensSettingsExportDataFileNotFound": "Export file not found. Export your data again.",
+  "@screensSettingsExportDataFileNotFound": {"description": "Missing exported file message"},
+  "screensSettingsExportDataShareFailed": "Could not share file: {error}",
+  "@screensSettingsExportDataShareFailed": {"description": "Sharing error", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsExportDataShareText": "PlatePal data export - {fileName}",
+  "@screensSettingsExportDataShareText": {"description": "Shared export text", "placeholders": {"fileName": {"type": "String"}}},
+  "screensSettingsExportDataShareSubject": "PlatePal data export",
+  "@screensSettingsExportDataShareSubject": {"description": "Shared export subject"},
+  "screensSettingsExportDataFailedDetail": "Export failed: {error}",
+  "@screensSettingsExportDataFailedDetail": {"description": "Export failure with technical details", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsExportDataSectionFailed": "Could not export the selected data. No file was created. Please try again.",
+  "@screensSettingsExportDataSectionFailed": {"description": "Export stopped when a selected section cannot be read"},
+  "screensSettingsExportDataWriteFailed": "Could not save the export file. Please try again.",
+  "@screensSettingsExportDataWriteFailed": {"description": "Export file write failed"},
+  "screensSettingsExportDataShareProblem": "Could not share the file. Please try again.",
+  "@screensSettingsExportDataShareProblem": {"description": "Failure when sharing the exported file"},
+  "screensSettingsImportDataRestoring": "Restoring from backup...",
+  "@screensSettingsImportDataRestoring": {"description": "Restore progress heading"},
+  "screensSettingsImportDataProcessingItems": "Processing {current} of {total} items",
+  "@screensSettingsImportDataProcessingItems": {"description": "Import progress count", "placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "screensSettingsImportDataCurrentType": "Current: {type}",
+  "@screensSettingsImportDataCurrentType": {"description": "Currently imported data section", "placeholders": {"type": {"type": "String"}}},
+  "screensSettingsImportDataUndoing": "Undoing the last import...",
+  "@screensSettingsImportDataUndoing": {"description": "Restore progress detail"},
+  "screensSettingsImportDataFileSelection": "File selection",
+  "@screensSettingsImportDataFileSelection": {"description": "File picker section heading"},
+  "screensSettingsImportDataRemoveFile": "Remove selected file",
+  "@screensSettingsImportDataRemoveFile": {"description": "Tooltip for clearing the selected import file"},
+  "screensSettingsImportDataChangeFile": "Change file",
+  "@screensSettingsImportDataChangeFile": {"description": "Replace selected import file"},
+  "screensSettingsImportDataSupportedFormats": "Supported formats: JSON, CSV",
+  "@screensSettingsImportDataSupportedFormats": {"description": "Accepted import file formats"},
+  "screensSettingsImportDataAllDataDescription": "Import everything from the file",
+  "@screensSettingsImportDataAllDataDescription": {"description": "All data import description"},
+  "screensSettingsImportDataSkipDescription": "Keep existing data; skip imported duplicates",
+  "@screensSettingsImportDataSkipDescription": {"description": "Skip duplicates description"},
+  "screensSettingsImportDataOverwriteDescription": "Replace existing data with imported data",
+  "@screensSettingsImportDataOverwriteDescription": {"description": "Overwrite duplicates description"},
+  "screensSettingsImportDataAdvancedOptions": "Advanced options",
+  "@screensSettingsImportDataAdvancedOptions": {"description": "Import advanced options heading"},
+  "screensSettingsImportDataValidateBeforeImport": "Validate data before import",
+  "@screensSettingsImportDataValidateBeforeImport": {"description": "Always-enabled import validation setting"},
+  "screensSettingsImportDataValidateDescription": "Check data integrity and show warnings",
+  "@screensSettingsImportDataValidateDescription": {"description": "Import validation description"},
+  "screensSettingsImportDataBackupBeforeImport": "Create backup before import",
+  "@screensSettingsImportDataBackupBeforeImport": {"description": "Always-enabled backup setting"},
+  "screensSettingsImportDataBackupDescription": "Automatically back up existing data",
+  "@screensSettingsImportDataBackupDescription": {"description": "Import backup description"},
+  "screensSettingsImportDataIssues": "Import issues",
+  "@screensSettingsImportDataIssues": {"description": "Import error heading"},
+  "screensSettingsImportDataDetailedErrors": "Detailed errors:",
+  "@screensSettingsImportDataDetailedErrors": {"description": "Import error list heading"},
+  "screensSettingsImportDataTechnicalDetails": "File and row details (may appear in English):",
+  "@screensSettingsImportDataTechnicalDetails": {"description": "Introduces untranslated details from an imported file"},
+  "screensSettingsImportDataResults": "Import results",
+  "@screensSettingsImportDataResults": {"description": "Successful import results heading"},
+  "screensSettingsImportDataPartialResults": "Import completed with skipped items",
+  "@screensSettingsImportDataPartialResults": {"description": "Partial import warning heading"},
+  "screensSettingsImportDataImportedSkipped": "Imported {imported}, skipped {skipped}",
+  "@screensSettingsImportDataImportedSkipped": {"description": "Partial import totals", "placeholders": {"imported": {"type": "int"}, "skipped": {"type": "int"}}},
+  "screensSettingsImportDataShowReasons": "Show reasons",
+  "@screensSettingsImportDataShowReasons": {"description": "Expand skipped item reasons"},
+  "screensSettingsImportDataFailedSection": "Failed section: {section}",
+  "@screensSettingsImportDataFailedSection": {"description": "Section that could not be imported", "placeholders": {"section": {"type": "String"}}},
+  "screensSettingsImportDataConfirmTitle": "Confirm import",
+  "@screensSettingsImportDataConfirmTitle": {"description": "Import confirmation dialog title"},
+  "screensSettingsImportDataSelectedSections": "Selected sections:",
+  "@screensSettingsImportDataSelectedSections": {"description": "Import confirmation section list label"},
+  "screensSettingsImportDataDuplicatesLabel": "Duplicates: {strategy}",
+  "@screensSettingsImportDataDuplicatesLabel": {"description": "Import confirmation duplicate handling", "placeholders": {"strategy": {"type": "String"}}},
+  "screensSettingsImportDataConfirmAction": "Import",
+  "@screensSettingsImportDataConfirmAction": {"description": "Confirm import button"},
+  "screensSettingsImportDataBackupFailedTitle": "Backup failed",
+  "@screensSettingsImportDataBackupFailedTitle": {"description": "Failed safety backup dialog title"},
+  "screensSettingsImportDataBackupFailedDescription": "The automatic backup could not be created. Continue importing without a backup?",
+  "@screensSettingsImportDataBackupFailedDescription": {"description": "Failed safety backup warning"},
+  "screensSettingsImportDataContinueWithoutBackup": "Continue without backup",
+  "@screensSettingsImportDataContinueWithoutBackup": {"description": "Explicit unsafe import action"},
+  "screensSettingsImportDataFileSelectionFailed": "Error selecting file: {error}",
+  "@screensSettingsImportDataFileSelectionFailed": {"description": "File picker error", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsImportDataCompletedWithErrors": "{count, plural, =1{Import completed with 1 error} other{Import completed with {count} errors}}",
+  "@screensSettingsImportDataCompletedWithErrors": {"description": "Import failure count", "placeholders": {"count": {"type": "int"}}},
+  "screensSettingsImportDataFailedDetail": "Import failed: {error}",
+  "@screensSettingsImportDataFailedDetail": {"description": "Import failure with technical details", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsImportDataBackupAvailable": "Backup available",
+  "@screensSettingsImportDataBackupAvailable": {"description": "Last import backup heading"},
+  "screensSettingsImportDataBackupAvailableDescription": "A backup from your last import is available.",
+  "@screensSettingsImportDataBackupAvailableDescription": {"description": "Last import backup description"},
+  "screensSettingsImportDataBackupCreated": "Created: {date}",
+  "@screensSettingsImportDataBackupCreated": {"description": "Backup creation time", "placeholders": {"date": {"type": "String"}}},
+  "screensSettingsImportDataBackupSize": "Size: {size} KB",
+  "@screensSettingsImportDataBackupSize": {"description": "Backup size in kilobytes", "placeholders": {"size": {"type": "String"}}},
+  "screensSettingsImportDataUndoLastImport": "Undo last import",
+  "@screensSettingsImportDataUndoLastImport": {"description": "Restore backup button"},
+  "screensSettingsImportDataMinutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "@screensSettingsImportDataMinutesAgo": {"description": "Minutes since backup", "placeholders": {"count": {"type": "int"}}},
+  "screensSettingsImportDataHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@screensSettingsImportDataHoursAgo": {"description": "Hours since backup", "placeholders": {"count": {"type": "int"}}},
+  "screensSettingsImportDataDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@screensSettingsImportDataDaysAgo": {"description": "Days since backup", "placeholders": {"count": {"type": "int"}}},
+  "screensSettingsImportDataRestoreTitle": "Restore from backup",
+  "@screensSettingsImportDataRestoreTitle": {"description": "Restore confirmation title"},
+  "screensSettingsImportDataRestoreWarning": "This will restore your data to the state before the last import. All changes made since then will be lost. Are you sure?",
+  "@screensSettingsImportDataRestoreWarning": {"description": "Restore confirmation warning"},
+  "screensSettingsImportDataRestoreAction": "Restore",
+  "@screensSettingsImportDataRestoreAction": {"description": "Confirm restore button"},
+  "screensSettingsImportDataRestoreSuccess": "Successfully restored from backup!",
+  "@screensSettingsImportDataRestoreSuccess": {"description": "Successful restore message"},
+  "screensSettingsImportDataRestoreFailedDetail": "Restore failed: {error}",
+  "@screensSettingsImportDataRestoreFailedDetail": {"description": "Restore error details", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsImportDataFileMissing": "Import file not found. Select it again.",
+  "@screensSettingsImportDataFileMissing": {"description": "Selected import file has disappeared"},
+  "screensSettingsImportDataFileTooLarge": "This file is too large. Select a file of at most {maxSize} MB.",
+  "@screensSettingsImportDataFileTooLarge": {"description": "Import file size limit", "placeholders": {"maxSize": {"type": "int"}}},
+  "screensSettingsImportDataInvalidJson": "This file is not valid JSON. Check it and try again.",
+  "@screensSettingsImportDataInvalidJson": {"description": "Invalid JSON import file"},
+  "screensSettingsImportDataUnsupportedFormat": "Unsupported file format. Select a JSON or CSV file.",
+  "@screensSettingsImportDataUnsupportedFormat": {"description": "Import requires a supported file extension"},
+  "screensSettingsImportDataInvalidData": "The file contains invalid data. Check the details and try again.",
+  "@screensSettingsImportDataInvalidData": {"description": "Import failed validation before writing any data"},
+  "screensSettingsImportDataFileSelectionProblem": "Could not select a file. Please try again.",
+  "@screensSettingsImportDataFileSelectionProblem": {"description": "File picker failure without technical details"},
+  "screensSettingsImportDataBackupMissing": "No backup was found to restore.",
+  "@screensSettingsImportDataBackupMissing": {"description": "Last import backup unavailable"},
+  "screensSettingsImportDataBackupUnreadable": "The backup could not be read. Nothing was changed.",
+  "@screensSettingsImportDataBackupUnreadable": {"description": "Restore stopped before changing data"},
+  "screensSettingsImportDataSnapshotFailed": "Could not protect your current data. Nothing was changed.",
+  "@screensSettingsImportDataSnapshotFailed": {"description": "Restore stopped when a safety snapshot failed"},
+  "screensSettingsImportDataRestoreProblem": "Could not restore your backup. Check your data before trying again.",
+  "@screensSettingsImportDataRestoreProblem": {"description": "Generic restore failure without exposing exception details"},
+  "screensSettingsImportDataRestoreRolledBack": "Restore failed, but your previous data was left unchanged.",
+  "@screensSettingsImportDataRestoreRolledBack": {"description": "Restore failed and the safety rollback succeeded"},
+  "screensSettingsImportDataRestoreCopySaved": "Restore failed and your previous data may be incomplete. A recovery copy is saved at {path}.",
+  "@screensSettingsImportDataRestoreCopySaved": {"description": "Restore and rollback failed; location of safety copy", "placeholders": {"path": {"type": "String"}}},
   "screensSettingsImportProfileCompletionActivityLevel": "Activity Level",
   "@screensSettingsImportProfileCompletionActivityLevel": {
     "description": "Activity level field label"
@@ -1639,14 +2197,6 @@
   "screensSettingsImportProfileCompletionBuildMuscle": "Build Muscle",
   "@screensSettingsImportProfileCompletionBuildMuscle": {
     "description": "Build muscle fitness goal"
-  },
-  "screensSettingsImportProfileCompletionCm": "cm",
-  "@screensSettingsImportProfileCompletionCm": {
-    "description": "Centimeters unit"
-  },
-  "screensSettingsImportProfileCompletionEmail": "Email",
-  "@screensSettingsImportProfileCompletionEmail": {
-    "description": "Email field label"
   },
   "screensSettingsImportProfileCompletionExtraActive": "Extra Active",
   "@screensSettingsImportProfileCompletionExtraActive": {
@@ -1679,22 +2229,6 @@
   "screensSettingsImportProfileCompletionImperial": "Imperial (lb, ft)",
   "@screensSettingsImportProfileCompletionImperial": {
     "description": "Imperial unit system option"
-  },
-  "screensSettingsImportProfileCompletionInches": "in",
-  "@screensSettingsImportProfileCompletionInches": {
-    "description": "Inches unit"
-  },
-  "screensSettingsImportProfileCompletionInvalidEmail": "Please enter a valid email address",
-  "@screensSettingsImportProfileCompletionInvalidEmail": {
-    "description": "Invalid email validation message"
-  },
-  "screensSettingsImportProfileCompletionKg": "kg",
-  "@screensSettingsImportProfileCompletionKg": {
-    "description": "Kilograms unit"
-  },
-  "screensSettingsImportProfileCompletionLb": "lb",
-  "@screensSettingsImportProfileCompletionLb": {
-    "description": "Pounds unit"
   },
   "screensSettingsImportProfileCompletionLightlyActive": "Lightly Active",
   "@screensSettingsImportProfileCompletionLightlyActive": {
@@ -1755,10 +2289,6 @@
   "screensSettingsImportProfileCompletionWeightRange": "Weight must be between 30-300 kg",
   "@screensSettingsImportProfileCompletionWeightRange": {
     "description": "Weight range validation message"
-  },
-  "screensSettingsImportProfileCompletionYears": "years",
-  "@screensSettingsImportProfileCompletionYears": {
-    "description": "Years unit"
   },
   "screensSettingsMacroCustomizationDiscardChanges": "Discard Changes",
   "@screensSettingsMacroCustomizationDiscardChanges": {
@@ -1972,6 +2502,8 @@
   "@screensSettingsStatisticsErrorLoadingData": {
     "description": "Error message when data loading fails"
   },
+  "screensSettingsStatisticsLoadFailedHint": "Could not load your statistics. Please try again.",
+  "@screensSettingsStatisticsLoadFailedHint": {"description": "Retry guidance after statistics load fails"},
   "screensSettingsStatisticsEstimatedBalance": "Estimated Balance",
   "@screensSettingsStatisticsEstimatedBalance": {
     "description": "Estimated balance label"
@@ -2172,14 +2704,15 @@
   "screensSettingsContributorsHansDesc": "Automating the grind and keeping the telemetry crisp. Cyber-minimalism architect.",
   "screensSettingsContributorsMrLappesRole": "Creator & Developer",
   "screensSettingsContributorsMrLappesDesc": "Created PlatePal Tracker with the vision of making a free, privacy-focused nutrition app for everyone.",
-
   "screensSettingsHealthSettingsTitle": "HEALTH CONNECT //",
   "screensSettingsHealthSettingsConnected": "Connected",
   "screensSettingsHealthSettingsNotConnected": "Not Connected",
   "screensSettingsHealthSettingsLastSynced": "Last synced: {time}",
   "@screensSettingsHealthSettingsLastSynced": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "screensSettingsHealthSettingsNotAvailableOnDevice": "Health Connect is not available on this device.",
@@ -2192,7 +2725,9 @@
   "screensSettingsHealthSettingsDaysCached": "{count} days of data cached",
   "@screensSettingsHealthSettingsDaysCached": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "screensSettingsHealthSettingsSyncControls": "SYNC CONTROLS",
@@ -2211,14 +2746,18 @@
   "screensSettingsHealthSettingsCalorieTargetUpdated": "Calorie target updated to {target} kcal",
   "@screensSettingsHealthSettingsCalorieTargetUpdated": {
     "placeholders": {
-      "target": { "type": "String" }
+      "target": {
+        "type": "String"
+      }
     }
   },
   "screensSettingsHealthSettingsCalorieTargetUpdateFailed": "Failed to update calorie target",
   "screensSettingsHealthSettingsAnalysisFailed": "Analysis failed: {error}",
   "@screensSettingsHealthSettingsAnalysisFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "screensSettingsHealthSettingsAboutHealthConnect": "ABOUT HEALTH CONNECT",
@@ -2232,19 +2771,25 @@
   "screensSettingsHealthSettingsMinutesAgo": "{minutes}m ago",
   "@screensSettingsHealthSettingsMinutesAgo": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "screensSettingsHealthSettingsHoursAgo": "{hours}h ago",
   "@screensSettingsHealthSettingsHoursAgo": {
     "placeholders": {
-      "hours": { "type": "int" }
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "screensSettingsHealthSettingsDaysAgo": "{days}d ago",
   "@screensSettingsHealthSettingsDaysAgo": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "screensMenuHealthAndFitness": "Health & Fitness",
@@ -2254,13 +2799,17 @@
   "componentsCalendarMacroSummaryBurned": "{calories} burned",
   "@componentsCalendarMacroSummaryBurned": {
     "placeholders": {
-      "calories": { "type": "String" }
+      "calories": {
+        "type": "String"
+      }
     }
   },
   "componentsCalendarMacroSummaryNetCalories": "Net: {value}",
   "@componentsCalendarMacroSummaryNetCalories": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "componentsCalendarMacroSummaryNoBurnData": "No burn data for this day",
@@ -2269,10 +2818,11 @@
   "screensSettingsProfileSettingsLastSynced": "Last synced: {time}",
   "@screensSettingsProfileSettingsLastSynced": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
-
   "servicesChatAgentFallbackParsing": "I apologize, but I'm having trouble processing your request right now. Could you please try rephrasing your question?",
   "@servicesChatAgentFallbackParsing": {
     "description": "Fallback reply shown when the agent fails to parse the user request"
@@ -2308,6 +2858,269 @@
   "servicesChatAgentFallbackDishInfo": "Here is the dish information:",
   "@servicesChatAgentFallbackDishInfo": {
     "description": "Prefix shown when the AI returns dish data without a reply text"
-  }
+  },
+  "servicesChatAgentFallbackNoResponse": "No response text found.",
+  "@servicesChatAgentFallbackNoResponse": {"description": "Reply when the model returned JSON without response text"},
+  "servicesChatAgentFallbackFormatting": "I couldn't process my response. Please try again.",
+  "@servicesChatAgentFallbackFormatting": {"description": "Reply when the model response has an invalid format"},
+  "screensDishCreateImage": "Image",
+  "@screensDishCreateImage": {
+    "description": "Title of the dish image section"
+  },
+  "screensDishCreateNoImageSelected": "No image selected",
+  "@screensDishCreateNoImageSelected": {
+    "description": "Placeholder for a dish without an image"
+  },
+  "screensDishCreateChangeImage": "Change image",
+  "@screensDishCreateChangeImage": {
+    "description": "Button for replacing a dish image"
+  },
+  "screensDishCreateAddImage": "Add image",
+  "@screensDishCreateAddImage": {
+    "description": "Button for choosing a dish image"
+  },
+  "screensDishCreateConfirmDiscardChanges": "Discard your unsaved changes?",
+  "@screensDishCreateConfirmDiscardChanges": {
+    "description": "Confirmation before leaving an edited dish"
+  },
+  "screensDishCreateProteinAbbreviation": "P",
+  "@screensDishCreateProteinAbbreviation": {
+    "description": "Compact protein label on an ingredient"
+  },
+  "screensDishCreateCarbsAbbreviation": "C",
+  "@screensDishCreateCarbsAbbreviation": {
+    "description": "Compact carbohydrate label on an ingredient"
+  },
+  "screensDishCreateFatAbbreviation": "F",
+  "@screensDishCreateFatAbbreviation": {
+    "description": "Compact fat label on an ingredient"
+  },
+  "componentsDishesDishFormIngredientFormModalUnit": "Unit",
+  "@componentsDishesDishFormIngredientFormModalUnit": {
+    "description": "Label for an ingredient unit selector"
+  },
+  "componentsDishesDishFormIngredientFormModalNutritionPerPiece": "Nutrition per piece",
+  "@componentsDishesDishFormIngredientFormModalNutritionPerPiece": {
+    "description": "Nutrition basis for ingredients counted in pieces"
+  },
+  "componentsDishesDishFormIngredientFormModalNutritionPerSlice": "Nutrition per slice",
+  "@componentsDishesDishFormIngredientFormModalNutritionPerSlice": {
+    "description": "Nutrition basis for ingredients counted in slices"
+  },
+  "componentsDishesDishFormIngredientFormModalProductInformationLoaded": "Product information loaded. Adjust quantity and save.",
+  "@componentsDishesDishFormIngredientFormModalProductInformationLoaded": {
+    "description": "Confirmation after filling the ingredient form from a product"
+  },
+  "componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients": "Recalculate from ingredients",
+  "@componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients": {
+    "description": "Tooltip for dish nutrition recalculation"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighProtein": "High Protein",
+  "@componentsDishesDishFormSmartNutritionCardHighProtein": {
+    "description": "Title for a protein-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighCarb": "High Carb",
+  "@componentsDishesDishFormSmartNutritionCardHighCarb": {
+    "description": "Title for a carbohydrate-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighFat": "High Fat",
+  "@componentsDishesDishFormSmartNutritionCardHighFat": {
+    "description": "Title for a fat-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardWellBalanced": "Well Balanced",
+  "@componentsDishesDishFormSmartNutritionCardWellBalanced": {
+    "description": "Title for a balanced dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighProteinFeedback": "Excellent! High protein content supports muscle building and satiety.",
+  "@componentsDishesDishFormSmartNutritionCardHighProteinFeedback": {
+    "description": "Feedback for a protein-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighCarbFeedback": "Great for energy! Perfect pre-workout or active days.",
+  "@componentsDishesDishFormSmartNutritionCardHighCarbFeedback": {
+    "description": "Feedback for a carbohydrate-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardHighFatFeedback": "High in fats. Enjoy in moderation and balance with other meals.",
+  "@componentsDishesDishFormSmartNutritionCardHighFatFeedback": {
+    "description": "Feedback for a fat-rich dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardBalancedFeedback": "Perfect balance! This dish provides well-rounded nutrition.",
+  "@componentsDishesDishFormSmartNutritionCardBalancedFeedback": {
+    "description": "Feedback for a balanced dish"
+  },
+  "componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": "Enter nutrition values to see smart analysis and recommendations.",
+  "@componentsDishesDishFormSmartNutritionCardUnbalancedFeedback": {
+    "description": "Feedback when dish nutrition needs more data"
+  },
+  "screensSettingsProfileSettingsPhysicalStats": "Physical Stats",
+  "screensSettingsProfileSettingsBodyFatOptional": "Body Fat % (optional)",
+  "screensSettingsProfileSettingsOptional": "Optional",
+  "screensSettingsProfileSettingsNameHint": "Enter your name",
+  "screensSettingsProfileSettingsCustomizeMacroRatios": "Customize Macro Ratios",
+  "screensSettingsProfileSettingsImperialHeightRange": "Height must be between 39 and 98 inches",
+  "screensSettingsProfileSettingsImperialWeightRange": "Weight must be between 66 and 660 lbs",
+  "screensSettingsProfileSettingsValidNumber": "Please enter a valid number",
+  "screensSettingsProfileSettingsBodyFatRange": "Body fat must be between 3% and 50%",
+  "screensSettingsProfileSettingsBaseMetabolicRate": "Base Metabolic Rate",
+  "screensSettingsProfileSettingsTotalDailyEnergy": "Total Daily Energy",
+  "screensSettingsProfileSettingsResettingAppData": "Resetting application data...",
+  "screensSettingsProfileSettingsLoadFailed": "Failed to load profile data: {error}",
+  "@screensSettingsProfileSettingsLoadFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsProfileSettingsUpdateFailed": "Failed to update profile: {error}",
+  "@screensSettingsProfileSettingsUpdateFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationDailyCalories": "Daily calories: {calories} kcal",
+  "@screensSettingsMacroCustomizationDailyCalories": {
+    "placeholders": {"calories": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationMacroRatios": "Macro Ratios",
+  "screensSettingsMacroCustomizationFiberTarget": "Fiber Target",
+  "screensSettingsMacroCustomizationTargetPreview": "Target Preview",
+  "screensSettingsMacroCustomizationQuickPresets": "Quick Presets",
+  "screensSettingsMacroCustomizationTotalRatio": "Total: {value}%",
+  "@screensSettingsMacroCustomizationTotalRatio": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationPinMacro": "Pin {macro}",
+  "@screensSettingsMacroCustomizationPinMacro": {
+    "placeholders": {"macro": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationUnpinMacro": "Unpin {macro}",
+  "@screensSettingsMacroCustomizationUnpinMacro": {
+    "placeholders": {"macro": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationPinnedValue": "Pinned - value locked",
+  "screensSettingsMacroCustomizationTooManyPins": "Cannot adjust - too many pins active",
+  "screensSettingsMacroCustomizationFiberTotal": "{grams} g total",
+  "@screensSettingsMacroCustomizationFiberTotal": {
+    "placeholders": {"grams": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationFiberPer1000Calories": "{grams} g per 1000 calories",
+  "@screensSettingsMacroCustomizationFiberPer1000Calories": {
+    "placeholders": {"grams": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationFiberGuidance": "Recommended: 14 g per 1000 calories (FDA guideline). Range: 5-35 g per 1000 calories",
+  "screensSettingsMacroCustomizationDailyMacroTargets": "Daily Macro Targets",
+  "screensSettingsMacroCustomizationPresetDescription": "Choose from common macro distributions",
+  "screensSettingsMacroCustomizationBalancedPreset": "Balanced (30P / 40C / 30F)",
+  "screensSettingsMacroCustomizationHighProteinPreset": "High Protein (40P / 30C / 30F)",
+  "screensSettingsMacroCustomizationProfileNotFound": "User profile not found. Please set up your profile.",
+  "screensSettingsMacroCustomizationLoadFailed": "Failed to load profile: {error}",
+  "@screensSettingsMacroCustomizationLoadFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsMacroCustomizationSaveFailed": "Failed to save macro targets: {error}",
+  "@screensSettingsMacroCustomizationSaveFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "screensSettingsStatisticsProfileNotFound": "User profile not found",
+  "@screensSettingsStatisticsProfileNotFound": {"description": "Statistics missing profile error"},
+  "screensSettingsStatisticsTestDataFailed": "Failed to generate test data: {error}",
+  "@screensSettingsStatisticsTestDataFailed": {"description": "Test data error", "placeholders": {"error": {"type": "String"}}},
+  "screensSettingsStatisticsPhaseDays": "({count, plural, =1{1 day} other{{count} days}})",
+  "@screensSettingsStatisticsPhaseDays": {"description": "Number of days in a calorie phase", "placeholders": {"count": {"type": "int"}}},
+  "screensSettingsStatisticsCalPerDay": "{value} cal/day",
+  "@screensSettingsStatisticsCalPerDay": {"description": "Daily calorie difference", "placeholders": {"value": {"type": "String"}}},
+  "screensSettingsStatisticsCalValue": "{value} cal",
+  "@screensSettingsStatisticsCalValue": {"description": "Calorie value", "placeholders": {"value": {"type": "String"}}},
+  "screensSettingsStatisticsCoverage": "Calorie expenditure data coverage: {percent}% ({healthDays}/{totalDays} {totalDays, plural, =1{day} other{days}})",
+  "@screensSettingsStatisticsCoverage": {"description": "Calorie expenditure coverage", "placeholders": {"percent": {"type": "String"}, "healthDays": {"type": "int"}, "totalDays": {"type": "int"}}},
+  "screensSettingsStatisticsActualBalance": "Actual Balance",
+  "@screensSettingsStatisticsActualBalance": {"description": "Measured calorie balance label"},
+  "screensSettingsStatisticsChartSummary": "{chart}: {count} data points, chart scale {minimum} to {maximum}",
+  "@screensSettingsStatisticsChartSummary": {"description": "Accessible summary of a statistics chart", "placeholders": {"chart": {"type": "String"}, "count": {"type": "int"}, "minimum": {"type": "String"}, "maximum": {"type": "String"}}},
+  "screensSettingsHealthSettingsAnalysisProfileNotFound": "User profile not found",
+  "@screensSettingsHealthSettingsAnalysisProfileNotFound": {"description": "Analysis requires a saved profile"},
+  "screensSettingsHealthSettingsAnalysisNoData": "No calorie expenditure data available for analysis",
+  "@screensSettingsHealthSettingsAnalysisNoData": {"description": "Analysis has no expenditure data"},
+  "screensSettingsHealthSettingsAnalysisIncreaseIntake": "Your calorie expenditure is significantly higher than your current target suggests. Consider increasing your calorie intake.",
+  "@screensSettingsHealthSettingsAnalysisIncreaseIntake": {"description": "Recommendation when target is too low"},
+  "screensSettingsHealthSettingsAnalysisDecreaseIntake": "Your calorie expenditure is lower than your current target suggests. Consider adjusting your calorie intake or increasing activity.",
+  "@screensSettingsHealthSettingsAnalysisDecreaseIntake": {"description": "Recommendation when target is too high"},
+  "screensSettingsHealthSettingsAnalysisOnTarget": "Your current calorie targets seem well-aligned with your activity level.",
+  "@screensSettingsHealthSettingsAnalysisOnTarget": {"description": "Recommendation when target matches activity"},
+  "screensSettingsHealthSettingsAnalysisError": "Error occurred during analysis: {error}",
+  "@screensSettingsHealthSettingsAnalysisError": {"description": "Analysis error with details", "placeholders": {"error": {"type": "String"}}},
+  "servicesChatAgentThinking": "Analyzing your request and planning approach...",
+  "@servicesChatAgentThinking": {"description": "Thinking step progress"},
+  "servicesChatAgentThinkingDetail": "Breaking down your request and determining the best approach",
+  "@servicesChatAgentThinkingDetail": {"description": "Thinking step detail"},
+  "servicesChatAgentContext": "Gathering relevant context and user data...",
+  "@servicesChatAgentContext": {"description": "Context gathering progress"},
+  "servicesChatAgentContextDetail": "Collecting your profile, preferences, and relevant meal history",
+  "@servicesChatAgentContextDetail": {"description": "Context gathering detail"},
+  "servicesChatAgentResponse": "Crafting your personalized response...",
+  "@servicesChatAgentResponse": {"description": "Response generation progress"},
+  "servicesChatAgentResponseDetail": "Combining all information to create a helpful and personalized answer",
+  "@servicesChatAgentResponseDetail": {"description": "Response generation detail"},
+  "servicesChatAgentDish": "Processing and analyzing dishes...",
+  "@servicesChatAgentDish": {"description": "Dish processing progress"},
+  "servicesChatAgentDishDetail": "Calculating nutrition values, ingredients, and meal details",
+  "@servicesChatAgentDishDetail": {"description": "Dish processing detail"},
+  "servicesChatAgentDishValidation": "Validating and refining dishes...",
+  "@servicesChatAgentDishValidation": {"description": "Dish validation progress"},
+  "servicesChatAgentDishValidationDetail": "Ensuring dishes have accurate nutrition and ingredient data",
+  "@servicesChatAgentDishValidationDetail": {"description": "Dish validation detail"},
+  "servicesChatAgentError": "Handling unexpected error...",
+  "@servicesChatAgentError": {"description": "Error handling progress"},
+  "servicesChatAgentErrorDetail": "Attempting to recover from error and provide a helpful response",
+  "@servicesChatAgentErrorDetail": {"description": "Error handling detail"},
+  "servicesChatAgentVerify": "Validating context sufficiency for optimal response...",
+  "@servicesChatAgentVerify": {"description": "Deep verification progress"},
+  "servicesChatAgentVerifyDetail": "Analyzing gathered context to ensure we can provide the best possible answer",
+  "@servicesChatAgentVerifyDetail": {"description": "Deep verification detail"},
+  "servicesChatAgentImage": "Analyzing your uploaded image...",
+  "@servicesChatAgentImage": {"description": "Image processing progress"},
+  "servicesChatAgentImageDetail": "Extracting food items, ingredients, and portion sizes from your image",
+  "@servicesChatAgentImageDetail": {"description": "Image processing detail"},
+  "servicesChatAgentUnknownStep": "Processing step: {step}...",
+  "@servicesChatAgentUnknownStep": {"description": "Unknown step progress", "placeholders": {"step": {"type": "String"}}},
+  "servicesChatAgentUnknownDetail": "Processing information for step: {step}",
+  "@servicesChatAgentUnknownDetail": {"description": "Unknown step detail", "placeholders": {"step": {"type": "String"}}},
+  "servicesChatAgentRestart": "Restarting with enhanced strategy (attempt {attempt}/3)...",
+  "@servicesChatAgentRestart": {"description": "Agent restart progress", "placeholders": {"attempt": {"type": "int"}}},
+  "servicesChatAgentFailedStep": "Step \"{step}\" encountered an issue, attempting recovery...",
+  "@servicesChatAgentFailedStep": {"description": "Failed step progress", "placeholders": {"step": {"type": "String"}}},
+  "componentsChatMessageBubbleErrorAuth": "Your API key was rejected. Check it in the API key settings.",
+  "@componentsChatMessageBubbleErrorAuth": {"description": "Failed chat message: the provider rejected the API key (401/403)"},
+  "componentsChatMessageBubbleErrorRateLimit": "Your AI provider's rate limit or quota was reached. Wait a moment or check your plan and credit, then try again.",
+  "@componentsChatMessageBubbleErrorRateLimit": {"description": "Failed chat message: rate limit or quota reached (429)"},
+  "componentsChatMessageBubbleErrorNetwork": "Couldn't reach the AI provider or the request timed out. Check your internet connection and try again.",
+  "@componentsChatMessageBubbleErrorNetwork": {"description": "Failed chat message: network error or timeout"},
+  "componentsChatMessageBubbleErrorServer": "The AI provider is currently unavailable. Please try again in a moment.",
+  "@componentsChatMessageBubbleErrorServer": {"description": "Failed chat message: provider server error (5xx)"},
+  "componentsChatMessageBubbleErrorKeyUnreadable": "Your API key couldn't be read on this device. Enter it again in the API key settings.",
+  "@componentsChatMessageBubbleErrorKeyUnreadable": {"description": "Failed chat message: the stored API key could not be read"},
+  "componentsChatMessageBubbleErrorUnknown": "The message couldn't be sent. Please try again.",
+  "@componentsChatMessageBubbleErrorUnknown": {"description": "Failed chat message: unknown cause"},
+  "componentsChatMessageBubbleOpenApiKeySettings": "API key settings",
+  "@componentsChatMessageBubbleOpenApiKeySettings": {"description": "Button on a failed message that opens the API key settings"},
+  "componentsChatMessageBubbleNoteContextIncomplete": "Some of your data couldn't be loaded; the answer may be less personal.",
+  "@componentsChatMessageBubbleNoteContextIncomplete": {"description": "Note under an AI answer when profile, dish or meal data failed to load"},
+  "componentsChatMessageBubbleNoteImageNotAnalyzed": "The image couldn't be analyzed.",
+  "@componentsChatMessageBubbleNoteImageNotAnalyzed": {"description": "Note under an AI answer when the attached image could not be processed"},
+  "screensChatHistoryLoadFailed": "Some of your chat history couldn't be loaded.",
+  "@screensChatHistoryLoadFailed": {"description": "Snackbar when saved chat messages could not be read"},
+  "screensChatHistorySaveFailed": "Your chat history couldn't be saved on this device.",
+  "@screensChatHistorySaveFailed": {"description": "Snackbar when chat messages could not be saved"},
+  "screensChatSettingsFailed": "Chat settings couldn't be loaded or saved. Defaults are used for now.",
+  "@screensChatSettingsFailed": {"description": "Snackbar when agent mode settings could not be read or written"},
+  "screensChatProfilesLoadFailed": "Chat profiles couldn't be loaded. Defaults are shown; your saved profiles were not changed.",
+  "@screensChatProfilesLoadFailed": {"description": "Snackbar when chat profiles could not be read"},
+  "screensChatProfileSaveFailed": "Your profile changes couldn't be saved.",
+  "@screensChatProfileSaveFailed": {"description": "Snackbar when a chat profile change could not be saved"},
+  "screensChatApiKeyReadFailedTitle": "Your API key couldn't be read",
+  "@screensChatApiKeyReadFailedTitle": {"description": "Chat screen title when the stored API key could not be read"},
+  "screensChatApiKeyReadFailedMessage": "The key stored on this device couldn't be accessed. Reload to try again, or enter it again in the API key settings.",
+  "@screensChatApiKeyReadFailedMessage": {"description": "Chat screen explanation when the stored API key could not be read"},
+  "screensSettingsStatisticsPartialLoadFailed": "Some health or calorie data couldn't be loaded, so the charts may be incomplete.",
+  "@screensSettingsStatisticsPartialLoadFailed": {"description": "Banner when health or calorie history failed to load"},
+  "screensSettingsHealthSettingsLoadDataFailed": "Today's health data couldn't be loaded.",
+  "@screensSettingsHealthSettingsLoadDataFailed": {"description": "Snackbar when today's health data failed to load"},
+  "screensSettingsHealthSettingsOpenSettingsFailed": "Health Connect settings couldn't be opened.",
+  "@screensSettingsHealthSettingsOpenSettingsFailed": {"description": "Snackbar when Health Connect settings could not be opened"},
+  "screensCalendarProfileLoadFailed": "Your profile couldn't be loaded, so daily targets aren't shown.",
+  "@screensCalendarProfileLoadFailed": {"description": "Calendar message when the user profile failed to load"}
 }
-

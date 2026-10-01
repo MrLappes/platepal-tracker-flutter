@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/chat_message.dart';
@@ -8,6 +10,9 @@ import '../../models/chat_profile.dart';
 import '../../models/dish_models.dart';
 import '../../models/dish.dart';
 import '../../models/user_ingredient.dart';
+import '../../services/storage/dish_service.dart';
+import '../../services/chat/openai_service.dart' show ChatErrorKind;
+import '../../utils/number_parsing.dart';
 import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
@@ -94,7 +99,11 @@ class MessageBubble extends StatelessWidget {
             if (message.hasImage) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: _buildImageWidget(message.imageUrl!, theme),
+                child: _buildImageWidget(
+                  message.imageUrl!,
+                  theme,
+                  localizations.componentsChatChatInputImageAttached,
+                ),
               ),
               const SizedBox(height: 12),
             ],
@@ -140,39 +149,30 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
                   ] else if (message.hasFailed) ...[
-                    GestureDetector(
-                      onTap: onRetry,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.error,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.refresh,
-                              size: 14,
-                              color: theme.colorScheme.onError,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              localizations
-                                  .componentsChatMessageBubbleRetryMessage,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onError,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                    Flexible(child: _buildFailureActions(context, theme)),
+                  ],
+                ],
+              ),
+            ],
+            for (final note in _responseNotes(localizations)) ...[
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      note,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ],
@@ -419,16 +419,102 @@ class MessageBubble extends StatelessWidget {
     final difference = now.difference(dateTime);
 
     if (difference.inDays == 0) {
-      final hour = dateTime.hour;
-      final minute = dateTime.minute.toString().padLeft(2, '0');
-      final period = hour >= 12 ? 'PM' : 'AM';
-      final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-      return '$displayHour:$minute $period';
+      return MaterialLocalizations.of(context).formatTimeOfDay(
+        TimeOfDay.fromDateTime(dateTime),
+        alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+      );
     } else if (difference.inDays == 1) {
       return localizations.componentsChatMessageBubbleYesterday;
     } else {
-      return '${dateTime.day}/${dateTime.month}';
+      return DateFormat.MMMd(localizations.localeName).format(dateTime);
     }
+  }
+
+  /// Why the message failed, Retry, and for key problems a settings shortcut.
+  Widget _buildFailureActions(BuildContext context, ThemeData theme) {
+    final localizations = AppLocalizations.of(context);
+    final kind = ChatErrorKind.values.asNameMap()[message.metadata?['errorKind']];
+    final guidance = switch (kind) {
+      ChatErrorKind.auth => localizations.componentsChatMessageBubbleErrorAuth,
+      ChatErrorKind.rateLimit =>
+        localizations.componentsChatMessageBubbleErrorRateLimit,
+      ChatErrorKind.network =>
+        localizations.componentsChatMessageBubbleErrorNetwork,
+      ChatErrorKind.server =>
+        localizations.componentsChatMessageBubbleErrorServer,
+      ChatErrorKind.keyUnreadable =>
+        localizations.componentsChatMessageBubbleErrorKeyUnreadable,
+      ChatErrorKind.unknown =>
+        localizations.componentsChatMessageBubbleErrorUnknown,
+      null => null, // History saved before error kinds existed.
+    };
+    final opensKeySettings =
+        kind == ChatErrorKind.auth || kind == ChatErrorKind.keyUnreadable;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (guidance != null) ...[
+          Text(
+            guidance,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            TextButton.icon(
+              onPressed: onRetry,
+              style: TextButton.styleFrom(
+                backgroundColor: theme.colorScheme.error,
+                foregroundColor: theme.colorScheme.onError,
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              icon: const Icon(Icons.refresh, size: 14),
+              label: Text(
+                localizations.componentsChatMessageBubbleRetryMessage,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onError,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (opensKeySettings)
+              TextButton.icon(
+                onPressed: () => context.push('/settings/api-key'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                icon: const Icon(Icons.key, size: 14),
+                label: Text(
+                  localizations.componentsChatMessageBubbleOpenApiKeySettings,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Localized notes for assistant answers built from incomplete data.
+  List<String> _responseNotes(AppLocalizations localizations) {
+    final notes = message.metadata?['responseNotes'];
+    if (message.isFromUser || notes is! List) return const [];
+    return [
+      if (notes.contains('contextIncomplete'))
+        localizations.componentsChatMessageBubbleNoteContextIncomplete,
+      if (notes.contains('imageNotAnalyzed'))
+        localizations.componentsChatMessageBubbleNoteImageNotAnalyzed,
+    ];
   }
 
   /// Check if this message has agent processing metadata
@@ -441,13 +527,6 @@ class MessageBubble extends StatelessWidget {
   /// Check if this message has processed dishes
   bool _hasDishes() {
     final dishesProcessedRaw = message.metadata?['dishesProcessed'];
-
-    // Debug logging to understand the data structure
-    if (dishesProcessedRaw != null) {
-      debugPrint('dishesProcessed type: ${dishesProcessedRaw.runtimeType}');
-      debugPrint('dishesProcessed value: $dishesProcessedRaw');
-    }
-
     if (dishesProcessedRaw == null ||
         dishesProcessedRaw is! Map<String, dynamic>) {
       return false;
@@ -501,8 +580,32 @@ class MessageBubble extends StatelessWidget {
           ),
         );
       } catch (e) {
-        debugPrint('Error building dish card: $e');
-        return const SizedBox.shrink();
+        debugPrint('Invalid dish suggestion payload');
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).screensMealsErrorLoadingDishes,
+                ),
+              ),
+              if (onRetry != null)
+                TextButton(
+                  onPressed: onRetry,
+                  child: Text(
+                    AppLocalizations.of(context)
+                        .componentsChatMessageBubbleRetryMessage,
+                  ),
+                ),
+            ],
+          ),
+        );
       }
     }).toList();
   }
@@ -571,17 +674,35 @@ class MessageBubble extends StatelessWidget {
   }
 
   /// Handle adding dish to meals by showing the dish log modal
-  void _handleAddToMeals(BuildContext context, ProcessedDish processedDish) {
-    // Convert ProcessedDish to Dish
+  Future<void> _handleAddToMeals(
+    BuildContext context,
+    ProcessedDish processedDish,
+  ) async {
     final dish = _convertToDish(processedDish);
-
-    // Show dish log modal
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DishLogModal(dish: dish),
-    );
+    try {
+      final dishService = DishService();
+      final storedDish =
+          await dishService.getDishById(dish.id) ??
+          await dishService.saveDish(dish);
+      if (!context.mounted) return;
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => DishLogModal(dish: storedDish),
+      );
+    } catch (error) {
+      debugPrint('Error saving suggested dish: ${error.runtimeType}');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).screensDishCreateErrorSavingDish,
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   /// Handle viewing dish details (async version for DishSuggestionCard)
@@ -590,6 +711,7 @@ class MessageBubble extends StatelessWidget {
     ProcessedDish dish,
   ) async {
     final localizations = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     return await showDialog<ProcessedDish?>(
       context: context,
       builder:
@@ -604,16 +726,16 @@ class MessageBubble extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryCalories}: ${dish.totalNutrition.calories.toStringAsFixed(0)}',
+                  '${localizations.componentsCalendarMacroSummaryCalories}: ${formatDecimal(dish.totalNutrition.calories, locale, fractionDigits: 0)}',
                 ),
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryProtein}: ${dish.totalNutrition.protein.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryProtein}: ${formatDecimal(dish.totalNutrition.protein, locale)}g',
                 ),
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryCarbs}: ${dish.totalNutrition.carbs.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryCarbs}: ${formatDecimal(dish.totalNutrition.carbs, locale)}g',
                 ),
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryFat}: ${dish.totalNutrition.fat.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryFat}: ${formatDecimal(dish.totalNutrition.fat, locale)}g',
                 ),
                 if (dish.ingredients.isNotEmpty) ...[
                   const SizedBox(height: 12),
@@ -640,7 +762,7 @@ class MessageBubble extends StatelessWidget {
   }
 
   /// Build image widget that handles both local files and network URLs
-  Widget _buildImageWidget(String imageUrl, ThemeData theme) {
+  Widget _buildImageWidget(String imageUrl, ThemeData theme, String label) {
     // Check if it's a local file path
     if (imageUrl.startsWith('/') ||
         imageUrl.contains('\\') ||
@@ -649,6 +771,7 @@ class MessageBubble extends StatelessWidget {
       final file = File(imageUrl);
       return Image.file(
         file,
+        semanticLabel: label,
         width: double.infinity,
         height: 200,
         fit: BoxFit.cover,
@@ -665,6 +788,7 @@ class MessageBubble extends StatelessWidget {
       // Handle network URL
       return Image.network(
         imageUrl,
+        semanticLabel: label,
         width: double.infinity,
         height: 200,
         fit: BoxFit.cover,
@@ -683,34 +807,28 @@ class MessageBubble extends StatelessWidget {
   /// Build avatar widget based on user/bot profile
   Widget _buildAvatar(BuildContext context, ThemeData theme, bool isUser) {
     final avatarUrl = isUser ? userProfile?.avatarUrl : botProfile?.avatarUrl;
-
-    // Debug logging to check if avatar URLs are being passed correctly
-    debugPrint('MessageBubble avatar debug:');
-    debugPrint('  isUser: $isUser');
-    debugPrint('  userProfile?.avatarUrl: ${userProfile?.avatarUrl}');
-    debugPrint('  botProfile?.avatarUrl: ${botProfile?.avatarUrl}');
-    debugPrint('  final avatarUrl: $avatarUrl');
-
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child:
-            avatarUrl != null
-                ? _buildAvatarImage(avatarUrl, theme, isUser)
-                : _buildDefaultAvatar(theme, isUser),
+    return ExcludeSemantics(
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child:
+              avatarUrl != null
+                  ? _buildAvatarImage(avatarUrl, theme, isUser)
+                  : _buildDefaultAvatar(theme, isUser),
+        ),
       ),
     );
   }
@@ -729,9 +847,7 @@ class MessageBubble extends StatelessWidget {
         height: 36,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          debugPrint(
-            'Local avatar image failed to load: $avatarUrl, error: $error',
-          );
+          debugPrint('Local avatar image failed to load');
           return _buildDefaultAvatar(theme, isUser);
         },
       );
@@ -758,9 +874,7 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
         errorWidget: (context, url, error) {
-          debugPrint(
-            'Network avatar image failed to load: $url, error: $error',
-          );
+          debugPrint('Network avatar image failed to load');
           return _buildDefaultAvatar(theme, isUser);
         },
       );
@@ -789,6 +903,7 @@ class MessageBubble extends StatelessWidget {
     }
 
     final localizations = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -828,6 +943,24 @@ class MessageBubble extends StatelessWidget {
                   final ingredient = UserIngredient.fromJson(
                     ingredientData as Map<String, dynamic>,
                   );
+                  final quantityText = ingredient.quantity.toString();
+                  final exponentIndex = quantityText.indexOf('e');
+                  final decimalIndex = quantityText.indexOf('.');
+                  final fractionDigits =
+                      decimalIndex == -1
+                          ? 0
+                          : (exponentIndex == -1
+                                  ? quantityText.length
+                                  : exponentIndex) -
+                              decimalIndex -
+                              1;
+                  final exponent =
+                      exponentIndex == -1
+                          ? 0
+                          : int.parse(
+                            quantityText.substring(exponentIndex + 1),
+                          );
+                  final digits = fractionDigits - exponent;
                   return Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -841,7 +974,7 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
+                      '${ingredient.name} (${formatDecimal(ingredient.quantity, locale, fractionDigits: digits > 0 ? digits : 1)}${ingredient.unit})',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w500,

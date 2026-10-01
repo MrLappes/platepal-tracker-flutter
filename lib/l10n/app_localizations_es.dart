@@ -9,6 +9,36 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get screensCalendarHasMealsLogged => 'tiene comidas registradas';
+
+  @override
+  String get screensCalendarFailedToLoadDates =>
+      'No se pudieron cargar las fechas del calendario';
+
+  @override
+  String get screensCalendarFailedToLoadSummary =>
+      'No se pudo cargar el resumen nutricional';
+
+  @override
+  String get screensCalendarProfileNudge =>
+      'Configura tu perfil para obtener objetivos diarios';
+
+  @override
+  String get screensCalendarSetUpProfile => 'Configurar perfil';
+
+  @override
+  String get screensCalendarLogMeal => 'Registrar comida';
+
+  @override
+  String screensCalendarCaloriesPerServing(int calories) {
+    return '$calories kcal por ración';
+  }
+
+  @override
+  String get componentsCalendarCalendarDayDetailErrorLoadingMeals =>
+      'No se pudieron cargar las comidas de este día';
+
+  @override
   String get componentsCalendarCalendarDayDetailNoMealsLoggedForDay =>
       'No hay comidas registradas para este día';
 
@@ -48,6 +78,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsCalendarMacroSummaryGetAiTip => 'Obtener Consejo IA';
 
   @override
+  String componentsCalendarMacroSummaryPercentOfGoal(int percent) {
+    return '$percent % del objetivo';
+  }
+
+  @override
+  String componentsCalendarMacroSummaryOverBy(String amount, String unit) {
+    return 'Por encima del objetivo en $amount $unit';
+  }
+
+  @override
   String get componentsCalendarMacroSummaryHealthDataMessage =>
       'Estos datos fueron recopilados de los datos de salud en tu teléfono, proporcionando información precisa sobre las calorías quemadas de tus actividades de fitness para este día completo.';
 
@@ -70,16 +110,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsCalendarMacroSummaryProtein => 'Proteína';
 
   @override
-  String get componentsCalendarMacroSummaryCompactCalories => 'Cal';
+  String get componentsCalendarMacroSummaryCompactProtein => 'Proteína';
 
   @override
-  String get componentsCalendarMacroSummaryCompactProtein => 'Protein';
+  String get componentsCalendarMacroSummaryCompactCarbs => 'Carb.';
 
   @override
-  String get componentsCalendarMacroSummaryCompactCarbs => 'Carbs';
-
-  @override
-  String get componentsCalendarMacroSummaryCompactFat => 'Fat';
+  String get componentsCalendarMacroSummaryCompactFat => 'Grasa';
 
   @override
   String get componentsCommonOk => 'Aceptar';
@@ -290,6 +327,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsChatAgentStepsModalFailed => 'Fallido';
 
   @override
+  String get componentsChatAgentStepsModalSeverityLow => 'Bajo';
+
+  @override
+  String get componentsChatAgentStepsModalSeverityMedium => 'Medio';
+
+  @override
+  String get componentsChatAgentStepsModalSeverityHigh => 'Alto';
+
+  @override
+  String get componentsChatAgentStepsModalSeverityCritical => 'Crítico';
+
+  @override
   String get componentsChatAgentStepsModalBadgeEmergencyOverrides =>
       'Sobrescrituras de emergencia';
 
@@ -331,6 +380,32 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String componentsChatAgentStepsModalTimeLabel(String time) {
     return 'Tiempo: $time';
+  }
+
+  @override
+  String get componentsChatAgentStepsModalUnknownStep => 'Paso desconocido';
+
+  @override
+  String get componentsChatAgentStepsModalNoReasonProvided =>
+      'No se indicó ningún motivo';
+
+  @override
+  String get componentsChatAgentStepsModalNoSummaryAvailable =>
+      'No hay ningún resumen disponible';
+
+  @override
+  String componentsChatAgentStepsModalListItems(int count) {
+    return 'Lista con $count elementos';
+  }
+
+  @override
+  String componentsChatAgentStepsModalMapKeys(int count) {
+    return 'Mapa con $count claves';
+  }
+
+  @override
+  String componentsChatAgentStepsModalMoreItems(int count) {
+    return '... y $count elementos más';
   }
 
   @override
@@ -462,6 +537,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ingredientes agregados';
 
   @override
+  String componentsChatChatInputRemoveIngredient(String name) {
+    return 'Quitar $name';
+  }
+
+  @override
+  String get componentsChatChatInputIngredientAdded =>
+      'Ingrediente añadido al chat';
+
+  @override
+  String get componentsChatChatInputAttachments => 'Añadir archivos adjuntos';
+
+  @override
   String get componentsChatChatInputScanBarcode => 'Escanear Código de Barras';
 
   @override
@@ -590,26 +677,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsChatMessageBubbleYesterday => 'Ayer';
 
   @override
-  String get componentsChatNutritionAnalysisCardAddToMeals =>
-      'Agregar a Comidas';
-
-  @override
-  String get componentsChatNutritionAnalysisCardCookingInstructions =>
-      'Instrucciones de Cocina';
-
-  @override
   String get componentsChatNutritionAnalysisCardDishName => 'Nombre del Plato';
-
-  @override
-  String get componentsChatNutritionAnalysisCardMealType => 'Tipo de Comida';
 
   @override
   String get componentsChatNutritionAnalysisCardNutritionAnalysis =>
       'Análisis Nutricional';
-
-  @override
-  String get componentsChatNutritionAnalysisCardServingSize =>
-      'Tamaño de Porción';
 
   @override
   String get componentsChatQuickActionsQuickActions => 'Acciones Rápidas';
@@ -725,6 +797,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Seleccionar Tipo de Comida';
 
   @override
+  String get componentsModalsDishLogModalSelectTime => 'Seleccionar hora';
+
+  @override
   String get componentsModalsDishLogModalSnack => 'Merienda';
 
   @override
@@ -753,8 +828,30 @@ class AppLocalizationsEs extends AppLocalizations {
       'Escaneando código de barras...';
 
   @override
+  String get componentsScannerBarcodeScannerClose => 'Cerrar';
+
+  @override
+  String get componentsScannerBarcodeScannerPermissionHint =>
+      'Permite el acceso a la cámara para esta aplicación en los ajustes del sistema.';
+
+  @override
+  String componentsScannerBarcodeScannerScannerError(String errorCode) {
+    return 'Error del escáner: $errorCode';
+  }
+
+  @override
+  String get componentsScannerBarcodeScannerServiceUnavailable =>
+      'El servicio de alimentos no está disponible. Inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerBarcodeScannerTorchOn => 'Encender la linterna';
+
+  @override
+  String get componentsScannerBarcodeScannerTorchOff => 'Apagar la linterna';
+
+  @override
   String componentsScannerProductSearchErrorSearchingProduct(String error) {
-    return 'Error al buscar el producto';
+    return 'Error al buscar el producto: $error';
   }
 
   @override
@@ -779,6 +876,155 @@ class AppLocalizationsEs extends AppLocalizations {
   String get componentsScannerProductSearchSearchProducts => 'Buscar productos';
 
   @override
+  String get componentsScannerProductSearchFiltersAndSort => 'Filtros y orden';
+
+  @override
+  String get componentsScannerProductSearchNutriScore => 'NUTRI-SCORE';
+
+  @override
+  String get componentsScannerProductSearchAny => 'Cualquiera';
+
+  @override
+  String get componentsScannerProductSearchSortBy => 'Ordenar por';
+
+  @override
+  String get componentsScannerProductSearchPopular => 'Populares';
+
+  @override
+  String componentsScannerProductSearchResultsFor(String query) {
+    return 'Resultados para \"$query\"';
+  }
+
+  @override
+  String get componentsScannerProductSearchMyDatabase => 'Mi base de datos';
+
+  @override
+  String get componentsScannerProductSearchGlobalFeed => 'Catálogo global';
+
+  @override
+  String get componentsScannerProductSearchEndOfResults =>
+      'Fin de los resultados';
+
+  @override
+  String get componentsScannerProductSearchSelectCategoryOrSearch =>
+      'Elige una categoría o escribe para buscar';
+
+  @override
+  String componentsScannerProductSearchNoResultsFor(String query) {
+    return 'Sin resultados para \"$query\"';
+  }
+
+  @override
+  String get componentsScannerProductSearchUnknown => 'Desconocido';
+
+  @override
+  String get componentsScannerProductSearchKcal => 'kcal';
+
+  @override
+  String get componentsScannerProductSearchProteinAbbreviation => 'P:';
+
+  @override
+  String get componentsScannerProductSearchCarbsAbbreviation => 'C:';
+
+  @override
+  String get componentsScannerProductSearchFatAbbreviation => 'G:';
+
+  @override
+  String get componentsScannerProductSearchGramsAbbreviation => 'g';
+
+  @override
+  String get componentsScannerProductSearchIngredient => 'Ingrediente';
+
+  @override
+  String componentsScannerProductSearchDishIngredients(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredientes — plato',
+      one: '1 ingrediente — plato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get componentsScannerProductSearchBrowseUnavailable =>
+      'No se pueden cargar los productos. Inténtalo de nuevo.';
+
+  @override
+  String get componentsScannerProductSearchUnknownProduct =>
+      'Producto desconocido';
+
+  @override
+  String get componentsScannerProductSearchCategoryAll => 'Todos';
+
+  @override
+  String get componentsScannerProductSearchCategoryFruits => 'Frutas';
+
+  @override
+  String get componentsScannerProductSearchCategoryVegetables => 'Verduras';
+
+  @override
+  String get componentsScannerProductSearchCategoryDairy => 'Lácteos';
+
+  @override
+  String get componentsScannerProductSearchCategoryMeat => 'Carnes';
+
+  @override
+  String get componentsScannerProductSearchCategorySeafood =>
+      'Pescados y mariscos';
+
+  @override
+  String get componentsScannerProductSearchCategoryBeverages => 'Bebidas';
+
+  @override
+  String get componentsScannerProductSearchCategoryCereals => 'Cereales';
+
+  @override
+  String get componentsScannerProductSearchCategoryBreads => 'Panes';
+
+  @override
+  String get componentsScannerProductSearchCategorySnacks => 'Aperitivos';
+
+  @override
+  String get componentsScannerProductSearchCategorySweets => 'Dulces';
+
+  @override
+  String get componentsScannerProductSearchCategoryLegumes => 'Legumbres';
+
+  @override
+  String get componentsScannerProductSearchCategoryNuts => 'Frutos secos';
+
+  @override
+  String get componentsScannerProductSearchCategoryCondiments => 'Condimentos';
+
+  @override
+  String get componentsScannerProductSearchCategoryOilsAndFats =>
+      'Aceites y grasas';
+
+  @override
+  String get componentsScannerProductSearchCategoryFrozen => 'Congelados';
+
+  @override
+  String get componentsScannerProductSearchCategoryReadyMeals =>
+      'Platos preparados';
+
+  @override
+  String get componentsScannerProductSearchCategoryBabyFoods =>
+      'Alimentos infantiles';
+
+  @override
+  String get componentsScannerProductSearchSortPopularity => 'Más populares';
+
+  @override
+  String get componentsScannerProductSearchSortName => 'Nombre A–Z';
+
+  @override
+  String get componentsScannerProductSearchSortNewest => 'Más recientes';
+
+  @override
+  String get componentsScannerProductSearchSortCompleteness => 'Más completos';
+
+  @override
   String get componentsSharedErrorDisplayRetry => 'Reintentar';
 
   @override
@@ -795,6 +1041,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get providersChatProviderAiThinking => 'La IA está pensando...';
+
+  @override
+  String get providersChatProviderIngredientsPrompt =>
+      '¿Qué puedo preparar con estos ingredientes?';
 
   @override
   String get providersChatProviderTestChatResponse =>
@@ -841,6 +1091,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensChatChatAssistant => 'Asistente de Chat IA';
 
   @override
+  String get screensChatSystemAnalyzing => 'SISTEMA ANALIZANDO ::';
+
+  @override
   String get screensChatChatCleared => 'Historial del chat eliminado';
 
   @override
@@ -862,9 +1115,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensChatNoApiKeyConfigured => 'No hay clave API configurada';
-
-  @override
-  String get screensChatReloadApiKeyButton => 'Recargar Clave API';
 
   @override
   String get screensDishCreateBasicInfo => 'Información Básica';
@@ -951,8 +1201,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensHomeAppTitle => 'PlatePal Tracker';
 
   @override
-  String get screensHomeWelcomeToPlatePalTracker =>
-      'Bienvenido a PlatePal Tracker';
+  String get providersStorageError => 'No se pudieron cargar tus datos.';
+
+  @override
+  String get providersStorageRetry => 'Reintentar';
 
   @override
   String get screensMealsAddedToFavorites => 'Agregado a favoritos';
@@ -986,6 +1238,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensMealsErrorLoadingDishes => 'Error al cargar los platos';
 
   @override
+  String get screensMealsLoadFailedHint =>
+      'No se pudieron cargar tus platos. Inténtalo de nuevo.';
+
+  @override
   String get screensMealsErrorUpdatingDish => 'Error al actualizar el plato';
 
   @override
@@ -996,6 +1252,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensMealsNoDishesFound => 'No se encontraron platos';
+
+  @override
+  String get screensMealsOtherCategory => 'Otros';
 
   @override
   String get screensMealsRemovedFromFavorites => 'Removido de favoritos';
@@ -1067,6 +1326,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensMenuLanguage => 'Idioma';
 
   @override
+  String get screensMenuSystemDefault => 'Predeterminado del sistema';
+
+  @override
   String get screensMenuLearnMorePlatePal => 'Aprende más sobre PlatePal';
 
   @override
@@ -1077,6 +1339,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensMenuNutritionGoals => 'Objetivos Nutricionales';
+
+  @override
+  String get screensMenuOceanic => 'Oceánico';
+
+  @override
+  String get screensMenuForest => 'Bosque';
+
+  @override
+  String get screensMenuPlatePal => 'PlatePal';
 
   @override
   String get screensMenuProfile => 'Perfil';
@@ -1099,6 +1370,108 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensMenuViewStatistics => 'Ver Estadísticas';
+
+  @override
+  String get screensPrivacyTitle => 'Política de privacidad';
+
+  @override
+  String get screensPrivacyEffectiveDate =>
+      'Fecha de entrada en vigor: 2026-09-30';
+
+  @override
+  String get screensPrivacyOverviewTitle => 'En resumen';
+
+  @override
+  String get screensPrivacyOverviewBody =>
+      'PlatePal Tracker es una aplicación de seguimiento nutricional que funciona principalmente sin conexión. No operamos servidores para tus datos ni exigimos una cuenta, y la aplicación no incluye herramientas de análisis, publicidad ni rastreo. Las funciones de red opcionales que se describen a continuación contactan con sus proveedores cuando las usas.';
+
+  @override
+  String get screensPrivacyStorageTitle => 'Datos en tu dispositivo';
+
+  @override
+  String get screensPrivacyStorageBody =>
+      'Los platos, registros de comidas, datos de perfil (incluidas las medidas corporales), objetivos, historial del chat y ajustes se guardan en tu dispositivo mediante SQLite o SharedPreferences. Las fotos de alimentos guardadas también pueden conservarse en el almacenamiento de la aplicación. La clave API que introduces se guarda en el almacenamiento seguro del sistema; las claves antiguas de SharedPreferences se migran cuando es posible.';
+
+  @override
+  String get screensPrivacyAiTitle => 'Chat con IA';
+
+  @override
+  String get screensPrivacyAiBody =>
+      'El chat con IA es opcional y requiere tu propia clave API. Al usarlo, tus mensajes, imágenes adjuntas y, cuando corresponde, el historial de la conversación, tu perfil, registros de comidas o resúmenes nutricionales y platos guardados se envían a OpenAI o al servicio compatible con OpenAI que hayas configurado. La clave se envía a ese proveedor para autenticarte. Ese proveedor trata la información según su propia política de privacidad; elige uno en quien confíes. Nosotros no recibimos esas solicitudes.';
+
+  @override
+  String get screensPrivacyFoodFactsTitle => 'Open Food Facts';
+
+  @override
+  String get screensPrivacyFoodFactsBody =>
+      'Al buscar alimentos o escanear un código de barras, la aplicación envía el texto de búsqueda o el número del código y los filtros elegidos a world.openfoodfacts.org. También puede descargar información e imágenes de productos de Open Food Facts.';
+
+  @override
+  String get screensPrivacyHealthTitle => 'Health Connect y Apple Health';
+
+  @override
+  String get screensPrivacyHealthBody =>
+      'Con tu permiso, la aplicación lee las calorías quemadas (totales y activas en Android; activas y basales en iOS) de Health Connect o Apple Health y escribe allí los datos nutricionales de las comidas que registras. Las lecturas se guardan temporalmente en este dispositivo y se usan para cálculos de energía y objetivos dentro de la aplicación; no se incluyen en las solicitudes a la IA ni se envían a un servidor del desarrollador. Health Connect y Apple Health gestionan sus propios registros.';
+
+  @override
+  String get screensPrivacyExternalTitle => 'Enlaces e imágenes externos';
+
+  @override
+  String get screensPrivacyExternalBody =>
+      'La pantalla de colaboradores carga avatares de avatars.githubusercontent.com, de GitHub. Al abrir GitHub, la política en línea, otros sitios externos o imágenes de productos remotas, contactas con esos servicios, que pueden conocer tu dirección IP y tratar las solicitudes según sus propias políticas.';
+
+  @override
+  String get screensPrivacyExportTitle => 'Exportación e importación';
+
+  @override
+  String get screensPrivacyExportBody =>
+      'Los archivos de exportación (JSON o CSV) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.';
+
+  @override
+  String get screensPrivacyBackupTitle => 'Copia de seguridad de Android';
+
+  @override
+  String get screensPrivacyBackupBody =>
+      'La copia de seguridad del sistema Android puede copiar la base de datos y las preferencias de la aplicación, incluidos los registros de chat y las calorías de salud guardadas temporalmente, a tu cuenta de Google o transferirlas a otro dispositivo. Las reglas excluyen los archivos de preferencias del almacenamiento seguro, pero una clave API antigua puede permanecer en otras preferencias hasta su migración. Revisa los ajustes de copia de seguridad de Android para controlarlo.';
+
+  @override
+  String get screensPrivacyDeletionTitle => 'Eliminar tus datos';
+
+  @override
+  String get screensPrivacyDeletionBody =>
+      'En Perfil, Restablecer la aplicación elimina la base de datos SQLite, SharedPreferences y la clave API guardada en este dispositivo. Desinstalarla elimina los datos privados de la aplicación. Restablecerla no elimina las imágenes guardadas, archivos exportados o copias previas a una importación, copias compartidas en otros lugares, registros ya escritos en Health Connect o Apple Health ni copias del sistema; bórralos por separado cuando corresponda.';
+
+  @override
+  String get screensPrivacyChildrenTitle => 'Menores';
+
+  @override
+  String get screensPrivacyChildrenBody =>
+      'PlatePal Tracker no está destinada a menores. La aplicación no verifica la edad; madres, padres o tutores deben supervisar su uso, especialmente antes de activar servicios externos o compartir información sensible.';
+
+  @override
+  String get screensPrivacyChangesTitle => 'Cambios en esta política';
+
+  @override
+  String get screensPrivacyChangesBody =>
+      'Podemos actualizar esta política cuando cambie la aplicación. La fecha de entrada en vigor indicada arriba corresponde a esta versión; consulta la política vigente en la aplicación o en el repositorio de GitHub.';
+
+  @override
+  String get screensPrivacyContactTitle => 'Contacto';
+
+  @override
+  String get screensPrivacyContactBody =>
+      'Si tienes preguntas sobre privacidad, abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.';
+
+  @override
+  String get screensPrivacyMenuSubtitle =>
+      'Qué datos salen del dispositivo y cómo controlarlos';
+
+  @override
+  String get screensPrivacyViewOnline => 'Ver en línea';
+
+  @override
+  String get screensPrivacyLinkError =>
+      'No se pudo abrir la política de privacidad.';
 
   @override
   String get screensSettingsAboutAboutAppTitle => 'Acerca de la Aplicación';
@@ -1205,6 +1578,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Error al eliminar la clave API';
 
   @override
+  String get screensSettingsApiKeySettingsInvalidBaseUrl =>
+      'La URL base debe empezar con https:// (http:// solo se permite para localhost)';
+
+  @override
   String get screensSettingsApiKeySettingsGetApiKeyFromOpenAi =>
       'Obtener clave API de OpenAI';
 
@@ -1238,6 +1615,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensSettingsApiKeySettingsRemoveApiKey => 'Eliminar clave API';
 
   @override
+  String get screensSettingsApiKeySettingsShowKey => 'Mostrar clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsHideKey => 'Ocultar clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsDeleteKey => 'Eliminar clave API';
+
+  @override
   String get screensSettingsApiKeySettingsRemoveApiKeyConfirmation =>
       '¿Estás seguro de que quieres eliminar tu clave API? Esto desactivará las funciones de IA.';
 
@@ -1255,6 +1641,58 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsApiKeySettingsUpdateApiKey =>
       'Actualizar clave API';
+
+  @override
+  String get screensSettingsApiKeySettingsApiMode => 'Modo de API';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibleApi =>
+      'API compatible con OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsUsingCustomEndpoint =>
+      'Usando un servidor API personalizado compatible con OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsUsingOfficialApi =>
+      'Usando la API oficial de OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsBaseUrl => 'URL base';
+
+  @override
+  String get screensSettingsApiKeySettingsBaseUrlHelper =>
+      'Introduce la URL base de tu API compatible con OpenAI';
+
+  @override
+  String get screensSettingsApiKeySettingsBaseUrlRequired =>
+      'La URL base es obligatoria en modo compatible';
+
+  @override
+  String get screensSettingsApiKeySettingsApiKeyGeneric => 'Clave de API';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibilityKeyHelper =>
+      'Introduce tu clave de API o déjala vacía para desactivar las funciones de IA';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibilityKeyRequired =>
+      'La clave de API es obligatoria en modo compatible';
+
+  @override
+  String get screensSettingsApiKeySettingsCompatibilityKeyTooShort =>
+      'La clave de API parece demasiado corta';
+
+  @override
+  String get screensSettingsApiKeySettingsModelName => 'Nombre del modelo';
+
+  @override
+  String get screensSettingsApiKeySettingsModelNameHelper =>
+      'Introduce el nombre exacto del modelo admitido por tu API';
+
+  @override
+  String get screensSettingsApiKeySettingsModelNameRequired =>
+      'El nombre del modelo es obligatorio en modo compatible';
 
   @override
   String get screensSettingsChatAgentSettingsChatAgentDeepSearchSubtitle =>
@@ -1289,11 +1727,20 @@ class AppLocalizationsEs extends AppLocalizations {
       'Configuración de chat guardada correctamente';
 
   @override
+  String get screensSettingsChatAgentSettingsSaveFailed =>
+      'No se pudo guardar la configuración del chat';
+
+  @override
   String get screensSettingsContributorsBuyMeCreatine => 'Cómprame creatina';
 
   @override
   String get screensSettingsContributorsCheckGitHub =>
       'Echa un vistazo a nuestro repositorio de GitHub';
+
+  @override
+  String screensSettingsContributorsOpenGitHubProfile(String name) {
+    return 'Abrir el perfil de $name en GitHub';
+  }
 
   @override
   String get screensSettingsContributorsContributorPlural => 'Contribuidores';
@@ -1395,6 +1842,410 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensSettingsImportDataSkipDuplicates => 'Omitir Duplicados';
 
   @override
+  String get screensSettingsExportDataPreparing => 'Preparando tus datos...';
+
+  @override
+  String get screensSettingsExportDataPreview =>
+      'Vista previa de la exportación';
+
+  @override
+  String screensSettingsExportDataFormatLabel(String format) {
+    return 'Formato: $format';
+  }
+
+  @override
+  String screensSettingsExportDataTypesSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tipos',
+      one: '1 tipo',
+    );
+    return 'Tipos de datos seleccionados: $_temp0';
+  }
+
+  @override
+  String get screensSettingsExportDataReady => 'Listo para exportar';
+
+  @override
+  String get screensSettingsExportDataDishesDescription =>
+      'Tus recetas y platos guardados';
+
+  @override
+  String get screensSettingsExportDataMealLogsDescription =>
+      'Tu historial de comidas y registros nutricionales';
+
+  @override
+  String get screensSettingsExportDataUserProfilesDescription =>
+      'Perfil de usuario y preferencias';
+
+  @override
+  String get screensSettingsExportDataIngredientsDescription =>
+      'Base de datos de ingredientes';
+
+  @override
+  String get screensSettingsExportDataSupplementsDescription =>
+      'Datos de seguimiento de suplementos';
+
+  @override
+  String get screensSettingsExportDataFitnessGoalsDescription =>
+      'Objetivos de ejercicio y nutrición';
+
+  @override
+  String get screensSettingsExportDataAllDataDescription =>
+      'Exportar todos tus datos';
+
+  @override
+  String get screensSettingsExportDataFormatTitle => 'Formato de exportación';
+
+  @override
+  String get screensSettingsExportDataJsonDescription =>
+      'Formato estructurado, ideal para copias de seguridad';
+
+  @override
+  String get screensSettingsExportDataCsvDescription =>
+      'Formato de hoja de cálculo, útil para análisis';
+
+  @override
+  String get screensSettingsExportDataError => 'Error de exportación';
+
+  @override
+  String get screensSettingsExportDataResults => 'Resultados de la exportación';
+
+  @override
+  String screensSettingsExportDataFileLabel(String fileName) {
+    return 'Archivo: $fileName';
+  }
+
+  @override
+  String screensSettingsExportDataLocationLabel(String path) {
+    return 'Ubicación: $path';
+  }
+
+  @override
+  String get screensSettingsExportDataItemsExported => 'Elementos exportados:';
+
+  @override
+  String get screensSettingsExportDataShare => 'Compartir';
+
+  @override
+  String get screensSettingsExportDataShowFileLocation =>
+      'Mostrar ubicación del archivo';
+
+  @override
+  String get screensSettingsExportDataLocationTitle =>
+      'Ubicación de la exportación';
+
+  @override
+  String get screensSettingsExportDataLocationDescription =>
+      'El archivo exportado se encuentra en:';
+
+  @override
+  String get screensSettingsExportDataNoFileToShare =>
+      'No hay archivo para compartir. Exporta tus datos primero.';
+
+  @override
+  String get screensSettingsExportDataFileNotFound =>
+      'No se encuentra el archivo exportado. Exporta los datos de nuevo.';
+
+  @override
+  String screensSettingsExportDataShareFailed(String error) {
+    return 'No se pudo compartir el archivo: $error';
+  }
+
+  @override
+  String screensSettingsExportDataShareText(String fileName) {
+    return 'Exportación de datos de PlatePal - $fileName';
+  }
+
+  @override
+  String get screensSettingsExportDataShareSubject =>
+      'Exportación de datos de PlatePal';
+
+  @override
+  String screensSettingsExportDataFailedDetail(String error) {
+    return 'Error de exportación: $error';
+  }
+
+  @override
+  String get screensSettingsExportDataSectionFailed =>
+      'No se pudieron exportar los datos seleccionados. No se creó ningún archivo. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsExportDataWriteFailed =>
+      'No se pudo guardar el archivo de exportación. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsExportDataShareProblem =>
+      'No se pudo compartir el archivo. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataRestoring =>
+      'Restaurando desde la copia de seguridad...';
+
+  @override
+  String screensSettingsImportDataProcessingItems(int current, int total) {
+    return 'Procesando $current de $total elementos';
+  }
+
+  @override
+  String screensSettingsImportDataCurrentType(String type) {
+    return 'Actual: $type';
+  }
+
+  @override
+  String get screensSettingsImportDataUndoing =>
+      'Deshaciendo la última importación...';
+
+  @override
+  String get screensSettingsImportDataFileSelection => 'Selección de archivo';
+
+  @override
+  String get screensSettingsImportDataRemoveFile =>
+      'Quitar el archivo seleccionado';
+
+  @override
+  String get screensSettingsImportDataChangeFile => 'Cambiar archivo';
+
+  @override
+  String get screensSettingsImportDataSupportedFormats =>
+      'Formatos admitidos: JSON, CSV';
+
+  @override
+  String get screensSettingsImportDataAllDataDescription =>
+      'Importar todos los datos del archivo';
+
+  @override
+  String get screensSettingsImportDataSkipDescription =>
+      'Conservar los datos existentes; omitir los duplicados importados';
+
+  @override
+  String get screensSettingsImportDataOverwriteDescription =>
+      'Reemplazar los datos existentes con los importados';
+
+  @override
+  String get screensSettingsImportDataAdvancedOptions => 'Opciones avanzadas';
+
+  @override
+  String get screensSettingsImportDataValidateBeforeImport =>
+      'Validar los datos antes de importar';
+
+  @override
+  String get screensSettingsImportDataValidateDescription =>
+      'Comprobar la integridad de los datos y mostrar advertencias';
+
+  @override
+  String get screensSettingsImportDataBackupBeforeImport =>
+      'Crear una copia de seguridad antes de importar';
+
+  @override
+  String get screensSettingsImportDataBackupDescription =>
+      'Guardar automáticamente los datos existentes';
+
+  @override
+  String get screensSettingsImportDataIssues => 'Problemas de importación';
+
+  @override
+  String get screensSettingsImportDataDetailedErrors => 'Errores detallados:';
+
+  @override
+  String get screensSettingsImportDataTechnicalDetails =>
+      'Detalles del archivo y las filas (pueden aparecer en inglés):';
+
+  @override
+  String get screensSettingsImportDataResults => 'Resultados de la importación';
+
+  @override
+  String get screensSettingsImportDataPartialResults =>
+      'Importación completada con elementos omitidos';
+
+  @override
+  String screensSettingsImportDataImportedSkipped(int imported, int skipped) {
+    return 'Importados: $imported; omitidos: $skipped';
+  }
+
+  @override
+  String get screensSettingsImportDataShowReasons => 'Mostrar motivos';
+
+  @override
+  String screensSettingsImportDataFailedSection(String section) {
+    return 'Sección fallida: $section';
+  }
+
+  @override
+  String get screensSettingsImportDataConfirmTitle => 'Confirmar importación';
+
+  @override
+  String get screensSettingsImportDataSelectedSections =>
+      'Secciones seleccionadas:';
+
+  @override
+  String screensSettingsImportDataDuplicatesLabel(String strategy) {
+    return 'Duplicados: $strategy';
+  }
+
+  @override
+  String get screensSettingsImportDataConfirmAction => 'Importar';
+
+  @override
+  String get screensSettingsImportDataBackupFailedTitle =>
+      'Falló la copia de seguridad';
+
+  @override
+  String get screensSettingsImportDataBackupFailedDescription =>
+      'No se pudo crear la copia de seguridad automática. ¿Continuar con la importación sin copia de seguridad?';
+
+  @override
+  String get screensSettingsImportDataContinueWithoutBackup =>
+      'Continuar sin copia de seguridad';
+
+  @override
+  String screensSettingsImportDataFileSelectionFailed(String error) {
+    return 'Error al seleccionar el archivo: $error';
+  }
+
+  @override
+  String screensSettingsImportDataCompletedWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Importación completada con $count errores',
+      one: 'Importación completada con 1 error',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensSettingsImportDataFailedDetail(String error) {
+    return 'Error de importación: $error';
+  }
+
+  @override
+  String get screensSettingsImportDataBackupAvailable =>
+      'Copia de seguridad disponible';
+
+  @override
+  String get screensSettingsImportDataBackupAvailableDescription =>
+      'Hay una copia de seguridad de tu última importación.';
+
+  @override
+  String screensSettingsImportDataBackupCreated(String date) {
+    return 'Creada: $date';
+  }
+
+  @override
+  String screensSettingsImportDataBackupSize(String size) {
+    return 'Tamaño: $size KB';
+  }
+
+  @override
+  String get screensSettingsImportDataUndoLastImport =>
+      'Deshacer última importación';
+
+  @override
+  String screensSettingsImportDataMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count minutos',
+      one: 'hace 1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensSettingsImportDataHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count horas',
+      one: 'hace 1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String screensSettingsImportDataDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count días',
+      one: 'hace 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get screensSettingsImportDataRestoreTitle =>
+      'Restaurar desde la copia de seguridad';
+
+  @override
+  String get screensSettingsImportDataRestoreWarning =>
+      'Esto restaurará los datos al estado anterior a la última importación. Se perderán todos los cambios realizados desde entonces. ¿Quieres continuar?';
+
+  @override
+  String get screensSettingsImportDataRestoreAction => 'Restaurar';
+
+  @override
+  String get screensSettingsImportDataRestoreSuccess =>
+      '¡Restauración completada desde la copia de seguridad!';
+
+  @override
+  String screensSettingsImportDataRestoreFailedDetail(String error) {
+    return 'Error de restauración: $error';
+  }
+
+  @override
+  String get screensSettingsImportDataFileMissing =>
+      'No se encontró el archivo. Selecciónalo de nuevo.';
+
+  @override
+  String screensSettingsImportDataFileTooLarge(int maxSize) {
+    return 'El archivo es demasiado grande. Selecciona uno de hasta $maxSize MB.';
+  }
+
+  @override
+  String get screensSettingsImportDataInvalidJson =>
+      'El archivo no contiene JSON válido. Revísalo e inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataUnsupportedFormat =>
+      'Formato de archivo no admitido. Selecciona un archivo JSON o CSV.';
+
+  @override
+  String get screensSettingsImportDataInvalidData =>
+      'El archivo contiene datos no válidos. Revisa los detalles e inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataFileSelectionProblem =>
+      'No se pudo seleccionar un archivo. Inténtalo de nuevo.';
+
+  @override
+  String get screensSettingsImportDataBackupMissing =>
+      'No se encontró ninguna copia de seguridad para restaurar.';
+
+  @override
+  String get screensSettingsImportDataBackupUnreadable =>
+      'No se pudo leer la copia de seguridad. No se modificaron los datos.';
+
+  @override
+  String get screensSettingsImportDataSnapshotFailed =>
+      'No se pudieron proteger tus datos actuales. No se modificaron los datos.';
+
+  @override
+  String get screensSettingsImportDataRestoreProblem =>
+      'No se pudo restaurar la copia de seguridad. Comprueba tus datos antes de reintentar.';
+
+  @override
+  String get screensSettingsImportDataRestoreRolledBack =>
+      'La restauración falló, pero tus datos anteriores no se modificaron.';
+
+  @override
+  String screensSettingsImportDataRestoreCopySaved(String path) {
+    return 'La restauración falló y tus datos anteriores pueden estar incompletos. Hay una copia de recuperación en $path.';
+  }
+
+  @override
   String get screensSettingsImportProfileCompletionActivityLevel =>
       'Nivel de Actividad';
 
@@ -1408,13 +2259,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsImportProfileCompletionBuildMuscle =>
       'Construir Músculo';
-
-  @override
-  String get screensSettingsImportProfileCompletionCm => 'cm';
-
-  @override
-  String get screensSettingsImportProfileCompletionEmail =>
-      'Correo Electrónico';
 
   @override
   String get screensSettingsImportProfileCompletionExtraActive =>
@@ -1443,19 +2287,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsImportProfileCompletionImperial =>
       'Imperial (lb, ft)';
-
-  @override
-  String get screensSettingsImportProfileCompletionInches => 'in';
-
-  @override
-  String get screensSettingsImportProfileCompletionInvalidEmail =>
-      'Por favor ingresa una dirección de correo válida';
-
-  @override
-  String get screensSettingsImportProfileCompletionKg => 'kg';
-
-  @override
-  String get screensSettingsImportProfileCompletionLb => 'lb';
 
   @override
   String get screensSettingsImportProfileCompletionLightlyActive =>
@@ -1508,9 +2339,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsImportProfileCompletionWeightRange =>
       'El peso debe estar entre 30-300 kg';
-
-  @override
-  String get screensSettingsImportProfileCompletionYears => 'años';
 
   @override
   String get screensSettingsMacroCustomizationDiscardChanges =>
@@ -1708,6 +2536,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensSettingsStatisticsErrorLoadingData =>
       'Error al cargar datos';
+
+  @override
+  String get screensSettingsStatisticsLoadFailedHint =>
+      'No se pudieron cargar las estadísticas. Inténtalo de nuevo.';
 
   @override
   String get screensSettingsStatisticsEstimatedBalance => 'Balance Estimado';
@@ -2126,4 +2958,481 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get servicesChatAgentFallbackDishInfo =>
       'Aquí está la información del plato:';
+
+  @override
+  String get servicesChatAgentFallbackNoResponse =>
+      'No se encontró texto de respuesta.';
+
+  @override
+  String get servicesChatAgentFallbackFormatting =>
+      'No pude procesar mi respuesta. Inténtalo de nuevo.';
+
+  @override
+  String get screensDishCreateImage => 'Imagen';
+
+  @override
+  String get screensDishCreateNoImageSelected =>
+      'No se ha seleccionado ninguna imagen';
+
+  @override
+  String get screensDishCreateChangeImage => 'Cambiar imagen';
+
+  @override
+  String get screensDishCreateAddImage => 'Añadir imagen';
+
+  @override
+  String get screensDishCreateConfirmDiscardChanges =>
+      '¿Descartar los cambios sin guardar?';
+
+  @override
+  String get screensDishCreateProteinAbbreviation => 'P';
+
+  @override
+  String get screensDishCreateCarbsAbbreviation => 'C';
+
+  @override
+  String get screensDishCreateFatAbbreviation => 'G';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalUnit => 'Unidad';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerPiece =>
+      'Valores nutricionales por pieza';
+
+  @override
+  String get componentsDishesDishFormIngredientFormModalNutritionPerSlice =>
+      'Valores nutricionales por rebanada';
+
+  @override
+  String
+  get componentsDishesDishFormIngredientFormModalProductInformationLoaded =>
+      'Datos del producto cargados. Ajusta la cantidad y guarda.';
+
+  @override
+  String
+  get componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients =>
+      'Recalcular a partir de los ingredientes';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProtein =>
+      'Alto en proteínas';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarb =>
+      'Alto en carbohidratos';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFat =>
+      'Alto en grasas';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardWellBalanced =>
+      'Bien equilibrado';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighProteinFeedback =>
+      '¡Excelente! Su alto contenido de proteínas favorece el desarrollo muscular y la saciedad.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighCarbFeedback =>
+      '¡Una buena fuente de energía! Ideal antes de entrenar o en días de mucha actividad.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardHighFatFeedback =>
+      'Alto contenido de grasas. Disfrútalo con moderación y acompáñalo con comidas equilibradas.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardBalancedFeedback =>
+      '¡Muy equilibrado! Este plato aporta una combinación variada de nutrientes.';
+
+  @override
+  String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback =>
+      'Introduce los valores nutricionales para ver el análisis y las recomendaciones.';
+
+  @override
+  String get screensSettingsProfileSettingsPhysicalStats => 'Datos físicos';
+
+  @override
+  String get screensSettingsProfileSettingsBodyFatOptional =>
+      'Grasa corporal % (opcional)';
+
+  @override
+  String get screensSettingsProfileSettingsOptional => 'Opcional';
+
+  @override
+  String get screensSettingsProfileSettingsNameHint => 'Introduce tu nombre';
+
+  @override
+  String get screensSettingsProfileSettingsCustomizeMacroRatios =>
+      'Personalizar proporciones de macronutrientes';
+
+  @override
+  String get screensSettingsProfileSettingsImperialHeightRange =>
+      'La altura debe estar entre 39 y 98 pulgadas';
+
+  @override
+  String get screensSettingsProfileSettingsImperialWeightRange =>
+      'El peso debe estar entre 66 y 660 lb';
+
+  @override
+  String get screensSettingsProfileSettingsValidNumber =>
+      'Introduce un número válido';
+
+  @override
+  String get screensSettingsProfileSettingsBodyFatRange =>
+      'La grasa corporal debe estar entre el 3 % y el 50 %';
+
+  @override
+  String get screensSettingsProfileSettingsBaseMetabolicRate =>
+      'Tasa metabólica basal';
+
+  @override
+  String get screensSettingsProfileSettingsTotalDailyEnergy =>
+      'Gasto energético diario total';
+
+  @override
+  String get screensSettingsProfileSettingsResettingAppData =>
+      'Restableciendo los datos de la aplicación...';
+
+  @override
+  String screensSettingsProfileSettingsLoadFailed(String error) {
+    return 'No se pudieron cargar los datos del perfil: $error';
+  }
+
+  @override
+  String screensSettingsProfileSettingsUpdateFailed(String error) {
+    return 'No se pudo actualizar el perfil: $error';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationDailyCalories(String calories) {
+    return 'Calorías diarias: $calories kcal';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationMacroRatios =>
+      'Proporciones de macronutrientes';
+
+  @override
+  String get screensSettingsMacroCustomizationFiberTarget =>
+      'Objetivo de fibra';
+
+  @override
+  String get screensSettingsMacroCustomizationTargetPreview =>
+      'Vista previa del objetivo';
+
+  @override
+  String get screensSettingsMacroCustomizationQuickPresets => 'Ajustes rápidos';
+
+  @override
+  String screensSettingsMacroCustomizationTotalRatio(String value) {
+    return 'Total: $value %';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationPinMacro(String macro) {
+    return 'Fijar $macro';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationUnpinMacro(String macro) {
+    return 'Desfijar $macro';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationPinnedValue =>
+      'Fijado: valor bloqueado';
+
+  @override
+  String get screensSettingsMacroCustomizationTooManyPins =>
+      'No se puede ajustar: hay demasiados valores fijados';
+
+  @override
+  String screensSettingsMacroCustomizationFiberTotal(String grams) {
+    return '$grams g en total';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationFiberPer1000Calories(String grams) {
+    return '$grams g por cada 1000 calorías';
+  }
+
+  @override
+  String get screensSettingsMacroCustomizationFiberGuidance =>
+      'Recomendación: 14 g por cada 1000 calorías (guía de la FDA). Intervalo: 5-35 g por cada 1000 calorías';
+
+  @override
+  String get screensSettingsMacroCustomizationDailyMacroTargets =>
+      'Objetivos diarios de macronutrientes';
+
+  @override
+  String get screensSettingsMacroCustomizationPresetDescription =>
+      'Elige una distribución habitual de macronutrientes';
+
+  @override
+  String get screensSettingsMacroCustomizationBalancedPreset =>
+      'Equilibrado (30P / 40C / 30G)';
+
+  @override
+  String get screensSettingsMacroCustomizationHighProteinPreset =>
+      'Alto en proteínas (40P / 30C / 30G)';
+
+  @override
+  String get screensSettingsMacroCustomizationProfileNotFound =>
+      'No se encontró el perfil. Configura tu perfil.';
+
+  @override
+  String screensSettingsMacroCustomizationLoadFailed(String error) {
+    return 'No se pudo cargar el perfil: $error';
+  }
+
+  @override
+  String screensSettingsMacroCustomizationSaveFailed(String error) {
+    return 'No se pudieron guardar los objetivos de macronutrientes: $error';
+  }
+
+  @override
+  String get screensSettingsStatisticsProfileNotFound =>
+      'No se encontró el perfil de usuario';
+
+  @override
+  String screensSettingsStatisticsTestDataFailed(String error) {
+    return 'No se pudieron generar los datos de prueba: $error';
+  }
+
+  @override
+  String screensSettingsStatisticsPhaseDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+    );
+    return '($_temp0)';
+  }
+
+  @override
+  String screensSettingsStatisticsCalPerDay(String value) {
+    return '$value calorías/día';
+  }
+
+  @override
+  String screensSettingsStatisticsCalValue(String value) {
+    return '$value calorías';
+  }
+
+  @override
+  String screensSettingsStatisticsCoverage(
+    String percent,
+    int healthDays,
+    int totalDays,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      totalDays,
+      locale: localeName,
+      other: 'días',
+      one: 'día',
+    );
+    return 'Cobertura de datos del gasto calórico: $percent% ($healthDays/$totalDays $_temp0)';
+  }
+
+  @override
+  String get screensSettingsStatisticsActualBalance => 'Balance real';
+
+  @override
+  String screensSettingsStatisticsChartSummary(
+    String chart,
+    int count,
+    String minimum,
+    String maximum,
+  ) {
+    return 'Gráfico de $chart: $count puntos, escala de $minimum a $maximum';
+  }
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisProfileNotFound =>
+      'No se encontró el perfil de usuario';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisNoData =>
+      'No hay datos de gasto calórico disponibles para el análisis';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisIncreaseIntake =>
+      'Tu gasto calórico es mucho mayor de lo que indica tu objetivo actual. Considera aumentar la ingesta de calorías.';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisDecreaseIntake =>
+      'Tu gasto calórico es menor de lo que indica tu objetivo actual. Considera ajustar la ingesta de calorías o aumentar la actividad.';
+
+  @override
+  String get screensSettingsHealthSettingsAnalysisOnTarget =>
+      'Tus objetivos calóricos actuales parecen adecuados para tu nivel de actividad.';
+
+  @override
+  String screensSettingsHealthSettingsAnalysisError(String error) {
+    return 'Se produjo un error durante el análisis: $error';
+  }
+
+  @override
+  String get servicesChatAgentThinking =>
+      'Analizando tu solicitud y planificando cómo proceder...';
+
+  @override
+  String get servicesChatAgentThinkingDetail =>
+      'Desglosando tu solicitud para decidir el mejor enfoque';
+
+  @override
+  String get servicesChatAgentContext =>
+      'Reuniendo contexto y datos relevantes...';
+
+  @override
+  String get servicesChatAgentContextDetail =>
+      'Recopilando tu perfil, preferencias e historial de comidas';
+
+  @override
+  String get servicesChatAgentResponse =>
+      'Preparando una respuesta personalizada...';
+
+  @override
+  String get servicesChatAgentResponseDetail =>
+      'Combinando la información para darte una respuesta útil y personalizada';
+
+  @override
+  String get servicesChatAgentDish => 'Procesando y analizando platos...';
+
+  @override
+  String get servicesChatAgentDishDetail =>
+      'Calculando los valores nutricionales, ingredientes y detalles de las comidas';
+
+  @override
+  String get servicesChatAgentDishValidation =>
+      'Validando y ajustando los platos...';
+
+  @override
+  String get servicesChatAgentDishValidationDetail =>
+      'Comprobando los valores nutricionales y los ingredientes de los platos';
+
+  @override
+  String get servicesChatAgentError => 'Gestionando un error inesperado...';
+
+  @override
+  String get servicesChatAgentErrorDetail =>
+      'Intentando recuperarse del error y ofrecer una respuesta útil';
+
+  @override
+  String get servicesChatAgentVerify =>
+      'Verificando que el contexto permita una respuesta óptima...';
+
+  @override
+  String get servicesChatAgentVerifyDetail =>
+      'Analizando el contexto reunido para ofrecer la mejor respuesta posible';
+
+  @override
+  String get servicesChatAgentImage => 'Analizando la imagen que has subido...';
+
+  @override
+  String get servicesChatAgentImageDetail =>
+      'Identificando alimentos, ingredientes y porciones de tu imagen';
+
+  @override
+  String servicesChatAgentUnknownStep(String step) {
+    return 'Procesando el paso: $step...';
+  }
+
+  @override
+  String servicesChatAgentUnknownDetail(String step) {
+    return 'Procesando información para el paso: $step';
+  }
+
+  @override
+  String servicesChatAgentRestart(int attempt) {
+    return 'Reiniciando con una estrategia mejorada (intento $attempt/3)...';
+  }
+
+  @override
+  String servicesChatAgentFailedStep(String step) {
+    return 'Se produjo un problema en el paso \"$step\"; intentando recuperarse...';
+  }
+
+  @override
+  String get componentsChatMessageBubbleErrorAuth =>
+      'Tu clave de API fue rechazada. Revísala en los ajustes de la clave de API.';
+
+  @override
+  String get componentsChatMessageBubbleErrorRateLimit =>
+      'Se alcanzó el límite de solicitudes o la cuota de tu proveedor de IA. Espera un momento o revisa tu plan y tu saldo, y vuelve a intentarlo.';
+
+  @override
+  String get componentsChatMessageBubbleErrorNetwork =>
+      'No se pudo conectar con el proveedor de IA o la solicitud tardó demasiado. Comprueba tu conexión a internet y vuelve a intentarlo.';
+
+  @override
+  String get componentsChatMessageBubbleErrorServer =>
+      'El proveedor de IA no está disponible en este momento. Vuelve a intentarlo en un momento.';
+
+  @override
+  String get componentsChatMessageBubbleErrorKeyUnreadable =>
+      'No se pudo leer tu clave de API en este dispositivo. Vuelve a introducirla en los ajustes de la clave de API.';
+
+  @override
+  String get componentsChatMessageBubbleErrorUnknown =>
+      'No se pudo enviar el mensaje. Vuelve a intentarlo.';
+
+  @override
+  String get componentsChatMessageBubbleOpenApiKeySettings =>
+      'Ajustes de la clave de API';
+
+  @override
+  String get componentsChatMessageBubbleNoteContextIncomplete =>
+      'No se pudieron cargar algunos de tus datos; la respuesta puede ser menos personalizada.';
+
+  @override
+  String get componentsChatMessageBubbleNoteImageNotAnalyzed =>
+      'No se pudo analizar la imagen.';
+
+  @override
+  String get screensChatHistoryLoadFailed =>
+      'No se pudo cargar parte de tu historial de chat.';
+
+  @override
+  String get screensChatHistorySaveFailed =>
+      'No se pudo guardar tu historial de chat en este dispositivo.';
+
+  @override
+  String get screensChatSettingsFailed =>
+      'No se pudieron cargar o guardar los ajustes del chat. Por ahora se usan los valores predeterminados.';
+
+  @override
+  String get screensChatProfilesLoadFailed =>
+      'No se pudieron cargar los perfiles del chat. Se muestran los predeterminados; tus perfiles guardados no se modificaron.';
+
+  @override
+  String get screensChatProfileSaveFailed =>
+      'No se pudieron guardar los cambios del perfil.';
+
+  @override
+  String get screensChatApiKeyReadFailedTitle =>
+      'No se pudo leer tu clave de API';
+
+  @override
+  String get screensChatApiKeyReadFailedMessage =>
+      'No se pudo acceder a la clave guardada en este dispositivo. Recarga para volver a intentarlo o introdúcela de nuevo en los ajustes de la clave de API.';
+
+  @override
+  String get screensSettingsStatisticsPartialLoadFailed =>
+      'No se pudieron cargar algunos datos de salud o de calorías, por lo que los gráficos pueden estar incompletos.';
+
+  @override
+  String get screensSettingsHealthSettingsLoadDataFailed =>
+      'No se pudieron cargar los datos de salud de hoy.';
+
+  @override
+  String get screensSettingsHealthSettingsOpenSettingsFailed =>
+      'No se pudieron abrir los ajustes de Health Connect.';
+
+  @override
+  String get screensCalendarProfileLoadFailed =>
+      'No se pudo cargar tu perfil, por eso no se muestran los objetivos diarios.';
 }

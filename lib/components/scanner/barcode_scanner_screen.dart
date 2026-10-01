@@ -83,12 +83,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     });
 
     try {
-      debugPrint('🔍 Barcode scanned: $code');
-
       final product = await _openFoodFactsService.getProductByBarcode(code);
+      if (!mounted) return;
       if (product != null && product.isValid) {
-        debugPrint('✅ Product found: ${product.name}');
-
         // Stop the camera before closing
         _controller.stop();
 
@@ -98,10 +95,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           widget.onProductFound?.call(product);
         }
       } else {
-        debugPrint('❌ Product not found for barcode: $code');
+        debugPrint('Product not found for scanned barcode');
         if (mounted) {
           setState(() {
-            _errorMessage = AppLocalizations.of(context).componentsScannerBarcodeScannerProductNotFound;
+            _errorMessage =
+                AppLocalizations.of(
+                  context,
+                ).componentsScannerBarcodeScannerProductNotFound;
           });
 
           // Clear error after 3 seconds
@@ -115,12 +115,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         }
       }
     } catch (e) {
-      debugPrint('❌ Error searching for product: $e');
+      debugPrint('❌ Error searching for product: ${e.runtimeType}');
       if (mounted) {
         setState(() {
-          _errorMessage = AppLocalizations.of(
-            context,
-          ).componentsScannerBarcodeScannerErrorScanningBarcode(e.toString());
+          _errorMessage =
+              AppLocalizations.of(
+                context,
+              ).componentsScannerBarcodeScannerServiceUnavailable;
         });
 
         // Clear error after 5 seconds
@@ -157,29 +158,33 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.componentsScannerBarcodeScannerBarcodeScanner),
+        title: Text(
+          localizations.componentsScannerBarcodeScannerBarcodeScanner,
+        ),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () {
             widget.onCancel?.call();
             Navigator.of(context).pop();
           },
         ),
         actions: [
-          IconButton(
-            icon: ValueListenableBuilder(
-              valueListenable: _controller,
-              builder: (context, value, child) {
-                return Icon(
-                  value.torchState == TorchState.on
-                      ? Icons.flash_on
-                      : Icons.flash_off,
-                );
-              },
-            ),
-            onPressed: _toggleTorch,
+          ValueListenableBuilder(
+            valueListenable: _controller,
+            builder: (context, value, child) {
+              final isOn = value.torchState == TorchState.on;
+              return IconButton(
+                icon: Icon(isOn ? Icons.flash_on : Icons.flash_off),
+                tooltip:
+                    isOn
+                        ? localizations.componentsScannerBarcodeScannerTorchOff
+                        : localizations.componentsScannerBarcodeScannerTorchOn,
+                onPressed: _toggleTorch,
+              );
+            },
           ),
         ],
       ),
@@ -198,18 +203,32 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     Icon(Icons.error, color: Colors.red, size: 64),
                     const SizedBox(height: 16),
                     Text(
-                      'Scanner Error: ${error.errorCode}',
+                      localizations.componentsScannerBarcodeScannerScannerError(
+                        error.errorCode.toString(),
+                      ),
                       style: const TextStyle(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                     if (error.errorCode ==
                         MobileScannerErrorCode.permissionDenied) ...[
                       const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          localizations
+                              .componentsScannerBarcodeScannerPermissionHint,
+                          style: const TextStyle(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: Text(localizations.componentsScannerBarcodeScannerOpenSettings),
+                        child: Text(
+                          localizations.componentsScannerBarcodeScannerClose,
+                        ),
                       ),
                     ],
                   ],
@@ -238,7 +257,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      localizations.componentsScannerBarcodeScannerScanningBarcode,
+                      localizations
+                          .componentsScannerBarcodeScannerScanningBarcode,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
@@ -254,7 +274,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
                     const SizedBox(height: 8),
                     Text(
-                      localizations.componentsScannerBarcodeScannerScanBarcodeToAddProduct,
+                      localizations
+                          .componentsScannerBarcodeScannerScanBarcodeToAddProduct,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),

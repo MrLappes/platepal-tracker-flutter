@@ -1,5 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../models/dish.dart';
 import '../models/user_profile.dart';
@@ -9,7 +10,9 @@ import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
 import '../services/chat/openai_service.dart';
 import '../components/calendar/calendar_day_detail.dart';
+import '../components/calendar/calendar_dish_picker.dart';
 import '../components/calendar/macro_summary.dart';
+import '../components/modals/dish_log_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -26,9 +29,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   final OpenAIService _openAIService = OpenAIService();
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = true;
+  bool _isLoadingSummary = false;
   DailyMacroSummary? _selectedDaySummary;
   List<DishLog> _selectedDayLogs = [];
+  bool _hasLoadedDayLogs = false;
+  int _selectionRequestId = 0;
   UserProfile? _userProfile;
+  bool _profileLoadFailed = false;
+  bool _initializationFailed = false;
   final bool _isMacroSummaryExpanded = true;
   // ignore: unused_field
   bool _isGeneratingTip = false;
@@ -37,13 +45,45 @@ class _CalendarScreenState extends State<CalendarScreen> {
   late DateTime _weekStartDate;
   int _calendarMonth = DateTime.now().month - 1; // 0-based
   int _calendarYear = DateTime.now().year;
-  List<int> _datesWithLogs = [];
+  Set<DateTime> _datesWithLogs = {};
+  int? _firstDayOfWeekIndex;
+  int _markerRequestId = 0;
+
   @override
   void initState() {
     super.initState();
-    _initializeServices();
-    _initializeCalendar();
-    _fetchCalendarData();
+    _init();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final firstDay = MaterialLocalizations.of(context).firstDayOfWeekIndex;
+    if (firstDay == _firstDayOfWeekIndex) return;
+    final isInitialWeek = _firstDayOfWeekIndex == null;
+    _firstDayOfWeekIndex = firstDay;
+    _setWeekForDate(_selectedDate);
+    if (!isInitialWeek) _loadCalendarDates();
+  }
+
+  Future<void> _init() async {
+    setState(() {
+      _isLoading = true;
+      _initializationFailed = false;
+    });
+    try {
+      await _initializeServices();
+      if (!mounted) return;
+      await _fetchCalendarData();
+    } catch (error) {
+      debugPrint('Error initializing calendar: ${error.runtimeType}');
+      if (mounted) {
+        setState(() {
+          _initializationFailed = true;
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _initializeServices() async {
@@ -54,15 +94,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  void _initializeCalendar() {
-    final today = DateTime.now();
-    _selectedDate = today;
-    _calendarMonth = today.month - 1; // 0-based
-    _calendarYear = today.year;
-
-    // Set week to current week (starting from Sunday)
-    final dayOfWeek = today.weekday % 7; // Convert to Sunday = 0
-    _weekStartDate = today.subtract(Duration(days: dayOfWeek));
+  void _setWeekForDate(DateTime date) {
+    final daysSinceWeekStart =
+        (date.weekday % 7 - _firstDayOfWeekIndex! + 7) % 7;
+    _weekStartDate = DateTime(
+      date.year,
+      date.month,
+      date.day - daysSinceWeekStart,
+    );
   }
 
   Future<void> _fetchCalendarData() async {
@@ -70,12 +109,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     try {
       await _loadUserProfile();
+      if (!mounted) return;
       await _loadCalendarDates();
+      if (!mounted) return;
       await _handleDateSelect(_selectedDate);
     } catch (error) {
-      debugPrint('Error fetching calendar data: $error');
+      debugPrint('Error fetching calendar data: ${error.runtimeType}');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -86,61 +127,155 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (userProfile != null) {
         debugPrint('User profile id: ${userProfile.id}');
         debugPrint('User profile has goals');
-        debugPrint(
-          'User goals: ${userProfile.goals.targetCalories} cal, ${userProfile.goals.targetProtein}g protein',
-        );
       } else {
         debugPrint('User profile not found');
       }
 
+      if (!mounted) return;
       setState(() {
         _userProfile = userProfile;
+        _profileLoadFailed = false;
       });
     } catch (error) {
-      debugPrint('Error loading user profile: $error');
+      debugPrint('Error loading user profile: ${error.runtimeType}');
+      if (mounted) setState(() => _profileLoadFailed = true);
     }
+  }
+
+  Future<void> _openProfile() async {
+    await context.push('/settings/profile');
+    if (!mounted) return;
+    await _retryProfileLoad();
+  }
+
+  Future<void> _retryProfileLoad() async {
+    await _loadUserProfile();
+    if (!mounted) return;
+    await _handleDateSelect(_selectedDate);
+  }
+
+  Future<void> _createDishFromCalendar() async {
+    final created = await context.push<bool>('/dishes/create');
+    if (!mounted || created != true) return;
+    await _openDishPicker();
+  }
+
+  Future<void> _openDishPicker() async {
+    final dish = await showModalBottomSheet<Dish>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (sheetContext) => CalendarDishPicker(
+            dishService: _dishService,
+            onCreateDish: () {
+              Navigator.of(sheetContext).pop();
+              _createDishFromCalendar();
+            },
+          ),
+    );
+    if (!mounted || dish == null) return;
+    final logged = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => DishLogModal(dish: dish, initialDate: _selectedDate),
+    );
+    if (!mounted || logged != true) return;
+    await _handleDateSelect(_selectedDate);
+    if (mounted) await _loadCalendarDates();
   }
 
   Future<void> _loadCalendarDates() async {
+    final requestId = ++_markerRequestId;
+    final weekEndDate = DateTime(
+      _weekStartDate.year,
+      _weekStartDate.month,
+      _weekStartDate.day + 6,
+    );
+    final months = {
+      DateTime(_weekStartDate.year, _weekStartDate.month),
+      DateTime(weekEndDate.year, weekEndDate.month),
+    };
     try {
-      final dates = await _dishService.getDatesWithLogsInMonth(
-        _calendarYear,
-        _calendarMonth + 1, // Convert from 0-based to 1-based month
+      final dateGroups = await Future.wait(
+        months.map((month) async {
+          final days = await _dishService.getDatesWithLogsInMonth(
+            month.year,
+            month.month,
+          );
+          return days.map((day) => DateTime(month.year, month.month, day));
+        }),
       );
+      if (!mounted || requestId != _markerRequestId) return;
       setState(() {
-        _datesWithLogs = dates;
+        _datesWithLogs = dateGroups.expand((dates) => dates).toSet();
       });
     } catch (error) {
-      debugPrint('Error fetching dates with logs: $error');
+      debugPrint('Error fetching dates with logs: ${error.runtimeType}');
+      if (!mounted || requestId != _markerRequestId) return;
       setState(() {
-        _datesWithLogs = [];
+        _datesWithLogs = {};
       });
+      _showLoadError(
+        AppLocalizations.of(context).screensCalendarFailedToLoadDates,
+        _loadCalendarDates,
+      );
     }
   }
 
+  void _showLoadError(String message, VoidCallback retry) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: SnackBarAction(
+          label: AppLocalizations.of(context).componentsSharedErrorDisplayRetry,
+          onPressed: retry,
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleDateSelect(DateTime date) async {
-    setState(() => _selectedDate = date);
+    final requestId = ++_selectionRequestId;
+    setState(() {
+      _selectedDate = date;
+      _selectedDaySummary = null;
+      _selectedDayLogs = [];
+      _hasLoadedDayLogs = false;
+      _isLoadingSummary = true;
+    });
     try {
       final logs = await _dishService.getDishLogsForDate(date);
-      final logsWithDishes = <DishLog>[];
-
-      for (final log in logs) {
-        try {
-          final dish = await _dishService.getDish(log.dishId);
-          final logWithDish = log.copyWith(dish: dish);
-          logsWithDishes.add(logWithDish);
-        } catch (error) {
-          logsWithDishes.add(log);
-        }
-      }
-
-      final summary = await _dishService.getMacroSummaryForDate(date);
+      if (!mounted || requestId != _selectionRequestId) return;
       setState(() {
-        _selectedDayLogs = logsWithDishes;
+        _selectedDayLogs = logs;
+        _hasLoadedDayLogs = true;
+      });
+      final summary = await _dishService.getMacroSummaryForDate(date);
+      if (!mounted || requestId != _selectionRequestId) return;
+      setState(() {
         _selectedDaySummary = summary;
       });
     } catch (error) {
-      debugPrint('Error loading logs for date: $error');
+      debugPrint('Error loading logs for date: ${error.runtimeType}');
+      if (!mounted || requestId != _selectionRequestId) return;
+      _showLoadError(
+        _hasLoadedDayLogs
+            ? AppLocalizations.of(context).screensCalendarFailedToLoadSummary
+            : AppLocalizations.of(
+              context,
+            ).componentsCalendarCalendarDayDetailErrorLoadingMeals,
+        () {
+          if (_selectedDate == date) _handleDateSelect(date);
+        },
+      );
+    } finally {
+      if (mounted && requestId == _selectionRequestId) {
+        setState(() => _isLoadingSummary = false);
+      }
     }
   }
 
@@ -202,15 +337,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
     );
+    if (!mounted) return;
     if (confirmed == true) {
       try {
         await _dishService.deleteDishLog(log.id);
-        setState(() {
-          _selectedDayLogs.removeWhere((l) => l.id == log.id);
-        });
-        // Only reload the selected date and calendar dates, not user profile
+        if (!mounted) return;
         await _loadCalendarDates();
+        if (!mounted) return;
         await _handleDateSelect(_selectedDate);
+        if (!mounted) return;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -234,23 +369,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _getAiTip() async {
     final l10n = AppLocalizations.of(context);
-    // Check if OpenAI service is configured
-    final isConfigured = await _openAIService.isConfigured();
-    if (!isConfigured) {
-      if (mounted) {
+    try {
+      final isConfigured = await _openAIService.isConfigured();
+      if (!mounted) return;
+      if (!isConfigured) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.screensCalendarConfigureApiKeyForAiTips),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
+        return;
       }
-      return;
-    }
 
-    setState(() => _isGeneratingTip = true);
-
-    try {
+      setState(() => _isGeneratingTip = true);
       // Build context for AI recommendation
       final summary = _selectedDaySummary;
       final profile = _userProfile;
@@ -295,7 +427,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         contextMessage += '\n\nMeals eaten today:';
         for (final log in _selectedDayLogs) {
           contextMessage +=
-              '\n- ${log.dish?.name ?? "Unknown"} (${log.mealType})';
+              '\n- ${log.dish?.name ?? log.dishName ?? l10n.componentsCalendarCalendarDayDetailUnknownDish} (${log.mealType})';
         }
       }
 
@@ -303,9 +435,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           '\n\nPlease provide a brief, actionable nutrition tip or recommendation to help me reach my goals. Keep it under 100 words.';
       final response = await _openAIService.sendMessage(contextMessage);
 
-      _showAiTipDialog(response);
+      if (mounted) _showAiTipDialog(response);
     } catch (error) {
-      debugPrint('Error getting AI tip: $error');
+      debugPrint('Error getting AI tip: ${error.runtimeType}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -315,7 +447,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         );
       }
     } finally {
-      setState(() => _isGeneratingTip = false);
+      if (mounted) setState(() => _isGeneratingTip = false);
     }
   }
 
@@ -377,7 +509,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _goToPreviousWeek() {
     setState(() {
-      _weekStartDate = _weekStartDate.subtract(const Duration(days: 7));
+      _weekStartDate = DateTime(
+        _weekStartDate.year,
+        _weekStartDate.month,
+        _weekStartDate.day - 7,
+      );
       _calendarMonth = _weekStartDate.month - 1;
       _calendarYear = _weekStartDate.year;
     });
@@ -386,7 +522,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _goToNextWeek() {
     setState(() {
-      _weekStartDate = _weekStartDate.add(const Duration(days: 7));
+      _weekStartDate = DateTime(
+        _weekStartDate.year,
+        _weekStartDate.month,
+        _weekStartDate.day + 7,
+      );
       _calendarMonth = _weekStartDate.month - 1;
       _calendarYear = _weekStartDate.year;
     });
@@ -399,8 +539,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _selectedDate = today;
       _calendarMonth = today.month - 1;
       _calendarYear = today.year;
-      final dayOfWeek = today.weekday % 7;
-      _weekStartDate = today.subtract(Duration(days: dayOfWeek));
+      _setWeekForDate(today);
     });
     _loadCalendarDates(); // Only reload calendar dates
     _handleDateSelect(today); // Load data for today
@@ -408,148 +547,161 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _updateWeekForMonth() {
     final firstDayOfMonth = DateTime(_calendarYear, _calendarMonth + 1, 1);
-    final dayOfWeek = firstDayOfMonth.weekday % 7;
-    _weekStartDate = firstDayOfMonth.subtract(Duration(days: dayOfWeek));
+    _setWeekForDate(firstDayOfMonth);
   }
 
   List<DateTime> _generateWeekDays() {
     return List.generate(7, (index) {
-      return _weekStartDate.add(Duration(days: index));
+      return DateTime(
+        _weekStartDate.year,
+        _weekStartDate.month,
+        _weekStartDate.day + index,
+      );
     });
   }
 
   String _getWeekRangeText() {
-    final weekEndDate = _weekStartDate.add(const Duration(days: 6));
-    final monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    final startMonth = monthNames[_weekStartDate.month - 1];
-    final endMonth = monthNames[weekEndDate.month - 1];
-
-    if (_weekStartDate.year == weekEndDate.year) {
-      if (_weekStartDate.month == weekEndDate.month) {
-        return '$startMonth ${_weekStartDate.day}-${weekEndDate.day}, ${_weekStartDate.year}';
-      }
-      return '$startMonth ${_weekStartDate.day} - $endMonth ${weekEndDate.day}, ${_weekStartDate.year}';
-    }
-
-    return '$startMonth ${_weekStartDate.day}, ${_weekStartDate.year} - $endMonth ${weekEndDate.day}, ${weekEndDate.year}';
+    final weekEndDate = _generateWeekDays().last;
+    final locale = Localizations.localeOf(context).toString();
+    final startFormat =
+        _weekStartDate.year != weekEndDate.year
+            ? DateFormat.yMMMd(locale)
+            : _weekStartDate.month != weekEndDate.month
+            ? DateFormat.MMMd(locale)
+            : DateFormat.d(locale);
+    return '${startFormat.format(_weekStartDate)} – ${DateFormat.yMMMd(locale).format(weekEndDate)}';
   }
 
   String _getMonthYearText() {
-    final monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return '${monthNames[_calendarMonth]} $_calendarYear';
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMMMM(
+      locale,
+    ).format(DateTime(_calendarYear, _calendarMonth + 1));
   }
 
   Widget _buildWeekView() {
     final weekDays = _generateWeekDays();
     final today = DateTime.now();
-    final dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    final locale = Localizations.localeOf(context).toString();
+    final l10n = AppLocalizations.of(context);
 
-    return Row(
-      children:
-          weekDays.asMap().entries.map((entry) {
-            final index = entry.key;
-            final date = entry.value;
-            final isSelected =
-                date.day == _selectedDate.day &&
-                date.month == _selectedDate.month &&
-                date.year == _selectedDate.year;
-            final isToday =
-                date.day == today.day &&
-                date.month == today.month &&
-                date.year == today.year;
-            final hasLogs =
-                _datesWithLogs.contains(date.day) &&
-                date.month == _calendarMonth + 1 &&
-                date.year == _calendarYear;
+    return LayoutBuilder(
+      builder:
+          (context, constraints) => SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children:
+                  weekDays.map((date) {
+                    final isSelected =
+                        date.day == _selectedDate.day &&
+                        date.month == _selectedDate.month &&
+                        date.year == _selectedDate.year;
+                    final isToday =
+                        date.day == today.day &&
+                        date.month == today.month &&
+                        date.year == today.year;
+                    final hasLogs = _datesWithLogs.contains(
+                      DateTime(date.year, date.month, date.day),
+                    );
 
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => _handleDateSelect(date),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color:
-                        isSelected
-                            ? Theme.of(context).colorScheme.primary
-                            : isToday
-                            ? Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.2)
-                            : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        dayNames[index],
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color:
-                              isSelected
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        date.day.toString(),
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isSelected
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : isToday
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      if (hasLogs && !isSelected)
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
+                    return SizedBox(
+                      width:
+                          constraints.maxWidth / 7 < 52
+                              ? 52
+                              : constraints.maxWidth / 7,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: Semantics(
+                          button: true,
+                          selected: isSelected,
+                          label:
+                              '${DateFormat.yMMMMEEEEd(locale).format(date)}${hasLogs ? ', ${l10n.screensCalendarHasMealsLogged}' : ''}',
+                          onTap: () => _handleDateSelect(date),
+                          excludeSemantics: true,
+                          child: Material(
+                            color:
+                                isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : isToday
+                                    ? Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withValues(alpha: 0.2)
+                                    : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _handleDateSelect(date),
+                              child: SizedBox(
+                                height: 72,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateFormat.E(locale).format(date),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall?.copyWith(
+                                        color:
+                                            isSelected
+                                                ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary
+                                                : Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      date.day.toString(),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            isSelected
+                                                ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary
+                                                : isToday
+                                                ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                                : Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (hasLogs)
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              isSelected
+                                                  ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary
+                                                  : Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox(height: 6),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+                      ),
+                    );
+                  }).toList(),
+            ),
+          ),
     );
   }
 
@@ -586,6 +738,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               children: [
                 Text(
                   (log.dish?.name ??
+                          log.dishName ??
                           l10n.componentsCalendarCalendarDayDetailUnknownDish)
                       .toUpperCase(),
                   style: theme.textTheme.titleSmall?.copyWith(
@@ -623,13 +776,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           IconButton(
             onPressed: () => _handleDeleteLog(log),
+            tooltip: l10n.screensCalendarDeleteLog,
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             icon: Icon(
               Icons.close,
               size: 18,
               color: colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
           ),
         ],
       ),
@@ -641,9 +794,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
+      floatingActionButton: _initializationFailed ? null : FloatingActionButton.extended(
+        heroTag: 'calendar_log_meal',
+        onPressed: _openDishPicker,
+        tooltip: AppLocalizations.of(context).screensCalendarLogMeal,
+        icon: const Icon(Icons.add),
+        label: Text(AppLocalizations.of(context).screensCalendarLogMeal),
+      ),
       body: SafeArea(
         child:
-            _isLoading
+            _initializationFailed
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(AppLocalizations.of(context).providersStorageError),
+                      TextButton(
+                        onPressed: _init,
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).componentsSharedErrorDisplayRetry,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                : _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
                   onRefresh: _fetchCalendarData,
@@ -665,6 +842,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           children: [
                             IconButton(
                               onPressed: _goToPreviousMonth,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).previousMonthTooltip,
                               icon: const Icon(Icons.chevron_left),
                             ),
                             Text(
@@ -675,6 +857,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                             IconButton(
                               onPressed: _goToNextMonth,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).nextMonthTooltip,
                               icon: const Icon(Icons.chevron_right),
                             ),
                           ],
@@ -692,41 +879,63 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           children: [
                             IconButton(
                               onPressed: _goToPreviousWeek,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).previousPageTooltip,
                               icon: const Icon(Icons.keyboard_arrow_left),
                             ),
-                            GestureDetector(
+                            Semantics(
+                              button: true,
+                              label: MaterialLocalizations.of(context).currentDateLabel,
                               onTap: _goToToday,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainer,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      size: 16,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _getWeekRangeText(),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
+                              excludeSemantics: true,
+                              child: GestureDetector(
+                                onTap: _goToToday,
+                                behavior: HitTestBehavior.opaque,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(minHeight: 48),
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.surfaceContainer,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 16,
                                             color: colorScheme.onSurfaceVariant,
                                           ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            _getWeekRangeText(),
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: colorScheme.onSurfaceVariant,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
                             IconButton(
                               onPressed: _goToNextWeek,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                              tooltip:
+                                  MaterialLocalizations.of(
+                                    context,
+                                  ).nextPageTooltip,
                               icon: const Icon(Icons.keyboard_arrow_right),
                             ),
                           ],
@@ -750,40 +959,137 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               children: [
-                                // Collapsible Macro Summary                                if (_selectedDaySummary != null)
-                                MacroSummary(
-                                  calories: _selectedDaySummary!.calories,
-                                  protein: _selectedDaySummary!.protein,
-                                  carbs: _selectedDaySummary!.carbs,
-                                  fat: _selectedDaySummary!.fat,
-                                  fiber: _selectedDaySummary!.fiber,
-                                  caloriesBurned:
-                                      _selectedDaySummary!.caloriesBurned,
-                                  isCaloriesBurnedEstimated:
-                                      _selectedDaySummary!
-                                          .isCaloriesBurnedEstimated,
-                                  isHealthConnected:
-                                      _selectedDaySummary!.isHealthConnected,
-                                  calorieTarget:
-                                      _userProfile?.goals.targetCalories,
-                                  proteinTarget:
-                                      _userProfile?.goals.targetProtein,
-                                  carbsTarget: _userProfile?.goals.targetCarbs,
-                                  fatTarget: _userProfile?.goals.targetFat,
-                                  fiberTarget: _userProfile?.goals.targetFiber,
-                                  isCollapsible: true,
-                                  initiallyExpanded: _isMacroSummaryExpanded,
-                                  onAiTipPressed: _getAiTip,
-                                  selectedDate: _selectedDate,
-                                ),
+                                if (_isLoadingSummary)
+                                  const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                if (_selectedDaySummary != null &&
+                                    _profileLoadFailed)
+                                  Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.errorContainer,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).screensCalendarProfileLoadFailed,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color:
+                                                    colorScheme
+                                                        .onErrorContainer,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        TextButton(
+                                          onPressed: _retryProfileLoad,
+                                          style: TextButton.styleFrom(
+                                            minimumSize: const Size(48, 48),
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            ).componentsSharedErrorDisplayRetry,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                if (_selectedDaySummary != null &&
+                                    !_profileLoadFailed &&
+                                    (_userProfile == null ||
+                                        _userProfile!.goals.targetCalories <=
+                                            0))
+                                  Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surfaceContainer,
+                                      border: Border.all(
+                                        color: colorScheme.outline.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).screensCalendarProfileNudge,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        TextButton(
+                                          onPressed: _openProfile,
+                                          style: TextButton.styleFrom(
+                                            minimumSize: const Size(48, 48),
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            ).screensCalendarSetUpProfile,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                if (_selectedDaySummary != null)
+                                  MacroSummary(
+                                    calories: _selectedDaySummary!.calories,
+                                    protein: _selectedDaySummary!.protein,
+                                    carbs: _selectedDaySummary!.carbs,
+                                    fat: _selectedDaySummary!.fat,
+                                    fiber: _selectedDaySummary!.fiber,
+                                    caloriesBurned:
+                                        _selectedDaySummary!.caloriesBurned,
+                                    isCaloriesBurnedEstimated:
+                                        _selectedDaySummary!
+                                            .isCaloriesBurnedEstimated,
+                                    isHealthConnected:
+                                        _selectedDaySummary!.isHealthConnected,
+                                    calorieTarget:
+                                        (_userProfile?.goals.targetCalories ??
+                                                    0) >
+                                                0
+                                            ? _userProfile!.goals.targetCalories
+                                            : null,
+                                    proteinTarget:
+                                        _userProfile?.goals.targetProtein,
+                                    carbsTarget:
+                                        _userProfile?.goals.targetCarbs,
+                                    fatTarget: _userProfile?.goals.targetFat,
+                                    fiberTarget:
+                                        _userProfile?.goals.targetFiber,
+                                    isCollapsible: true,
+                                    initiallyExpanded: _isMacroSummaryExpanded,
+                                    onAiTipPressed: _getAiTip,
+                                    selectedDate: _selectedDate,
+                                  ),
 
                                 // Calendar Day Detail
-                                CalendarDayDetail(
-                                  date: _selectedDate,
-                                  renderLogItem:
-                                      (context, log) =>
-                                          _buildLogItem(context, log),
-                                ),
+                                if (_hasLoadedDayLogs && !_isLoadingSummary)
+                                  CalendarDayDetail(
+                                    date: _selectedDate,
+                                    logs: _selectedDayLogs,
+                                    onLogMeal: _openDishPicker,
+                                    renderLogItem:
+                                        (context, log) =>
+                                            _buildLogItem(context, log),
+                                  ),
                                 // Add some bottom padding to ensure there's enough space to scroll
                                 const SizedBox(height: 100),
                               ],

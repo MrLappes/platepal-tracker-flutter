@@ -141,12 +141,6 @@ class AutonomousVerificationStep extends AgentStep {
       debugPrint(
         '🔍 AutonomousVerificationStep: Filtered dishes from ${availableDishes.length} to ${filteredDishes.length}',
       );
-      debugPrint(
-        '   Original dishes: ${availableDishes.map((d) => d['name']).join(', ')}',
-      );
-      debugPrint(
-        '   Kept dishes: ${filteredDishes.map((d) => d['name']).join(', ')}',
-      );
 
       // Record this optimization
       _modificationTracker.recordModification(
@@ -650,8 +644,10 @@ $pipelineHistorySummary
             [],
       );
     } catch (e) {
-      debugPrint('⚠️ Failed to parse verification result: $e');
-      debugPrint('Raw response: $content');
+      debugPrint(
+        '⚠️ Failed to parse verification result (${e.runtimeType}, '
+        '${content.length} chars)',
+      );
 
       // Always return a valid result
       return VerificationResult(
@@ -674,7 +670,7 @@ $pipelineHistorySummary
     }
 
     debugPrint(
-      '🔍 Filtering ${availableDishes.length} dishes for relevance to: "$userMessage"',
+      '🔍 Filtering ${availableDishes.length} dishes for relevance',
     );
 
     // If thinking result indicates specific dish search terms, use those for filtering

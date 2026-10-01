@@ -11,6 +11,8 @@ import '../../services/open_food_facts_service.dart';
 import '../../services/storage/database_service.dart';
 import '../../services/storage/dish_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/number_parsing.dart';
+import '../../utils/product_converter.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Nutri-Score colour helpers
@@ -30,6 +32,36 @@ Color _nutriColor(NutriScoreGrade g) {
       return const Color(0xFFE63E11);
   }
 }
+
+String _categoryLabel(OFFCategory category, AppLocalizations l10n) =>
+    switch (category.id) {
+      'all' => l10n.componentsScannerProductSearchCategoryAll,
+      'fruits' => l10n.componentsScannerProductSearchCategoryFruits,
+      'vegetables' => l10n.componentsScannerProductSearchCategoryVegetables,
+      'dairy' => l10n.componentsScannerProductSearchCategoryDairy,
+      'meat' => l10n.componentsScannerProductSearchCategoryMeat,
+      'seafood' => l10n.componentsScannerProductSearchCategorySeafood,
+      'beverages' => l10n.componentsScannerProductSearchCategoryBeverages,
+      'cereals' => l10n.componentsScannerProductSearchCategoryCereals,
+      'breads' => l10n.componentsScannerProductSearchCategoryBreads,
+      'snacks' => l10n.componentsScannerProductSearchCategorySnacks,
+      'sweets' => l10n.componentsScannerProductSearchCategorySweets,
+      'legumes' => l10n.componentsScannerProductSearchCategoryLegumes,
+      'nuts' => l10n.componentsScannerProductSearchCategoryNuts,
+      'condiments' => l10n.componentsScannerProductSearchCategoryCondiments,
+      'oilsAndFats' => l10n.componentsScannerProductSearchCategoryOilsAndFats,
+      'frozen' => l10n.componentsScannerProductSearchCategoryFrozen,
+      'readyMeals' => l10n.componentsScannerProductSearchCategoryReadyMeals,
+      'babyFoods' => l10n.componentsScannerProductSearchCategoryBabyFoods,
+      _ => category.id,
+    };
+
+String _sortLabel(OFFSortBy sort, AppLocalizations l10n) => switch (sort) {
+  OFFSortBy.popularity => l10n.componentsScannerProductSearchSortPopularity,
+  OFFSortBy.productName => l10n.componentsScannerProductSearchSortName,
+  OFFSortBy.lastModified => l10n.componentsScannerProductSearchSortNewest,
+  OFFSortBy.completeness => l10n.componentsScannerProductSearchSortCompleteness,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Screen
@@ -71,6 +103,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   bool _hasMoreResults = false;
   bool _isSearching = false;
   bool _isBrowsing = false; // category browse without text
+  bool _browseFailed = false;
+  int _requestGeneration = 0;
 
   // Debounce
   Timer? _debounceTimer;
@@ -99,18 +133,30 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   void _onSearchTextChanged() {
     final q = _searchController.text.trim();
     _debounceTimer?.cancel();
+    ++_requestGeneration;
 
     if (q.isEmpty) {
       _triggerBrowse(); // switch back to browse mode
       return;
     }
 
+    setState(() {
+      _localIngredients = [];
+      _localDishes = [];
+      _browseFailed = false;
+      _searchResults = [];
+      _hasMoreResults = false;
+      _isSearching = q.length >= 2;
+      _isBrowsing = false;
+    });
+    if (q.length < 2) return;
+
     // Local instant search
-    if (q.length >= 2) _searchLocalItems(q);
+    _searchLocalItems(q);
 
     // Remote debounced (avoid 10 req/min rate limit)
     _debounceTimer = Timer(const Duration(milliseconds: 600), () {
-      if (q.length >= 2) _triggerSearch(q, isNewSearch: true);
+      _triggerSearch(q, isNewSearch: true);
     });
   }
 
@@ -210,7 +256,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             .take(5)
             .toList();
 
-    if (mounted) {
+    if (mounted && _searchController.text.trim() == query) {
       setState(() {
         _localIngredients = ingredients;
         _localDishes = dishes;
@@ -219,16 +265,17 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   }
 
   Future<void> _triggerSearch(String query, {bool isNewSearch = true}) async {
-    if (_isSearching) return;
-
+    final generation = ++_requestGeneration;
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
 
     setState(() {
       _isSearching = true;
       _isBrowsing = false;
+      _browseFailed = false;
       if (isNewSearch) {
         _currentPage = 1;
         _searchResults = [];
+        _hasMoreResults = false;
       }
     });
 
@@ -237,43 +284,53 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         query,
         page: _currentPage,
         pageSize: 20,
-        countryCode: localeProvider.locale.languageCode,
+        countryCode:
+            WidgetsBinding.instance.platformDispatcher.locale.countryCode,
         languageCode: localeProvider.locale.languageCode,
         category: _selectedCategory.tag.isNotEmpty ? _selectedCategory : null,
         nutriScore: _selectedNutriScore,
         sortBy: _sortBy,
       );
 
-      if (!mounted) return;
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         if (isNewSearch) {
           _searchResults = products;
         } else {
           _searchResults.addAll(products);
         }
-        _isSearching = false;
         _hasMoreResults = products.length == 20;
       });
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _isSearching = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Search error: $e')));
+      if (!mounted || generation != _requestGeneration) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).componentsScannerProductSearchErrorSearchingProduct(e.toString()),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted && generation == _requestGeneration) {
+        setState(() => _isSearching = false);
+      }
     }
   }
 
   Future<void> _triggerBrowse() async {
-    if (_isBrowsing) return;
-
+    final generation = ++_requestGeneration;
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
     setState(() {
       _isBrowsing = true;
       _isSearching = true;
+      _browseFailed = false;
       _localIngredients = [];
       _localDishes = [];
       _searchResults = [];
       _currentPage = 1;
+      _hasMoreResults = false;
     });
 
     try {
@@ -286,23 +343,30 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         languageCode: localeProvider.locale.languageCode,
       );
 
-      if (!mounted) return;
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         _searchResults = products;
-        _isSearching = false;
         _hasMoreResults = products.length == 20;
       });
-    } catch (e) {
-      if (!mounted) return;
+    } catch (_) {
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
-        _isSearching = false;
-        _isBrowsing = false;
+        _browseFailed = true;
       });
+    } finally {
+      if (mounted && generation == _requestGeneration) {
+        setState(() {
+          _isSearching = false;
+          _isBrowsing = false;
+        });
+      }
     }
   }
 
   void _loadMore() {
-    if (_isSearching || !_hasMoreResults) return;
+    if (_isSearching || _isBrowsing || _browseFailed || !_hasMoreResults) {
+      return;
+    }
     final query = _searchController.text.trim();
     setState(() => _currentPage++);
     if (query.isNotEmpty) {
@@ -313,8 +377,12 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   }
 
   Future<void> _loadMoreBrowse() async {
+    final generation = ++_requestGeneration;
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
-    setState(() => _isSearching = true);
+    setState(() {
+      _isSearching = true;
+      _browseFailed = false;
+    });
 
     try {
       final products = await _offService.browseCategory(
@@ -326,15 +394,21 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         languageCode: localeProvider.locale.languageCode,
       );
 
-      if (!mounted) return;
+      if (!mounted || generation != _requestGeneration) return;
       setState(() {
         _searchResults.addAll(products);
-        _isSearching = false;
         _hasMoreResults = products.length == 20;
       });
     } catch (_) {
-      if (!mounted) return;
-      setState(() => _isSearching = false);
+      if (!mounted || generation != _requestGeneration) return;
+      setState(() {
+        _browseFailed = true;
+        _hasMoreResults = false;
+      });
+    } finally {
+      if (mounted && generation == _requestGeneration) {
+        setState(() => _isSearching = false);
+      }
     }
   }
 
@@ -354,6 +428,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () {
             widget.onCancel?.call();
             Navigator.of(context).pop();
@@ -369,7 +444,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                       ? colorScheme.primary
                       : null,
             ),
-            tooltip: 'Filters & Sort',
+            tooltip: localizations.componentsScannerProductSearchFiltersAndSort,
             onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
         ],
@@ -384,7 +459,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
               autofocus: false,
               decoration: InputDecoration(
                 hintText:
-                    localizations.screensDishCreateDishNamePlaceholder
+                    localizations.componentsScannerProductSearchSearchProducts
                         .toUpperCase(),
                 prefixIcon: Icon(
                   Icons.search,
@@ -402,14 +477,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                     _searchController.text.isNotEmpty
                         ? IconButton(
                           icon: const Icon(Icons.clear, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _localIngredients = [];
-                              _localDishes = [];
-                            });
-                            _triggerBrowse();
-                          },
+                          tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+                          onPressed: _searchController.clear,
                         )
                         : null,
               ),
@@ -432,8 +501,16 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
           // ── Results ─────────────────────────────────────────────────────
           Expanded(
             child:
-                _isSearching && _currentPage == 1
+                _isSearching &&
+                        _currentPage == 1 &&
+                        _localIngredients.isEmpty &&
+                        _localDishes.isEmpty
                     ? const Center(child: CircularProgressIndicator())
+                    : _browseFailed &&
+                        _searchResults.isEmpty &&
+                        _localIngredients.isEmpty &&
+                        _localDishes.isEmpty
+                    ? _buildBrowseErrorState(theme, colorScheme)
                     : _searchResults.isEmpty &&
                         _localIngredients.isEmpty &&
                         _localDishes.isEmpty &&
@@ -447,8 +524,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   }
 
   Widget _buildCategoryChips(ThemeData theme, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
-      height: 38,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -457,7 +535,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         itemBuilder: (context, i) {
           final cat = OFFCategory.all[i];
           final selected = _selectedCategory.tag == cat.tag;
-          return GestureDetector(
+          return _selectableChip(
+            label: _categoryLabel(cat, l10n),
+            selected: selected,
             onTap: () => _onCategoryChanged(cat),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
@@ -481,7 +561,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   Text(cat.emoji, style: const TextStyle(fontSize: 13)),
                   const SizedBox(width: 4),
                   Text(
-                    cat.label.toUpperCase(),
+                    _categoryLabel(cat, l10n).toUpperCase(),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color:
                           selected
@@ -500,7 +580,31 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     );
   }
 
+  Widget _selectableChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    required Widget child,
+  }) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Center(widthFactor: 1, child: child),
+        ),
+      ),
+    );
+  }
+
   Widget _buildExpandedFilters(ThemeData theme, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsets.all(12),
@@ -516,7 +620,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
           Row(
             children: [
               Text(
-                'NUTRI-SCORE',
+                l10n.componentsScannerProductSearchNutriScore,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -528,7 +632,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                   spacing: 6,
                   children: [
                     // "Any" pill
-                    GestureDetector(
+                    _selectableChip(
+                      label: l10n.componentsScannerProductSearchAny,
+                      selected: _selectedNutriScore == null,
                       onTap: () => _onNutriScoreChanged(null),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -551,7 +657,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                           ),
                         ),
                         child: Text(
-                          'ANY',
+                          l10n.componentsScannerProductSearchAny.toUpperCase(),
                           style: theme.textTheme.labelSmall?.copyWith(
                             color:
                                 _selectedNutriScore == null
@@ -566,7 +672,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                     ...NutriScoreGrade.values.map((g) {
                       final selected = _selectedNutriScore == g;
                       final bg = _nutriColor(g);
-                      return GestureDetector(
+                      return _selectableChip(
+                        label: g.label,
+                        selected: selected,
                         onTap: () => _onNutriScoreChanged(selected ? null : g),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -606,7 +714,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
           Row(
             children: [
               Text(
-                'SORT BY',
+                l10n.componentsScannerProductSearchSortBy.toUpperCase(),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -622,7 +730,9 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                           final selected = _sortBy == s;
                           return Padding(
                             padding: const EdgeInsets.only(right: 6),
-                            child: GestureDetector(
+                            child: _selectableChip(
+                              label: _sortLabel(s, l10n),
+                              selected: selected,
                               onTap: () => _onSortChanged(s),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -645,7 +755,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                                   ),
                                 ),
                                 child: Text(
-                                  s.label.toUpperCase(),
+                                  _sortLabel(s, l10n).toUpperCase(),
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color:
                                         selected
@@ -670,59 +780,89 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
   }
 
   Widget _buildResultsList(ThemeData theme, ColorScheme colorScheme) {
-    return ListView(
+    final l10n = AppLocalizations.of(context);
+    final hasLocalResults =
+        _localIngredients.isNotEmpty || _localDishes.isNotEmpty;
+    return CustomScrollView(
       controller: _scrollController,
-      padding: const EdgeInsets.only(top: 8, bottom: 20),
-      children: [
-        // — Section header
-        if (_searchController.text.trim().isEmpty)
-          _sectionHeader(
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        SliverToBoxAdapter(
+          child: _sectionHeader(
             theme,
             colorScheme,
-            '${_selectedCategory.emoji}  ${_selectedCategory.label.toUpperCase()} — POPULAR //',
-          )
-        else
-          _sectionHeader(
-            theme,
-            colorScheme,
-            'RESULTS FOR "${_searchController.text.trim().toUpperCase()}" //',
+            _searchController.text.trim().isEmpty
+                ? '${_selectedCategory.emoji}  ${_categoryLabel(_selectedCategory, l10n).toUpperCase()} — ${l10n.componentsScannerProductSearchPopular.toUpperCase()} //'
+                : '${l10n.componentsScannerProductSearchResultsFor(_searchController.text.trim().toUpperCase()).toUpperCase()} //',
           ),
-
-        // — Local items
-        if (_localIngredients.isNotEmpty || _localDishes.isNotEmpty) ...[
-          _sectionHeader(theme, colorScheme, '📦  MY DATABASE //'),
-          ..._localIngredients.map(
-            (ing) => _buildLocalIngredientCard(ing, theme, colorScheme),
+        ),
+        if (hasLocalResults) ...[
+          SliverToBoxAdapter(
+            child: _sectionHeader(
+              theme,
+              colorScheme,
+              '📦  ${l10n.componentsScannerProductSearchMyDatabase.toUpperCase()} //',
+            ),
           ),
-          ..._localDishes.map(
-            (d) => _buildLocalDishCard(d, theme, colorScheme),
+          SliverList.builder(
+            itemCount: _localIngredients.length,
+            itemBuilder:
+                (context, index) => _buildLocalIngredientCard(
+                  _localIngredients[index],
+                  theme,
+                  colorScheme,
+                ),
+          ),
+          SliverList.builder(
+            itemCount: _localDishes.length,
+            itemBuilder:
+                (context, index) => _buildLocalDishCard(
+                  _localDishes[index],
+                  theme,
+                  colorScheme,
+                ),
           ),
           if (_searchResults.isNotEmpty)
-            _sectionHeader(theme, colorScheme, '🌍  GLOBAL FEED //'),
+            SliverToBoxAdapter(
+              child: _sectionHeader(
+                theme,
+                colorScheme,
+                '🌍  ${l10n.componentsScannerProductSearchGlobalFeed.toUpperCase()} //',
+              ),
+            ),
         ],
-
-        // — Remote products
-        ..._searchResults.map(_buildProductCard),
-
-        // — Load-more spinner
+        SliverList.builder(
+          itemCount: _searchResults.length,
+          itemBuilder:
+              (context, index) => _buildProductCard(_searchResults[index]),
+        ),
         if (_isSearching && _currentPage > 1)
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: CircularProgressIndicator()),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
           ),
-
-        if (!_isSearching && !_hasMoreResults && _searchResults.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Text(
-                '— END OF RESULTS —',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.4),
+        if (_browseFailed)
+          SliverToBoxAdapter(child: _buildBrowseErrorState(theme, colorScheme)),
+        if (!_browseFailed &&
+            !_isSearching &&
+            !_hasMoreResults &&
+            _searchResults.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  '— ${l10n.componentsScannerProductSearchEndOfResults.toUpperCase()} —',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
                 ),
               ),
             ),
           ),
+        const SliverToBoxAdapter(child: SizedBox(height: 20)),
       ],
     );
   }
@@ -743,6 +883,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
 
   Widget _buildEmptyState(ThemeData theme, ColorScheme colorScheme) {
     final q = _searchController.text.trim();
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -757,8 +898,13 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
             const SizedBox(height: 12),
             Text(
               q.isEmpty
-                  ? 'SELECT A CATEGORY\nOR TYPE TO SEARCH'
-                  : 'NO RESULTS FOR\n"${q.toUpperCase()}"',
+                  ? l10n.componentsScannerProductSearchSelectCategoryOrSearch
+                      .toUpperCase()
+                  : l10n
+                      .componentsScannerProductSearchNoResultsFor(
+                        q.toUpperCase(),
+                      )
+                      .toUpperCase(),
               textAlign: TextAlign.center,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.4),
@@ -771,11 +917,42 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     );
   }
 
+  Widget _buildBrowseErrorState(ThemeData theme, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off, size: 48, color: colorScheme.error),
+            const SizedBox(height: 12),
+            Text(
+              l10n.componentsScannerProductSearchBrowseUnavailable,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _currentPage > 1 ? _loadMoreBrowse : _triggerBrowse,
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.componentsSharedErrorDisplayRetry),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ── Card builders ──────────────────────────────────────────────────────────
 
   Widget _buildProductCard(Product product) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final thumbnailPixels =
+        (48 * MediaQuery.devicePixelRatioOf(context)).round();
 
     // Nutri-score badge from product data
     final rawGrade = product.rawData?['nutrition_grades'] as String?;
@@ -788,19 +965,23 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
         Navigator.of(context).pop();
         widget.onProductSelected?.call(product);
       },
-      icon:
-          product.imageUrl != null
-              ? CachedNetworkImage(
-                imageUrl: product.imageUrl!,
-                fit: BoxFit.cover,
-                errorWidget:
-                    (_, __, ___) => Icon(
-                      Icons.fastfood,
-                      size: 22,
-                      color: colorScheme.primary,
-                    ),
-              )
-              : Icon(Icons.fastfood, size: 22, color: colorScheme.primary),
+        icon: ExcludeSemantics(
+          child:
+              product.imageUrl != null
+                  ? CachedNetworkImage(
+                    imageUrl: product.imageUrl!,
+                    fit: BoxFit.cover,
+                    memCacheWidth: thumbnailPixels,
+                    memCacheHeight: thumbnailPixels,
+                    errorWidget:
+                        (_, __, ___) => Icon(
+                          Icons.fastfood,
+                          size: 22,
+                          color: colorScheme.primary,
+                        ),
+                  )
+                  : Icon(Icons.fastfood, size: 22, color: colorScheme.primary),
+        ),
       topRight:
           rawGrade != null
               ? Container(
@@ -819,17 +1000,41 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
                 ),
               )
               : null,
-      title: (product.name ?? 'UNKNOWN').toUpperCase(),
+      title:
+          (product.name ?? l10n.componentsScannerProductSearchUnknown)
+              .toUpperCase(),
       subtitle: product.brand?.toUpperCase(),
       subtitleColor: colorScheme.primary,
       nutrition:
           product.hasNutrition
-              ? '${product.nutrition!.calories.round()} KCAL | '
-                  'P:${product.nutrition!.protein.toStringAsFixed(1)}G | '
-                  'C:${product.nutrition!.carbs.toStringAsFixed(1)}G | '
-                  'F:${product.nutrition!.fat.toStringAsFixed(1)}G'
+              ? _nutritionSummary(
+                calories: product.nutrition!.calories,
+                protein: product.nutrition!.protein,
+                carbs: product.nutrition!.carbs,
+                fat: product.nutrition!.fat,
+                locale: locale,
+              )
               : null,
     );
+  }
+
+  String _nutritionSummary({
+    required double calories,
+    required double protein,
+    required double carbs,
+    double? fat,
+    required String locale,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    final grams =
+        l10n.componentsScannerProductSearchGramsAbbreviation.toUpperCase();
+    final fatSummary =
+        fat == null
+            ? ''
+            : ' | ${l10n.componentsScannerProductSearchFatAbbreviation.toUpperCase()}${formatDecimal(fat, locale)}$grams';
+    return '${calories.round()} ${l10n.componentsScannerProductSearchKcal.toUpperCase()} | '
+        '${l10n.componentsScannerProductSearchProteinAbbreviation.toUpperCase()}${formatDecimal(protein, locale)}$grams | '
+        '${l10n.componentsScannerProductSearchCarbsAbbreviation.toUpperCase()}${formatDecimal(carbs, locale)}$grams$fatSummary';
   }
 
   Widget _buildLocalIngredientCard(
@@ -837,6 +1042,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
+    final locale = Localizations.localeOf(context).toString();
     return _itemCard(
       theme: theme,
       colorScheme: colorScheme,
@@ -865,13 +1071,17 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
       },
       icon: Icon(Icons.inventory_2, size: 22, color: colorScheme.primary),
       title: ing.name.toUpperCase(),
-      subtitle: '${ing.amount.toStringAsFixed(0)}${ing.unit} — INGREDIENT',
+      subtitle:
+          '${formatDecimal(ing.amount, locale, fractionDigits: 0)}${ing.unit} — ${AppLocalizations.of(context).componentsScannerProductSearchIngredient.toUpperCase()}',
       subtitleColor: colorScheme.secondary,
       nutrition:
           ing.nutrition != null
-              ? '${ing.nutrition!.calories.round()} KCAL | '
-                  'P:${ing.nutrition!.protein.toStringAsFixed(1)}G | '
-                  'C:${ing.nutrition!.carbs.toStringAsFixed(1)}G'
+              ? _nutritionSummary(
+                calories: ing.nutrition!.calories,
+                protein: ing.nutrition!.protein,
+                carbs: ing.nutrition!.carbs,
+                locale: locale,
+              )
               : null,
     );
   }
@@ -881,37 +1091,31 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
+    final locale = Localizations.localeOf(context).toString();
     return _itemCard(
       theme: theme,
       colorScheme: colorScheme,
       onTap: () {
         Navigator.of(context).pop();
         widget.onProductSelected?.call(
-          Product(
-            name: dish.name,
-            brand: null,
-            barcode: null,
-            imageUrl: null,
-            nutrition: ProductNutrition(
-              energyKcal100g: dish.nutrition.calories,
-              proteins100g: dish.nutrition.protein,
-              carbohydrates100g: dish.nutrition.carbs,
-              fat100g: dish.nutrition.fat,
-              fiber100g: dish.nutrition.fiber,
-              sugars100g: dish.nutrition.sugar,
-              sodium100g: dish.nutrition.sodium,
-            ),
-          ),
+          ProductToIngredientConverter.productFromDish(dish),
         );
       },
       icon: Icon(Icons.restaurant, size: 22, color: colorScheme.primary),
       title: dish.name.toUpperCase(),
-      subtitle: '${dish.ingredients.length} INGREDIENTS — DISH',
+      subtitle:
+          AppLocalizations.of(context)
+              .componentsScannerProductSearchDishIngredients(
+                dish.ingredients.length,
+              )
+              .toUpperCase(),
       subtitleColor: colorScheme.secondary,
-      nutrition:
-          '${dish.nutrition.calories.round()} KCAL | '
-          'P:${dish.nutrition.protein.toStringAsFixed(1)}G | '
-          'C:${dish.nutrition.carbs.toStringAsFixed(1)}G',
+      nutrition: _nutritionSummary(
+        calories: dish.nutrition.calories,
+        protein: dish.nutrition.protein,
+        carbs: dish.nutrition.carbs,
+        locale: locale,
+      ),
     );
   }
 

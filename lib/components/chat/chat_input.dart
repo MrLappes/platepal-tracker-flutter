@@ -132,7 +132,9 @@ class _ChatInputState extends State<ChatInput>
                         children: [
                           _buildMenuOption(
                             icon: Icons.camera_alt,
-                            label: localizations.componentsChatBotProfileCustomizationDialogTakePhoto,
+                            label:
+                                localizations
+                                    .componentsChatBotProfileCustomizationDialogTakePhoto,
                             onTap: () {
                               _toggleMenu();
                               _pickImage(ImageSource.camera);
@@ -141,7 +143,9 @@ class _ChatInputState extends State<ChatInput>
                           ),
                           _buildMenuOption(
                             icon: Icons.photo_library,
-                            label: localizations.componentsChatBotProfileCustomizationDialogChooseFromGallery,
+                            label:
+                                localizations
+                                    .componentsChatBotProfileCustomizationDialogChooseFromGallery,
                             onTap: () {
                               _toggleMenu();
                               _pickImage(ImageSource.gallery);
@@ -150,7 +154,9 @@ class _ChatInputState extends State<ChatInput>
                           ),
                           _buildMenuOption(
                             icon: Icons.barcode_reader,
-                            label: localizations.componentsChatChatInputScanBarcode,
+                            label:
+                                localizations
+                                    .componentsChatChatInputScanBarcode,
                             onTap: () {
                               _toggleMenu();
                               _openBarcodeScanner();
@@ -159,7 +165,9 @@ class _ChatInputState extends State<ChatInput>
                           ),
                           _buildMenuOption(
                             icon: Icons.search,
-                            label: localizations.componentsChatChatInputSearchProduct,
+                            label:
+                                localizations
+                                    .componentsChatChatInputSearchProduct,
                             onTap: () {
                               _toggleMenu();
                               _openProductSearch();
@@ -198,35 +206,38 @@ class _ChatInputState extends State<ChatInput>
                       AnimatedBuilder(
                         animation: _animationController,
                         builder: (context, child) {
-                          return InkWell(
-                            onTap: widget.isLoading ? null : _toggleMenu,
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color:
-                                    _showMenu
-                                        ? theme.colorScheme.primary.withValues(
-                                          alpha: 0.1,
-                                        )
-                                        : theme
-                                            .colorScheme
-                                            .surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Center(
-                                child: Transform.rotate(
-                                  angle: _animationController.value * 0.785,
-                                  child: Icon(
-                                    Icons.add,
-                                    size: 24,
-                                    color:
-                                        _showMenu
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.onSurface
-                                                .withValues(alpha: 0.7),
-                                  ),
+                          return Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color:
+                                  _showMenu
+                                      ? theme.colorScheme.primary.withValues(
+                                        alpha: 0.1,
+                                      )
+                                      : theme
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: IconButton(
+                              onPressed: widget.isLoading ? null : _toggleMenu,
+                              tooltip:
+                                  _showMenu
+                                      ? localizations
+                                          .componentsChatMessageBubbleClose
+                                      : localizations
+                                          .componentsChatChatInputAttachments,
+                              icon: Transform.rotate(
+                                angle: _animationController.value * 0.785,
+                                child: Icon(
+                                  Icons.add,
+                                  size: 24,
+                                  color:
+                                      _showMenu
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.7),
                                 ),
                               ),
                             ),
@@ -244,7 +255,9 @@ class _ChatInputState extends State<ChatInput>
                             controller: _controller,
                             enabled: !widget.isLoading,
                             decoration: InputDecoration(
-                              hintText: localizations.componentsChatChatInputTypeMessage,
+                              hintText:
+                                  localizations
+                                      .componentsChatChatInputTypeMessage,
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -298,7 +311,8 @@ class _ChatInputState extends State<ChatInput>
                                             : theme.colorScheme.onSurface
                                                 .withValues(alpha: 0.4),
                                   ),
-                          tooltip: localizations.componentsChatChatInputSendMessage,
+                          tooltip:
+                              localizations.componentsChatChatInputSendMessage,
                         ),
                       ),
                     ],
@@ -425,34 +439,19 @@ class _ChatInputState extends State<ChatInput>
               Positioned(
                 top: 8,
                 right: 8,
-                child: GestureDetector(
-                  onTap: () {
+                child: IconButton(
+                  tooltip: localizations.screensDishCreateRemoveImage,
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  onPressed: () {
                     setState(() {
                       _selectedImage = null;
                     });
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.shadow.withValues(
-                            alpha: 0.2,
-                          ),
-                          spreadRadius: 1,
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 16,
-                      color: theme.colorScheme.error,
-                    ),
+                  style: IconButton.styleFrom(
+                    backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.9),
+                    foregroundColor: theme.colorScheme.error,
                   ),
+                  icon: const Icon(Icons.close, size: 16),
                 ),
               ),
             ],
@@ -488,9 +487,10 @@ class _ChatInputState extends State<ChatInput>
                   final ingredient = entry.value;
 
                   return Container(
+                    constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width - 32),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
-                      vertical: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
@@ -508,21 +508,21 @@ class _ChatInputState extends State<ChatInput>
                           color: theme.colorScheme.primary,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Text(
+                            '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        GestureDetector(
-                          onTap: () => _removeIngredient(index),
-                          child: Icon(
-                            Icons.close,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
+                        IconButton(
+                          tooltip: localizations.componentsChatChatInputRemoveIngredient(ingredient.name),
+                          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                          onPressed: () => _removeIngredient(index),
+                          icon: Icon(Icons.close, size: 16, color: theme.colorScheme.primary),
                         ),
                       ],
                     ),
@@ -551,7 +551,11 @@ class _ChatInputState extends State<ChatInput>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context).componentsChatChatInputImageAttached),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                ).componentsChatChatInputImageAttached,
+              ),
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(
@@ -567,7 +571,9 @@ class _ChatInputState extends State<ChatInput>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context).componentsChatChatInputErrorPickingImage(e.toString()),
+              AppLocalizations.of(
+                context,
+              ).componentsChatChatInputErrorPickingImage(e.toString()),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
@@ -589,15 +595,9 @@ class _ChatInputState extends State<ChatInput>
       return;
     }
 
-    // Debug: Print what we're about to send
     debugPrint(
-      '🔍 DEBUG: Sending message with ${_selectedIngredients.length} ingredients',
+      'ChatInput: Sending message with ${_selectedIngredients.length} ingredients',
     );
-    for (final ingredient in _selectedIngredients) {
-      debugPrint(
-        '   - ${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
-      );
-    }
 
     // For now, we'll pass the file path as imageUrl
     // In a real app, you'd upload the image to a server first
@@ -686,7 +686,11 @@ class _ChatInputState extends State<ChatInput>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ingredient added to chat'),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).componentsChatChatInputIngredientAdded,
+            ),
             backgroundColor: Colors.green,
           ),
         );

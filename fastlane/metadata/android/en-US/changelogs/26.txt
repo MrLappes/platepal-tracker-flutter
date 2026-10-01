@@ -1,0 +1,4 @@
+- Log meals directly from the calendar diary.
+- Improved product search, dish calculations, profile goals and weight/calorie statistics.
+- Safer import with confirmation, backups and undo; API keys now use secure storage.
+- Corrected Health energy totals, expanded translations and improved accessibility.

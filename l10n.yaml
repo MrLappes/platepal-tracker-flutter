@@ -3,5 +3,4 @@ template-arb-file: app_en.arb
 output-dir: lib/l10n
 output-class: AppLocalizations
 nullable-getter: false
-synthetic-package: false
 untranslated-messages-file: missing_localizations.json

@@ -1,3 +1,5 @@
+import 'dish.dart';
+
 class Product {
   final String? barcode;
   final String? name;
@@ -5,6 +7,9 @@ class Product {
   final String? imageUrl;
   final String? quantity;
   final ProductNutrition? nutrition;
+
+  /// Nutrition for one locally saved serving, rather than per 100 g.
+  final NutritionInfo? servingNutrition;
   final Map<String, dynamic>? rawData;
 
   const Product({
@@ -14,6 +19,7 @@ class Product {
     this.imageUrl,
     this.quantity,
     this.nutrition,
+    this.servingNutrition,
     this.rawData,
   });
 
@@ -46,6 +52,7 @@ class Product {
       'imageUrl': imageUrl,
       'quantity': quantity,
       'nutrition': nutrition?.toJson(),
+      'servingNutrition': servingNutrition?.toJson(),
       'rawData': rawData,
     };
   }
@@ -82,15 +89,24 @@ class ProductNutrition {
       return const ProductNutrition();
     }
 
+    final energyKj =
+        _parseNutrient(nutriments['energy-kj_100g']) ??
+        _parseNutrient(nutriments['energy_100g']);
+    final salt = _parseNutrient(nutriments['salt_100g']);
+
     return ProductNutrition(
-      energyKcal100g: _parseNutrient(nutriments['energy-kcal_100g']),
+      energyKcal100g:
+          _parseNutrient(nutriments['energy-kcal_100g']) ??
+          (energyKj == null ? null : energyKj / 4.184),
       proteins100g: _parseNutrient(nutriments['proteins_100g']),
       carbohydrates100g: _parseNutrient(nutriments['carbohydrates_100g']),
       fat100g: _parseNutrient(nutriments['fat_100g']),
       fiber100g: _parseNutrient(nutriments['fiber_100g']),
       sugars100g: _parseNutrient(nutriments['sugars_100g']),
-      sodium100g: _parseNutrient(nutriments['sodium_100g']),
-      salt100g: _parseNutrient(nutriments['salt_100g']),
+      sodium100g:
+          _parseNutrient(nutriments['sodium_100g']) ??
+          (salt == null ? null : salt / 2.5),
+      salt100g: salt,
     );
   }
 

@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
+import '../../utils/number_parsing.dart';
 
 class MacroSummary extends StatefulWidget {
   final double calories;
@@ -159,13 +161,36 @@ class _MacroSummaryState extends State<MacroSummary> {
   }
 
   double _getProgressWidth(double current, double? target) {
-    if (target == null) return 0.2;
+    if (target == null || target <= 0) return 0.2;
 
     if (current > target * 1.5) {
       return 1.0;
     }
 
     return min(1.0, current / target);
+  }
+
+  String? _goalStatus(
+    BuildContext context,
+    double current,
+    double? target,
+    String unit,
+    String locale,
+  ) {
+    if (target == null || target <= 0) return null;
+    final localizations = AppLocalizations.of(context);
+    if (current > target) {
+      final difference = current - target;
+      final amount = formatDecimal(
+        difference,
+        locale,
+        fractionDigits: difference == difference.round() ? 0 : 1,
+      );
+      return localizations.componentsCalendarMacroSummaryOverBy(amount, unit);
+    }
+    return localizations.componentsCalendarMacroSummaryPercentOfGoal(
+      (current / target * 100).round(),
+    );
   }
 
   Widget _buildMacroBar({
@@ -175,10 +200,18 @@ class _MacroSummaryState extends State<MacroSummary> {
     required String unit,
     required Color color,
     required BuildContext context,
+    required String locale,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final progressWidth = _getProgressWidth(current, target);
+    final status = _goalStatus(
+      context,
+      current,
+      target,
+      unit.isEmpty ? 'kcal' : unit,
+      locale,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,8 +227,8 @@ class _MacroSummaryState extends State<MacroSummary> {
             ),
             Text(
               target != null
-                  ? '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}$unit / ${target.toStringAsFixed(target == target.toInt() ? 0 : 1)}$unit'
-                  : '${current.toStringAsFixed(current == current.toInt() ? 0 : 1)}$unit',
+                  ? '${formatDecimal(current, locale, fractionDigits: current == current.toInt() ? 0 : 1)}$unit / ${formatDecimal(target, locale, fractionDigits: target == target.toInt() ? 0 : 1)}$unit'
+                  : '${formatDecimal(current, locale, fractionDigits: current == current.toInt() ? 0 : 1)}$unit',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -203,31 +236,49 @@ class _MacroSummaryState extends State<MacroSummary> {
           ],
         ),
         const SizedBox(height: 4),
-        Container(
-          height: 8,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progressWidth,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(4),
+        Semantics(
+          label: label,
+          value:
+              status ??
+              '${formatDecimal(current, locale, fractionDigits: 0)} $unit',
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progressWidth,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
           ),
         ),
+        if (status != null) ...[
+          const SizedBox(height: 4),
+          ExcludeSemantics(
+            child: Text(
+              status,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildCaloriesBar(BuildContext context, AppLocalizations l10n) {
-    // Use calories burned as max if available, otherwise use calorie target
-    final double? maxCalories = widget.caloriesBurned ?? widget.calorieTarget;
-
+  Widget _buildCaloriesBar(
+    BuildContext context,
+    AppLocalizations l10n,
+    String locale,
+  ) {
     return Column(
       children: [
         Row(
@@ -236,19 +287,22 @@ class _MacroSummaryState extends State<MacroSummary> {
               child: _buildMacroBar(
                 label: l10n.componentsCalendarMacroSummaryCalories,
                 current: widget.calories,
-                target: maxCalories,
+                target: widget.calorieTarget,
                 unit: '',
-                color: _getCaloriesColor(widget.calories, maxCalories),
+                color: _getCaloriesColor(widget.calories, widget.calorieTarget),
                 context: context,
+                locale: locale,
               ),
             ),
             // Show info icon only when we have real health data (not estimated)
             if (widget.caloriesBurned != null &&
                 !widget.isCaloriesBurnedEstimated) ...[
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => _showHealthDataInfo(context),
-                child: Icon(
+              IconButton(
+                tooltip: l10n.componentsCalendarMacroSummaryHealthDataTitle,
+                onPressed: () => _showHealthDataInfo(context),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                icon: Icon(
                   Icons.info_outline,
                   size: 16,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -258,13 +312,17 @@ class _MacroSummaryState extends State<MacroSummary> {
           ],
         ),
         // Burned calories & net display
-        _buildBurnedCaloriesRow(context, l10n),
+        _buildBurnedCaloriesRow(context, l10n, locale),
       ],
     );
   }
 
   /// Build a row showing calories burned from Health Connect and net balance
-  Widget _buildBurnedCaloriesRow(BuildContext context, AppLocalizations l10n) {
+  Widget _buildBurnedCaloriesRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    String locale,
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -281,12 +339,16 @@ class _MacroSummaryState extends State<MacroSummary> {
             Icon(
               Icons.local_fire_department,
               size: 14,
-              color: Colors.deepOrange,
+              color: MacroColors.of(context).calories,
             ),
             const SizedBox(width: 4),
             Text(
               l10n.componentsCalendarMacroSummaryBurned(
-                widget.caloriesBurned!.toStringAsFixed(0),
+                formatDecimal(
+                  widget.caloriesBurned!,
+                  locale,
+                  fractionDigits: 0,
+                ),
               ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -318,7 +380,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                   const SizedBox(width: 4),
                   Text(
                     l10n.componentsCalendarMacroSummaryNetCalories(
-                      '${netCalories >= 0 ? '+' : ''}${netCalories.toStringAsFixed(0)}',
+                      '${netCalories >= 0 ? '+' : ''}${formatDecimal(netCalories, locale, fractionDigits: 0)}',
                     ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
@@ -432,6 +494,7 @@ class _MacroSummaryState extends State<MacroSummary> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final locale = Localizations.localeOf(context).toString();
 
     if (widget.isCollapsible) {
       return Card(
@@ -446,70 +509,89 @@ class _MacroSummaryState extends State<MacroSummary> {
               },
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.bar_chart, color: colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.componentsCalendarMacroSummaryNutritionSummary,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tipWidth = min(320.0, constraints.maxWidth * 0.5);
+                    final tipLabel =
+                        l10n.componentsCalendarMacroSummaryGetAiTip;
+                    final tipText = TextPainter(
+                      text: TextSpan(
+                        text: tipLabel,
+                        style: theme.textTheme.labelLarge,
                       ),
-                    ),
-                    const Spacer(),
-                    // AI Tip button
-                    if (widget.onAiTipPressed != null) ...[
-                      GestureDetector(
-                        onTap: widget.onAiTipPressed,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                      textDirection: Directionality.of(context),
+                      textScaler: MediaQuery.textScalerOf(context),
+                    )..layout();
+                    final useIconOnly = tipText.width + 40 > tipWidth;
+                    return Row(
+                      children: [
+                        Icon(Icons.bar_chart, color: colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                size: 12,
-                                color: colorScheme.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 4),
                               Text(
-                                l10n.componentsCalendarMacroSummaryGetAiTip,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onPrimaryContainer,
+                                l10n.componentsCalendarMacroSummaryNutritionSummary,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              if (!_isExpanded)
+                                Text(
+                                  '${formatDecimal(widget.calories, locale, fractionDigits: 0)} ${l10n.componentsCalendarMacroSummaryCalories}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    // Quick stats when collapsed
-                    if (!_isExpanded) ...[
-                      Text(
-                        '${widget.calories.toStringAsFixed(0)} ${l10n.componentsCalendarMacroSummaryCalories}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        if (widget.onAiTipPressed != null) ...[
+                          const SizedBox(width: 8),
+                          if (useIconOnly)
+                            IconButton(
+                              onPressed: widget.onAiTipPressed,
+                              tooltip: tipLabel,
+                              constraints: const BoxConstraints(
+                                minWidth: 48,
+                                minHeight: 48,
+                              ),
+                              icon: const Icon(Icons.auto_awesome),
+                            )
+                          else
+                            ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: tipWidth),
+                              child: TextButton.icon(
+                                onPressed: widget.onAiTipPressed,
+                                style: TextButton.styleFrom(
+                                  minimumSize: const Size(48, 48),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                ),
+                                icon: const Icon(Icons.auto_awesome, size: 16),
+                                label: Text(
+                                  tipLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                        ],
+                        Icon(
+                          _isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
                           color: colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Icon(
-                      _isExpanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ],
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -522,7 +604,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                 child: Column(
                   children: [
                     // Calories
-                    _buildCaloriesBar(context, l10n),
+                    _buildCaloriesBar(context, l10n, locale),
 
                     const SizedBox(height: 12),
 
@@ -536,6 +618,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.protein,
                         widget.proteinTarget,
                       ),
+                      locale: locale,
                       context: context,
                     ),
                     const SizedBox(height: 12),
@@ -546,6 +629,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                       current: widget.carbs,
                       target: widget.carbsTarget,
                       unit: 'g',
+                      locale: locale,
                       color: _getCarbsColor(widget.carbs, widget.carbsTarget),
                       context: context,
                     ),
@@ -556,6 +640,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                       label: l10n.componentsCalendarMacroSummaryFat,
                       current: widget.fat,
                       target: widget.fatTarget,
+                      locale: locale,
                       unit: 'g',
                       color: _getFatColor(widget.fat, widget.fatTarget),
                       context: context,
@@ -569,6 +654,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                       _buildMacroBar(
                         label: l10n.componentsCalendarMacroSummaryFiber,
                         current: widget.fiber,
+                        locale: locale,
                         target: widget.fiberTarget,
                         unit: 'g',
                         color: _getFiberColor(widget.fiber, widget.fiberTarget),
@@ -594,6 +680,8 @@ class _MacroSummaryState extends State<MacroSummary> {
                           widget.calorieTarget,
                         ),
                         context,
+                        unit: 'kcal',
+                        locale: locale,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -604,6 +692,8 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.proteinTarget,
                         _getProteinColor(widget.protein, widget.proteinTarget),
                         context,
+                        unit: 'g',
+                        locale: locale,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -614,6 +704,8 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.carbsTarget,
                         _getCarbsColor(widget.carbs, widget.carbsTarget),
                         context,
+                        unit: 'g',
+                        locale: locale,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -624,6 +716,8 @@ class _MacroSummaryState extends State<MacroSummary> {
                         widget.fatTarget,
                         _getFatColor(widget.fat, widget.fatTarget),
                         context,
+                        unit: 'g',
+                        locale: locale,
                       ),
                     ),
                   ],
@@ -687,6 +781,7 @@ class _MacroSummaryState extends State<MacroSummary> {
             // Calories
             _buildMacroBar(
               label: l10n.componentsCalendarMacroSummaryCalories,
+              locale: locale,
               current: widget.calories,
               target: widget.calorieTarget,
               unit: 'kcal',
@@ -696,6 +791,7 @@ class _MacroSummaryState extends State<MacroSummary> {
 
             // Protein
             _buildMacroBar(
+              locale: locale,
               label: l10n.componentsCalendarMacroSummaryProtein,
               current: widget.protein,
               target: widget.proteinTarget,
@@ -712,6 +808,7 @@ class _MacroSummaryState extends State<MacroSummary> {
               unit: 'g',
               color: _getCarbsColor(widget.carbs, widget.carbsTarget),
               context: context,
+              locale: locale,
             ),
 
             // Fat
@@ -722,6 +819,7 @@ class _MacroSummaryState extends State<MacroSummary> {
               unit: 'g',
               color: _getFatColor(widget.fat, widget.fatTarget),
               context: context,
+              locale: locale,
             ),
 
             // Fiber (only show if has value or target)
@@ -734,6 +832,7 @@ class _MacroSummaryState extends State<MacroSummary> {
                 unit: 'g',
                 color: _getFiberColor(widget.fiber, widget.fiberTarget),
                 context: context,
+                locale: locale,
               ),
           ],
         ),
@@ -746,41 +845,58 @@ class _MacroSummaryState extends State<MacroSummary> {
     double current,
     double? target,
     Color color,
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    required String unit,
+    required String locale,
+  }) {
     final theme = Theme.of(context);
     final progressWidth = _getProgressWidth(current, target);
+    final status = _goalStatus(context, current, target, unit, locale);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
         const SizedBox(height: 2),
-        Container(
-          height: 4,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progressWidth,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
+        Semantics(
+          label: label,
+          value: status ?? formatDecimal(current, locale, fractionDigits: 0),
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progressWidth,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(height: 2),
         Text(
-          current.toStringAsFixed(0),
+          formatDecimal(current, locale, fractionDigits: 0),
           style: theme.textTheme.bodySmall?.copyWith(
             fontSize: 10,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
+        if (target != null && target > 0)
+          ExcludeSemantics(
+            child: Text(
+              '${(current / target * 100).round()}%',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
       ],
     );
   }

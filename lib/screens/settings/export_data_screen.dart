@@ -20,8 +20,6 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
   String? _lastExportPath;
   String? _lastError;
   ImportExportResult? _lastResults;
-  bool _showAdvancedOptions = false;
-  bool _createBackup = true;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +48,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Preparing your data...',
+            AppLocalizations.of(context).screensSettingsExportDataPreparing,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -79,8 +77,6 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           _buildDataTypeSelectionCard(),
           const SizedBox(height: 16),
           _buildFormatSelectionCard(),
-          const SizedBox(height: 16),
-          _buildAdvancedOptionsCard(),
           const SizedBox(height: 24),
           _buildExportButton(),
         ],
@@ -104,7 +100,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 Icon(Icons.preview, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  'Export Preview',
+                  AppLocalizations.of(context).screensSettingsExportDataPreview,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -130,7 +126,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Format: $formatName',
+                        AppLocalizations.of(
+                          context,
+                        ).screensSettingsExportDataFormatLabel(formatName),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -147,7 +145,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Data types: $selectedCount selected',
+                        AppLocalizations.of(
+                          context,
+                        ).screensSettingsExportDataTypesSelected(selectedCount),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -164,7 +164,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Ready to export',
+                        AppLocalizations.of(context).screensSettingsExportDataReady,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -252,37 +252,37 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
     switch (dataType) {
       case DataType.dishes:
         title = AppLocalizations.of(context).screensSettingsExportDataDishes;
-        subtitle = 'Your saved recipes and dishes';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataDishesDescription;
         break;
       case DataType.mealLogs:
         title = AppLocalizations.of(context).screensSettingsExportDataMealLogs;
-        subtitle = 'Your meal history and nutrition logs';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataMealLogsDescription;
         break;
       case DataType.userProfiles:
         title =
             AppLocalizations.of(context).screensSettingsExportDataUserProfiles;
-        subtitle = 'User profile and preferences';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataUserProfilesDescription;
         break;
       case DataType.ingredients:
         title =
             AppLocalizations.of(context).componentsChatMessageBubbleIngredients;
-        subtitle = 'Ingredient database';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataIngredientsDescription;
         break;
       case DataType.supplements:
         title =
             AppLocalizations.of(context).screensSettingsExportDataSupplements;
-        subtitle = 'Supplement tracking data';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataSupplementsDescription;
         break;
       case DataType.fitnessGoals:
         title =
             AppLocalizations.of(
               context,
             ).screensSettingsExportDataNutritionGoalsData;
-        subtitle = 'Fitness and nutrition goals';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataFitnessGoalsDescription;
         break;
       case DataType.allData:
         title = AppLocalizations.of(context).screensSettingsExportDataAllData;
-        subtitle = 'Export everything from your account';
+        subtitle = AppLocalizations.of(context).screensSettingsExportDataAllDataDescription;
         break;
     }
 
@@ -328,7 +328,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 Icon(Icons.description, color: Theme.of(context).primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  'Export Format',
+                  AppLocalizations.of(context).screensSettingsExportDataFormatTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -349,8 +349,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                         context,
                       ).screensSettingsExportDataExportAsJson,
                     ),
-                    subtitle: const Text(
-                      'Structured data format, best for backup',
+                    subtitle: Text(
+                      AppLocalizations.of(context).screensSettingsExportDataJsonDescription,
                     ),
                     value: ExportFormat.json,
                     secondary: const Icon(Icons.code, color: Colors.blue),
@@ -361,8 +361,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                         context,
                       ).screensSettingsExportDataExportAsCsv,
                     ),
-                    subtitle: const Text(
-                      'Spreadsheet format, good for analysis',
+                    subtitle: Text(
+                      AppLocalizations.of(context).screensSettingsExportDataCsvDescription,
                     ),
                     value: ExportFormat.csv,
                     secondary: const Icon(
@@ -373,66 +373,6 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdvancedOptionsCard() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InkWell(
-              onTap:
-                  () => setState(
-                    () => _showAdvancedOptions = !_showAdvancedOptions,
-                  ),
-              child: Row(
-                children: [
-                  Icon(Icons.settings, color: Theme.of(context).primaryColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Advanced Options',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    _showAdvancedOptions
-                        ? Icons.expand_less
-                        : Icons.expand_more,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-            if (_showAdvancedOptions) ...[
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: const Text('Create backup before export'),
-                subtitle: const Text('Automatically backup data during export'),
-                value: _createBackup,
-                onChanged: (value) {
-                  setState(() {
-                    _createBackup = value;
-                  });
-                },
-                secondary: const Icon(Icons.backup, color: Colors.blue),
-              ),
-              SwitchListTile(
-                title: const Text('Validate data during export'),
-                subtitle: const Text('Check data integrity while exporting'),
-                value: true,
-                onChanged: null, // Always enabled for now
-                secondary: const Icon(Icons.verified, color: Colors.green),
-              ),
-            ],
           ],
         ),
       ),
@@ -456,7 +396,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Export Error',
+                  AppLocalizations.of(context).screensSettingsExportDataError,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onErrorContainer,
@@ -497,7 +437,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Export Results',
+                  AppLocalizations.of(context).screensSettingsExportDataResults,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -517,7 +457,11 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'File: ${_lastExportPath!.split('/').last}',
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataFileLabel(
+                        _lastExportPath!.split('/').last,
+                      ),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                         fontSize: 12,
@@ -537,7 +481,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Location: ${_lastExportPath!}',
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataLocationLabel(_lastExportPath!),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                         fontSize: 12,
@@ -553,7 +499,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Items Exported:',
+                  AppLocalizations.of(
+                    context,
+                  ).screensSettingsExportDataItemsExported,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w500,
@@ -575,7 +523,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _shareExportedFile(),
                     icon: const Icon(Icons.share),
-                    label: const Text('Share'),
+                    label: Text(
+                      AppLocalizations.of(context).screensSettingsExportDataShare,
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor:
                           Theme.of(context).colorScheme.onPrimaryContainer,
@@ -590,7 +540,11 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _showExportLocationDialog(),
                     icon: const Icon(Icons.folder_open),
-                    label: const Text('Show in Files'),
+                    label: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataShowFileLocation,
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor:
                           Theme.of(context).colorScheme.onPrimaryContainer,
@@ -640,12 +594,18 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Export Location'),
+            title: Text(
+              AppLocalizations.of(context).screensSettingsExportDataLocationTitle,
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Your exported file is located at:'),
+                Text(
+                  AppLocalizations.of(
+                    context,
+                  ).screensSettingsExportDataLocationDescription,
+                ),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -666,7 +626,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(
+                  MaterialLocalizations.of(context).closeButtonLabel,
+                ),
               ),
             ],
           ),
@@ -674,10 +636,11 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
   }
 
   Future<void> _shareExportedFile() async {
+    final localizations = AppLocalizations.of(context);
     if (_lastExportPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No file to share. Please export data first.'),
+        SnackBar(
+          content: Text(localizations.screensSettingsExportDataNoFileToShare),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),
@@ -691,13 +654,13 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
         final fileName = _lastExportPath!.split('/').last;
         await Share.shareXFiles(
           [XFile(_lastExportPath!)],
-          text: 'PlatePal Data Export - $fileName',
-          subject: 'PlatePal Data Export',
+          text: localizations.screensSettingsExportDataShareText(fileName),
+          subject: localizations.screensSettingsExportDataShareSubject,
         );
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Export file not found. Please export data again.'),
+          SnackBar(
+            content: Text(localizations.screensSettingsExportDataFileNotFound),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -705,9 +668,10 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      debugPrint('ExportDataScreen: Sharing failed (${e.runtimeType})');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to share file: ${e.toString()}'),
+          content: Text(localizations.screensSettingsExportDataShareProblem),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -732,16 +696,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
       if (mounted) {
         setState(() {
           _isExporting = false;
-          _lastResults = result;
+          _lastResults = result.success ? result : null;
           if (result.success) {
-            // Extract the file path from the success message
-            final message = result.message;
-            final pathMatch = RegExp(r'to (.+)$').firstMatch(message);
-            if (pathMatch != null) {
-              _lastExportPath = pathMatch.group(1);
-            } else {
-              _lastExportPath = 'Export completed successfully';
-            }
+            _lastExportPath = result.filePath;
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -757,15 +714,18 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               ),
             );
           } else {
-            _lastError = result.message;
+            _lastError = result.errorCode == ImportExportErrorCode.exportSectionFailed
+                ? AppLocalizations.of(context).screensSettingsExportDataSectionFailed
+                : AppLocalizations.of(context).screensSettingsExportDataWriteFailed;
           }
         });
       }
     } catch (e) {
       if (mounted) {
+        debugPrint('ExportDataScreen: Export failed (${e.runtimeType})');
         setState(() {
           _isExporting = false;
-          _lastError = e.toString();
+          _lastError = AppLocalizations.of(context).screensSettingsExportDataWriteFailed;
         });
       }
     }

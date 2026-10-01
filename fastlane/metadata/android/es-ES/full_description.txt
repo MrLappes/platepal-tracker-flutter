@@ -1,0 +1,15 @@
+PlatePal Tracker es un diario de alimentación que guarda tus datos en el dispositivo. Registra tus comidas, consulta tus objetivos y conserva el control de tu información.
+
+- Crea platos con tus propios ingredientes y registra desayunos, almuerzos, cenas o tentempiés.
+- Escanea códigos de barras o busca productos y datos nutricionales en Open Food Facts.
+- Revisa tu diario en el calendario, compara cada día las calorías y los macronutrientes con tus objetivos y registra comidas directamente desde allí.
+- Calcula objetivos de calorías y macronutrientes a partir de tu perfil con la fórmula de Mifflin-St Jeor; ajusta su distribución a tus preferencias.
+- Consulta la evolución de tu peso y tus calorías en las estadísticas.
+- Usa, si lo deseas, el chat con IA para obtener sugerencias de platos. Necesitas tu propia clave de API de OpenAI o de un servicio compatible, guardada de forma segura.
+- Con tu permiso, conecta Health Connect en Android o Apple Health en iOS para consultar las calorías gastadas y registrar los nutrientes de tus comidas.
+- Exporta e importa tus datos en JSON o CSV. Antes de importar, la app hace una copia de seguridad que permite deshacer la importación. Si falla, te pregunta si quieres continuar sin ella.
+- Elige inglés, español o alemán y un tema claro, oscuro o según el sistema.
+
+Sin cuenta, anuncios ni seguimiento. Las comidas y los datos de tu perfil se guardan en tu dispositivo. Las búsquedas de productos se envían a Open Food Facts; si usas la IA, los mensajes y el contexto pertinente se envían al proveedor que elijas. El servicio de IA puede tener costes. El acceso a datos de salud es opcional. Consulta la política de privacidad de la app.
+
+Código abierto con licencia GPL-2.0. Los datos nutricionales y las sugerencias de la IA no sustituyen el asesoramiento médico.

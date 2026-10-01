@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import '../../utils/link_handler.dart';
 
@@ -13,6 +15,7 @@ class _AboutScreenState extends State<AboutScreen>
     with TickerProviderStateMixin {
   late AnimationController _contentController;
   late Animation<Offset> _contentSlide;
+  final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
 
   @override
   void initState() {
@@ -45,6 +48,7 @@ class _AboutScreenState extends State<AboutScreen>
         title: Text(localizations.screensSettingsIndustrialSystemInfo),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -82,10 +86,17 @@ class _AboutScreenState extends State<AboutScreen>
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      localizations.screensSettingsIndustrialStableBuild('V1.12.6'),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    FutureBuilder<PackageInfo>(
+                      future: _packageInfo,
+                      builder: (context, snapshot) => Text(
+                        localizations.screensSettingsIndustrialStableBuild(
+                          snapshot.hasData
+                              ? 'v${snapshot.data!.version}+${snapshot.data!.buildNumber}'
+                              : '?',
+                        ),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                     const Padding(
@@ -140,6 +151,13 @@ class _AboutScreenState extends State<AboutScreen>
                 Icons.public, 
                 localizations.screensSettingsIndustrialOfficialDomain, 
                 () => LinkHandler.openPlatePalWebsite(context)
+              ),
+              const SizedBox(height: 12),
+              _buildLinkCard(
+                context,
+                Icons.privacy_tip_outlined,
+                localizations.screensPrivacyTitle,
+                () => context.push('/privacy'),
               ),
               
               const SizedBox(height: 40),
