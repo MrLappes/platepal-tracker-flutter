@@ -13,6 +13,10 @@ String formatDecimal(num value, String locale, {int fractionDigits = 1}) =>
       decimalDigits: fractionDigits,
     )..turnOffGrouping()).format(value);
 
+/// Formats [value] with up to two decimals and no trailing zeros.
+String formatAmount(num value, String locale) =>
+    NumberFormat('0.##', locale).format(value);
+
 final TextInputFormatter decimalInputFormatter =
     TextInputFormatter.withFunction(
       (oldValue, newValue) =>
