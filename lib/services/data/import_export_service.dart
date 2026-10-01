@@ -58,8 +58,7 @@ class ImportExportService {
   /// Import files above this size are rejected before reading.
   static const int maxImportBytes = 50 * 1024 * 1024;
 
-  /// Sections with more rows are rejected as a whole.
-  static const int maxItemsPerSection = 100000;
+  static const int _yieldInterval = 1000;
 
   static const int _backupsToKeep = 5;
   static final RegExp _backupName = RegExp(r'^platepal_backup_(\d+)\.json$');
@@ -402,6 +401,7 @@ class ImportExportService {
 
     final groups = <String, List<(int, _ImportedLog)>>{};
     for (int i = 0; i < entries.length; i++) {
+      await _yieldPeriodically(i);
       try {
         final log = _parseImportedLog(entries[i]);
         groups.putIfAbsent(log.key, () => []).add((i, log));
@@ -421,6 +421,7 @@ class ImportExportService {
 
     final existing = await _existingLogCounts();
     final toInsert = <(int, String, _ImportedLog, String?, _Nutrients)>[];
+    var visited = 0;
     for (final entry in groups.entries) {
       final group = entry.value;
       // A logical log appears at most once per source, so the busiest
@@ -437,6 +438,7 @@ class ImportExportService {
       ];
 
       for (int n = 0; n < candidates.length; n++) {
+        await _yieldPeriodically(visited++);
         final (index, log) = candidates[n];
         final identifier = '${log.dishId} @ ${log.loggedAt.toIso8601String()}';
         if (n >= toWrite) {
@@ -538,6 +540,13 @@ class ImportExportService {
     );
   }
 
+  /// Lets the UI isolate draw a frame during long import loops.
+  static Future<void> _yieldPeriodically(int i) async {
+    if (i % _yieldInterval == _yieldInterval - 1) {
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
   static String _logKey(
     String dishId,
     DateTime loggedAt,
@@ -551,7 +560,9 @@ class ImportExportService {
   Future<Map<String, int>> _existingLogCounts() async {
     final rows = await _getAllDishLogs();
     final counts = <String, int>{};
+    var n = 0;
     for (final row in rows) {
+      await _yieldPeriodically(n++);
       final loggedAt = DateTime.tryParse(row['logged_at'] as String? ?? '');
       if (loggedAt == null) continue;
       final key = _logKey(
@@ -844,11 +855,6 @@ class ImportExportService {
               : null;
       if (items == null) {
         errors.add('$name must be a list');
-      } else if (items.length > maxItemsPerSection) {
-        errors.add(
-          '$name contains too many items (${items.length}, '
-          'max $maxItemsPerSection)',
-        );
       }
     }
     if (!hasData) errors.add('No importable data found');
@@ -954,67 +960,83 @@ class ImportExportService {
       int duplicates = 0;
       int skipped = 0;
       final errors = <String>[];
+      final processedItems = <ProcessedItem>[];
 
-      for (int index = 0; index < items.length; index++) {
-        var item = items[index];
-        try {
-          final itemValidation = _validateItem(type, item, index);
-          if (itemValidation.isNotEmpty) {
-            detailedResults.validationErrors.addAll(itemValidation);
-            skipped++;
-            continue;
-          }
-
-          // Reuse the local ID of a same-named dish, or overwrite would add
-          // a second dish under a new ID.
-          if (type == DataType.dishes && item['id'] == null) {
-            final localId = await _localDishIdByName(item['name']);
-            if (localId != null) item = <String, dynamic>{...item, 'id': localId};
-          }
-
-          final exists = await _checkIfExists(type, item);
-
-          if (exists) {
-            final duplicate = DuplicateItem(
-              type: type.name,
-              index: index,
-              identifier: _getItemIdentifier(type, item),
-              action: duplicateHandling.name,
-            );
-            detailedResults.duplicates.add(duplicate);
-
-            if (duplicateHandling == DuplicateHandling.skip) {
-              duplicates++;
+      Future<void> processItems(DatabaseExecutor? executor) async {
+        for (int index = 0; index < items.length; index++) {
+          await _yieldPeriodically(index);
+          var item = items[index];
+          try {
+            final itemValidation = _validateItem(type, item, index);
+            if (itemValidation.isNotEmpty) {
+              detailedResults.validationErrors.addAll(itemValidation);
+              skipped++;
               continue;
             }
+
+            // Reuse the local ID of a same-named dish, or overwrite would add
+            // a second dish under a new ID.
+            if (type == DataType.dishes && item['id'] == null) {
+              final localId = await _localDishIdByName(item['name']);
+              if (localId != null) {
+                item = <String, dynamic>{...item, 'id': localId};
+              }
+            }
+
+            final exists = await _checkIfExists(type, item, executor);
+
+            if (exists) {
+              final duplicate = DuplicateItem(
+                type: type.name,
+                index: index,
+                identifier: _getItemIdentifier(type, item),
+                action: duplicateHandling.name,
+              );
+              detailedResults.duplicates.add(duplicate);
+
+              if (duplicateHandling == DuplicateHandling.skip) {
+                duplicates++;
+                continue;
+              }
+            }
+
+            await _saveItem(type, item, duplicateHandling, executor);
+            processed++;
+
+            processedItems.add(
+              ProcessedItem(
+                type: type.name,
+                index: index,
+                identifier: _getItemIdentifier(type, item),
+                action: exists ? 'updated' : 'created',
+              ),
+            );
+          } catch (e) {
+            final error =
+                'Error processing ${type.name} item at index $index: $e';
+            errors.add(error);
+            detailedResults.processingErrors.add(
+              ProcessingError(
+                type: type.name,
+                index: index,
+                error: e.toString(),
+                item: item.toString(),
+              ),
+            );
+            skipped++;
           }
-
-          await _saveItem(type, item, duplicateHandling);
-          processed++;
-
-          detailedResults.processedItems.add(
-            ProcessedItem(
-              type: type.name,
-              index: index,
-              identifier: _getItemIdentifier(type, item),
-              action: exists ? 'updated' : 'created',
-            ),
-          );
-        } catch (e) {
-          final error =
-              'Error processing ${type.name} item at index $index: $e';
-          errors.add(error);
-          detailedResults.processingErrors.add(
-            ProcessingError(
-              type: type.name,
-              index: index,
-              error: e.toString(),
-              item: item.toString(),
-            ),
-          );
-          skipped++;
         }
       }
+
+      // Ingredient rows are plain statements: commit the section once
+      // instead of once per row. Dishes already save in one transaction each.
+      if (type == DataType.ingredients) {
+        final db = await DatabaseService.instance.database;
+        await db.transaction(processItems);
+      } else {
+        await processItems(null);
+      }
+      detailedResults.processedItems.addAll(processedItems);
 
       detailedResults.summary[type.name] = TypeSummary(
         total: items.length,
@@ -1493,7 +1515,11 @@ class ImportExportService {
     return errors;
   }
 
-  Future<bool> _checkIfExists(DataType type, dynamic item) async {
+  Future<bool> _checkIfExists(
+    DataType type,
+    dynamic item, [
+    DatabaseExecutor? executor,
+  ]) async {
     if (item is! Map<String, dynamic>) return false;
 
     switch (type) {
@@ -1523,7 +1549,7 @@ class ImportExportService {
       case DataType.ingredients:
         final id = item['id'] as String?;
         if (id != null) {
-          final db = await DatabaseService.instance.database;
+          final db = executor ?? await DatabaseService.instance.database;
           final results = await db.query(
             'ingredients',
             where: 'id = ?',
@@ -1576,8 +1602,9 @@ class ImportExportService {
   Future<void> _saveItem(
     DataType type,
     dynamic item,
-    DuplicateHandling duplicateHandling,
-  ) async {
+    DuplicateHandling duplicateHandling, [
+    DatabaseExecutor? executor,
+  ]) async {
     switch (type) {
       case DataType.dishes:
         await _saveDishItem(item as Map<String, dynamic>, duplicateHandling);
@@ -1597,6 +1624,7 @@ class ImportExportService {
         await _saveIngredientItem(
           item as Map<String, dynamic>,
           duplicateHandling,
+          executor,
         );
         break;
       case DataType.supplements:
@@ -1698,10 +1726,11 @@ class ImportExportService {
   /// Save an ingredient item to the database
   Future<void> _saveIngredientItem(
     Map<String, dynamic> ingredientData,
-    DuplicateHandling duplicateHandling,
-  ) async {
+    DuplicateHandling duplicateHandling, [
+    DatabaseExecutor? executor,
+  ]) async {
     try {
-      final db = await DatabaseService.instance.database;
+      final db = executor ?? await DatabaseService.instance.database;
       final id = ingredientData['id'] as String;
       final name = ingredientData['name'] as String;
       final barcode = ingredientData['barcode'] as String?;

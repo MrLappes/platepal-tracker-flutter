@@ -4,6 +4,10 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Changed
+
+- Imports no longer limit how many items a section may contain; large imports write ingredients in one transaction and keep the screen responsive.
+
 ## [1.14.0] - 2026-10-01
 
 ### Added

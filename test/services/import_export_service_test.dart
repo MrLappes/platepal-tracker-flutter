@@ -547,20 +547,41 @@ void main() {
           duplicateHandling: DuplicateHandling.overwrite,
         );
 
-    test('too many items fails without writing anything', () async {
+    test('a section with more than 100000 items is not rejected', () async {
       final result = await importAll({
         'dishes': [rice()],
-        'mealLogs': List.generate(
-          ImportExportService.maxItemsPerSection + 1,
-          (i) => _dishLogEntry('$i', 'oats', 'lunch', '2026-09-20T12:00:00.000'),
-        ),
+        'mealLogs': List.filled(100001, const <String, dynamic>{}),
       });
 
-      expect(result.success, isFalse);
-      expect(result.errors.join(), contains('too many items'));
-      expect(result.errorCode, ImportExportErrorCode.importInvalidData);
-      expect(await dishService.getDishById('rice'), isNull);
-      expect(await _ledger(), isEmpty);
+      expect(result.errorCode, isNot(ImportExportErrorCode.importInvalidData));
+      expect(await dishService.getDishById('rice'), isNotNull);
+      expect(result.detailedResults!.summary['mealLogs']!.total, 100001);
+    });
+
+    test('an ingredients section writes valid rows and reports bad ones', () async {
+      final result = await service.importData(
+        filePath: '',
+        jsonData: {
+          'ingredients': [
+            {
+              'id': 'i1',
+              'name': 'Salt',
+              'nutrition': {'calories': 0, 'protein': 0, 'carbs': 0, 'fat': 0},
+            },
+            {'id': 'i2', 'name': 'Flour'},
+            {'name': 'No id'},
+          ],
+        },
+        dataTypes: [DataType.ingredients],
+        duplicateHandling: DuplicateHandling.overwrite,
+      );
+
+      final db = await DatabaseService.instance.database;
+      final rows = await db.query('ingredients', orderBy: 'id');
+      expect(rows.map((r) => r['id']), ['i1', 'i2']);
+      expect(result.itemsProcessed, 2);
+      expect(result.errors, hasLength(1));
+      expect(result.detailedResults!.processedItems, hasLength(2));
     });
 
     test('a section of the wrong type fails without writing', () async {
