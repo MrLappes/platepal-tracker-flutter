@@ -3,16 +3,17 @@
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
-      <!-- Health Connect Permissions (calories burned read + nutrition read/write) -->
+    <!-- Health Connect Permissions (calories burned read + nutrition write) -->
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
-    <uses-permission android:name="android.permission.health.READ_NUTRITION" />
     <uses-permission android:name="android.permission.health.WRITE_NUTRITION" />
     
     <application
         android:label="PlatePal Tracker"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"
             android:exported="true"

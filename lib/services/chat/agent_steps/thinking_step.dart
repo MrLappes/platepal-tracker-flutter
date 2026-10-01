@@ -153,18 +153,18 @@ class ThinkingStep extends AgentStep {
       responseFormat: {'type': 'json_object'},
     );
     final content = response.choices.first.message.content?.trim() ?? '{}';
-    debugPrint('🧠 ThinkingStep: OpenAI analysis response: $content');
+    debugPrint(
+      '🧠 ThinkingStep: Received analysis (${content.length} chars)',
+    );
     // Parse and validate JSON
     Map<String, dynamic> jsonResponse;
     try {
       jsonResponse = jsonDecode(content) as Map<String, dynamic>;
       // Normalize the JSON to match our schema
       jsonResponse = _normalizeOpenAIAnalysisJson(jsonResponse);
-      debugPrint(
-        '🧠 ThinkingStep: Normalized OpenAI JSON for use: ${jsonEncode(jsonResponse)}',
-      );
     } catch (e) {
-      throw Exception('Failed to parse OpenAI JSON: $e');
+      // FormatException text would echo the model output into the logs.
+      throw Exception('Failed to parse OpenAI JSON (${e.runtimeType})');
     }
     // No strict schema validation needed, just use normalized
     final intent =

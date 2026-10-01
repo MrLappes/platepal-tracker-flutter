@@ -27,26 +27,22 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
 
   Future<void> _saveSettings() async {
     setState(() => loading = true);
-    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    final storageProvider = Provider.of<StorageServiceProvider>(
-      context,
-      listen: false,
-    );
+    try {
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      final storageProvider = Provider.of<StorageServiceProvider>(
+        context,
+        listen: false,
+      );
 
-    // Save to SharedPreferences via storage provider
-    final prefs = await storageProvider.getPrefs();
-    await prefs.setBool('agent_mode_enabled', agentModeEnabled);
-    await prefs.setBool('deep_search_enabled', deepSearchEnabled);
+      final prefs = await storageProvider.getPrefs();
+      await prefs.setBool('agent_mode_enabled', agentModeEnabled);
+      await prefs.setBool('deep_search_enabled', deepSearchEnabled);
 
-    // Update provider state
-    await chatProvider.setAgentModeEnabled(agentModeEnabled);
-    chatProvider.deepSearchEnabled = deepSearchEnabled;
+      await chatProvider.setAgentModeEnabled(agentModeEnabled);
+      chatProvider.deepSearchEnabled = deepSearchEnabled;
+      await chatProvider.reloadAgentSettings();
 
-    // Ensure provider reloads from SharedPreferences
-    await chatProvider.reloadAgentSettings();
-
-    setState(() => loading = false);
-    if (mounted) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -56,6 +52,19 @@ class _ChatAgentSettingsScreenState extends State<ChatAgentSettingsScreen> {
           ),
         ),
       );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).screensSettingsChatAgentSettingsSaveFailed,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => loading = false);
     }
   }
 

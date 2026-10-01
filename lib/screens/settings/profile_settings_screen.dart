@@ -3,6 +3,8 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile.dart';
+import '../../utils/number_parsing.dart';
+import '../../utils/nutrition_calculator.dart';
 import '../../utils/service_extensions.dart';
 import '../../services/health_service.dart';
 
@@ -35,6 +37,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   String _selectedUnitSystem = 'metric';
 
   UserProfile? _originalProfile;
+  double _preciseHeight = 0;
+  double _preciseWeight = 0;
+  double _preciseTargetWeight = 0;
+  String _displayedHeight = '';
+  String _displayedWeight = '';
+  String _displayedTargetWeight = '';
+  bool _isConvertingUnits = false;
 
   // Health service integration
   final HealthService _healthService = HealthService();
@@ -91,17 +100,19 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   void _onWeightChanged() {
     _onFieldChanged();
-    _updateGoalBasedOnWeights();
+    if (!_isConvertingUnits) _updateGoalBasedOnWeights();
   }
 
   void _onTargetWeightChanged() {
     _onFieldChanged();
-    _updateGoalBasedOnWeights();
+    if (!_isConvertingUnits) _updateGoalBasedOnWeights();
   }
 
   void _updateGoalBasedOnWeights() {
-    final currentWeight = double.tryParse(_weightController.text);
-    final targetWeight = double.tryParse(_targetWeightController.text);
+    if (_selectedFitnessGoal == 'build_muscle') return;
+
+    final currentWeight = parseLocalizedDouble(_weightController.text);
+    final targetWeight = parseLocalizedDouble(_targetWeightController.text);
 
     if (currentWeight == null || targetWeight == null) return;
 
@@ -135,7 +146,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   void _adjustTargetWeightForGoal(String newGoal) {
-    final currentWeight = double.tryParse(_weightController.text);
+    final locale = Localizations.localeOf(context).toString();
+    final currentWeight = parseLocalizedDouble(_weightController.text);
     if (currentWeight == null) return;
 
     // Convert to metric for calculations if needed
@@ -152,7 +164,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         break;
       case 'lose_weight':
         // If current target is higher than current weight, adjust to 10% lower
-        final currentTarget = double.tryParse(_targetWeightController.text);
+        final currentTarget = parseLocalizedDouble(
+          _targetWeightController.text,
+        );
         if (currentTarget != null) {
           double actualCurrentTarget = currentTarget;
           if (_selectedUnitSystem == 'imperial') {
@@ -169,7 +183,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         break;
       case 'gain_weight':
         // If current target is lower than current weight, adjust to 10% higher
-        final currentTarget = double.tryParse(_targetWeightController.text);
+        final currentTarget = parseLocalizedDouble(
+          _targetWeightController.text,
+        );
         if (currentTarget != null) {
           double actualCurrentTarget = currentTarget;
           if (_selectedUnitSystem == 'imperial') {
@@ -191,7 +207,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       newTargetWeight = newTargetWeight * 2.2046;
     }
 
-    _targetWeightController.text = newTargetWeight.round().toString();
+    _targetWeightController.text = _formatMeasurement(newTargetWeight, locale);
   }
 
   // Health service initialization
@@ -236,8 +252,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           // Create a default profile if none exists
           _originalProfile = UserProfile(
             id: currentUserId,
-            name: 'John Doe',
-            email: 'john.doe@example.com',
+            name: '',
+            email: 'user@platepal.app',
             age: 25,
             gender: 'male',
             height: 175.0,
@@ -264,41 +280,70 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         }
       }
 
+      if (!mounted) return;
       _populateFields(_originalProfile!);
     } catch (e) {
-      _showErrorSnackBar('Failed to load profile data: ${e.toString()}');
+      if (mounted) {
+        _showErrorSnackBar(
+          AppLocalizations.of(
+            context,
+          ).screensSettingsProfileSettingsLoadFailed(e.toString()),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _populateFields(UserProfile profile) {
+    final locale = Localizations.localeOf(context).toString();
+    _preciseHeight = profile.height;
+    _preciseWeight = profile.weight;
+    _preciseTargetWeight =
+        profile.goals.goal == 'maintain_weight'
+            ? profile.weight
+            : profile.goals.targetWeight;
     _nameController.text = profile.name;
     _ageController.text = profile.age.toString();
 
     // Convert height/weight based on unit system
     if (profile.preferredUnit == 'metric') {
-      _heightController.text = profile.height.round().toString();
-      _weightController.text = profile.weight.round().toString();
+      _heightController.text = _formatMeasurement(profile.height, locale);
+      _weightController.text = _formatMeasurement(profile.weight, locale);
       // For maintain_weight goal, set target weight to current weight
       if (profile.goals.goal == 'maintain_weight') {
-        _targetWeightController.text = profile.weight.round().toString();
+        _targetWeightController.text = _formatMeasurement(
+          profile.weight,
+          locale,
+        );
       } else {
-        _targetWeightController.text =
-            profile.goals.targetWeight.round().toString();
+        _targetWeightController.text = _formatMeasurement(
+          profile.goals.targetWeight,
+          locale,
+        );
       }
     } else {
-      _heightController.text = (profile.height / 2.54).round().toString();
-      _weightController.text = (profile.weight * 2.2046).round().toString();
+      _heightController.text = _formatMeasurement(profile.height / 2.54, locale);
+      _weightController.text = _formatMeasurement(
+        profile.weight * 2.2046,
+        locale,
+      );
       // For maintain_weight goal, set target weight to current weight
       if (profile.goals.goal == 'maintain_weight') {
-        _targetWeightController.text =
-            (profile.weight * 2.2046).round().toString();
+        _targetWeightController.text = _formatMeasurement(
+          profile.weight * 2.2046,
+          locale,
+        );
       } else {
-        _targetWeightController.text =
-            (profile.goals.targetWeight * 2.2046).round().toString();
+        _targetWeightController.text = _formatMeasurement(
+          profile.goals.targetWeight * 2.2046,
+          locale,
+        );
       }
     }
+    _displayedHeight = _heightController.text;
+    _displayedWeight = _weightController.text;
+    _displayedTargetWeight = _targetWeightController.text;
 
     // Body fat percentage (optional field) - Try to get the last recorded body fat percentage
     if (_metricsHistory.isNotEmpty &&
@@ -309,12 +354,31 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
 
     setState(() {
-      _selectedGender = profile.gender;
+      final gender = profile.gender.toLowerCase();
+      // The dropdown asserts if its value is not one of its items.
+      _selectedGender =
+          gender == 'male' || gender == 'female' ? gender : 'other';
       _selectedActivityLevel = profile.activityLevel;
       _selectedFitnessGoal = profile.goals.goal;
       _selectedUnitSystem = profile.preferredUnit;
       _hasUnsavedChanges = false;
     });
+  }
+
+  String _formatMeasurement(double value, String locale) =>
+      formatDecimal(value, locale).replaceFirst(RegExp(r'[.,]0$'), '');
+
+  double? _metricMeasurement(
+    TextEditingController controller,
+    String displayed,
+    double preciseValue,
+    bool isMetric,
+    double metricMultiplier,
+  ) {
+    if (controller.text == displayed) return preciseValue;
+    final value = parseLocalizedDouble(controller.text);
+    if (value == null) return null;
+    return isMetric ? value : value * metricMultiplier;
   }
 
   // Add field to store metrics history
@@ -327,42 +391,59 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
     try {
       // Convert units back to metric for storage
-      double height = double.parse(_heightController.text);
-      double weight = double.parse(_weightController.text);
-      double targetWeight = double.parse(_targetWeightController.text);
-
-      // Store previous weight and height for history tracking
-      final double? previousWeight = _originalProfile?.weight;
-      final double? previousHeight = _originalProfile?.height;
-
-      if (_selectedUnitSystem == 'imperial') {
-        height = height * 2.54; // inches to cm
-        weight = weight / 2.2046; // lbs to kg
-        targetWeight = targetWeight / 2.2046;
-      }
+      final isMetric = _selectedUnitSystem == 'metric';
+      final height =
+          _metricMeasurement(
+            _heightController,
+            _displayedHeight,
+            _preciseHeight,
+            isMetric,
+            2.54,
+          )!;
+      final weight =
+          _metricMeasurement(
+            _weightController,
+            _displayedWeight,
+            _preciseWeight,
+            isMetric,
+            1 / 2.2046,
+          )!;
+      final targetWeight =
+          _metricMeasurement(
+            _targetWeightController,
+            _displayedTargetWeight,
+            _preciseTargetWeight,
+            isMetric,
+            1 / 2.2046,
+          )!;
 
       // Calculate nutrition targets
       final age = int.parse(_ageController.text);
-      final bmr = _calculateBMR(weight, height, age, _selectedGender);
-      final tdee = _calculateTDEE(bmr, _selectedActivityLevel);
-      final dailyCalories = _calculateCaloriesForGoal(
-        tdee,
-        _selectedFitnessGoal,
+      final bmr = mifflinStJeorBmr(
+        weightKg: weight,
+        heightCm: height,
+        age: age,
+        gender: _selectedGender,
       );
-      final macros = _calculateMacroTargets(
-        dailyCalories,
-        weight,
-        _selectedFitnessGoal,
-      ); // Use a constant email instead of getting from form
+      final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
+      final dailyCalories = calorieTargetForGoal(tdee, _selectedFitnessGoal);
       const defaultEmail = "user@platepal.app";
 
       // Get current user ID from session service
+      final profileService = context.userProfileService;
       final prefs = await SharedPreferences.getInstance();
       final userSessionService = UserSessionService(prefs);
       final currentUserId = userSessionService.getCurrentUserId();
+      final profileId = _originalProfile?.id ?? currentUserId;
+
+      // Macro customization may have changed the split since this screen loaded.
+      final savedGoals =
+          (await profileService.getUserProfile(profileId))?.goals ??
+          _originalProfile?.goals;
+      final macros = macroTargetsFor(dailyCalories, previous: savedGoals);
 
       final updatedProfile = UserProfile(
-        id: _originalProfile?.id ?? currentUserId,
+        id: profileId,
         name: _nameController.text.trim(),
         email: defaultEmail, // Use default email
         age: age,
@@ -374,10 +455,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           goal: _selectedFitnessGoal,
           targetWeight: targetWeight,
           targetCalories: dailyCalories,
-          targetProtein: macros['protein']!,
-          targetCarbs: macros['carbs']!,
-          targetFat: macros['fat']!,
-          targetFiber: macros['fiber']!,
+          targetProtein: macros.protein,
+          targetCarbs: macros.carbs,
+          targetFat: macros.fat,
+          targetFiber: macros.fiber,
         ),
         preferences:
             _originalProfile?.preferences ?? const DietaryPreferences(),
@@ -385,29 +466,18 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         createdAt: _originalProfile?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      if (!mounted) return;
-      // Save profile to SQLite database
-      await context.userProfileService.saveUserProfile(updatedProfile);
-
-      // Always update metrics if body fat was entered, otherwise only update if weight or height changed
       final bodyFat =
           _bodyFatController.text.isNotEmpty
-              ? double.tryParse(_bodyFatController.text)
+              ? parseLocalizedDouble(_bodyFatController.text)
               : null;
 
-      final bool weightChanged =
-          previousWeight != null && (weight - previousWeight).abs() > 0.1;
-      final bool heightChanged =
-          previousHeight != null && (height - previousHeight).abs() > 0.1;
-
-      if ((weightChanged || heightChanged || bodyFat != null) && mounted) {
-        await context.userProfileService.updateUserMetrics(
-          userId: updatedProfile.id,
-          weight: weight,
-          height: height,
-          bodyFat: bodyFat,
-        );
-      }
+      if (!mounted) return;
+      // Also records a metrics history row if weight/height/body fat changed.
+      await context.userProfileService.saveUserProfile(
+        updatedProfile,
+        bodyFat: bodyFat,
+      );
+      if (!mounted) return;
 
       // Update the original profile reference
       _originalProfile = updatedProfile;
@@ -425,9 +495,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to update profile: ${e.toString()}');
+      if (mounted) {
+        _showErrorSnackBar(
+          AppLocalizations.of(
+            context,
+          ).screensSettingsProfileSettingsUpdateFailed(e.toString()),
+        );
+      }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -439,7 +515,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
   }
 
-  Future<bool> _showUnsavedChangesDialog() async {
+  Future<void> _showUnsavedChangesDialog() async {
     final l10n = AppLocalizations.of(context);
     final result = await showDialog<bool>(
       context: context,
@@ -466,60 +542,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             ],
           ),
     );
-    return result ?? false;
-  }
-
-  // Calculation methods (simplified versions)
-  double _calculateBMR(double weight, double height, int age, String gender) {
-    if (gender == 'male') {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+    if (result == false && mounted) {
+      setState(() => _hasUnsavedChanges = false);
+      Navigator.of(context).pop();
     }
-  }
-
-  double _calculateTDEE(double bmr, String activityLevel) {
-    final multipliers = {
-      'sedentary': 1.2,
-      'lightly_active': 1.375,
-      'moderately_active': 1.55,
-      'very_active': 1.725,
-      'extra_active': 1.9,
-    };
-    return bmr * (multipliers[activityLevel] ?? 1.55);
-  }
-
-  double _calculateCaloriesForGoal(double tdee, String goal) {
-    switch (goal) {
-      case 'lose_weight':
-        return tdee - 500; // 500 calorie deficit
-      case 'gain_weight':
-        return tdee + 300; // 300 calorie surplus
-      case 'build_muscle':
-        return tdee + 200; // 200 calorie surplus
-      default:
-        return tdee; // maintain weight
-    }
-  }
-
-  Map<String, double> _calculateMacroTargets(
-    double calories,
-    double weight,
-    String goal,
-  ) {
-    // High protein diet: 40% protein, 30% carbs, 30% fat
-    // This helps preserve muscle mass during weight loss and supports muscle building
-
-    double protein =
-        (calories * 0.40) / 4; // 40% of calories from protein (4 cal/g)
-    double carbs =
-        (calories * 0.30) / 4; // 30% of calories from carbs (4 cal/g)
-    double fat = (calories * 0.30) / 9; // 30% of calories from fat (9 cal/g)
-
-    // Calculate fiber target based on calories (14g per 1000 calories)
-    double fiber = (calories / 1000) * 14;
-
-    return {'protein': protein, 'carbs': carbs, 'fat': fat, 'fiber': fiber};
   }
 
   Future<void> _navigateToMacroCustomization() async {
@@ -557,9 +583,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     if (value == null || value.trim().isEmpty) {
       return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
-    final height = double.tryParse(value.trim());
+    final height = parseLocalizedDouble(value);
     if (height == null) {
-      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+      return l10n.screensSettingsProfileSettingsValidNumber;
     }
 
     if (_selectedUnitSystem == 'metric') {
@@ -568,7 +594,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       }
     } else {
       if (height < 39 || height > 98) {
-        return 'Height must be between 39-98 inches';
+        return l10n.screensSettingsProfileSettingsImperialHeightRange;
       }
     }
     return null;
@@ -579,9 +605,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     if (value == null || value.trim().isEmpty) {
       return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
     }
-    final weight = double.tryParse(value.trim());
+    final weight = parseLocalizedDouble(value);
     if (weight == null) {
-      return l10n.componentsChatBotProfileCustomizationDialogRequiredField;
+      return l10n.screensSettingsProfileSettingsValidNumber;
     }
 
     if (_selectedUnitSystem == 'metric') {
@@ -590,22 +616,23 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       }
     } else {
       if (weight < 66 || weight > 660) {
-        return 'Weight must be between 66-660 lbs';
+        return l10n.screensSettingsProfileSettingsImperialWeightRange;
       }
     }
     return null;
   }
 
   String? _validateBodyFat(String? value) {
+    final l10n = AppLocalizations.of(context);
     if (value == null || value.trim().isEmpty) {
       return null; // Optional field
     }
-    final bodyFat = double.tryParse(value.trim());
+    final bodyFat = parseLocalizedDouble(value);
     if (bodyFat == null) {
-      return 'Please enter a valid number';
+      return l10n.screensSettingsProfileSettingsValidNumber;
     }
     if (bodyFat < 3 || bodyFat > 50) {
-      return 'Body fat must be between 3-50%';
+      return l10n.screensSettingsProfileSettingsBodyFatRange;
     }
     return null;
   }
@@ -716,7 +743,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             const SizedBox(height: 24),
 
             // Physical Stats Section
-            _buildSectionHeader('Physical Stats'),
+            _buildSectionHeader(
+              l10n.screensSettingsProfileSettingsPhysicalStats,
+            ),
             _buildPhysicalStatsCard(l10n),
             const SizedBox(height: 24),
 
@@ -777,52 +806,45 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             _buildTextField(
               controller: _nameController,
               label: l10n.screensSettingsImportProfileCompletionName,
+              hint: l10n.screensSettingsProfileSettingsNameHint,
               icon: Icons.person,
               validator: (value) => _validateRequired(value, 'Name'),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildTextField(
-                    controller: _ageController,
-                    label: l10n.screensSettingsImportProfileCompletionAge,
-                    icon: Icons.cake,
-                    keyboardType: TextInputType.number,
-                    validator: _validateAge,
+            _buildTextField(
+              controller: _ageController,
+              label: l10n.screensSettingsImportProfileCompletionAge,
+              icon: Icons.cake,
+              keyboardType: TextInputType.number,
+              validator: _validateAge,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown<String>(
+              value: _selectedGender,
+              label: l10n.screensSettingsImportProfileCompletionGender,
+              icon: Icons.person_outline,
+              items: [
+                DropdownMenuItem(
+                  value: 'male',
+                  child: Text(l10n.screensSettingsImportProfileCompletionMale),
+                ),
+                DropdownMenuItem(
+                  value: 'female',
+                  child: Text(
+                    l10n.screensSettingsImportProfileCompletionFemale,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 3,
-                  child: _buildDropdown<String>(
-                    value: _selectedGender,
-                    label: l10n.screensSettingsImportProfileCompletionGender,
-                    icon: Icons.person_outline,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'male',
-                        child: Text(
-                          l10n.screensSettingsImportProfileCompletionMale,
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'female',
-                        child: Text(
-                          l10n.screensSettingsImportProfileCompletionFemale,
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedGender = value!;
-                        _onFieldChanged();
-                      });
-                    },
-                  ),
+                DropdownMenuItem(
+                  value: 'other',
+                  child: Text(l10n.screensSettingsImportProfileCompletionOther),
                 ),
               ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedGender = value!;
+                  _onFieldChanged();
+                });
+              },
             ),
           ],
         ),
@@ -837,66 +859,51 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: _heightController,
-                    label:
-                        '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
-                    icon: Icons.height,
-                    keyboardType: TextInputType.number,
-                    validator: _validateHeight,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    controller: _weightController,
-                    label:
-                        '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
-                    icon: Icons.monitor_weight,
-                    keyboardType: TextInputType.number,
-                    validator: _validateWeight,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              controller: _heightController,
+              label:
+                  '${l10n.screensSettingsImportProfileCompletionHeight} (${isMetric ? 'cm' : 'in'})',
+              icon: Icons.height,
+              keyboardType: TextInputType.number,
+              validator: _validateHeight,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: _bodyFatController,
-                    label: 'Body Fat % (optional)',
-                    icon: Icons.fitness_center,
-                    keyboardType: TextInputType.number,
-                    validator: _validateBodyFat,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown<String>(
-                    value: _selectedActivityLevel,
-                    label:
-                        l10n.screensSettingsImportProfileCompletionActivityLevel,
-                    icon: Icons.directions_run,
-                    items:
-                        _activityLevels.keys.map((level) {
-                          return DropdownMenuItem(
-                            value: level,
-                            child: Text(_getActivityLevelText(level, l10n)),
-                          );
-                        }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedActivityLevel = value!;
-                        _onFieldChanged();
-                      });
-                    },
-                  ),
-                ),
-              ],
+            _buildTextField(
+              controller: _weightController,
+              label:
+                  '${l10n.screensSettingsImportProfileCompletionWeight} (${isMetric ? 'kg' : 'lbs'})',
+              icon: Icons.monitor_weight,
+              keyboardType: TextInputType.number,
+              validator: _validateWeight,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _bodyFatController,
+              label: '${l10n.screensSettingsStatisticsBodyFat} (%)',
+              helper: l10n.screensSettingsProfileSettingsOptional,
+              icon: Icons.fitness_center,
+              keyboardType: TextInputType.number,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              validator: _validateBodyFat,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown<String>(
+              value: _selectedActivityLevel,
+              label: l10n.screensSettingsImportProfileCompletionActivityLevel,
+              icon: Icons.directions_run,
+              items:
+                  _activityLevels.keys.map((level) {
+                    return DropdownMenuItem(
+                      value: level,
+                      child: Text(_getActivityLevelText(level, l10n)),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedActivityLevel = value!;
+                  _onFieldChanged();
+                });
+              },
             ),
           ],
         ),
@@ -946,7 +953,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               child: OutlinedButton.icon(
                 onPressed: () => _navigateToMacroCustomization(),
                 icon: const Icon(Icons.tune),
-                label: Text('Customize Macro Ratios'),
+                label: Text(
+                  l10n.screensSettingsProfileSettingsCustomizeMacroRatios,
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -1105,21 +1114,37 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   Widget _buildCurrentStatsCard(AppLocalizations l10n) {
     if (_originalProfile == null) return const SizedBox.shrink();
 
+    final locale = Localizations.localeOf(context).toString();
     // Calculate current values for display
+    final isMetric = _selectedUnitSystem == 'metric';
     final height =
-        double.tryParse(_heightController.text) ?? _originalProfile!.height;
+        _metricMeasurement(
+          _heightController,
+          _displayedHeight,
+          _preciseHeight,
+          isMetric,
+          2.54,
+        ) ??
+        _originalProfile!.height;
     final weight =
-        double.tryParse(_weightController.text) ?? _originalProfile!.weight;
+        _metricMeasurement(
+          _weightController,
+          _displayedWeight,
+          _preciseWeight,
+          isMetric,
+          1 / 2.2046,
+        ) ??
+        _originalProfile!.weight;
     final age = int.tryParse(_ageController.text) ?? _originalProfile!.age;
 
-    // Convert for calculations if needed
-    final actualHeight =
-        _selectedUnitSystem == 'metric' ? height : height * 2.54;
-    final actualWeight =
-        _selectedUnitSystem == 'metric' ? weight : weight / 2.2046;
-    final bmi = actualWeight / ((actualHeight / 100) * (actualHeight / 100));
-    final bmr = _calculateBMR(actualWeight, actualHeight, age, _selectedGender);
-    final tdee = _calculateTDEE(bmr, _selectedActivityLevel);
+    final bmi = weight / ((height / 100) * (height / 100));
+    final bmr = mifflinStJeorBmr(
+      weightKg: weight,
+      heightCm: height,
+      age: age,
+      gender: _selectedGender,
+    );
+    final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
 
     return Card(
       color: Theme.of(
@@ -1132,20 +1157,26 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatColumn(
-                  l10n.screensSettingsProfileSettingsBmi,
-                  bmi.toStringAsFixed(1),
-                  _getBMICategory(bmi),
+                Expanded(
+                  child: _buildStatColumn(
+                    l10n.screensSettingsProfileSettingsBmi,
+                    formatDecimal(bmi, locale),
+                    _getBMICategory(bmi, l10n),
+                  ),
                 ),
-                _buildStatColumn(
-                  'BMR',
-                  '${bmr.round()} cal',
-                  'Base Metabolic Rate',
+                Expanded(
+                  child: _buildStatColumn(
+                    'BMR',
+                    '${bmr.round()} cal',
+                    l10n.screensSettingsProfileSettingsBaseMetabolicRate,
+                  ),
                 ),
-                _buildStatColumn(
-                  'TDEE',
-                  '${tdee.round()} cal',
-                  'Total Daily Energy',
+                Expanded(
+                  child: _buildStatColumn(
+                    'TDEE',
+                    '${tdee.round()} cal',
+                    l10n.screensSettingsProfileSettingsTotalDailyEnergy,
+                  ),
                 ),
               ],
             ),
@@ -1158,15 +1189,25 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
+    String? hint,
+    String? helper,
     required IconData icon,
     TextInputType? keyboardType,
+    FloatingLabelBehavior? floatingLabelBehavior,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
+        hintText: hint,
+        helperText: helper,
         prefixIcon: Icon(icon),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 48,
+        ),
+        floatingLabelBehavior: floatingLabelBehavior,
         border: const OutlineInputBorder(),
       ),
       keyboardType: keyboardType,
@@ -1186,6 +1227,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 48,
+        ),
         border: const OutlineInputBorder(),
       ),
       items: items,
@@ -1249,50 +1294,66 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     }
   }
 
-  String _getBMICategory(double bmi) {
-    if (bmi < 18.5) return 'Underweight';
-    if (bmi < 25) return 'Normal';
-    if (bmi < 30) return 'Overweight';
-    return 'Obese';
+  String _getBMICategory(double bmi, AppLocalizations l10n) {
+    if (bmi < 18.5) return l10n.screensSettingsStatisticsBmiUnderweight;
+    if (bmi < 25) return l10n.screensSettingsStatisticsBmiNormal;
+    if (bmi < 30) return l10n.screensSettingsStatisticsBmiOverweight;
+    return l10n.screensSettingsStatisticsBmiObese;
   }
 
   void _convertUnitsForDisplay() {
-    try {
-      if (_originalProfile == null) return;
+    if (_originalProfile == null) return;
 
-      // Convert height and weight based on new unit system
-      final height = double.tryParse(_heightController.text);
-      final weight = double.tryParse(_weightController.text);
-      final targetWeight = double.tryParse(_targetWeightController.text);
+    final locale = Localizations.localeOf(context).toString();
+    final wasMetric = _selectedUnitSystem == 'imperial';
+    final height = _metricMeasurement(
+      _heightController,
+      _displayedHeight,
+      _preciseHeight,
+      wasMetric,
+      2.54,
+    );
+    final weight = _metricMeasurement(
+      _weightController,
+      _displayedWeight,
+      _preciseWeight,
+      wasMetric,
+      1 / 2.2046,
+    );
+    final targetWeight = _metricMeasurement(
+      _targetWeightController,
+      _displayedTargetWeight,
+      _preciseTargetWeight,
+      wasMetric,
+      1 / 2.2046,
+    );
 
-      if (_selectedUnitSystem == 'imperial') {
-        // Convert from metric to imperial
-        if (height != null) {
-          _heightController.text = (height / 2.54).round().toString();
-        }
-        if (weight != null) {
-          _weightController.text = (weight * 2.2046).round().toString();
-        }
-        if (targetWeight != null) {
-          _targetWeightController.text =
-              (targetWeight * 2.2046).round().toString();
-        }
-      } else {
-        // Convert from imperial to metric
-        if (height != null) {
-          _heightController.text = (height * 2.54).round().toString();
-        }
-        if (weight != null) {
-          _weightController.text = (weight / 2.2046).round().toString();
-        }
-        if (targetWeight != null) {
-          _targetWeightController.text =
-              (targetWeight / 2.2046).round().toString();
-        }
-      }
-    } catch (e) {
-      // Handle conversion errors gracefully
+    _isConvertingUnits = true;
+    if (height != null) {
+      _preciseHeight = height;
+      _heightController.text = _formatMeasurement(
+        wasMetric ? height / 2.54 : height,
+        locale,
+      );
+      _displayedHeight = _heightController.text;
     }
+    if (weight != null) {
+      _preciseWeight = weight;
+      _weightController.text = _formatMeasurement(
+        wasMetric ? weight * 2.2046 : weight,
+        locale,
+      );
+      _displayedWeight = _weightController.text;
+    }
+    if (targetWeight != null) {
+      _preciseTargetWeight = targetWeight;
+      _targetWeightController.text = _formatMeasurement(
+        wasMetric ? targetWeight * 2.2046 : targetWeight,
+        locale,
+      );
+      _displayedTargetWeight = _targetWeightController.text;
+    }
+    _isConvertingUnits = false;
   }
 
   Widget _buildDangerZoneCard(AppLocalizations l10n) {
@@ -1408,12 +1469,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         context: context,
         barrierDismissible: false,
         builder:
-            (context) => const AlertDialog(
+            (context) => AlertDialog(
               content: Row(
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 16),
-                  Text('Resetting application data...'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(width: 16),
+                  Text(l10n.screensSettingsProfileSettingsResettingAppData),
                 ],
               ),
             ),
@@ -1444,11 +1505,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
       // Show error message
       if (mounted) {
+        debugPrint('ProfileSettingsScreen: Reset failed (${e.runtimeType})');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${l10n.screensSettingsProfileSettingsResetAppError}: $e',
-            ),
+            content: Text(l10n.screensSettingsProfileSettingsResetAppError),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),

@@ -1,7 +1,29 @@
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:platepal_tracker/l10n/app_localizations.dart';
+
 import '../models/product.dart';
 import '../models/dish.dart';
 
 class ProductToIngredientConverter {
+  static String _unknownProductName() {
+    final languageCode =
+        intl.Intl.getCurrentLocale().split(RegExp(r'[-_]')).first;
+    final locale =
+        AppLocalizations.supportedLocales.any(
+              (supported) => supported.languageCode == languageCode,
+            )
+            ? Locale(languageCode)
+            : const Locale('en');
+    return lookupAppLocalizations(
+      locale,
+    ).componentsScannerProductSearchUnknownProduct;
+  }
+
+  /// Represent a local dish as one selectable serving.
+  static Product productFromDish(Dish dish) =>
+      Product(name: dish.name, servingNutrition: dish.nutrition);
+
   /// Convert a Product from Open Food Facts to an Ingredient
   static Ingredient convertProductToIngredient(
     Product product, {
@@ -13,11 +35,11 @@ class ProductToIngredientConverter {
         'ingredient_${DateTime.now().millisecondsSinceEpoch}_${product.barcode ?? product.name?.hashCode}';
 
     // Use product name, fallback to brand if no name
-    final name = product.name ?? product.brand ?? 'Unknown Product';
+    final name = product.name ?? product.brand ?? _unknownProductName();
 
     // Convert product nutrition to ingredient nutrition
-    NutritionInfo? nutrition;
-    if (product.hasNutrition) {
+    NutritionInfo? nutrition = product.servingNutrition;
+    if (nutrition == null && product.hasNutrition) {
       final productNutrition = product.nutrition!;
       nutrition = NutritionInfo(
         calories: productNutrition.calories,
@@ -33,8 +55,8 @@ class ProductToIngredientConverter {
     return Ingredient(
       id: id,
       name: name,
-      amount: amount,
-      unit: unit,
+      amount: product.servingNutrition == null ? amount : 1,
+      unit: product.servingNutrition == null ? unit : 'piece',
       nutrition: nutrition,
       barcode: product.barcode,
     );
@@ -48,7 +70,7 @@ class ProductToIngredientConverter {
   }) {
     final id =
         'ingredient_${DateTime.now().millisecondsSinceEpoch}_${product.barcode ?? product.name?.hashCode}';
-    final name = product.name ?? product.brand ?? 'Unknown Product';
+    final name = product.name ?? product.brand ?? _unknownProductName();
 
     // If product has no nutrition, create ingredient without nutrition
     // User can manually add nutrition values later

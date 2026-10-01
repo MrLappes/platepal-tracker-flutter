@@ -110,10 +110,40 @@ class UserProfileService {
   }
 
   // Save or update user profile
-  Future<UserProfile> saveUserProfile(UserProfile userProfile) async {
+  //
+  // A metrics history row is added only when weight, height or [bodyFat]
+  // differ from the stored values (or on the first save).
+  Future<UserProfile> saveUserProfile(
+    UserProfile userProfile, {
+    double? bodyFat,
+  }) async {
     final db = await _databaseService.database;
 
     await db.transaction((txn) async {
+      final previous = await txn.query(
+        'user_profiles',
+        columns: ['weight', 'height'],
+        where: 'id = ?',
+        whereArgs: [userProfile.id],
+      );
+      var measurementsChanged =
+          previous.isEmpty ||
+          _differs(previous.first['weight'], userProfile.weight) ||
+          _differs(previous.first['height'], userProfile.height);
+      if (!measurementsChanged && bodyFat != null) {
+        final lastBodyFat = await txn.query(
+          'user_metrics_history',
+          columns: ['body_fat'],
+          where: 'user_id = ? AND body_fat IS NOT NULL',
+          whereArgs: [userProfile.id],
+          orderBy: 'recorded_date DESC, id DESC',
+          limit: 1,
+        );
+        measurementsChanged =
+            lastBodyFat.isEmpty ||
+            _differs(lastBodyFat.first['body_fat'], bodyFat);
+      }
+
       // Save user profile
       await txn.insert('user_profiles', {
         'id': userProfile.id,
@@ -129,13 +159,17 @@ class UserProfileService {
         'updated_at': userProfile.updatedAt.toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-      // Add to metrics history
-      await txn.insert('user_metrics_history', {
-        'user_id': userProfile.id,
-        'weight': userProfile.weight,
-        'height': userProfile.height,
-        'recorded_date': DateTime.now().toIso8601String(),
-      }); // Save fitness goals
+      if (measurementsChanged) {
+        await txn.insert('user_metrics_history', {
+          'user_id': userProfile.id,
+          'weight': userProfile.weight,
+          'height': userProfile.height,
+          'body_fat': bodyFat,
+          'recorded_date': DateTime.now().toIso8601String(),
+        });
+      }
+
+      // Save fitness goals
       await txn.insert('fitness_goals', {
         'user_id': userProfile.id,
         'goal': userProfile.goals.goal,
@@ -324,6 +358,18 @@ class UserProfileService {
 
       // Delete user profile
       await txn.delete('user_profiles', where: 'id = ?', whereArgs: [userId]);
+
+      // The dish_logs ledger has no user column; it belongs to the sole
+      // profile, so it goes with the last one.
+      final remaining = Sqflite.firstIntValue(
+        await txn.rawQuery('SELECT COUNT(*) FROM user_profiles'),
+      );
+      if (remaining == 0) {
+        await txn.delete('dish_logs');
+      }
     });
   }
+
+  static bool _differs(Object? stored, double value) =>
+      stored is! num || (stored - value).abs() > 0.01;
 }

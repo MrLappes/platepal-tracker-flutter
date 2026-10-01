@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import '../../services/health_service.dart';
 import '../../services/calorie_expenditure_service.dart';
+import '../../utils/number_parsing.dart';
 
 class HealthSettingsScreen extends StatefulWidget {
   const HealthSettingsScreen({super.key});
@@ -19,6 +20,10 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
       CalorieExpenditureService();
 
   bool _isHealthAvailable = false;
+  // Health Connect missing/outdated: connecting offers the install instead.
+  bool _canInstallHealth = false;
+  bool _isCheckingAvailability = true;
+  bool _availabilityCheckFailed = false;
   bool _isSyncing = false;
   bool _writeMealsEnabled = true;
   double? _todaysBurnedCalories;
@@ -39,41 +44,74 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   }
 
   Future<void> _initialize() async {
-    await _healthService.loadConnectionStatus();
-    final available = await _healthService.isHealthDataAvailable();
-    final prefs = await SharedPreferences.getInstance();
-    final writeMeals = prefs.getBool('health_write_meals_enabled') ?? true;
-
-    // Subscribe to connection status changes
-    _healthConnectionSubscription = _healthService.connectionStatusStream
-        .listen((isConnected) {
-          if (mounted) {
-            setState(() {});
-            if (isConnected) _loadHealthData();
-          }
-        });
-
     setState(() {
-      _isHealthAvailable = available;
-      _writeMealsEnabled = writeMeals;
+      _isCheckingAvailability = true;
+      _availabilityCheckFailed = false;
     });
+    try {
+      await _healthService.loadConnectionStatus();
+      final availability = await _healthService.getHealthAvailability();
+      final prefs = await SharedPreferences.getInstance();
+      final writeMeals = prefs.getBool('health_write_meals_enabled') ?? true;
+      if (!mounted) return;
 
-    if (_healthService.isConnected) {
-      await _loadHealthData();
+      _healthConnectionSubscription = _healthService.connectionStatusStream
+          .listen((isConnected) {
+            if (mounted) {
+              setState(() {});
+              if (isConnected) _loadHealthData();
+            }
+          });
+
+      setState(() {
+        _isHealthAvailable = availability == HealthAvailability.available;
+        _canInstallHealth =
+            availability == HealthAvailability.needsInstall ||
+            availability == HealthAvailability.needsUpdate;
+        _writeMealsEnabled = writeMeals;
+        _isCheckingAvailability = false;
+      });
+
+      if (_healthService.isConnected) await _loadHealthData();
+    } catch (error) {
+      debugPrint('Failed to check health availability: ${error.runtimeType}');
+      if (mounted) setState(() => _availabilityCheckFailed = true);
+    } finally {
+      if (mounted) setState(() => _isCheckingAvailability = false);
     }
   }
 
   Future<void> _loadHealthData() async {
     try {
-      final storedData = await _healthService.getStoredCaloriesBurnedData();
-      final todayKey = DateTime.now().toIso8601String().split('T')[0];
-      final todayCalories = storedData[todayKey];
+      final storedData = await _healthService.getStoredEnergyBurned();
+      final today = storedData[HealthService.dayKey(DateTime.now())];
+      final todayCalories =
+          today == null
+              ? null
+              : await _calorieExpenditureService.resolveExpenditure(today);
+      if (!mounted) return;
 
       setState(() {
-        _todaysBurnedCalories = todayCalories;
+        _todaysBurnedCalories = todayCalories?.$1;
         _cachedDaysCount = storedData.length;
       });
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('Failed to load health data: ${error.runtimeType}');
+      if (!mounted) return;
+      _showErrorSnackBar(
+        AppLocalizations.of(context).screensSettingsHealthSettingsLoadDataFailed,
+      );
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
   }
 
   Future<void> _connectToHealth() async {
@@ -98,6 +136,21 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
         await _syncHealthData();
       } else {
         switch (result.error) {
+          case HealthConnectionError.healthConnectNotInstalled:
+            _showErrorDialog(
+              AppLocalizations.of(
+                context,
+              ).screensSettingsProfileSettingsHealthNotAvailable,
+              AppLocalizations.of(
+                context,
+              ).screensSettingsProfileSettingsHealthNotAvailableMessage,
+              actionLabel:
+                  AppLocalizations.of(
+                    context,
+                  ).screensSettingsHealthSettingsOpenHealthConnect,
+              onAction: _healthService.installHealthConnect,
+            );
+            break;
           case HealthConnectionError.platformNotSupported:
             _showErrorDialog(
               AppLocalizations.of(
@@ -173,6 +226,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
 
     if (confirmed == true) {
       await _healthService.disconnectFromHealth();
+      if (!mounted) return;
       setState(() {
         _todaysBurnedCalories = null;
         _cachedDaysCount = 0;
@@ -186,7 +240,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
     setState(() => _isSyncing = true);
 
     try {
-      await _healthService.refreshCaloriesBurnedCache();
+      final synced = await _healthService.refreshCaloriesBurnedCache();
+      if (synced == null) throw StateError('Health read failed');
       await _loadHealthData();
 
       if (mounted) {
@@ -222,6 +277,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   Future<void> _toggleWriteMeals(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('health_write_meals_enabled', value);
+    if (!mounted) return;
     setState(() => _writeMealsEnabled = value);
   }
 
@@ -257,6 +313,22 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
     CalorieTargetAnalysis analysis,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final analysisMessage = switch (analysis.status) {
+      CalorieTargetStatus.profileNotFound =>
+        l10n.screensSettingsHealthSettingsAnalysisProfileNotFound,
+      CalorieTargetStatus.noExpenditureData =>
+        l10n.screensSettingsHealthSettingsAnalysisNoData,
+      CalorieTargetStatus.increaseIntake =>
+        l10n.screensSettingsHealthSettingsAnalysisIncreaseIntake,
+      CalorieTargetStatus.decreaseIntake =>
+        l10n.screensSettingsHealthSettingsAnalysisDecreaseIntake,
+      CalorieTargetStatus.onTarget =>
+        l10n.screensSettingsHealthSettingsAnalysisOnTarget,
+      CalorieTargetStatus.error => l10n.screensSettingsHealthSettingsAnalysisError(
+        analysis.errorDetails ?? '',
+      ),
+    };
 
     return showDialog(
       context: context,
@@ -283,16 +355,16 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                 children: [
                   _buildAnalysisRow(
                     l10n.screensSettingsHealthSettingsCurrentTarget,
-                    '${analysis.currentTarget.toStringAsFixed(0)} kcal',
+                    '${formatDecimal(analysis.currentTarget, locale, fractionDigits: 0)} kcal',
                   ),
                   _buildAnalysisRow(
                     l10n.screensSettingsHealthSettingsAvgExpenditure,
-                    '${analysis.averageExpenditure.toStringAsFixed(0)} kcal',
+                    '${formatDecimal(analysis.averageExpenditure, locale, fractionDigits: 0)} kcal',
                   ),
                   if (analysis.needsAdjustment)
                     _buildAnalysisRow(
                       l10n.screensSettingsHealthSettingsSuggestedTarget,
-                      '${analysis.suggestedTarget.toStringAsFixed(0)} kcal',
+                      '${formatDecimal(analysis.suggestedTarget, locale, fractionDigits: 0)} kcal',
                       isHighlighted: true,
                     ),
                   if (analysis.daysAnalyzed > 0)
@@ -302,7 +374,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                     ),
                   const SizedBox(height: 12),
                   Text(
-                    analysis.analysisMessage,
+                    analysisMessage,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -331,6 +403,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
       newTarget,
     );
     if (mounted) {
+      final locale = Localizations.localeOf(context).toString();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -338,7 +411,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                 ? AppLocalizations.of(
                   context,
                 ).screensSettingsHealthSettingsCalorieTargetUpdated(
-                  newTarget.toStringAsFixed(0),
+                  formatDecimal(newTarget, locale, fractionDigits: 0),
                 )
                 : AppLocalizations.of(
                   context,
@@ -376,18 +449,33 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   }
 
   Future<void> _openHealthSettings() async {
+    var opened = false;
     try {
       // Try to open Health Connect settings on Android
       final uri = Uri.parse(
         'market://details?id=com.google.android.apps.healthdata',
       );
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('Failed to open Health Connect: ${error.runtimeType}');
+    }
+    if (!opened && mounted) {
+      _showErrorSnackBar(
+        AppLocalizations.of(
+          context,
+        ).screensSettingsHealthSettingsOpenSettingsFailed,
+      );
+    }
   }
 
-  void _showErrorDialog(String title, String message) {
+  void _showErrorDialog(
+    String title,
+    String message, {
+    String? actionLabel,
+    Future<void> Function()? onAction,
+  }) {
     showDialog(
       context: context,
       builder:
@@ -399,6 +487,14 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(AppLocalizations.of(context).componentsCommonOk),
               ),
+              if (actionLabel != null && onAction != null)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    onAction();
+                  },
+                  child: Text(actionLabel),
+                ),
             ],
           ),
     );
@@ -415,7 +511,29 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
           AppLocalizations.of(context).screensSettingsHealthSettingsTitle,
         ),
       ),
-      body: ListView(
+      body: _isCheckingAvailability
+          ? const Center(child: CircularProgressIndicator())
+          : _availabilityCheckFailed
+          ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppLocalizations.of(context).providersStorageError),
+                  TextButton(
+                    onPressed: _initialize,
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).componentsSharedErrorDisplayRetry,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Connection status card
@@ -534,7 +652,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                       )
                       : ElevatedButton.icon(
                         onPressed:
-                            _isSyncing || !_isHealthAvailable
+                            _isSyncing ||
+                                    !(_isHealthAvailable || _canInstallHealth)
                                 ? null
                                 : _connectToHealth,
                         icon:
@@ -558,7 +677,9 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                         ),
                       ),
             ),
-            if (!_isHealthAvailable && !_healthService.isConnected) ...[
+            if (!_isHealthAvailable &&
+                !_canInstallHealth &&
+                !_healthService.isConnected) ...[
               const SizedBox(height: 8),
               Text(
                 AppLocalizations.of(
@@ -576,6 +697,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
   }
 
   Widget _buildDataOverviewCard(ThemeData theme, ColorScheme colorScheme) {
+    final locale = Localizations.localeOf(context).toString();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -632,7 +754,7 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                       ),
                       Text(
                         _todaysBurnedCalories != null
-                            ? '${_todaysBurnedCalories!.toStringAsFixed(0)} kcal'
+                            ? '${formatDecimal(_todaysBurnedCalories!, locale, fractionDigits: 0)} kcal'
                             : AppLocalizations.of(
                               context,
                             ).screensSettingsHealthSettingsNoDataYet,

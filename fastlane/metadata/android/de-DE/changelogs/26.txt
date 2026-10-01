@@ -1,0 +1,4 @@
+- Mahlzeiten direkt aus dem Kalendertagebuch erfassen.
+- Produktsuche, Nährwertberechnung für Gerichte, Profilziele sowie Gewichts- und Kalorienstatistik verbessert.
+- Datenimport mit Bestätigung, Backups und Wiederherstellung abgesichert; API-Schlüssel werden sicher gespeichert.
+- Berechnung verbrannter Kalorien in Health Connect und Apple Health korrigiert, Übersetzungen und Barrierefreiheit verbessert.

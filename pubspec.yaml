@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.13.1+25
+version: 1.14.0+26
 
 environment:
   sdk: ^3.7.0
@@ -59,14 +59,18 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.10+1
   url_launcher: ^6.3.1
+  package_info_plus: ^8.3.1
     # Barcode scanning and product search
   mobile_scanner: ^5.2.3
     # Health data integration
   health: ^13.1.1
+  flutter_secure_storage: ^10.3.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  sqflite_common_ffi: ^2.3.6
+  url_launcher_platform_interface: ^2.3.2
   flutter_native_splash: ^2.4.0
   flutter_launcher_icons: ^0.13.1
 
@@ -129,9 +133,9 @@ flutter_native_splash:
   color_dark: "#1a1a1a"
   image_dark: assets/icons/icon.png
   android_12:
-    image: assets/icons/icon.png
+    image: assets/icons/splash_android12.png
     icon_background_color: "#ffffff"
-    image_dark: assets/icons/icon.png
+    image_dark: assets/icons/splash_android12.png
     icon_background_color_dark: "#1a1a1a"
 
 # Flutter Launcher Icons configuration
@@ -143,8 +147,8 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/icons/icon.png"
-    background_color: "#hexcode"
-    theme_color: "#hexcode"
+    background_color: "#3d403e"
+    theme_color: "#fba9eb"
   windows:
     generate: true
     image_path: "assets/icons/icon.png"

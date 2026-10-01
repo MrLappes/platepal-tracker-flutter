@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import '../../../models/dish.dart';
 import '../../../models/product.dart';
+import '../../../utils/number_parsing.dart';
 import '../../scanner/barcode_scanner_screen.dart';
 import '../../scanner/product_search_screen.dart';
 
@@ -50,6 +52,8 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   late TextEditingController _carbsController;
   late TextEditingController _fatController;
   late TextEditingController _fiberController;
+  String? _barcode;
+  bool _didPrefillIngredient = false;
 
   String _selectedUnit = 'g';
   final List<String> _commonUnits = [
@@ -67,29 +71,59 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   void initState() {
     super.initState();
     final ingredient = widget.ingredient;
+    _barcode = ingredient?.barcode;
     _nameController = TextEditingController(text: ingredient?.name ?? '');
-    _quantityController = TextEditingController(
-      text: ingredient?.amount.toString() ?? '',
-    );
-    _caloriesController = TextEditingController(
-      text: ingredient?.nutrition?.calories.toString() ?? '',
-    );
-    _proteinController = TextEditingController(
-      text: ingredient?.nutrition?.protein.toString() ?? '',
-    );
-    _carbsController = TextEditingController(
-      text: ingredient?.nutrition?.carbs.toString() ?? '',
-    );
-    _fatController = TextEditingController(
-      text: ingredient?.nutrition?.fat.toString() ?? '',
-    );
-    _fiberController = TextEditingController(
-      text: ingredient?.nutrition?.fiber.toString() ?? '',
-    );
+    _quantityController = TextEditingController();
+    _caloriesController = TextEditingController();
+    _proteinController = TextEditingController();
+    _carbsController = TextEditingController();
+    _fatController = TextEditingController();
+    _fiberController = TextEditingController();
 
     if (ingredient?.unit != null) {
       _selectedUnit = ingredient!.unit;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrefillIngredient) return;
+    _didPrefillIngredient = true;
+    final ingredient = widget.ingredient;
+    if (ingredient == null) return;
+    final locale = Localizations.localeOf(context).toString();
+    _quantityController.text = _formatEditableNumber(ingredient.amount, locale);
+    final nutrition = ingredient.nutrition;
+    if (nutrition == null) return;
+    _caloriesController.text = _formatEditableNumber(
+      nutrition.calories,
+      locale,
+    );
+    _proteinController.text = _formatEditableNumber(nutrition.protein, locale);
+    _carbsController.text = _formatEditableNumber(nutrition.carbs, locale);
+    _fatController.text = _formatEditableNumber(nutrition.fat, locale);
+    _fiberController.text = _formatEditableNumber(nutrition.fiber, locale);
+  }
+
+  String _formatEditableNumber(double value, String locale) {
+    final text = value.toString();
+    final exponentIndex = text.indexOf('e');
+    final decimalIndex = text.indexOf('.');
+    final fractionDigits =
+        decimalIndex == -1
+            ? 0
+            : (exponentIndex == -1 ? text.length : exponentIndex) -
+                decimalIndex -
+                1;
+    final exponent =
+        exponentIndex == -1 ? 0 : int.parse(text.substring(exponentIndex + 1));
+    final digits = fractionDigits - exponent;
+    return formatDecimal(
+      value,
+      locale,
+      fractionDigits: digits > 0 ? digits : 1,
+    );
   }
 
   @override
@@ -111,14 +145,15 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
             widget.ingredient?.id ??
             DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
-        amount: double.tryParse(_quantityController.text) ?? 0,
+        amount: parseLocalizedDouble(_quantityController.text)!,
         unit: _selectedUnit,
+        barcode: _barcode,
         nutrition: NutritionInfo(
-          calories: double.tryParse(_caloriesController.text) ?? 0,
-          protein: double.tryParse(_proteinController.text) ?? 0,
-          carbs: double.tryParse(_carbsController.text) ?? 0,
-          fat: double.tryParse(_fatController.text) ?? 0,
-          fiber: double.tryParse(_fiberController.text) ?? 0,
+          calories: parseLocalizedDouble(_caloriesController.text) ?? 0,
+          protein: parseLocalizedDouble(_proteinController.text) ?? 0,
+          carbs: parseLocalizedDouble(_carbsController.text) ?? 0,
+          fat: parseLocalizedDouble(_fatController.text) ?? 0,
+          fiber: parseLocalizedDouble(_fiberController.text) ?? 0,
         ),
       );
       widget.onSave(ingredient);
@@ -131,6 +166,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final macroColors = MacroColors.of(context);
     final mediaQuery = MediaQuery.of(context);
 
     return Container(
@@ -189,6 +225,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   style: IconButton.styleFrom(
                     backgroundColor: colorScheme.surfaceContainerHighest,
                     foregroundColor: colorScheme.onSurfaceVariant,
@@ -276,17 +313,14 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d*\.?\d*'),
-                              ),
-                            ],
+                            inputFormatters: [decimalInputFormatter],
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return l10n
                                     .componentsDishesDishFormIngredientFormModalPleaseEnterQuantity;
                               }
-                              if (double.tryParse(value) == null) {
+                              final quantity = parseLocalizedDouble(value);
+                              if (quantity == null || quantity <= 0) {
                                 return l10n
                                     .componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber;
                               }
@@ -311,7 +345,14 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      l10n.componentsDishesDishFormIngredientFormModalNutritionPer100g,
+                      switch (_selectedUnit) {
+                        'piece' =>
+                          l10n.componentsDishesDishFormIngredientFormModalNutritionPerPiece,
+                        'slice' =>
+                          l10n.componentsDishesDishFormIngredientFormModalNutritionPerSlice,
+                        _ =>
+                          l10n.componentsDishesDishFormIngredientFormModalNutritionPer100g,
+                      },
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant.withValues(
                           alpha: 0.7,
@@ -328,7 +369,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             suffix:
                                 l10n.componentsDishesDishFormIngredientFormModalKcal,
                             icon: Icons.local_fire_department_outlined,
-                            color: Colors.orange,
+                            color: macroColors.calories,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -339,7 +380,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                             suffix:
                                 l10n.componentsDishesDishFormIngredientFormModalGrams,
                             icon: Icons.grass_outlined,
-                            color: Colors.green,
+                            color: macroColors.fiber,
                           ),
                         ),
                       ],
@@ -365,7 +406,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.fitness_center_outlined,
-                                      color: Colors.blue,
+                                      color: macroColors.protein,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -377,7 +418,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.grain_outlined,
-                                      color: Colors.amber,
+                                      color: macroColors.carbs,
                                     ),
                                   ),
                                 ],
@@ -393,7 +434,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                       suffix:
                                           l10n.componentsDishesDishFormIngredientFormModalGrams,
                                       icon: Icons.water_drop_outlined,
-                                      color: Colors.teal,
+                                      color: macroColors.fat,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -415,7 +456,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   suffix:
                                       l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.fitness_center_outlined,
-                                  color: Colors.blue,
+                                  color: macroColors.protein,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -427,7 +468,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   suffix:
                                       l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.grain_outlined,
-                                  color: Colors.amber,
+                                  color: macroColors.carbs,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -438,7 +479,7 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                                   suffix:
                                       l10n.componentsDishesDishFormIngredientFormModalGrams,
                                   icon: Icons.water_drop_outlined,
-                                  color: Colors.teal,
+                                  color: macroColors.fat,
                                 ),
                               ),
                             ],
@@ -590,13 +631,11 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
         TextFormField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-          ],
+          inputFormatters: [decimalInputFormatter],
           decoration: InputDecoration(
             hintText: '0',
             suffixText: suffix,
-            suffixStyle: TextStyle(color: color.withValues(alpha: 0.7)),
+            suffixStyle: TextStyle(color: color),
             prefixIcon: Icon(icon, size: 18, color: color),
             filled: true,
             fillColor: colorScheme.surfaceContainer,
@@ -624,8 +663,10 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
           validator: (value) {
             if (value != null &&
                 value.isNotEmpty &&
-                double.tryParse(value) == null) {
-              return 'Please enter a valid number';
+                parseLocalizedDouble(value) == null) {
+              return AppLocalizations.of(
+                context,
+              ).componentsDishesDishFormIngredientFormModalPleaseEnterValidNumber;
             }
             return null;
           },
@@ -717,7 +758,9 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Unit',
+          AppLocalizations.of(
+            context,
+          ).componentsDishesDishFormIngredientFormModalUnit,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurfaceVariant,
@@ -740,34 +783,42 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
                   return InkWell(
                     onTap: () => setState(() => _selectedUnit = unit),
                     borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? colorScheme.primary
-                                : colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color:
-                              isSelected
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                        ),
-                      ),
-                      child: Text(
-                        unit,
-                        style: TextStyle(
-                          color:
-                              isSelected
-                                  ? colorScheme.onPrimary
-                                  : colorScheme.onSurfaceVariant,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          fontSize: 12,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? colorScheme.primary
+                                    : colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color:
+                                  isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
+                            ),
+                          ),
+                          child: Text(
+                            unit,
+                            style: TextStyle(
+                              color:
+                                  isSelected
+                                      ? colorScheme.onPrimary
+                                      : colorScheme.onSurfaceVariant,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -811,28 +862,45 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
   void _prefillFormWithProduct(Product product) {
     // Check if widget is still mounted before calling setState
     if (!mounted) return;
+    final locale = Localizations.localeOf(context).toString();
 
     // Call the onProductScanned callback if provided (for dish name/image auto-fill)
     widget.onProductScanned?.call(product);
 
     setState(() {
+      _barcode = product.barcode;
       // Set ingredient name from product
       if (product.name != null) {
         _nameController.text = product.name!;
       }
 
-      // Set default quantity to 100g
-      _quantityController.text = '100';
-      _selectedUnit = 'g';
+      final servingNutrition = product.servingNutrition;
+      _quantityController.text = servingNutrition == null ? '100' : '1';
+      _selectedUnit = servingNutrition == null ? 'g' : 'piece';
 
       // Set nutrition data if available
-      if (product.hasNutrition) {
-        final nutrition = product.nutrition!;
-        _caloriesController.text = nutrition.calories.toStringAsFixed(1);
-        _proteinController.text = nutrition.protein.toStringAsFixed(1);
-        _carbsController.text = nutrition.carbs.toStringAsFixed(1);
-        _fatController.text = nutrition.fat.toStringAsFixed(1);
-        _fiberController.text = nutrition.fiber.toStringAsFixed(1);
+      if (servingNutrition != null || product.hasNutrition) {
+        final nutrition = product.nutrition;
+        _caloriesController.text = formatDecimal(
+          servingNutrition?.calories ?? nutrition?.calories ?? 0,
+          locale,
+        );
+        _proteinController.text = formatDecimal(
+          servingNutrition?.protein ?? nutrition?.protein ?? 0,
+          locale,
+        );
+        _carbsController.text = formatDecimal(
+          servingNutrition?.carbs ?? nutrition?.carbs ?? 0,
+          locale,
+        );
+        _fatController.text = formatDecimal(
+          servingNutrition?.fat ?? nutrition?.fat ?? 0,
+          locale,
+        );
+        _fiberController.text = formatDecimal(
+          servingNutrition?.fiber ?? nutrition?.fiber ?? 0,
+          locale,
+        );
       }
     });
 
@@ -841,7 +909,9 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Product information loaded. Adjust quantity and save.',
+            AppLocalizations.of(
+              context,
+            ).componentsDishesDishFormIngredientFormModalProductInformationLoaded,
           ),
           backgroundColor: Colors.green,
         ),

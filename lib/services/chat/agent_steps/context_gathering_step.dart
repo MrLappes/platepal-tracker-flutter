@@ -30,6 +30,8 @@ class ContextGatheringStep extends AgentStep {
   Future<ChatStepResult> execute(ChatStepInput input) async {
     final contextSections = <String, String>{};
     final gatheredContextData = <String, dynamic>{};
+    // Context the AI asked for but that could not be read.
+    final failedContextParts = <String>{};
     try {
       debugPrint('📊 ContextGatheringStep: Starting context gathering');
       final thinkingResult = input.thinkingResult;
@@ -64,6 +66,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get user profile: $e');
+          failedContextParts.add('userProfile');
         }
       }
       // Gather existing dishes if needed (unless explicitly skipped)
@@ -96,9 +99,8 @@ class ContextGatheringStep extends AgentStep {
                     }
                   }
                 } catch (e) {
-                  debugPrint(
-                    '⚠️ Failed to search dishes for term "$searchTerm": $e',
-                  );
+                  debugPrint('⚠️ Failed to search dishes by name: $e');
+                  failedContextParts.add('existingDishes');
                 }
               }
             }
@@ -118,9 +120,8 @@ class ContextGatheringStep extends AgentStep {
                     }
                   }
                 } catch (e) {
-                  debugPrint(
-                    '⚠️ Failed to search ingredients for term "$searchTerm": $e',
-                  );
+                  debugPrint('⚠️ Failed to search dishes by ingredient: $e');
+                  failedContextParts.add('existingDishes');
                 }
               }
             }
@@ -129,9 +130,9 @@ class ContextGatheringStep extends AgentStep {
             dishes = searchResults.take(10).toList();
 
             debugPrint(
-              '📊 Found ${dishes.length} dishes using search terms: '
-              'dishes=${contextRequirements.dishSearchTerms}, '
-              'ingredients=${contextRequirements.ingredientSearchTerms}',
+              '📊 Found ${dishes.length} dishes using '
+              '${contextRequirements.dishSearchTerms?.length ?? 0} dish and '
+              '${contextRequirements.ingredientSearchTerms?.length ?? 0} ingredient search terms',
             );
           } else {
             // Fallback to all dishes if no search terms provided
@@ -147,21 +148,12 @@ class ContextGatheringStep extends AgentStep {
             gatheredContextData['existingDishes'] =
                 dishes.map((d) => d.toJson()).toList();
             debugPrint('📊 Added ${dishes.length} existing dishes to context');
-
-            // Log first few dish names for debugging
-            final dishNames = dishes.take(3).map((d) => d.name).join(', ');
-            debugPrint(
-              '📊 Sample dish names: $dishNames${dishes.length > 3 ? ' and ${dishes.length - 3} more...' : ''}',
-            );
           } else {
             debugPrint('⚠️ No existing dishes found matching search criteria');
-            // Log the search terms that were used
-            debugPrint(
-              '⚠️ Search terms used - dishes: ${contextRequirements.dishSearchTerms}, ingredients: ${contextRequirements.ingredientSearchTerms}',
-            );
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get dishes: $e');
+          failedContextParts.add('existingDishes');
         }
       } else if (skipExistingDishesLookup) {
         debugPrint('⏩ Skipping existing dishes lookup as requested');
@@ -182,6 +174,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get today\'s meals: $e');
+          failedContextParts.add('todayNutrition');
         }
       }
       // Gather weekly summary if needed
@@ -203,6 +196,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get weekly meals: $e');
+          failedContextParts.add('weeklyNutrition');
         }
       }
       // Gather historical data if needed
@@ -228,6 +222,7 @@ class ContextGatheringStep extends AgentStep {
           }
         } catch (e) {
           debugPrint('⚠️ Failed to get historical meals: $e');
+          failedContextParts.add('historicalMeals');
         }
       }
 
@@ -296,7 +291,11 @@ class ContextGatheringStep extends AgentStep {
       );
       return ChatStepResult.success(
         stepName: stepName,
-        data: {'contextGatheringResult': response.toJson()},
+        data: {
+          'contextGatheringResult': response.toJson(),
+          if (failedContextParts.isNotEmpty)
+            'failedContextParts': failedContextParts.toList(),
+        },
       );
     } catch (error, stackTrace) {
       debugPrint(

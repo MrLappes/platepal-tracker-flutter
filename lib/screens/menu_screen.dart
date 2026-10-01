@@ -44,7 +44,7 @@ class MenuScreen extends StatelessWidget {
                 subtitle:
                     AppLocalizations.of(context).screensMenuSetNutritionTargets,
                 icon: Icons.track_changes,
-                onTap: () => context.push('/settings/nutrition-goals'),
+                onTap: () => context.push('/settings/macro-customization'),
               ),
               _buildSettingsTile(
                 context,
@@ -136,6 +136,13 @@ class MenuScreen extends StatelessWidget {
                     AppLocalizations.of(context).screensMenuLearnMorePlatePal,
                 icon: Icons.info_outline,
                 onTap: () => context.push('/settings/about'),
+              ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensPrivacyTitle,
+                subtitle: AppLocalizations.of(context).screensPrivacyMenuSubtitle,
+                icon: Icons.privacy_tip_outlined,
+                onTap: () => context.push('/privacy'),
               ),
               _buildSettingsTile(
                 context,
@@ -444,7 +451,10 @@ class MenuScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          themeProvider.currentThemeName,
+                          _localizedThemeName(
+                            context,
+                            themeProvider.currentThemeName,
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                             fontSize: 11,
@@ -528,7 +538,10 @@ class MenuScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                themeName.toUpperCase(),
+                                _localizedThemeName(
+                                  context,
+                                  themeName,
+                                ).toUpperCase(),
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color:
                                       isSelected
@@ -553,6 +566,18 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
+  String _localizedThemeName(BuildContext context, String themeName) {
+    final l10n = AppLocalizations.of(context);
+    return switch (themeName) {
+      'Light' => l10n.screensMenuLight,
+      'Dark' => l10n.screensMenuDark,
+      'Oceanic' => l10n.screensMenuOceanic,
+      'Forest' => l10n.screensMenuForest,
+      'PlatePal' => l10n.screensMenuPlatePal,
+      _ => themeName,
+    };
+  }
+
   Widget _buildThemeModeButton(
     BuildContext context,
     String label,
@@ -564,38 +589,53 @@ class MenuScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isSelected = themeProvider.themePreference == preference;
 
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      selected: isSelected,
       onTap: () => themeProvider.setThemePreference(preference),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary : colorScheme.surface,
-          border: Border.all(
-            color:
-                isSelected
-                    ? colorScheme.primary
-                    : colorScheme.outline.withValues(alpha: 0.5),
-          ),
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => themeProvider.setThemePreference(preference),
           borderRadius: BorderRadius.circular(4),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label.toUpperCase(),
-              style: theme.textTheme.labelSmall?.copyWith(
+          child: Ink(
+            decoration: BoxDecoration(
+              color: isSelected ? colorScheme.primary : colorScheme.surface,
+              border: Border.all(
                 color:
-                    isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
-                fontSize: 9,
-                fontWeight: FontWeight.w900,
+                    isSelected
+                        ? colorScheme.primary
+                        : colorScheme.outline.withValues(alpha: 0.5),
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 16,
+                    color:
+                        isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label.toUpperCase(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color:
+                          isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -628,7 +668,13 @@ class MenuScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _getLanguageName(localeProvider.locale.languageCode),
+                      localeProvider.selectedLocale == null
+                          ? AppLocalizations.of(
+                            context,
+                          ).screensMenuSystemDefault
+                          : _getLanguageName(
+                            localeProvider.selectedLocale!.languageCode,
+                          ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 11,
@@ -649,21 +695,37 @@ class MenuScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: DropdownButton<String>(
-                  value: localeProvider.locale.languageCode,
+                  value:
+                      localeProvider.selectedLocale?.languageCode ?? 'system',
                   underline: const SizedBox(),
                   isDense: true,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                     fontSize: 10,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'en', child: Text('EN')),
-                    DropdownMenuItem(value: 'es', child: Text('ES')),
-                    DropdownMenuItem(value: 'de', child: Text('DE')),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text(
+                        AppLocalizations.of(context).screensMenuSystemDefault,
+                      ),
+                    ),
+                    const DropdownMenuItem(value: 'en', child: Text('EN')),
+                    const DropdownMenuItem(value: 'es', child: Text('ES')),
+                    const DropdownMenuItem(value: 'de', child: Text('DE')),
                   ],
+                  selectedItemBuilder:
+                      (context) => [
+                        Text(AppLocalizations.of(context).screensMenuSystem),
+                        const Text('EN'),
+                        const Text('ES'),
+                        const Text('DE'),
+                      ],
                   onChanged: (String? languageCode) {
                     if (languageCode != null) {
-                      localeProvider.setLocale(Locale(languageCode));
+                      localeProvider.setLocale(
+                        languageCode == 'system' ? null : Locale(languageCode),
+                      );
                     }
                   },
                 ),

@@ -18,7 +18,9 @@ class CustomTabBar extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       selectedItemColor: Theme.of(context).colorScheme.primary,
-      unselectedItemColor: Colors.grey,
+      unselectedItemColor: Theme.of(
+        context,
+      ).colorScheme.onSurface.withValues(alpha: 0.5),
       items: [
         BottomNavigationBarItem(
           icon: const Icon(Icons.restaurant),

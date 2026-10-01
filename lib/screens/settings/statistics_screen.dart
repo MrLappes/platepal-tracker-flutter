@@ -1,12 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/number_parsing.dart';
+import '../../utils/nutrition_calculator.dart';
 import '../../utils/service_extensions.dart';
 import '../../models/user_profile.dart';
 import '../../services/user_session_service.dart';
 import '../../services/health_service.dart';
 import '../../services/calorie_expenditure_service.dart';
 import 'dart:math' as math;
+
+String formatStatisticsAxisDate(
+  DateTime date,
+  String localeName, {
+  bool includeYear = false,
+}) =>
+    includeYear
+        ? DateFormat.yM(localeName).format(date)
+        : DateFormat.Md(localeName).format(date);
+
+/// Groups weight readings by ISO week and plots each median on its Monday.
+List<Map<String, dynamic>> calculateWeeklyWeightMedian(
+  List<Map<String, dynamic>> data,
+) {
+  final weightsByWeek = <(int, int), List<double>>{};
+  for (final entry in data) {
+    final weight = entry['weight'] as double?;
+    if (weight == null) continue;
+    final date = DateTime.parse(entry['recorded_date'] as String);
+    final day = DateTime.utc(date.year, date.month, date.day);
+    final thursday = day.add(Duration(days: 4 - day.weekday));
+    final weekYear = thursday.year;
+    final jan4 = DateTime.utc(weekYear, 1, 4);
+    final firstThursday = jan4.add(Duration(days: 4 - jan4.weekday));
+    final week = 1 + thursday.difference(firstThursday).inDays ~/ 7;
+    weightsByWeek.putIfAbsent((weekYear, week), () => []).add(weight);
+  }
+
+  final medianData = <Map<String, dynamic>>[];
+  for (final entry in weightsByWeek.entries) {
+    final weights = entry.value..sort();
+    final middle = weights.length ~/ 2;
+    final median =
+        weights.length.isOdd
+            ? weights[middle]
+            : (weights[middle - 1] + weights[middle]) / 2;
+    final (weekYear, week) = entry.key;
+    final jan4 = DateTime(weekYear, 1, 4);
+    final weekDate = DateTime(weekYear, 1, 5 - jan4.weekday + (week - 1) * 7);
+    medianData.add({
+      'recorded_date': weekDate.toIso8601String(),
+      'weight': median,
+    });
+  }
+  medianData.sort(
+    (a, b) =>
+        (a['recorded_date'] as String).compareTo(b['recorded_date'] as String),
+  );
+  return medianData;
+}
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -22,6 +76,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   List<Map<String, dynamic>> _metricsHistory = [];
   List<Map<String, dynamic>> _calorieHistory = [];
   bool _isShowingTestData = false; // Track if we're showing test data
+  // Health or calorie data failed to load; charts may be incomplete.
+  bool _partialLoadFailed = false;
+  bool _healthInitFailed = false;
 
   // Services
   final HealthService _healthService = HealthService();
@@ -63,8 +120,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeServices();
+    _initialization = _startInitialization();
     _loadData();
+  }
+
+  late Future<void> _initialization;
+
+  Future<void> _startInitialization() {
+    _healthInitFailed = false;
+    return _initializeServices().catchError((Object e) {
+      debugPrint('Failed to initialize health services (${e.runtimeType})');
+      _healthInitFailed = true;
+    });
   }
 
   // Initialize services
@@ -86,7 +153,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _isLoading = true;
         _error = null;
         _isShowingTestData = false; // Clear test data flag
+        _partialLoadFailed = false;
       });
+      if (_healthInitFailed) _initialization = _startInitialization();
 
       // Get current user ID from session service
       final prefs = await SharedPreferences.getInstance();
@@ -97,6 +166,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       final userProfiles = await context.userProfileService.getUserProfile(
         currentUserId,
       );
+      if (!mounted) return;
 
       if (userProfiles != null) {
         _userProfile =
@@ -127,25 +197,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             startDate = DateTime(now.year, now.month - 1, now.day);
         }
 
-        var history = <Map<String, dynamic>>[];
-        if (mounted) {
-          history = await context.userProfileService.getUserMetricsHistory(
-            _userProfile!.id,
-            startDate: startDate,
-          );
-        } else {
-          setState(() {
-            _error = "No metrics history found";
-            _isLoading = false;
-          });
-          return;
-        } // Load calorie data from meal logs and health data
-        final calorieData = await _loadCalorieHistory(startDate);
+        final history = await context.userProfileService.getUserMetricsHistory(
+          _userProfile!.id,
+          startDate: startDate,
+        );
+        if (!mounted) return;
+        // Load calorie data from meal logs and health data
+        await _initialization;
+        if (!mounted) return;
+        if (_healthInitFailed) _partialLoadFailed = true;
+        final calorieStart =
+            _selectedTimeRange == 'all'
+                ? await _earliestMealLogDay(startDate)
+                : startDate;
+        if (!mounted) return;
 
-        // Load health data if connected
-        if (_isHealthConnected) {
-          await _loadHealthData(startDate);
+        // Expenditure must be loaded before the history that references it.
+        _caloriesBurnedData.clear();
+        if (_isHealthConnected && calorieStart != null) {
+          await _loadHealthData(calorieStart);
         }
+        if (!mounted) return;
+        final calorieData =
+            calorieStart == null
+                ? <Map<String, dynamic>>[]
+                : await _loadCalorieHistory(calorieStart);
+        if (!mounted) return;
 
         // Process the history data
         _metricsHistory = history;
@@ -153,41 +230,54 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _processMetricsData();
       } else {
         setState(() {
-          _error = "User profile not found";
+          _error =
+              AppLocalizations.of(
+                context,
+              ).screensSettingsStatisticsProfileNotFound;
           _isLoading = false;
         });
       }
     } catch (e) {
+      if (!mounted) return;
+      debugPrint('StatisticsScreen: Data load failed (${e.runtimeType})');
       setState(() {
-        _error = e.toString();
+        _error =
+            AppLocalizations.of(
+              context,
+            ).screensSettingsStatisticsLoadFailedHint;
         _isLoading = false;
       });
     }
   }
 
-  // Load health data for calorie expenditure
+  /// Local day of the oldest meal log since [since], or null without logs.
+  Future<DateTime?> _earliestMealLogDay(DateTime since) async {
+    final logs = await context.mealLogService.getMealsByDateRange(
+      userId: _userProfile!.id,
+      startDate: since,
+      endDate: DateTime.now(),
+    );
+    if (logs.isEmpty) return null;
+    final oldest = logs.last.loggedAt.toLocal(); // newest first
+    return DateTime(oldest.year, oldest.month, oldest.day);
+  }
+
+  // Load health data for calorie expenditure with one Health range read.
   Future<void> _loadHealthData(DateTime startDate) async {
     try {
-      final DateTime endDate = DateTime.now();
-      final int daysDifference = endDate.difference(startDate).inDays;
-
-      _caloriesBurnedData.clear();
-
-      for (int i = 0; i <= daysDifference; i++) {
-        final currentDate = startDate.add(Duration(days: i));
-
-        // Get calories burned for this date
-        final (caloriesBurned, isEstimated) = await _calorieExpenditureService
-            .getCaloriesBurnedForDateWithStatus(currentDate);
-
-        if (caloriesBurned != null) {
-          final dateKey = currentDate.toIso8601String().split('T')[0];
-          _caloriesBurnedData[dateKey] = caloriesBurned;
-        }
-      }
+      final now = DateTime.now();
+      final byDay = await _calorieExpenditureService.getExpenditureByDay(
+        DateTime(startDate.year, startDate.month, startDate.day),
+        DateTime(now.year, now.month, now.day + 1),
+      );
+      _caloriesBurnedData
+        ..clear()
+        ..addAll({
+          for (final entry in byDay.entries) entry.key: entry.value.$1,
+        });
     } catch (e) {
-      // Health data loading failed, continue without it
-      debugPrint('Failed to load health data: $e');
+      debugPrint('Failed to load health data (${e.runtimeType})');
+      _partialLoadFailed = true;
     }
   }
 
@@ -198,41 +288,31 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     try {
       final List<Map<String, dynamic>> calorieData = [];
       final DateTime endDate = DateTime.now();
-      final int daysDifference = endDate.difference(startDate).inDays;
-
-      for (int i = 0; i <= daysDifference; i++) {
-        final currentDate = startDate.add(Duration(days: i));
-        final dayStart = DateTime(
-          currentDate.year,
-          currentDate.month,
-          currentDate.day,
-        );
-        final dayEnd = dayStart.add(const Duration(days: 1));
-
-        // Get nutrition summary for this day
-        final summary = await context.mealLogService.getNutritionSummary(
-          userId: _userProfile!.id,
-          startDate: dayStart,
-          endDate: dayEnd,
-        );
-        if (summary.totalCalories > 0) {
-          final dateKey = currentDate.toIso8601String().split('T')[0];
+      final totals = await context.dishService.getDailyNutritionTotals(
+        startDate,
+        DateTime(endDate.year, endDate.month, endDate.day + 1),
+      );
+      for (final entry in totals.entries) {
+        final summary = entry.value;
+        if (summary.calories > 0) {
+          final dateKey = entry.key;
+          final currentDate = DateTime.parse(dateKey);
           final caloriesBurned = _caloriesBurnedData[dateKey];
 
           // Calculate deficit/surplus if we have expenditure data
           double? deficit;
           double? netCalories;
           if (caloriesBurned != null) {
-            deficit = summary.totalCalories - caloriesBurned;
-            netCalories = summary.totalCalories - caloriesBurned;
+            deficit = summary.calories - caloriesBurned;
+            netCalories = summary.calories - caloriesBurned;
           }
 
           calorieData.add({
             'date': currentDate.toIso8601String(),
-            'calories': summary.totalCalories,
-            'protein': summary.totalProtein,
-            'carbs': summary.totalCarbs,
-            'fat': summary.totalFat,
+            'calories': summary.calories,
+            'protein': summary.protein,
+            'carbs': summary.carbs,
+            'fat': summary.fat,
             'calories_burned': caloriesBurned,
             'deficit': deficit,
             'net_calories': netCalories,
@@ -242,6 +322,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
       return calorieData;
     } catch (e) {
+      debugPrint('Failed to load calorie history (${e.runtimeType})');
+      _partialLoadFailed = true;
       return [];
     }
   }
@@ -363,24 +445,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   // Calculate BMR using Mifflin-St Jeor equation
-  double _calculateBMR(double weight, double height, int age, String gender) {
-    if (gender == 'male') {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-    }
-  } // Calculate TDEE (Total Daily Energy Expenditure)
+  double _calculateBMR(double weight, double height, int age, String gender) =>
+      mifflinStJeorBmr(
+        weightKg: weight,
+        heightCm: height,
+        age: age,
+        gender: gender,
+      );
 
-  double _calculateTDEE(double bmr, String activityLevel) {
-    final multipliers = {
-      'sedentary': 1.2,
-      'lightly_active': 1.375,
-      'moderately_active': 1.55,
-      'very_active': 1.725,
-      'extra_active': 1.9,
-    };
-    return bmr * (multipliers[activityLevel] ?? 1.55);
-  }
+  double _calculateTDEE(double bmr, String activityLevel) =>
+      totalDailyEnergyExpenditure(bmr, activityLevel);
 
   // Generate test data for development/demo purposes (temporary, not saved to DB)
   Future<void> _generateTestData() async {
@@ -391,6 +465,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading
+    if (!mounted) return;
 
     try {
       final now = DateTime.now();
@@ -413,8 +488,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         _error = null;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _error = 'Failed to generate test data: $e';
+        _error = AppLocalizations.of(
+          context,
+        ).screensSettingsStatisticsTestDataFailed(e.toString());
         _isLoading = false;
       });
     }
@@ -545,67 +623,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return _calculateTDEE(bmr, _userProfile!.activityLevel);
   }
 
-  // Method to calculate weekly median weight
-  List<Map<String, dynamic>> _calculateWeeklyMedian(
-    List<Map<String, dynamic>> data,
-  ) {
-    if (data.isEmpty) return [];
-
-    // Group entries by week
-    final Map<int, List<double>> weightsByWeek = {};
-
-    for (final entry in data) {
-      final DateTime date = DateTime.parse(entry['recorded_date'] as String);
-      final weight = entry['weight'] as double?;
-      if (weight != null) {
-        // Calculate week number (based on ISO week date)
-        final int weekNumber =
-            ((date.difference(DateTime(date.year, 1, 1)).inDays) / 7).floor();
-        if (weightsByWeek.containsKey(weekNumber)) {
-          weightsByWeek[weekNumber]!.add(weight);
-        } else {
-          weightsByWeek[weekNumber] = [weight];
-        }
-      }
-    }
-
-    // Calculate median for each week
-    final List<Map<String, dynamic>> medianData = [];
-    weightsByWeek.forEach((weekNumber, weights) {
-      weights.sort();
-      double median;
-      if (weights.length.isOdd) {
-        median = weights[weights.length ~/ 2];
-      } else {
-        median =
-            (weights[(weights.length ~/ 2) - 1] +
-                weights[weights.length ~/ 2]) /
-            2;
-      }
-
-      // Estimate a date for this week number
-      final DateTime weekDate = DateTime(
-        DateTime.now().year,
-        1,
-        1,
-      ).add(Duration(days: weekNumber * 7));
-
-      medianData.add({
-        'recorded_date': weekDate.toIso8601String(),
-        'weight': median,
-      });
-    });
-
-    // Sort by date
-    medianData.sort((a, b) {
-      final dateA = DateTime.parse(a['recorded_date'] as String);
-      final dateB = DateTime.parse(b['recorded_date'] as String);
-      return dateA.compareTo(dateB);
-    });
-
-    return medianData;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -667,12 +684,49 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _loadData,
-        child:
-            hasEnoughData || _isShowingTestData
-                ? _buildStatisticsContent(context, l10n)
-                : _buildEmptyState(context, l10n),
+      body: Column(
+        children: [
+          if (_partialLoadFailed) _buildPartialLoadBanner(context, l10n),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadData,
+              child:
+                  hasEnoughData || _isShowingTestData
+                      ? _buildStatisticsContent(context, l10n)
+                      : _buildEmptyState(context, l10n),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPartialLoadBanner(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        child: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_outlined,
+              color: colorScheme.onErrorContainer,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.screensSettingsStatisticsPartialLoadFailed,
+                style: TextStyle(color: colorScheme.onErrorContainer),
+              ),
+            ),
+            TextButton(
+              onPressed: _loadData,
+              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+              child: Text(l10n.screensSettingsStatisticsTryAgain),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -714,7 +768,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 label: Text(l10n.screensSettingsStatisticsUpdateMetricsNow),
                 onPressed: () {
                   // Navigate to profile settings to update metrics
-                  Navigator.pushReplacementNamed(context, '/settings/profile');
+                  context.push('/settings/profile');
                 },
               ),
               const SizedBox(height: 16),
@@ -818,6 +872,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     BuildContext context,
     AppLocalizations l10n,
   ) {
+    final locale = Localizations.localeOf(context).toString();
     final healthDataDays = _caloriesBurnedData.length;
     final totalDays = _calorieHistory.length;
     final coverage = totalDays > 0 ? (healthDataDays / totalDays * 100) : 0;
@@ -844,7 +899,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Calorie expenditure data coverage: ${coverage.toStringAsFixed(1)}% ($healthDataDays/$totalDays days)',
+              l10n.screensSettingsStatisticsCoverage(
+                formatDecimal(coverage, locale),
+                healthDataDays,
+                totalDays,
+              ),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
@@ -869,6 +928,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildCurrentStatsCard(BuildContext context, AppLocalizations l10n) {
+    final locale = Localizations.localeOf(context).toString();
     final String weightUnit =
         _userProfile?.preferredUnit == 'imperial' ? 'lbs' : 'kg';
     final String heightUnit =
@@ -907,7 +967,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsImportProfileCompletionWeight,
                     value:
                         displayWeight != null
-                            ? '${displayWeight.toStringAsFixed(1)} $weightUnit'
+                        ? '${formatDecimal(displayWeight, locale)} $weightUnit'
                             : '-',
                   ),
                 ),
@@ -918,7 +978,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsImportProfileCompletionHeight,
                     value:
                         displayHeight != null
-                            ? '${displayHeight.toStringAsFixed(1)} $heightUnit'
+                        ? '${formatDecimal(displayHeight, locale)} $heightUnit'
                             : '-',
                   ),
                 ),
@@ -931,10 +991,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   child: _buildStatItem(
                     context,
                     icon: Icons.speed,
-                    label: 'BMI',
+                    label: l10n.screensSettingsProfileSettingsBmi,
                     value:
                         _currentBMI != null
-                            ? _currentBMI!.toStringAsFixed(1)
+                        ? formatDecimal(_currentBMI!, locale)
                             : '-',
                     detail: _getBMICategory(_currentBMI),
                   ),
@@ -946,8 +1006,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     label: l10n.screensSettingsStatisticsBodyFat,
                     value:
                         _currentBodyFat != null
-                            ? '${_currentBodyFat!.toStringAsFixed(1)}%'
-                            : '-',
+                        ? '${formatDecimal(_currentBodyFat!, locale)}%'
+                            : '–',
+                    detail:
+                        _currentBodyFat == null
+                            ? l10n.utilsLinkHandlerNotAvailable
+                            : null,
                   ),
                 ),
               ],
@@ -1001,6 +1065,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildTimeRangeSelector(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -1014,11 +1079,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: _selectedTimeRange,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                fillColor: colorScheme.surface,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
@@ -1086,8 +1150,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
                 Tooltip(
                   message: tooltipText,
                   child: const Icon(Icons.info_outline, size: 18),
@@ -1104,6 +1172,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildWeightChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final colorScheme = Theme.of(context).colorScheme;
     if (_metricsHistory.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable),
@@ -1111,24 +1181,43 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     // Use weekly median for weight to smooth out daily fluctuations
-    final medianData = _calculateWeeklyMedian(_metricsHistory);
+    final medianData = calculateWeeklyWeightMedian(_metricsHistory);
+    if (medianData.isEmpty) {
+      return Center(
+        child: Text(l10n.screensSettingsStatisticsNoWeightDataAvailable),
+      );
+    }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: LineChartPainter(
-        data: medianData,
-        valueKey: 'weight',
-        dateKey: 'recorded_date',
-        minValue: _minWeight,
-        maxValue: _maxWeight,
-        lineColor: Colors.blue,
-        pointColor: Colors.blue.shade800,
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        l10n.screensSettingsStatisticsWeightHistory,
+        medianData.length,
+        formatDecimal(_minWeight, locale),
+        formatDecimal(_maxWeight, locale),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: LineChartPainter(
+          data: medianData,
+          valueKey: 'weight',
+          dateKey: 'recorded_date',
+          localeName: locale,
+          minValue: _minWeight,
+          maxValue: _maxWeight,
+          lineColor: colorScheme.primary,
+          pointColor: colorScheme.primary,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
 
   Widget _buildBMIChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final colorScheme = Theme.of(context).colorScheme;
     if (_metricsHistory.isEmpty) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoBmiDataAvailable),
@@ -1158,40 +1247,53 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: LineChartPainter(
-        data: bmiData,
-        valueKey: 'bmi',
-        dateKey: 'recorded_date',
-        minValue: _minBMI,
-        maxValue: _maxBMI,
-        lineColor: Colors.green,
-        pointColor:
-            Colors.green.shade800, // Add reference lines for BMI categories
-        referenceLines: [
-          ReferenceLine(
-            value: 18.5,
-            color: Colors.orange.withValues(alpha: 0.5),
-            label: l10n.screensSettingsStatisticsBmiUnderweight,
-          ),
-          ReferenceLine(
-            value: 25.0,
-            color: Colors.orange.withValues(alpha: 0.5),
-            label: l10n.screensSettingsStatisticsBmiOverweight,
-          ),
-          ReferenceLine(
-            value: 30.0,
-            color: Colors.red.withValues(alpha: 0.5),
-            label: l10n.screensSettingsStatisticsBmiObese,
-          ),
-        ],
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        l10n.screensSettingsStatisticsBmiHistory,
+        bmiData.length,
+        formatDecimal(_minBMI, locale),
+        formatDecimal(_maxBMI, locale),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: LineChartPainter(
+          data: bmiData,
+          valueKey: 'bmi',
+          dateKey: 'recorded_date',
+          localeName: locale,
+          minValue: _minBMI,
+          maxValue: _maxBMI,
+          lineColor: Colors.green,
+          pointColor: Colors.green.shade800,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
+          referenceLines: [
+            ReferenceLine(
+              value: 18.5,
+              color: Colors.orange.withValues(alpha: 0.5),
+              label: l10n.screensSettingsStatisticsBmiUnderweight,
+            ),
+            ReferenceLine(
+              value: 25.0,
+              color: Colors.orange.withValues(alpha: 0.5),
+              label: l10n.screensSettingsStatisticsBmiOverweight,
+            ),
+            ReferenceLine(
+              value: 30.0,
+              color: Colors.red.withValues(alpha: 0.5),
+              label: l10n.screensSettingsStatisticsBmiObese,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBodyFatChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final colorScheme = Theme.of(context).colorScheme;
     final bodyFatData =
         _metricsHistory.where((entry) => entry['body_fat'] != null).toList();
 
@@ -1201,35 +1303,64 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: LineChartPainter(
-        data: bodyFatData,
-        valueKey: 'body_fat',
-        dateKey: 'recorded_date',
-        minValue: _minBodyFat,
-        maxValue: _maxBodyFat,
-        lineColor: Colors.purple,
-        pointColor: Colors.purple.shade800,
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        l10n.screensSettingsStatisticsBodyFatHistory,
+        bodyFatData.length,
+        formatDecimal(_minBodyFat, locale),
+        formatDecimal(_maxBodyFat, locale),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: LineChartPainter(
+          data: bodyFatData,
+          valueKey: 'body_fat',
+          dateKey: 'recorded_date',
+          localeName: locale,
+          minValue: _minBodyFat,
+          maxValue: _maxBodyFat,
+          lineColor: colorScheme.primary,
+          pointColor: colorScheme.primary,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
 
   Widget _buildCalorieChart(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final colorScheme = Theme.of(context).colorScheme;
     if (_calorieHistory.isEmpty || _maintenanceCalories == null) {
       return Center(
         child: Text(l10n.screensSettingsStatisticsNoCalorieDataAvailable),
       );
     }
 
-    return CustomPaint(
-      size: const Size(double.infinity, 200),
-      painter: CalorieChartPainter(
-        data: _calorieHistory,
-        maintenanceCalories: _maintenanceCalories!,
-        minValue: _minCalories,
-        maxValue: _maxCalories,
+    return Semantics(
+      image: true,
+      label: l10n.screensSettingsStatisticsChartSummary(
+        _isHealthConnected && _caloriesBurnedData.isNotEmpty
+            ? l10n.screensSettingsStatisticsCalorieBalanceTitle
+            : l10n.screensSettingsStatisticsCalorieIntakeHistory,
+        _calorieHistory.length,
+        formatDecimal(_minCalories, locale, fractionDigits: 0),
+        formatDecimal(_maxCalories, locale, fractionDigits: 0),
+      ),
+      child: CustomPaint(
+        size: const Size(double.infinity, 200),
+        painter: CalorieChartPainter(
+          data: _calorieHistory,
+          localeName: locale,
+          maintenanceCalories: _maintenanceCalories!,
+          minValue: _minCalories,
+          maxValue: _maxCalories,
+          maintenanceLabel: l10n.screensSettingsStatisticsMaintenance,
+          axisColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          labelColor: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -1350,7 +1481,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
           Text(
-            '($count days)',
+            AppLocalizations.of(
+              context,
+            ).screensSettingsStatisticsPhaseDays(count),
             style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
           ),
         ],
@@ -1365,7 +1498,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     // Calculate actual weekly deficit if health data is available
     double? actualWeeklyDeficit;
-    String? healthDataLabel;
 
     if (_isHealthConnected && _caloriesBurnedData.isNotEmpty) {
       final healthDataDays = _calorieHistory.where(
@@ -1376,7 +1508,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             .map((entry) => entry['deficit'] as double)
             .reduce((a, b) => a + b);
         actualWeeklyDeficit = totalActualDeficit / healthDataDays.length;
-        healthDataLabel = 'Actual Balance';
       }
     }
 
@@ -1412,7 +1543,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     ),
                     Text(
-                      '${isDeficit ? "-" : "+"}${weeklyDeficit.abs().round()} cal/day',
+                      l10n.screensSettingsStatisticsCalPerDay(
+                        '${isDeficit ? "-" : "+"}${weeklyDeficit.abs().round()}',
+                      ),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -1423,7 +1556,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ),
               ),
               Text(
-                '${weeklyAverage.round()} cal',
+                l10n.screensSettingsStatisticsCalValue(
+                  weeklyAverage.round().toString(),
+                ),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -1454,7 +1589,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Row(
                         children: [
                           Text(
-                            healthDataLabel!,
+                            l10n.screensSettingsStatisticsActualBalance,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -1469,7 +1604,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ],
                       ),
                       Text(
-                        '${actualWeeklyDeficit < 0 ? "" : "+"}${actualWeeklyDeficit.round()} cal/day',
+                        l10n.screensSettingsStatisticsCalPerDay(
+                          '${actualWeeklyDeficit < 0 ? "" : "+"}${actualWeeklyDeficit.round()}',
+                        ),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -1669,20 +1806,26 @@ class LineChartPainter extends CustomPainter {
   final List<Map<String, dynamic>> data;
   final String valueKey;
   final String dateKey;
+  final String localeName;
   final double minValue;
   final double maxValue;
   final Color lineColor;
   final Color pointColor;
+  final Color axisColor;
+  final Color labelColor;
   final List<ReferenceLine>? referenceLines;
 
   LineChartPainter({
     required this.data,
     required this.valueKey,
     required this.dateKey,
+    this.localeName = 'en',
     required this.minValue,
     required this.maxValue,
     required this.lineColor,
     required this.pointColor,
+    this.axisColor = Colors.grey,
+    this.labelColor = Colors.grey,
     this.referenceLines,
   });
 
@@ -1701,7 +1844,7 @@ class LineChartPainter extends CustomPainter {
     // Draw X and Y axis
     final axisPaint =
         Paint()
-          ..color = Colors.grey
+          ..color = axisColor
           ..strokeWidth = 1;
 
     canvas.drawLine(
@@ -1894,13 +2037,13 @@ class LineChartPainter extends CustomPainter {
       canvas.drawLine(
         Offset(horizontalPadding - 5, yPos),
         Offset(horizontalPadding, yPos),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
-        text: value.toStringAsFixed(1),
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        text: formatDecimal(value, localeName),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(
@@ -1963,25 +2106,23 @@ class LineChartPainter extends CustomPainter {
       final daysOffset = daysOffsetDouble.round();
       final labelDate = minDate.add(Duration(days: daysOffset));
 
-      // Format date based on range
-      String dateLabel;
-      if (daysDiff <= 30) {
-        dateLabel = '${labelDate.day}/${labelDate.month}';
-      } else {
-        dateLabel = '${labelDate.month}/${labelDate.year}';
-      }
+      final dateLabel = formatStatisticsAxisDate(
+        labelDate,
+        localeName,
+        includeYear: daysDiff > 30,
+      );
 
       // Draw tick
       canvas.drawLine(
         Offset(xPos, yPos),
         Offset(xPos, yPos + 5),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: dateLabel,
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(canvas, Offset(xPos - textPainter.width / 2, yPos + 8));
@@ -1991,8 +2132,13 @@ class LineChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(LineChartPainter oldDelegate) {
     return oldDelegate.data != data ||
+        oldDelegate.localeName != localeName ||
         oldDelegate.minValue != minValue ||
-        oldDelegate.maxValue != maxValue;
+        oldDelegate.maxValue != maxValue ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.pointColor != pointColor ||
+        oldDelegate.axisColor != axisColor ||
+        oldDelegate.labelColor != labelColor;
   }
 }
 
@@ -2011,15 +2157,23 @@ class ReferenceLine {
 // Custom chart painter for calorie intake vs maintenance
 class CalorieChartPainter extends CustomPainter {
   final List<Map<String, dynamic>> data;
+  final String localeName;
   final double maintenanceCalories;
   final double minValue;
   final double maxValue;
+  final String maintenanceLabel;
+  final Color axisColor;
+  final Color labelColor;
 
   CalorieChartPainter({
     required this.data,
+    this.localeName = 'en',
     required this.maintenanceCalories,
     required this.minValue,
     required this.maxValue,
+    required this.maintenanceLabel,
+    this.axisColor = Colors.grey,
+    this.labelColor = Colors.grey,
   });
 
   @override
@@ -2108,7 +2262,7 @@ class CalorieChartPainter extends CustomPainter {
     // Draw maintenance label
     final textPainter = TextPainter(
       text: TextSpan(
-        text: 'Maintenance',
+        text: maintenanceLabel,
         style: TextStyle(
           color: Colors.green.shade700,
           fontSize: 10,
@@ -2221,13 +2375,13 @@ class CalorieChartPainter extends CustomPainter {
       canvas.drawLine(
         Offset(horizontalPadding - 5, yPos),
         Offset(horizontalPadding, yPos),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: '${value.round()}',
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(
@@ -2290,25 +2444,23 @@ class CalorieChartPainter extends CustomPainter {
       final daysOffset = daysOffsetDouble.round();
       final labelDate = minDate.add(Duration(days: daysOffset));
 
-      // Format date based on range
-      String dateLabel;
-      if (daysDiff <= 30) {
-        dateLabel = '${labelDate.day}/${labelDate.month}';
-      } else {
-        dateLabel = '${labelDate.month}/${labelDate.year}';
-      }
+      final dateLabel = formatStatisticsAxisDate(
+        labelDate,
+        localeName,
+        includeYear: daysDiff > 30,
+      );
 
       // Draw tick
       canvas.drawLine(
         Offset(xPos, yPos),
         Offset(xPos, yPos + 5),
-        Paint()..color = Colors.grey,
+        Paint()..color = axisColor,
       );
 
       // Draw label
       textPainter.text = TextSpan(
         text: dateLabel,
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
+        style: TextStyle(color: labelColor, fontSize: 10),
       );
       textPainter.layout();
       textPainter.paint(canvas, Offset(xPos - textPainter.width / 2, yPos + 8));
@@ -2318,8 +2470,12 @@ class CalorieChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(CalorieChartPainter oldDelegate) {
     return oldDelegate.data != data ||
+        oldDelegate.localeName != localeName ||
         oldDelegate.maintenanceCalories != maintenanceCalories ||
         oldDelegate.minValue != minValue ||
-        oldDelegate.maxValue != maxValue;
+        oldDelegate.maxValue != maxValue ||
+        oldDelegate.maintenanceLabel != maintenanceLabel ||
+        oldDelegate.axisColor != axisColor ||
+        oldDelegate.labelColor != labelColor;
   }
 }

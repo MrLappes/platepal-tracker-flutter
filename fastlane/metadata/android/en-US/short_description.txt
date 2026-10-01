@@ -1,0 +1,1 @@
+Log meals and macros in a private diary with optional AI.

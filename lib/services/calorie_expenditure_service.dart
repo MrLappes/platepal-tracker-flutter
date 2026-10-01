@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import '../models/user_profile.dart';
 import '../repositories/user_profile_repository.dart';
 import '../services/user_session_service.dart';
+import '../utils/nutrition_calculator.dart';
 import 'health_service.dart';
 
 class CalorieExpenditureService {
@@ -13,18 +14,29 @@ class CalorieExpenditureService {
 
   final HealthService _healthService = HealthService();
   late final UserProfileRepository _userProfileRepository;
+  Future<void>? _initialization;
   bool _isInitialized = false;
 
-  /// Initialize the service with required dependencies
+  /// Initialize the service with required dependencies.
+  ///
+  /// Concurrent callers share one initialization.
   Future<void> initialize() async {
     if (_isInitialized) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final userSessionService = UserSessionService(prefs);
-    _userProfileRepository = UserProfileRepository(
-      userSessionService: userSessionService,
-    );
+    await (_initialization ??= _initialize());
     _isInitialized = true;
+  }
+
+  Future<void> _initialize() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userSessionService = UserSessionService(prefs);
+      _userProfileRepository = UserProfileRepository(
+        userSessionService: userSessionService,
+      );
+    } catch (_) {
+      _initialization = null;
+      rethrow;
+    }
   }
 
   /// Get calories burned for a specific date, with fallback to estimated values
@@ -35,82 +47,20 @@ class CalorieExpenditureService {
     await initialize();
 
     try {
-      final dateStr = date.toIso8601String().split('T')[0];
-      developer.log(
-        'Getting calories burned for date: $dateStr',
-        name: 'CalorieExpenditureService',
-      );
-
-      // Check if health service is connected
       if (!_healthService.isConnected) {
-        developer.log(
-          'Health service not connected, using estimation',
-          name: 'CalorieExpenditureService',
-        );
-        final estimatedCalories = await _estimateCaloriesBurned(date);
-        developer.log(
-          'Using estimated calories: $estimatedCalories',
-          name: 'CalorieExpenditureService',
-        );
-        return (estimatedCalories, true); // true = estimated
-      } // First try to get from health service for specific date using smart method
-      final healthCalories = await _healthService.getCaloriesBurnedForDateSmart(
-        date,
-      );
-      if (healthCalories != null && healthCalories > 0) {
-        developer.log(
-          'Found health data: $healthCalories calories for $dateStr',
-          name: 'CalorieExpenditureService',
-        );
-        return (healthCalories, false); // false = real data
-      } else {
-        developer.log(
-          'No health data found for $dateStr (returned: $healthCalories)',
-          name: 'CalorieExpenditureService',
-        );
+        return (await _estimateCaloriesBurned(date), true);
       }
 
-      // Check stored data for this specific date
-      final storedData = await _healthService.getStoredCaloriesBurnedData();
-      final dateKey = date.toIso8601String().split('T')[0];
+      // Falls back to the local cache when Health can't be read.
+      final day =
+          await _healthService.getEnergyBurnedForDate(date) ??
+          (await _healthService.getStoredEnergyBurned())[HealthService.dayKey(
+            date,
+          )];
+      final resolved = day == null ? null : await resolveExpenditure(day);
+      if (resolved != null) return resolved;
 
-      if (storedData.containsKey(dateKey)) {
-        final storedCalories = storedData[dateKey]!;
-        developer.log(
-          'Found stored data: $storedCalories calories',
-          name: 'CalorieExpenditureService',
-        );
-        return (
-          storedCalories,
-          false,
-        ); // false = real data (stored from health)
-      }
-
-      // If it's today or recent dates, try a cache refresh and retry
-      final isRecentDate = DateTime.now().difference(date).inDays <= 7;
-      if (isRecentDate && _healthService.isConnected) {
-        developer.log(
-          'Attempting to refresh calorie cache for recent data',
-          name: 'CalorieExpenditureService',
-        );
-        await _healthService.refreshCaloriesBurnedCache();
-        final syncedCalories = await _healthService
-            .getCaloriesBurnedForDateSmart(date);
-        if (syncedCalories != null && syncedCalories > 0) {
-          developer.log(
-            'Found synced data: $syncedCalories calories',
-            name: 'CalorieExpenditureService',
-          );
-          return (syncedCalories, false); // false = real data
-        }
-      }
-
-      // Health is connected but no data available for this date
-      // Do NOT fall back to estimation – Health Connect is the single source of truth
-      developer.log(
-        'Health connected but no data for $dateStr – returning null',
-        name: 'CalorieExpenditureService',
-      );
+      // Health is the source of truth once connected: no data means no value.
       return (null, false);
     } catch (e) {
       developer.log(
@@ -132,6 +82,74 @@ class CalorieExpenditureService {
     return calories;
   }
 
+  /// Total expenditure for a Health day as (kcal, isEstimated). Without a
+  /// basal record, the profile's Mifflin-St Jeor BMR stands in for it.
+  Future<(double, bool)?> resolveExpenditure(DailyEnergyBurned day) async {
+    await initialize();
+    return day.totalExpenditure() ??
+        day.totalExpenditure(estimatedBasal: await _profileBmr());
+  }
+
+  /// Total expenditure per local day key (see [HealthService.dayKey]) in
+  /// [start, end) from one Health read, or the local cache if that fails.
+  Future<Map<String, (double, bool)>> getExpenditureByDay(
+    DateTime start,
+    DateTime end,
+  ) async {
+    await initialize();
+    if (!_healthService.isConnected) return {};
+
+    Map<String, DailyEnergyBurned> days;
+    try {
+      days = await _healthService.readEnergyBurnedByDay(start, end);
+    } catch (e) {
+      developer.log(
+        'Health range read failed, using cache: $e',
+        name: 'CalorieExpenditureService',
+      );
+      final startKey = HealthService.dayKey(start);
+      final endKey = HealthService.dayKey(end);
+      days = {
+        for (final entry in (await _healthService.getStoredEnergyBurned())
+            .entries)
+          if (entry.key.compareTo(startKey) >= 0 &&
+              entry.key.compareTo(endKey) <= 0)
+            entry.key: entry.value,
+      };
+    }
+    return _resolveAll(days);
+  }
+
+  Future<Map<String, (double, bool)>> _resolveAll(
+    Map<String, DailyEnergyBurned> days,
+  ) async {
+    final bmr = await _profileBmr();
+    return {
+      for (final entry in days.entries)
+        if (entry.value.totalExpenditure(estimatedBasal: bmr) case final value?)
+          entry.key: value,
+    };
+  }
+
+  Future<double?> _profileBmr() async {
+    try {
+      final profile = await _userProfileRepository.getCurrentUserProfile();
+      if (profile == null) return null;
+      return mifflinStJeorBmr(
+        weightKg: profile.weight,
+        heightCm: profile.height,
+        age: profile.age,
+        gender: profile.gender,
+      );
+    } catch (e) {
+      developer.log(
+        'Error loading profile for BMR: $e',
+        name: 'CalorieExpenditureService',
+      );
+      return null;
+    }
+  }
+
   /// Estimate calories burned based on user profile when health data is not available
   Future<double?> _estimateCaloriesBurned(DateTime date) async {
     try {
@@ -139,13 +157,16 @@ class CalorieExpenditureService {
       if (userProfile == null) return null;
 
       // Basic estimation based on BMR and activity level
-      final bmr = _calculateBMR(userProfile);
-      final activityMultiplier = _getActivityMultiplier(
-        userProfile.activityLevel,
+      final bmr = mifflinStJeorBmr(
+        weightKg: userProfile.weight,
+        heightCm: userProfile.height,
+        age: userProfile.age,
+        gender: userProfile.gender,
       );
+      final multiplier = activityMultiplier(userProfile.activityLevel);
 
       // Calculate TDEE (Total Daily Energy Expenditure)
-      final tdee = bmr * activityMultiplier;
+      final tdee = bmr * multiplier;
 
       // Add some variability for different days
       final dayOfWeek = date.weekday;
@@ -160,53 +181,13 @@ class CalorieExpenditureService {
         variabilityFactor = 1.0;
       }
 
-      final estimatedCalories = tdee * variabilityFactor;
-
-      developer.log(
-        'Estimated calories for ${date.toIso8601String().split('T')[0]}: '
-        'BMR=$bmr, Activity=${userProfile.activityLevel} (${activityMultiplier}x), '
-        'TDEE=$tdee, Final=$estimatedCalories',
-        name: 'CalorieExpenditureService',
-      );
-
-      return estimatedCalories;
+      return tdee * variabilityFactor;
     } catch (e) {
       developer.log(
         'Error estimating calories burned: $e',
         name: 'CalorieExpenditureService',
       );
       return null;
-    }
-  }
-
-  /// Calculate Basal Metabolic Rate using Mifflin-St Jeor Equation
-  double _calculateBMR(UserProfile profile) {
-    double bmr;
-
-    if (profile.gender == 'male') {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
-    } else {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
-    }
-
-    return bmr;
-  }
-
-  /// Get activity level multiplier for TDEE calculation
-  double _getActivityMultiplier(String activityLevel) {
-    switch (activityLevel) {
-      case 'sedentary':
-        return 1.2;
-      case 'lightly_active':
-        return 1.375;
-      case 'moderately_active':
-        return 1.55;
-      case 'very_active':
-        return 1.725;
-      case 'extra_active':
-        return 1.9;
-      default:
-        return 1.55; // Default to moderately active
     }
   }
 
@@ -222,36 +203,41 @@ class CalorieExpenditureService {
           currentTarget: 0,
           suggestedTarget: 0,
           averageExpenditure: 0,
-          analysisMessage: 'User profile not found',
+          status: CalorieTargetStatus.profileNotFound,
         );
       }
 
-      // Get calories burned data for analysis period from cache
-      final caloriesData = await _healthService.refreshCaloriesBurnedCache(
-        days: days,
-      );
-      final storedData = await _healthService.getStoredCaloriesBurnedData();
+      // The refresh merges into the cache; a failed refresh leaves the cache.
+      await _healthService.refreshCaloriesBurnedCache(days: days);
+      final storedData = await _healthService.getStoredEnergyBurned();
 
-      // Combine fresh data with stored data
-      final combinedData = Map<String, double>.from(storedData);
-      combinedData.addAll(caloriesData);
+      // The last [days] complete days; today is partial and would skew low.
+      final now = DateTime.now();
+      final window = {
+        for (var i = 1; i <= days; i++)
+          HealthService.dayKey(DateTime(now.year, now.month, now.day - i)),
+      };
+      final expenditures = await _resolveAll({
+        for (final entry in storedData.entries)
+          if (window.contains(entry.key)) entry.key: entry.value,
+      });
 
-      if (combinedData.isEmpty) {
+      if (expenditures.isEmpty) {
         return CalorieTargetAnalysis(
           needsAdjustment: false,
           currentTarget: userProfile.goals.targetCalories,
           suggestedTarget: userProfile.goals.targetCalories,
           averageExpenditure: 0,
-          analysisMessage: 'No calorie expenditure data available for analysis',
+          status: CalorieTargetStatus.noExpenditureData,
         );
       }
 
       // Calculate average daily expenditure
-      final totalExpenditure = combinedData.values.fold(
+      final totalExpenditure = expenditures.values.fold(
         0.0,
-        (sum, calories) => sum + calories,
+        (sum, day) => sum + day.$1,
       );
-      final averageExpenditure = totalExpenditure / combinedData.length;
+      final averageExpenditure = totalExpenditure / expenditures.length;
 
       // Analyze if target needs adjustment
       final currentTarget = userProfile.goals.targetCalories;
@@ -260,7 +246,7 @@ class CalorieExpenditureService {
 
       bool needsAdjustment = false;
       double suggestedTarget = currentTarget;
-      String analysisMessage = '';
+      late CalorieTargetStatus status;
 
       // If user consistently burns more calories than their target intake suggests
       if (expenditureRatio < 0.7) {
@@ -268,8 +254,7 @@ class CalorieExpenditureService {
         // Increase target calories to match expenditure better
         suggestedTarget =
             averageExpenditure * 0.8; // 80% of expenditure for moderate deficit
-        analysisMessage =
-            'Your calorie expenditure is significantly higher than your current target suggests. Consider increasing your calorie intake.';
+        status = CalorieTargetStatus.increaseIntake;
       }
       // If user burns much fewer calories than target suggests
       else if (expenditureRatio > 1.3) {
@@ -278,20 +263,21 @@ class CalorieExpenditureService {
         suggestedTarget =
             averageExpenditure *
             1.1; // 110% of expenditure for moderate surplus
-        analysisMessage =
-            'Your calorie expenditure is lower than your current target suggests. Consider adjusting your calorie intake or increasing activity.';
+        status = CalorieTargetStatus.decreaseIntake;
       } else {
-        analysisMessage =
-            'Your current calorie targets seem well-aligned with your activity level.';
+        status = CalorieTargetStatus.onTarget;
       }
 
       return CalorieTargetAnalysis(
         needsAdjustment: needsAdjustment,
         currentTarget: currentTarget,
-        suggestedTarget: suggestedTarget,
+        suggestedTarget:
+            needsAdjustment && suggestedTarget < minimumCalorieTarget
+                ? minimumCalorieTarget
+                : suggestedTarget,
         averageExpenditure: averageExpenditure,
-        analysisMessage: analysisMessage,
-        daysAnalyzed: combinedData.length,
+        status: status,
+        daysAnalyzed: expenditures.length,
       );
     } catch (e) {
       developer.log(
@@ -303,7 +289,8 @@ class CalorieExpenditureService {
         currentTarget: 0,
         suggestedTarget: 0,
         averageExpenditure: 0,
-        analysisMessage: 'Error occurred during analysis: $e',
+        status: CalorieTargetStatus.error,
+        errorDetails: e.toString(),
       );
     }
   }
@@ -316,18 +303,35 @@ class CalorieExpenditureService {
       final userProfile = await _userProfileRepository.getCurrentUserProfile();
       if (userProfile == null) return false;
 
-      // Calculate new macro targets proportionally
-      final calorieRatio = newTargetCalories / userProfile.goals.targetCalories;
+      final targetCalories =
+          newTargetCalories < minimumCalorieTarget
+              ? minimumCalorieTarget
+              : newTargetCalories;
+      final goals = userProfile.goals;
+      final double protein;
+      final double carbs;
+      final double fat;
+      if (goals.targetCalories > 0) {
+        final calorieRatio = targetCalories / goals.targetCalories;
+        protein = goals.targetProtein * calorieRatio;
+        carbs = goals.targetCarbs * calorieRatio;
+        fat = goals.targetFat * calorieRatio;
+      } else {
+        // No current target to scale from: rebuild grams from the saved split.
+        final macros = macroTargetsFor(targetCalories, previous: goals);
+        protein = macros.protein;
+        carbs = macros.carbs;
+        fat = macros.fat;
+      }
 
       final newGoals = FitnessGoals(
-        goal: userProfile.goals.goal,
-        targetWeight: userProfile.goals.targetWeight,
-        targetCalories: newTargetCalories,
-        targetProtein: userProfile.goals.targetProtein * calorieRatio,
-        targetCarbs: userProfile.goals.targetCarbs * calorieRatio,
-        targetFat: userProfile.goals.targetFat * calorieRatio,
-        targetFiber:
-            userProfile.goals.targetFiber, // Keep fiber target unchanged
+        goal: goals.goal,
+        targetWeight: goals.targetWeight,
+        targetCalories: targetCalories,
+        targetProtein: protein,
+        targetCarbs: carbs,
+        targetFat: fat,
+        targetFiber: goals.targetFiber, // Keep fiber target unchanged
       );
       final updatedProfile = UserProfile(
         id: userProfile.id,
@@ -357,17 +361,19 @@ class CalorieExpenditureService {
   }
 
   /// Sync health data and perform automatic analysis
-  Future<CalorieTargetAnalysis> syncAndAnalyze() async {
-    await initialize();
+  Future<CalorieTargetAnalysis> syncAndAnalyze() =>
+      // analyzeCalorieTargets refreshes the cache itself.
+      analyzeCalorieTargets();
+}
 
-    // Refresh calorie cache from Health Connect
-    if (_healthService.isConnected) {
-      await _healthService.refreshCaloriesBurnedCache(days: 14);
-    }
-
-    // Perform analysis
-    return await analyzeCalorieTargets();
-  }
+/// Analysis outcome for the UI to translate without a BuildContext in the service.
+enum CalorieTargetStatus {
+  profileNotFound,
+  noExpenditureData,
+  increaseIntake,
+  decreaseIntake,
+  onTarget,
+  error,
 }
 
 class CalorieTargetAnalysis {
@@ -375,7 +381,8 @@ class CalorieTargetAnalysis {
   final double currentTarget;
   final double suggestedTarget;
   final double averageExpenditure;
-  final String analysisMessage;
+  final CalorieTargetStatus status;
+  final String? errorDetails;
   final int daysAnalyzed;
 
   CalorieTargetAnalysis({
@@ -383,7 +390,8 @@ class CalorieTargetAnalysis {
     required this.currentTarget,
     required this.suggestedTarget,
     required this.averageExpenditure,
-    required this.analysisMessage,
+    required this.status,
+    this.errorDetails,
     this.daysAnalyzed = 0,
   });
 }

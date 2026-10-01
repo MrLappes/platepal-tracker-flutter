@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import 'package:platepal_tracker/themes/app_theme.dart';
 import '../../models/dish_models.dart';
 import '../../models/dish.dart';
 import '../../services/storage/dish_service.dart';
@@ -107,6 +108,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
 
   bool _loading = false;
   bool _dishExists = false;
+  bool _lookupFailed = false;
   NutritionProfile _nutritionProfile = NutritionProfile.unbalanced;
   @override
   void initState() {
@@ -251,21 +253,36 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
     _pulseController.forward().then((_) => _pulseController.reverse());
   }
 
-  Future<void> _checkDishExists() async {
+  Future<bool> _checkDishExists() async {
     try {
       final existingDishes = await _dishService.getAllDishes();
       final exists = existingDishes.any(
         (existingDish) =>
             existingDish.name.toLowerCase() == widget.dish.name.toLowerCase(),
       );
-      setState(() => _dishExists = exists);
+      if (!mounted) return false;
+      setState(() {
+        _dishExists = exists;
+        _lookupFailed = false;
+      });
+      return true;
     } catch (error) {
-      debugPrint('Error checking if dish exists: $error');
-      setState(() => _dishExists = false);
+      debugPrint('Error checking if dish exists: ${error.runtimeType}');
+      if (!mounted) return false;
+      setState(() => _lookupFailed = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).screensMealsErrorLoadingDishes,
+          ),
+        ),
+      );
+      return false;
     }
   }
 
   Future<void> _handleInspect() async {
+    if (!await _checkDishExists() || !mounted) return;
     if (widget.isReferenced) {
       // For referenced dishes, check if dish exists in database
       await _handleReferencedDishInspect();
@@ -315,7 +332,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
         }
       }
     } catch (error) {
-      debugPrint('Error opening dish creation screen: $error');
+      debugPrint('Error opening dish creation screen: ${error.runtimeType}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -384,7 +401,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
       onDishCreated: (createdDish) {
         // The dish was successfully created/updated
         // The navigation result will handle the main UI updates
-        debugPrint('Dish created/updated: ${createdDish.name}');
+        debugPrint('Dish created/updated ID: ${createdDish.id}');
       },
     );
   }
@@ -556,6 +573,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final macroColors = MacroColors.of(context);
     final l10n = AppLocalizations.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -701,17 +719,14 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color:
-                                  isSpecialProfile
-                                      ? profileColor.withValues(alpha: 0.2)
-                                      : colorScheme.primary.withValues(
-                                        alpha: 0.15,
-                                      ),
+                              color: macroColors.calories.withValues(
+                                alpha: isSpecialProfile ? 0.2 : 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                               border:
                                   isSpecialProfile
                                       ? Border.all(
-                                        color: profileColor.withValues(
+                                        color: macroColors.calories.withValues(
                                           alpha: 0.5,
                                         ),
                                         width: 1,
@@ -725,7 +740,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                                   Icon(
                                     Icons.local_fire_department,
                                     size: 12,
-                                    color: profileColor,
+                                    color: macroColors.calories,
                                   ),
                                   const SizedBox(width: 4),
                                 ],
@@ -733,10 +748,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                                   '${widget.dish.totalNutrition.calories.round()} kcal',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color:
-                                        isSpecialProfile
-                                            ? profileColor
-                                            : colorScheme.primary,
+                                    color: macroColors.calories,
                                   ),
                                 ),
                               ],
@@ -751,28 +763,39 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                         'P',
                         widget.dish.totalNutrition.protein,
                         50,
-                        _getNutritionBarColor('protein'),
+                        macroColors.protein,
                         isHighlight: _shouldHighlightBar('protein'),
                       ),
                       _buildNutritionBar(
                         'C',
                         widget.dish.totalNutrition.carbs,
                         100,
-                        _getNutritionBarColor('carbs'),
+                        macroColors.carbs,
                         isHighlight: _shouldHighlightBar('carbs'),
                       ),
                       _buildNutritionBar(
                         'F',
                         widget.dish.totalNutrition.fat,
                         40,
-                        _getNutritionBarColor('fat'),
+                        macroColors.fat,
                         isHighlight: _shouldHighlightBar('fat'),
                       ),
                       const SizedBox(height: 16), // Action buttons
                       SizedBox(
                         width: double.infinity,
                         child:
-                            _dishExists
+                            _lookupFailed
+                                ? SizedBox(
+                                  height: 48,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _checkDishExists,
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(
+                                      l10n.componentsSharedErrorDisplayRetry,
+                                    ),
+                                  ),
+                                )
+                                : _dishExists
                                 ? _buildLogButton(theme, colorScheme, l10n)
                                 : _buildInspectButton(
                                   theme,
@@ -783,7 +806,9 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                       ),
 
                       // Status badge for dish state
-                      if (widget.isReferenced && !_dishExists) ...[
+                      if (!_lookupFailed &&
+                          widget.isReferenced &&
+                          !_dishExists) ...[
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -802,7 +827,9 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
                             ),
                           ],
                         ),
-                      ] else if (!widget.isReferenced && _dishExists) ...[
+                      ] else if (!_lookupFailed &&
+                          !widget.isReferenced &&
+                          _dishExists) ...[
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -852,26 +879,6 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
     }
   }
 
-  /// Gets the color for nutrition bars based on profile
-  Color _getNutritionBarColor(String nutrient) {
-    switch (nutrient) {
-      case 'protein':
-        return _nutritionProfile == NutritionProfile.highProtein
-            ? _nutritionProfile.color
-            : Colors.green;
-      case 'carbs':
-        return _nutritionProfile == NutritionProfile.highCarb
-            ? _nutritionProfile.color
-            : Colors.blue;
-      case 'fat':
-        return _nutritionProfile == NutritionProfile.highFat
-            ? _nutritionProfile.color
-            : Colors.pink;
-      default:
-        return Colors.grey;
-    }
-  }
-
   /// Determines if a nutrition bar should be highlighted
   bool _shouldHighlightBar(String nutrient) {
     switch (nutrient) {
@@ -914,7 +921,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
             ];
 
     return Container(
-      height: 40,
+      height: 48,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
@@ -971,7 +978,7 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
     final profileColor = _nutritionProfile.color;
 
     return Container(
-      height: 40,
+      height: 48,
       decoration: BoxDecoration(
         color:
             isSpecialProfile

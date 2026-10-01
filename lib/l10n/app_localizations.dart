@@ -100,6 +100,54 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
+  /// Appended to a calendar day's accessible date when meals are logged
+  ///
+  /// In en, this message translates to:
+  /// **'has meals logged'**
+  String get screensCalendarHasMealsLogged;
+
+  /// Error loading meal markers for the visible week
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load calendar dates'**
+  String get screensCalendarFailedToLoadDates;
+
+  /// Error loading the selected day's nutrition summary
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load nutrition summary'**
+  String get screensCalendarFailedToLoadSummary;
+
+  /// Calendar prompt shown when there is no calorie target
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your profile to get daily targets'**
+  String get screensCalendarProfileNudge;
+
+  /// Opens profile settings from the calendar
+  ///
+  /// In en, this message translates to:
+  /// **'Set up profile'**
+  String get screensCalendarSetUpProfile;
+
+  /// Opens the calendar quick-log dish picker
+  ///
+  /// In en, this message translates to:
+  /// **'Log meal'**
+  String get screensCalendarLogMeal;
+
+  /// Calories in a dish serving in the calendar picker
+  ///
+  /// In en, this message translates to:
+  /// **'{calories} kcal per serving'**
+  String screensCalendarCaloriesPerServing(int calories);
+
+  /// Error shown when the selected day's meal logs cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load meals for this day'**
+  String get componentsCalendarCalendarDayDetailErrorLoadingMeals;
+
   /// Message shown when no meals are logged for selected day
   ///
   /// In en, this message translates to:
@@ -166,6 +214,18 @@ abstract class AppLocalizations {
   /// **'Get AI Tip'**
   String get componentsCalendarMacroSummaryGetAiTip;
 
+  /// Progress toward a daily nutrition goal
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of goal'**
+  String componentsCalendarMacroSummaryPercentOfGoal(int percent);
+
+  /// Nutrition amount above a daily goal
+  ///
+  /// In en, this message translates to:
+  /// **'Over goal by {amount} {unit}'**
+  String componentsCalendarMacroSummaryOverBy(String amount, String unit);
+
   /// Message explaining health data source for complete days
   ///
   /// In en, this message translates to:
@@ -201,12 +261,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Protein'**
   String get componentsCalendarMacroSummaryProtein;
-
-  /// Short label for calories used in compact macro view
-  ///
-  /// In en, this message translates to:
-  /// **'Cal'**
-  String get componentsCalendarMacroSummaryCompactCalories;
 
   /// Short label for protein used in compact macro view
   ///
@@ -580,6 +634,30 @@ abstract class AppLocalizations {
   /// **'Failed'**
   String get componentsChatAgentStepsModalFailed;
 
+  /// Low severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get componentsChatAgentStepsModalSeverityLow;
+
+  /// Medium severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get componentsChatAgentStepsModalSeverityMedium;
+
+  /// High severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get componentsChatAgentStepsModalSeverityHigh;
+
+  /// Critical severity label for agent modifications
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get componentsChatAgentStepsModalSeverityCritical;
+
   /// Label for emergency override badge
   ///
   /// In en, this message translates to:
@@ -645,6 +723,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time: {time}'**
   String componentsChatAgentStepsModalTimeLabel(String time);
+
+  /// Fallback label when a processing step has no name
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Step'**
+  String get componentsChatAgentStepsModalUnknownStep;
+
+  /// Fallback explanation for a skipped processing step
+  ///
+  /// In en, this message translates to:
+  /// **'No reason provided'**
+  String get componentsChatAgentStepsModalNoReasonProvided;
+
+  /// Fallback when a processing step has no modification summary
+  ///
+  /// In en, this message translates to:
+  /// **'No summary available'**
+  String get componentsChatAgentStepsModalNoSummaryAvailable;
+
+  /// Summary of a list value in agent data
+  ///
+  /// In en, this message translates to:
+  /// **'List with {count} items'**
+  String componentsChatAgentStepsModalListItems(int count);
+
+  /// Summary of a map value in agent data
+  ///
+  /// In en, this message translates to:
+  /// **'Map with {count} keys'**
+  String componentsChatAgentStepsModalMapKeys(int count);
+
+  /// Summary of additional hidden agent data entries
+  ///
+  /// In en, this message translates to:
+  /// **'... and {count} more items'**
+  String componentsChatAgentStepsModalMoreItems(int count);
 
   /// Common tooltip for copy to clipboard
   ///
@@ -838,6 +952,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ingredients Added'**
   String get componentsChatChatInputIngredientsAdded;
+
+  /// Tooltip for removing an attached chat ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String componentsChatChatInputRemoveIngredient(String name);
+
+  /// Confirmation after adding a product as a chat ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient added to chat'**
+  String get componentsChatChatInputIngredientAdded;
+
+  /// Accessibility label for opening the chat attachment menu
+  ///
+  /// In en, this message translates to:
+  /// **'Add attachments'**
+  String get componentsChatChatInputAttachments;
 
   /// Scan barcode button text
   ///
@@ -1055,41 +1187,17 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get componentsChatMessageBubbleYesterday;
 
-  /// Add to meals button text
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Meals'**
-  String get componentsChatNutritionAnalysisCardAddToMeals;
-
-  /// Cooking instructions label
-  ///
-  /// In en, this message translates to:
-  /// **'Cooking Instructions'**
-  String get componentsChatNutritionAnalysisCardCookingInstructions;
-
   /// Dish name label
   ///
   /// In en, this message translates to:
   /// **'Dish Name'**
   String get componentsChatNutritionAnalysisCardDishName;
 
-  /// Meal type label
-  ///
-  /// In en, this message translates to:
-  /// **'Meal Type'**
-  String get componentsChatNutritionAnalysisCardMealType;
-
   /// Nutrition analysis section title
   ///
   /// In en, this message translates to:
   /// **'Nutrition Analysis'**
   String get componentsChatNutritionAnalysisCardNutritionAnalysis;
-
-  /// Serving size label
-  ///
-  /// In en, this message translates to:
-  /// **'Serving Size'**
-  String get componentsChatNutritionAnalysisCardServingSize;
 
   /// Quick actions section title
   ///
@@ -1279,6 +1387,12 @@ abstract class AppLocalizations {
   /// **'Select Meal Type'**
   String get componentsModalsDishLogModalSelectMealType;
 
+  /// Label for selecting the time of a dish log
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get componentsModalsDishLogModalSelectTime;
+
   /// Snack meal type
   ///
   /// In en, this message translates to:
@@ -1320,6 +1434,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scanning barcode...'**
   String get componentsScannerBarcodeScannerScanningBarcode;
+
+  /// Close scanner after camera permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get componentsScannerBarcodeScannerClose;
+
+  /// Instructions when camera permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera access for this app in system settings.'**
+  String get componentsScannerBarcodeScannerPermissionHint;
+
+  /// Camera scanner error
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner error: {errorCode}'**
+  String componentsScannerBarcodeScannerScannerError(String errorCode);
+
+  /// Barcode product service failed
+  ///
+  /// In en, this message translates to:
+  /// **'Food data is unavailable. Try again.'**
+  String get componentsScannerBarcodeScannerServiceUnavailable;
+
+  /// Turn on the scanner flashlight
+  ///
+  /// In en, this message translates to:
+  /// **'Turn flashlight on'**
+  String get componentsScannerBarcodeScannerTorchOn;
+
+  /// Turn off the scanner flashlight
+  ///
+  /// In en, this message translates to:
+  /// **'Turn flashlight off'**
+  String get componentsScannerBarcodeScannerTorchOff;
 
   /// Error message for product search
   ///
@@ -1363,6 +1513,264 @@ abstract class AppLocalizations {
   /// **'Search products...'**
   String get componentsScannerProductSearchSearchProducts;
 
+  /// Open product filters and sorting
+  ///
+  /// In en, this message translates to:
+  /// **'Filters & Sort'**
+  String get componentsScannerProductSearchFiltersAndSort;
+
+  /// Nutrition grade filter heading
+  ///
+  /// In en, this message translates to:
+  /// **'NUTRI-SCORE'**
+  String get componentsScannerProductSearchNutriScore;
+
+  /// Any nutrition grade
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get componentsScannerProductSearchAny;
+
+  /// Sorting heading
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get componentsScannerProductSearchSortBy;
+
+  /// Popular products section
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get componentsScannerProductSearchPopular;
+
+  /// Search results heading
+  ///
+  /// In en, this message translates to:
+  /// **'Results for \"{query}\"'**
+  String componentsScannerProductSearchResultsFor(String query);
+
+  /// Locally saved items section
+  ///
+  /// In en, this message translates to:
+  /// **'My database'**
+  String get componentsScannerProductSearchMyDatabase;
+
+  /// Open Food Facts products section
+  ///
+  /// In en, this message translates to:
+  /// **'Global feed'**
+  String get componentsScannerProductSearchGlobalFeed;
+
+  /// Last page of search results
+  ///
+  /// In en, this message translates to:
+  /// **'End of results'**
+  String get componentsScannerProductSearchEndOfResults;
+
+  /// Empty browse screen prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category or type to search'**
+  String get componentsScannerProductSearchSelectCategoryOrSearch;
+
+  /// Empty search results prompt
+  ///
+  /// In en, this message translates to:
+  /// **'No results for \"{query}\"'**
+  String componentsScannerProductSearchNoResultsFor(String query);
+
+  /// Unnamed product
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get componentsScannerProductSearchUnknown;
+
+  /// Calories unit
+  ///
+  /// In en, this message translates to:
+  /// **'kcal'**
+  String get componentsScannerProductSearchKcal;
+
+  /// Protein abbreviation in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'P:'**
+  String get componentsScannerProductSearchProteinAbbreviation;
+
+  /// Carbohydrate abbreviation in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'C:'**
+  String get componentsScannerProductSearchCarbsAbbreviation;
+
+  /// Fat abbreviation in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'F:'**
+  String get componentsScannerProductSearchFatAbbreviation;
+
+  /// Gram unit in result summaries
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get componentsScannerProductSearchGramsAbbreviation;
+
+  /// Local ingredient result type
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient'**
+  String get componentsScannerProductSearchIngredient;
+
+  /// Number of ingredients in a local dish result
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ingredient — dish} other{{count} ingredients — dish}}'**
+  String componentsScannerProductSearchDishIngredients(int count);
+
+  /// Failed to load browse results
+  ///
+  /// In en, this message translates to:
+  /// **'Products are unavailable. Try again.'**
+  String get componentsScannerProductSearchBrowseUnavailable;
+
+  /// Name of a product with no identifying data
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown product'**
+  String get componentsScannerProductSearchUnknownProduct;
+
+  /// All product categories
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get componentsScannerProductSearchCategoryAll;
+
+  /// Fruit category
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get componentsScannerProductSearchCategoryFruits;
+
+  /// Vegetable category
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables'**
+  String get componentsScannerProductSearchCategoryVegetables;
+
+  /// Dairy category
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get componentsScannerProductSearchCategoryDairy;
+
+  /// Meat category
+  ///
+  /// In en, this message translates to:
+  /// **'Meat'**
+  String get componentsScannerProductSearchCategoryMeat;
+
+  /// Seafood category
+  ///
+  /// In en, this message translates to:
+  /// **'Seafood'**
+  String get componentsScannerProductSearchCategorySeafood;
+
+  /// Beverage category
+  ///
+  /// In en, this message translates to:
+  /// **'Beverages'**
+  String get componentsScannerProductSearchCategoryBeverages;
+
+  /// Cereal category
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals'**
+  String get componentsScannerProductSearchCategoryCereals;
+
+  /// Bread category
+  ///
+  /// In en, this message translates to:
+  /// **'Breads'**
+  String get componentsScannerProductSearchCategoryBreads;
+
+  /// Snack category
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get componentsScannerProductSearchCategorySnacks;
+
+  /// Sweets category
+  ///
+  /// In en, this message translates to:
+  /// **'Sweets'**
+  String get componentsScannerProductSearchCategorySweets;
+
+  /// Legume category
+  ///
+  /// In en, this message translates to:
+  /// **'Legumes'**
+  String get componentsScannerProductSearchCategoryLegumes;
+
+  /// Nut category
+  ///
+  /// In en, this message translates to:
+  /// **'Nuts'**
+  String get componentsScannerProductSearchCategoryNuts;
+
+  /// Condiment category
+  ///
+  /// In en, this message translates to:
+  /// **'Condiments'**
+  String get componentsScannerProductSearchCategoryCondiments;
+
+  /// Oil and fat category
+  ///
+  /// In en, this message translates to:
+  /// **'Oils & Fats'**
+  String get componentsScannerProductSearchCategoryOilsAndFats;
+
+  /// Frozen foods category
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get componentsScannerProductSearchCategoryFrozen;
+
+  /// Prepared meals category
+  ///
+  /// In en, this message translates to:
+  /// **'Ready Meals'**
+  String get componentsScannerProductSearchCategoryReadyMeals;
+
+  /// Baby food category
+  ///
+  /// In en, this message translates to:
+  /// **'Baby Foods'**
+  String get componentsScannerProductSearchCategoryBabyFoods;
+
+  /// Sort by popularity
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular'**
+  String get componentsScannerProductSearchSortPopularity;
+
+  /// Sort by name
+  ///
+  /// In en, this message translates to:
+  /// **'Name A–Z'**
+  String get componentsScannerProductSearchSortName;
+
+  /// Sort by date
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get componentsScannerProductSearchSortNewest;
+
+  /// Sort by completeness
+  ///
+  /// In en, this message translates to:
+  /// **'Most Complete'**
+  String get componentsScannerProductSearchSortCompleteness;
+
   /// Retry button text
   ///
   /// In en, this message translates to:
@@ -1398,6 +1806,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI is thinking...'**
   String get providersChatProviderAiThinking;
+
+  /// Default chat message when only ingredients are attached
+  ///
+  /// In en, this message translates to:
+  /// **'What can I make with these ingredients?'**
+  String get providersChatProviderIngredientsPrompt;
 
   /// Test response message when no API key is configured
   ///
@@ -1471,6 +1885,12 @@ abstract class AppLocalizations {
   /// **'AI Chat Assistant'**
   String get screensChatChatAssistant;
 
+  /// Header for the chat processing indicator
+  ///
+  /// In en, this message translates to:
+  /// **'SYSTEM ANALYZING ::'**
+  String get screensChatSystemAnalyzing;
+
   /// Chat cleared success message
   ///
   /// In en, this message translates to:
@@ -1512,12 +1932,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No API key configured'**
   String get screensChatNoApiKeyConfigured;
-
-  /// Button text for reloading API key configuration
-  ///
-  /// In en, this message translates to:
-  /// **'Reload API Key'**
-  String get screensChatReloadApiKeyButton;
 
   /// Basic Information
   ///
@@ -1669,11 +2083,17 @@ abstract class AppLocalizations {
   /// **'PlatePal Tracker'**
   String get screensHomeAppTitle;
 
-  /// Welcome message for PlatePal Tracker
+  /// Message when local data storage fails to initialize
   ///
   /// In en, this message translates to:
-  /// **'Welcome to PlatePal Tracker'**
-  String get screensHomeWelcomeToPlatePalTracker;
+  /// **'Unable to load your data.'**
+  String get providersStorageError;
+
+  /// Button to retry initializing local data storage
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get providersStorageRetry;
 
   /// Success message when dish added to favorites
   ///
@@ -1729,6 +2149,12 @@ abstract class AppLocalizations {
   /// **'Error loading dishes'**
   String get screensMealsErrorLoadingDishes;
 
+  /// Advice shown after a meal list load error
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your dishes. Please try again.'**
+  String get screensMealsLoadFailedHint;
+
   /// Error message when dish update fails
   ///
   /// In en, this message translates to:
@@ -1752,6 +2178,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No dishes found'**
   String get screensMealsNoDishesFound;
+
+  /// Dish category shown when no meal category is assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get screensMealsOtherCategory;
 
   /// Success message when dish removed from favorites
   ///
@@ -1885,6 +2317,12 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get screensMenuLanguage;
 
+  /// Language choice that follows the device language
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get screensMenuSystemDefault;
+
   /// Subtitle for about option
   ///
   /// In en, this message translates to:
@@ -1908,6 +2346,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nutrition Goals'**
   String get screensMenuNutritionGoals;
+
+  /// Display name of the Oceanic color theme
+  ///
+  /// In en, this message translates to:
+  /// **'Oceanic'**
+  String get screensMenuOceanic;
+
+  /// Display name of the Forest color theme
+  ///
+  /// In en, this message translates to:
+  /// **'Forest'**
+  String get screensMenuForest;
+
+  /// Display name of the PlatePal color theme
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal'**
+  String get screensMenuPlatePal;
 
   /// Profile label
   ///
@@ -1950,6 +2406,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Statistics'**
   String get screensMenuViewStatistics;
+
+  /// Title of the in-app privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get screensPrivacyTitle;
+
+  /// Effective date of the privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Effective date: 2026-09-30'**
+  String get screensPrivacyEffectiveDate;
+
+  /// Privacy policy overview heading
+  ///
+  /// In en, this message translates to:
+  /// **'At a glance'**
+  String get screensPrivacyOverviewTitle;
+
+  /// Privacy policy overview
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker is an offline-first nutrition tracker. We do not run servers for your app data or require an account, and the app has no analytics, advertising, or tracking SDKs. The optional network features below contact their providers when used.'**
+  String get screensPrivacyOverviewBody;
+
+  /// Local storage section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Data on your device'**
+  String get screensPrivacyStorageTitle;
+
+  /// Local storage and API key handling
+  ///
+  /// In en, this message translates to:
+  /// **'Dishes, meal logs, profile information (including body measurements), goals, chat history, and settings are stored on your device in SQLite or SharedPreferences. Saved food photos may also be kept in app storage. The API key you enter is stored using the platform\'s secure storage; legacy keys in SharedPreferences are migrated when possible.'**
+  String get screensPrivacyStorageBody;
+
+  /// Optional AI chat section heading
+  ///
+  /// In en, this message translates to:
+  /// **'AI chat'**
+  String get screensPrivacyAiTitle;
+
+  /// AI provider data sharing
+  ///
+  /// In en, this message translates to:
+  /// **'AI chat is optional and requires your own API key. When used, your chat messages, attached images, and, when relevant, conversation history, your profile, meal logs or nutrition summaries, and saved dishes are sent to OpenAI or the OpenAI-compatible endpoint you configured. The key is sent to that provider for authentication. That provider handles this information under its own privacy policy; choose an endpoint you trust. We do not receive these requests.'**
+  String get screensPrivacyAiBody;
+
+  /// Open Food Facts section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts'**
+  String get screensPrivacyFoodFactsTitle;
+
+  /// Food lookup data sharing
+  ///
+  /// In en, this message translates to:
+  /// **'When you search for food or scan a barcode, the app sends your search text or barcode number and selected filters to world.openfoodfacts.org. Product information and images can be downloaded from Open Food Facts.'**
+  String get screensPrivacyFoodFactsBody;
+
+  /// Health integration section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect and Apple Health'**
+  String get screensPrivacyHealthTitle;
+
+  /// Health access and local use
+  ///
+  /// In en, this message translates to:
+  /// **'With your permission, the app reads calories burned (total and active on Android, active and basal on iOS) from Health Connect or Apple Health and writes nutrition for meals you log to that service. Readings are cached on this device and used for in-app energy and goal calculations; the app does not include Health readings in AI requests or send them to a developer server. Health Connect and Apple Health control their own stored records.'**
+  String get screensPrivacyHealthBody;
+
+  /// External content section heading
+  ///
+  /// In en, this message translates to:
+  /// **'External links and images'**
+  String get screensPrivacyExternalTitle;
+
+  /// Third-party images and links
+  ///
+  /// In en, this message translates to:
+  /// **'The Contributors screen loads avatar images from GitHub\'s avatars.githubusercontent.com. Opening GitHub, the online policy, other external websites, or remote product images contacts those services, which may see your IP address and process requests under their own policies.'**
+  String get screensPrivacyExternalBody;
+
+  /// Manual export and import section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import'**
+  String get screensPrivacyExportTitle;
+
+  /// Export, import, and pre-import backups
+  ///
+  /// In en, this message translates to:
+  /// **'Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.'**
+  String get screensPrivacyExportBody;
+
+  /// Android operating system backup section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Android backup'**
+  String get screensPrivacyBackupTitle;
+
+  /// Possible Google backup of app data and Health cache
+  ///
+  /// In en, this message translates to:
+  /// **'Android\'s system backup may copy the app\'s database and preferences, including cached Health calorie readings and chat history, to your Google account or transfer them to another device. The backup rules exclude secure-storage preference files, but a legacy API key may be present in other preferences until migration. Check your Android backup settings to control this.'**
+  String get screensPrivacyBackupBody;
+
+  /// Data deletion section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your data'**
+  String get screensPrivacyDeletionTitle;
+
+  /// Reset, uninstall, and remaining copies
+  ///
+  /// In en, this message translates to:
+  /// **'In Profile, Reset App deletes the SQLite database, SharedPreferences, and saved API key on this device. Uninstalling removes app-private data. Reset does not remove saved images, exported or pre-import backup files, copies shared elsewhere, Health Connect or Apple Health records already written, or system backups; remove those separately where applicable.'**
+  String get screensPrivacyDeletionBody;
+
+  /// Children's privacy section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get screensPrivacyChildrenTitle;
+
+  /// Children's privacy notice
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal Tracker is not intended for children. The app has no age verification; a parent or guardian should supervise use, especially before enabling external services or sharing sensitive information.'**
+  String get screensPrivacyChildrenBody;
+
+  /// Policy changes section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Changes to this policy'**
+  String get screensPrivacyChangesTitle;
+
+  /// How changes to the policy are announced
+  ///
+  /// In en, this message translates to:
+  /// **'We may update this policy when the app changes. The effective date above shows when this version took effect; review the current policy in the app or GitHub repository.'**
+  String get screensPrivacyChangesBody;
+
+  /// Privacy contact section heading
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get screensPrivacyContactTitle;
+
+  /// How to contact the project about privacy
+  ///
+  /// In en, this message translates to:
+  /// **'For privacy questions, open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.'**
+  String get screensPrivacyContactBody;
+
+  /// Privacy policy menu subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'What leaves the device and how to control your data'**
+  String get screensPrivacyMenuSubtitle;
+
+  /// Button to open the privacy policy on GitHub
+  ///
+  /// In en, this message translates to:
+  /// **'View online'**
+  String get screensPrivacyViewOnline;
+
+  /// Error shown when the online privacy policy cannot be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the privacy policy.'**
+  String get screensPrivacyLinkError;
 
   /// About the app title
   ///
@@ -2113,6 +2743,12 @@ abstract class AppLocalizations {
   /// **'Failed to remove API key'**
   String get screensSettingsApiKeySettingsFailedToRemoveApiKey;
 
+  /// Error message for an insecure or invalid base URL
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL must start with https:// (http:// is only allowed for localhost)'**
+  String get screensSettingsApiKeySettingsInvalidBaseUrl;
+
   /// Button text for opening OpenAI platform
   ///
   /// In en, this message translates to:
@@ -2167,6 +2803,24 @@ abstract class AppLocalizations {
   /// **'Remove API Key'**
   String get screensSettingsApiKeySettingsRemoveApiKey;
 
+  /// Tooltip for revealing the API key
+  ///
+  /// In en, this message translates to:
+  /// **'Show API key'**
+  String get screensSettingsApiKeySettingsShowKey;
+
+  /// Tooltip for concealing the API key
+  ///
+  /// In en, this message translates to:
+  /// **'Hide API key'**
+  String get screensSettingsApiKeySettingsHideKey;
+
+  /// Tooltip for deleting the saved API key
+  ///
+  /// In en, this message translates to:
+  /// **'Delete API key'**
+  String get screensSettingsApiKeySettingsDeleteKey;
+
   /// Confirmation message for removing API key
   ///
   /// In en, this message translates to:
@@ -2196,6 +2850,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update API Key'**
   String get screensSettingsApiKeySettingsUpdateApiKey;
+
+  /// API mode section title
+  ///
+  /// In en, this message translates to:
+  /// **'API Mode'**
+  String get screensSettingsApiKeySettingsApiMode;
+
+  /// Compatibility mode toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI Compatible API'**
+  String get screensSettingsApiKeySettingsCompatibleApi;
+
+  /// Compatibility mode enabled description
+  ///
+  /// In en, this message translates to:
+  /// **'Using custom OpenAI-compatible API endpoint'**
+  String get screensSettingsApiKeySettingsUsingCustomEndpoint;
+
+  /// Compatibility mode disabled description
+  ///
+  /// In en, this message translates to:
+  /// **'Using official OpenAI API'**
+  String get screensSettingsApiKeySettingsUsingOfficialApi;
+
+  /// Custom API base URL label
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get screensSettingsApiKeySettingsBaseUrl;
+
+  /// Custom API base URL helper
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the base URL for your OpenAI-compatible API'**
+  String get screensSettingsApiKeySettingsBaseUrlHelper;
+
+  /// Custom API base URL required error
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL is required for compatibility mode'**
+  String get screensSettingsApiKeySettingsBaseUrlRequired;
+
+  /// Generic API key label for compatible endpoints
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get screensSettingsApiKeySettingsApiKeyGeneric;
+
+  /// Compatible API key helper
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your API key or leave empty to disable AI features'**
+  String get screensSettingsApiKeySettingsCompatibilityKeyHelper;
+
+  /// Compatible API key required error
+  ///
+  /// In en, this message translates to:
+  /// **'API key is required for compatibility mode'**
+  String get screensSettingsApiKeySettingsCompatibilityKeyRequired;
+
+  /// Compatible API key length error
+  ///
+  /// In en, this message translates to:
+  /// **'API key seems too short'**
+  String get screensSettingsApiKeySettingsCompatibilityKeyTooShort;
+
+  /// Custom API model name label
+  ///
+  /// In en, this message translates to:
+  /// **'Model Name'**
+  String get screensSettingsApiKeySettingsModelName;
+
+  /// Custom API model name helper
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the exact model name supported by your API'**
+  String get screensSettingsApiKeySettingsModelNameHelper;
+
+  /// Custom API model required error
+  ///
+  /// In en, this message translates to:
+  /// **'Model name is required for compatibility mode'**
+  String get screensSettingsApiKeySettingsModelNameRequired;
 
   /// Switch subtitle for enabling deep search
   ///
@@ -2245,6 +2983,12 @@ abstract class AppLocalizations {
   /// **'Chat settings saved successfully'**
   String get screensSettingsChatAgentSettingsChatSettingsSaved;
 
+  /// Snackbar message when saving chat settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save chat settings'**
+  String get screensSettingsChatAgentSettingsSaveFailed;
+
   /// Buy me creatine button text
   ///
   /// In en, this message translates to:
@@ -2256,6 +3000,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check Out Our GitHub Repository'**
   String get screensSettingsContributorsCheckGitHub;
+
+  /// Tooltip on a contributor profile link
+  ///
+  /// In en, this message translates to:
+  /// **'Open {name} on GitHub'**
+  String screensSettingsContributorsOpenGitHubProfile(String name);
 
   /// Plural form for contributor count
   ///
@@ -2425,6 +3175,558 @@ abstract class AppLocalizations {
   /// **'Skip Duplicates'**
   String get screensSettingsImportDataSkipDuplicates;
 
+  /// Export preparation status
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your data...'**
+  String get screensSettingsExportDataPreparing;
+
+  /// Export preview heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export preview'**
+  String get screensSettingsExportDataPreview;
+
+  /// Selected export format
+  ///
+  /// In en, this message translates to:
+  /// **'Format: {format}'**
+  String screensSettingsExportDataFormatLabel(String format);
+
+  /// Number of selected export sections
+  ///
+  /// In en, this message translates to:
+  /// **'Selected data types: {count, plural, =1{1 type} other{{count} types}}'**
+  String screensSettingsExportDataTypesSelected(int count);
+
+  /// Export preview status
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to export'**
+  String get screensSettingsExportDataReady;
+
+  /// Dishes section description
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved recipes and dishes'**
+  String get screensSettingsExportDataDishesDescription;
+
+  /// Meal logs section description
+  ///
+  /// In en, this message translates to:
+  /// **'Your meal history and nutrition logs'**
+  String get screensSettingsExportDataMealLogsDescription;
+
+  /// User profiles section description
+  ///
+  /// In en, this message translates to:
+  /// **'User profile and preferences'**
+  String get screensSettingsExportDataUserProfilesDescription;
+
+  /// Ingredients section description
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient database'**
+  String get screensSettingsExportDataIngredientsDescription;
+
+  /// Supplements section description
+  ///
+  /// In en, this message translates to:
+  /// **'Supplement tracking data'**
+  String get screensSettingsExportDataSupplementsDescription;
+
+  /// Goals section description
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness and nutrition goals'**
+  String get screensSettingsExportDataFitnessGoalsDescription;
+
+  /// All data export description
+  ///
+  /// In en, this message translates to:
+  /// **'Export all your data'**
+  String get screensSettingsExportDataAllDataDescription;
+
+  /// Format selection heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export format'**
+  String get screensSettingsExportDataFormatTitle;
+
+  /// JSON format description
+  ///
+  /// In en, this message translates to:
+  /// **'Structured format, best for backups'**
+  String get screensSettingsExportDataJsonDescription;
+
+  /// CSV format description
+  ///
+  /// In en, this message translates to:
+  /// **'Spreadsheet format, good for analysis'**
+  String get screensSettingsExportDataCsvDescription;
+
+  /// Export error heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export error'**
+  String get screensSettingsExportDataError;
+
+  /// Export results heading
+  ///
+  /// In en, this message translates to:
+  /// **'Export results'**
+  String get screensSettingsExportDataResults;
+
+  /// Export or import file name
+  ///
+  /// In en, this message translates to:
+  /// **'File: {fileName}'**
+  String screensSettingsExportDataFileLabel(String fileName);
+
+  /// Export file path
+  ///
+  /// In en, this message translates to:
+  /// **'Location: {path}'**
+  String screensSettingsExportDataLocationLabel(String path);
+
+  /// Export results count label
+  ///
+  /// In en, this message translates to:
+  /// **'Items exported:'**
+  String get screensSettingsExportDataItemsExported;
+
+  /// Share exported file button
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get screensSettingsExportDataShare;
+
+  /// Show export path button
+  ///
+  /// In en, this message translates to:
+  /// **'Show file location'**
+  String get screensSettingsExportDataShowFileLocation;
+
+  /// Export path dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Export location'**
+  String get screensSettingsExportDataLocationTitle;
+
+  /// Export path dialog description
+  ///
+  /// In en, this message translates to:
+  /// **'Your exported file is located at:'**
+  String get screensSettingsExportDataLocationDescription;
+
+  /// Sharing before an export exists
+  ///
+  /// In en, this message translates to:
+  /// **'No file to share. Export your data first.'**
+  String get screensSettingsExportDataNoFileToShare;
+
+  /// Missing exported file message
+  ///
+  /// In en, this message translates to:
+  /// **'Export file not found. Export your data again.'**
+  String get screensSettingsExportDataFileNotFound;
+
+  /// Sharing error
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share file: {error}'**
+  String screensSettingsExportDataShareFailed(String error);
+
+  /// Shared export text
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal data export - {fileName}'**
+  String screensSettingsExportDataShareText(String fileName);
+
+  /// Shared export subject
+  ///
+  /// In en, this message translates to:
+  /// **'PlatePal data export'**
+  String get screensSettingsExportDataShareSubject;
+
+  /// Export failure with technical details
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String screensSettingsExportDataFailedDetail(String error);
+
+  /// Export stopped when a selected section cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export the selected data. No file was created. Please try again.'**
+  String get screensSettingsExportDataSectionFailed;
+
+  /// Export file write failed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the export file. Please try again.'**
+  String get screensSettingsExportDataWriteFailed;
+
+  /// Failure when sharing the exported file
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share the file. Please try again.'**
+  String get screensSettingsExportDataShareProblem;
+
+  /// Restore progress heading
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring from backup...'**
+  String get screensSettingsImportDataRestoring;
+
+  /// Import progress count
+  ///
+  /// In en, this message translates to:
+  /// **'Processing {current} of {total} items'**
+  String screensSettingsImportDataProcessingItems(int current, int total);
+
+  /// Currently imported data section
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {type}'**
+  String screensSettingsImportDataCurrentType(String type);
+
+  /// Restore progress detail
+  ///
+  /// In en, this message translates to:
+  /// **'Undoing the last import...'**
+  String get screensSettingsImportDataUndoing;
+
+  /// File picker section heading
+  ///
+  /// In en, this message translates to:
+  /// **'File selection'**
+  String get screensSettingsImportDataFileSelection;
+
+  /// Tooltip for clearing the selected import file
+  ///
+  /// In en, this message translates to:
+  /// **'Remove selected file'**
+  String get screensSettingsImportDataRemoveFile;
+
+  /// Replace selected import file
+  ///
+  /// In en, this message translates to:
+  /// **'Change file'**
+  String get screensSettingsImportDataChangeFile;
+
+  /// Accepted import file formats
+  ///
+  /// In en, this message translates to:
+  /// **'Supported formats: JSON, CSV'**
+  String get screensSettingsImportDataSupportedFormats;
+
+  /// All data import description
+  ///
+  /// In en, this message translates to:
+  /// **'Import everything from the file'**
+  String get screensSettingsImportDataAllDataDescription;
+
+  /// Skip duplicates description
+  ///
+  /// In en, this message translates to:
+  /// **'Keep existing data; skip imported duplicates'**
+  String get screensSettingsImportDataSkipDescription;
+
+  /// Overwrite duplicates description
+  ///
+  /// In en, this message translates to:
+  /// **'Replace existing data with imported data'**
+  String get screensSettingsImportDataOverwriteDescription;
+
+  /// Import advanced options heading
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced options'**
+  String get screensSettingsImportDataAdvancedOptions;
+
+  /// Always-enabled import validation setting
+  ///
+  /// In en, this message translates to:
+  /// **'Validate data before import'**
+  String get screensSettingsImportDataValidateBeforeImport;
+
+  /// Import validation description
+  ///
+  /// In en, this message translates to:
+  /// **'Check data integrity and show warnings'**
+  String get screensSettingsImportDataValidateDescription;
+
+  /// Always-enabled backup setting
+  ///
+  /// In en, this message translates to:
+  /// **'Create backup before import'**
+  String get screensSettingsImportDataBackupBeforeImport;
+
+  /// Import backup description
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically back up existing data'**
+  String get screensSettingsImportDataBackupDescription;
+
+  /// Import error heading
+  ///
+  /// In en, this message translates to:
+  /// **'Import issues'**
+  String get screensSettingsImportDataIssues;
+
+  /// Import error list heading
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed errors:'**
+  String get screensSettingsImportDataDetailedErrors;
+
+  /// Introduces untranslated details from an imported file
+  ///
+  /// In en, this message translates to:
+  /// **'File and row details (may appear in English):'**
+  String get screensSettingsImportDataTechnicalDetails;
+
+  /// Successful import results heading
+  ///
+  /// In en, this message translates to:
+  /// **'Import results'**
+  String get screensSettingsImportDataResults;
+
+  /// Partial import warning heading
+  ///
+  /// In en, this message translates to:
+  /// **'Import completed with skipped items'**
+  String get screensSettingsImportDataPartialResults;
+
+  /// Partial import totals
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {imported}, skipped {skipped}'**
+  String screensSettingsImportDataImportedSkipped(int imported, int skipped);
+
+  /// Expand skipped item reasons
+  ///
+  /// In en, this message translates to:
+  /// **'Show reasons'**
+  String get screensSettingsImportDataShowReasons;
+
+  /// Section that could not be imported
+  ///
+  /// In en, this message translates to:
+  /// **'Failed section: {section}'**
+  String screensSettingsImportDataFailedSection(String section);
+
+  /// Import confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm import'**
+  String get screensSettingsImportDataConfirmTitle;
+
+  /// Import confirmation section list label
+  ///
+  /// In en, this message translates to:
+  /// **'Selected sections:'**
+  String get screensSettingsImportDataSelectedSections;
+
+  /// Import confirmation duplicate handling
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicates: {strategy}'**
+  String screensSettingsImportDataDuplicatesLabel(String strategy);
+
+  /// Confirm import button
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get screensSettingsImportDataConfirmAction;
+
+  /// Failed safety backup dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed'**
+  String get screensSettingsImportDataBackupFailedTitle;
+
+  /// Failed safety backup warning
+  ///
+  /// In en, this message translates to:
+  /// **'The automatic backup could not be created. Continue importing without a backup?'**
+  String get screensSettingsImportDataBackupFailedDescription;
+
+  /// Explicit unsafe import action
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without backup'**
+  String get screensSettingsImportDataContinueWithoutBackup;
+
+  /// File picker error
+  ///
+  /// In en, this message translates to:
+  /// **'Error selecting file: {error}'**
+  String screensSettingsImportDataFileSelectionFailed(String error);
+
+  /// Import failure count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Import completed with 1 error} other{Import completed with {count} errors}}'**
+  String screensSettingsImportDataCompletedWithErrors(int count);
+
+  /// Import failure with technical details
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String screensSettingsImportDataFailedDetail(String error);
+
+  /// Last import backup heading
+  ///
+  /// In en, this message translates to:
+  /// **'Backup available'**
+  String get screensSettingsImportDataBackupAvailable;
+
+  /// Last import backup description
+  ///
+  /// In en, this message translates to:
+  /// **'A backup from your last import is available.'**
+  String get screensSettingsImportDataBackupAvailableDescription;
+
+  /// Backup creation time
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {date}'**
+  String screensSettingsImportDataBackupCreated(String date);
+
+  /// Backup size in kilobytes
+  ///
+  /// In en, this message translates to:
+  /// **'Size: {size} KB'**
+  String screensSettingsImportDataBackupSize(String size);
+
+  /// Restore backup button
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last import'**
+  String get screensSettingsImportDataUndoLastImport;
+
+  /// Minutes since backup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute ago} other{{count} minutes ago}}'**
+  String screensSettingsImportDataMinutesAgo(int count);
+
+  /// Hours since backup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
+  String screensSettingsImportDataHoursAgo(int count);
+
+  /// Days since backup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String screensSettingsImportDataDaysAgo(int count);
+
+  /// Restore confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from backup'**
+  String get screensSettingsImportDataRestoreTitle;
+
+  /// Restore confirmation warning
+  ///
+  /// In en, this message translates to:
+  /// **'This will restore your data to the state before the last import. All changes made since then will be lost. Are you sure?'**
+  String get screensSettingsImportDataRestoreWarning;
+
+  /// Confirm restore button
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get screensSettingsImportDataRestoreAction;
+
+  /// Successful restore message
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully restored from backup!'**
+  String get screensSettingsImportDataRestoreSuccess;
+
+  /// Restore error details
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String screensSettingsImportDataRestoreFailedDetail(String error);
+
+  /// Selected import file has disappeared
+  ///
+  /// In en, this message translates to:
+  /// **'Import file not found. Select it again.'**
+  String get screensSettingsImportDataFileMissing;
+
+  /// Import file size limit
+  ///
+  /// In en, this message translates to:
+  /// **'This file is too large. Select a file of at most {maxSize} MB.'**
+  String screensSettingsImportDataFileTooLarge(int maxSize);
+
+  /// Invalid JSON import file
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not valid JSON. Check it and try again.'**
+  String get screensSettingsImportDataInvalidJson;
+
+  /// Import requires a supported file extension
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file format. Select a JSON or CSV file.'**
+  String get screensSettingsImportDataUnsupportedFormat;
+
+  /// Import failed validation before writing any data
+  ///
+  /// In en, this message translates to:
+  /// **'The file contains invalid data. Check the details and try again.'**
+  String get screensSettingsImportDataInvalidData;
+
+  /// File picker failure without technical details
+  ///
+  /// In en, this message translates to:
+  /// **'Could not select a file. Please try again.'**
+  String get screensSettingsImportDataFileSelectionProblem;
+
+  /// Last import backup unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'No backup was found to restore.'**
+  String get screensSettingsImportDataBackupMissing;
+
+  /// Restore stopped before changing data
+  ///
+  /// In en, this message translates to:
+  /// **'The backup could not be read. Nothing was changed.'**
+  String get screensSettingsImportDataBackupUnreadable;
+
+  /// Restore stopped when a safety snapshot failed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not protect your current data. Nothing was changed.'**
+  String get screensSettingsImportDataSnapshotFailed;
+
+  /// Generic restore failure without exposing exception details
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore your backup. Check your data before trying again.'**
+  String get screensSettingsImportDataRestoreProblem;
+
+  /// Restore failed and the safety rollback succeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed, but your previous data was left unchanged.'**
+  String get screensSettingsImportDataRestoreRolledBack;
+
+  /// Restore and rollback failed; location of safety copy
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed and your previous data may be incomplete. A recovery copy is saved at {path}.'**
+  String screensSettingsImportDataRestoreCopySaved(String path);
+
   /// Activity level field label
   ///
   /// In en, this message translates to:
@@ -2448,18 +3750,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Build Muscle'**
   String get screensSettingsImportProfileCompletionBuildMuscle;
-
-  /// Centimeters unit
-  ///
-  /// In en, this message translates to:
-  /// **'cm'**
-  String get screensSettingsImportProfileCompletionCm;
-
-  /// Email field label
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get screensSettingsImportProfileCompletionEmail;
 
   /// Extra active activity level
   ///
@@ -2508,30 +3798,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Imperial (lb, ft)'**
   String get screensSettingsImportProfileCompletionImperial;
-
-  /// Inches unit
-  ///
-  /// In en, this message translates to:
-  /// **'in'**
-  String get screensSettingsImportProfileCompletionInches;
-
-  /// Invalid email validation message
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a valid email address'**
-  String get screensSettingsImportProfileCompletionInvalidEmail;
-
-  /// Kilograms unit
-  ///
-  /// In en, this message translates to:
-  /// **'kg'**
-  String get screensSettingsImportProfileCompletionKg;
-
-  /// Pounds unit
-  ///
-  /// In en, this message translates to:
-  /// **'lb'**
-  String get screensSettingsImportProfileCompletionLb;
 
   /// Lightly active activity level
   ///
@@ -2622,12 +3888,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weight must be between 30-300 kg'**
   String get screensSettingsImportProfileCompletionWeightRange;
-
-  /// Years unit
-  ///
-  /// In en, this message translates to:
-  /// **'years'**
-  String get screensSettingsImportProfileCompletionYears;
 
   /// Discard changes button text
   ///
@@ -2946,6 +4206,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading data'**
   String get screensSettingsStatisticsErrorLoadingData;
+
+  /// Retry guidance after statistics load fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your statistics. Please try again.'**
+  String get screensSettingsStatisticsLoadFailedHint;
 
   /// Estimated balance label
   ///
@@ -3606,6 +4872,689 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Here is the dish information:'**
   String get servicesChatAgentFallbackDishInfo;
+
+  /// Reply when the model returned JSON without response text
+  ///
+  /// In en, this message translates to:
+  /// **'No response text found.'**
+  String get servicesChatAgentFallbackNoResponse;
+
+  /// Reply when the model response has an invalid format
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t process my response. Please try again.'**
+  String get servicesChatAgentFallbackFormatting;
+
+  /// Title of the dish image section
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get screensDishCreateImage;
+
+  /// Placeholder for a dish without an image
+  ///
+  /// In en, this message translates to:
+  /// **'No image selected'**
+  String get screensDishCreateNoImageSelected;
+
+  /// Button for replacing a dish image
+  ///
+  /// In en, this message translates to:
+  /// **'Change image'**
+  String get screensDishCreateChangeImage;
+
+  /// Button for choosing a dish image
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get screensDishCreateAddImage;
+
+  /// Confirmation before leaving an edited dish
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your unsaved changes?'**
+  String get screensDishCreateConfirmDiscardChanges;
+
+  /// Compact protein label on an ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'P'**
+  String get screensDishCreateProteinAbbreviation;
+
+  /// Compact carbohydrate label on an ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'C'**
+  String get screensDishCreateCarbsAbbreviation;
+
+  /// Compact fat label on an ingredient
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get screensDishCreateFatAbbreviation;
+
+  /// Label for an ingredient unit selector
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get componentsDishesDishFormIngredientFormModalUnit;
+
+  /// Nutrition basis for ingredients counted in pieces
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition per piece'**
+  String get componentsDishesDishFormIngredientFormModalNutritionPerPiece;
+
+  /// Nutrition basis for ingredients counted in slices
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition per slice'**
+  String get componentsDishesDishFormIngredientFormModalNutritionPerSlice;
+
+  /// Confirmation after filling the ingredient form from a product
+  ///
+  /// In en, this message translates to:
+  /// **'Product information loaded. Adjust quantity and save.'**
+  String
+  get componentsDishesDishFormIngredientFormModalProductInformationLoaded;
+
+  /// Tooltip for dish nutrition recalculation
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate from ingredients'**
+  String
+  get componentsDishesDishFormSmartNutritionCardRecalculateFromIngredients;
+
+  /// Title for a protein-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High Protein'**
+  String get componentsDishesDishFormSmartNutritionCardHighProtein;
+
+  /// Title for a carbohydrate-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High Carb'**
+  String get componentsDishesDishFormSmartNutritionCardHighCarb;
+
+  /// Title for a fat-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High Fat'**
+  String get componentsDishesDishFormSmartNutritionCardHighFat;
+
+  /// Title for a balanced dish
+  ///
+  /// In en, this message translates to:
+  /// **'Well Balanced'**
+  String get componentsDishesDishFormSmartNutritionCardWellBalanced;
+
+  /// Feedback for a protein-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent! High protein content supports muscle building and satiety.'**
+  String get componentsDishesDishFormSmartNutritionCardHighProteinFeedback;
+
+  /// Feedback for a carbohydrate-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'Great for energy! Perfect pre-workout or active days.'**
+  String get componentsDishesDishFormSmartNutritionCardHighCarbFeedback;
+
+  /// Feedback for a fat-rich dish
+  ///
+  /// In en, this message translates to:
+  /// **'High in fats. Enjoy in moderation and balance with other meals.'**
+  String get componentsDishesDishFormSmartNutritionCardHighFatFeedback;
+
+  /// Feedback for a balanced dish
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect balance! This dish provides well-rounded nutrition.'**
+  String get componentsDishesDishFormSmartNutritionCardBalancedFeedback;
+
+  /// Feedback when dish nutrition needs more data
+  ///
+  /// In en, this message translates to:
+  /// **'Enter nutrition values to see smart analysis and recommendations.'**
+  String get componentsDishesDishFormSmartNutritionCardUnbalancedFeedback;
+
+  /// No description provided for @screensSettingsProfileSettingsPhysicalStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical Stats'**
+  String get screensSettingsProfileSettingsPhysicalStats;
+
+  /// No description provided for @screensSettingsProfileSettingsBodyFatOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Body Fat % (optional)'**
+  String get screensSettingsProfileSettingsBodyFatOptional;
+
+  /// No description provided for @screensSettingsProfileSettingsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get screensSettingsProfileSettingsOptional;
+
+  /// No description provided for @screensSettingsProfileSettingsNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get screensSettingsProfileSettingsNameHint;
+
+  /// No description provided for @screensSettingsProfileSettingsCustomizeMacroRatios.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Macro Ratios'**
+  String get screensSettingsProfileSettingsCustomizeMacroRatios;
+
+  /// No description provided for @screensSettingsProfileSettingsImperialHeightRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Height must be between 39 and 98 inches'**
+  String get screensSettingsProfileSettingsImperialHeightRange;
+
+  /// No description provided for @screensSettingsProfileSettingsImperialWeightRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight must be between 66 and 660 lbs'**
+  String get screensSettingsProfileSettingsImperialWeightRange;
+
+  /// No description provided for @screensSettingsProfileSettingsValidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number'**
+  String get screensSettingsProfileSettingsValidNumber;
+
+  /// No description provided for @screensSettingsProfileSettingsBodyFatRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Body fat must be between 3% and 50%'**
+  String get screensSettingsProfileSettingsBodyFatRange;
+
+  /// No description provided for @screensSettingsProfileSettingsBaseMetabolicRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Metabolic Rate'**
+  String get screensSettingsProfileSettingsBaseMetabolicRate;
+
+  /// No description provided for @screensSettingsProfileSettingsTotalDailyEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Daily Energy'**
+  String get screensSettingsProfileSettingsTotalDailyEnergy;
+
+  /// No description provided for @screensSettingsProfileSettingsResettingAppData.
+  ///
+  /// In en, this message translates to:
+  /// **'Resetting application data...'**
+  String get screensSettingsProfileSettingsResettingAppData;
+
+  /// No description provided for @screensSettingsProfileSettingsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load profile data: {error}'**
+  String screensSettingsProfileSettingsLoadFailed(String error);
+
+  /// No description provided for @screensSettingsProfileSettingsUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile: {error}'**
+  String screensSettingsProfileSettingsUpdateFailed(String error);
+
+  /// No description provided for @screensSettingsMacroCustomizationDailyCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily calories: {calories} kcal'**
+  String screensSettingsMacroCustomizationDailyCalories(String calories);
+
+  /// No description provided for @screensSettingsMacroCustomizationMacroRatios.
+  ///
+  /// In en, this message translates to:
+  /// **'Macro Ratios'**
+  String get screensSettingsMacroCustomizationMacroRatios;
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber Target'**
+  String get screensSettingsMacroCustomizationFiberTarget;
+
+  /// No description provided for @screensSettingsMacroCustomizationTargetPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Preview'**
+  String get screensSettingsMacroCustomizationTargetPreview;
+
+  /// No description provided for @screensSettingsMacroCustomizationQuickPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Presets'**
+  String get screensSettingsMacroCustomizationQuickPresets;
+
+  /// No description provided for @screensSettingsMacroCustomizationTotalRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {value}%'**
+  String screensSettingsMacroCustomizationTotalRatio(String value);
+
+  /// No description provided for @screensSettingsMacroCustomizationPinMacro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin {macro}'**
+  String screensSettingsMacroCustomizationPinMacro(String macro);
+
+  /// No description provided for @screensSettingsMacroCustomizationUnpinMacro.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin {macro}'**
+  String screensSettingsMacroCustomizationUnpinMacro(String macro);
+
+  /// No description provided for @screensSettingsMacroCustomizationPinnedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned - value locked'**
+  String get screensSettingsMacroCustomizationPinnedValue;
+
+  /// No description provided for @screensSettingsMacroCustomizationTooManyPins.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot adjust - too many pins active'**
+  String get screensSettingsMacroCustomizationTooManyPins;
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g total'**
+  String screensSettingsMacroCustomizationFiberTotal(String grams);
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberPer1000Calories.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g per 1000 calories'**
+  String screensSettingsMacroCustomizationFiberPer1000Calories(String grams);
+
+  /// No description provided for @screensSettingsMacroCustomizationFiberGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: 14 g per 1000 calories (FDA guideline). Range: 5-35 g per 1000 calories'**
+  String get screensSettingsMacroCustomizationFiberGuidance;
+
+  /// No description provided for @screensSettingsMacroCustomizationDailyMacroTargets.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Macro Targets'**
+  String get screensSettingsMacroCustomizationDailyMacroTargets;
+
+  /// No description provided for @screensSettingsMacroCustomizationPresetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from common macro distributions'**
+  String get screensSettingsMacroCustomizationPresetDescription;
+
+  /// No description provided for @screensSettingsMacroCustomizationBalancedPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced (30P / 40C / 30F)'**
+  String get screensSettingsMacroCustomizationBalancedPreset;
+
+  /// No description provided for @screensSettingsMacroCustomizationHighProteinPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'High Protein (40P / 30C / 30F)'**
+  String get screensSettingsMacroCustomizationHighProteinPreset;
+
+  /// No description provided for @screensSettingsMacroCustomizationProfileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User profile not found. Please set up your profile.'**
+  String get screensSettingsMacroCustomizationProfileNotFound;
+
+  /// No description provided for @screensSettingsMacroCustomizationLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load profile: {error}'**
+  String screensSettingsMacroCustomizationLoadFailed(String error);
+
+  /// No description provided for @screensSettingsMacroCustomizationSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save macro targets: {error}'**
+  String screensSettingsMacroCustomizationSaveFailed(String error);
+
+  /// Statistics missing profile error
+  ///
+  /// In en, this message translates to:
+  /// **'User profile not found'**
+  String get screensSettingsStatisticsProfileNotFound;
+
+  /// Test data error
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate test data: {error}'**
+  String screensSettingsStatisticsTestDataFailed(String error);
+
+  /// Number of days in a calorie phase
+  ///
+  /// In en, this message translates to:
+  /// **'({count, plural, =1{1 day} other{{count} days}})'**
+  String screensSettingsStatisticsPhaseDays(int count);
+
+  /// Daily calorie difference
+  ///
+  /// In en, this message translates to:
+  /// **'{value} cal/day'**
+  String screensSettingsStatisticsCalPerDay(String value);
+
+  /// Calorie value
+  ///
+  /// In en, this message translates to:
+  /// **'{value} cal'**
+  String screensSettingsStatisticsCalValue(String value);
+
+  /// Calorie expenditure coverage
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie expenditure data coverage: {percent}% ({healthDays}/{totalDays} {totalDays, plural, =1{day} other{days}})'**
+  String screensSettingsStatisticsCoverage(
+    String percent,
+    int healthDays,
+    int totalDays,
+  );
+
+  /// Measured calorie balance label
+  ///
+  /// In en, this message translates to:
+  /// **'Actual Balance'**
+  String get screensSettingsStatisticsActualBalance;
+
+  /// Accessible summary of a statistics chart
+  ///
+  /// In en, this message translates to:
+  /// **'{chart}: {count} data points, chart scale {minimum} to {maximum}'**
+  String screensSettingsStatisticsChartSummary(
+    String chart,
+    int count,
+    String minimum,
+    String maximum,
+  );
+
+  /// Analysis requires a saved profile
+  ///
+  /// In en, this message translates to:
+  /// **'User profile not found'**
+  String get screensSettingsHealthSettingsAnalysisProfileNotFound;
+
+  /// Analysis has no expenditure data
+  ///
+  /// In en, this message translates to:
+  /// **'No calorie expenditure data available for analysis'**
+  String get screensSettingsHealthSettingsAnalysisNoData;
+
+  /// Recommendation when target is too low
+  ///
+  /// In en, this message translates to:
+  /// **'Your calorie expenditure is significantly higher than your current target suggests. Consider increasing your calorie intake.'**
+  String get screensSettingsHealthSettingsAnalysisIncreaseIntake;
+
+  /// Recommendation when target is too high
+  ///
+  /// In en, this message translates to:
+  /// **'Your calorie expenditure is lower than your current target suggests. Consider adjusting your calorie intake or increasing activity.'**
+  String get screensSettingsHealthSettingsAnalysisDecreaseIntake;
+
+  /// Recommendation when target matches activity
+  ///
+  /// In en, this message translates to:
+  /// **'Your current calorie targets seem well-aligned with your activity level.'**
+  String get screensSettingsHealthSettingsAnalysisOnTarget;
+
+  /// Analysis error with details
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred during analysis: {error}'**
+  String screensSettingsHealthSettingsAnalysisError(String error);
+
+  /// Thinking step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your request and planning approach...'**
+  String get servicesChatAgentThinking;
+
+  /// Thinking step detail
+  ///
+  /// In en, this message translates to:
+  /// **'Breaking down your request and determining the best approach'**
+  String get servicesChatAgentThinkingDetail;
+
+  /// Context gathering progress
+  ///
+  /// In en, this message translates to:
+  /// **'Gathering relevant context and user data...'**
+  String get servicesChatAgentContext;
+
+  /// Context gathering detail
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting your profile, preferences, and relevant meal history'**
+  String get servicesChatAgentContextDetail;
+
+  /// Response generation progress
+  ///
+  /// In en, this message translates to:
+  /// **'Crafting your personalized response...'**
+  String get servicesChatAgentResponse;
+
+  /// Response generation detail
+  ///
+  /// In en, this message translates to:
+  /// **'Combining all information to create a helpful and personalized answer'**
+  String get servicesChatAgentResponseDetail;
+
+  /// Dish processing progress
+  ///
+  /// In en, this message translates to:
+  /// **'Processing and analyzing dishes...'**
+  String get servicesChatAgentDish;
+
+  /// Dish processing detail
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating nutrition values, ingredients, and meal details'**
+  String get servicesChatAgentDishDetail;
+
+  /// Dish validation progress
+  ///
+  /// In en, this message translates to:
+  /// **'Validating and refining dishes...'**
+  String get servicesChatAgentDishValidation;
+
+  /// Dish validation detail
+  ///
+  /// In en, this message translates to:
+  /// **'Ensuring dishes have accurate nutrition and ingredient data'**
+  String get servicesChatAgentDishValidationDetail;
+
+  /// Error handling progress
+  ///
+  /// In en, this message translates to:
+  /// **'Handling unexpected error...'**
+  String get servicesChatAgentError;
+
+  /// Error handling detail
+  ///
+  /// In en, this message translates to:
+  /// **'Attempting to recover from error and provide a helpful response'**
+  String get servicesChatAgentErrorDetail;
+
+  /// Deep verification progress
+  ///
+  /// In en, this message translates to:
+  /// **'Validating context sufficiency for optimal response...'**
+  String get servicesChatAgentVerify;
+
+  /// Deep verification detail
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing gathered context to ensure we can provide the best possible answer'**
+  String get servicesChatAgentVerifyDetail;
+
+  /// Image processing progress
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your uploaded image...'**
+  String get servicesChatAgentImage;
+
+  /// Image processing detail
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting food items, ingredients, and portion sizes from your image'**
+  String get servicesChatAgentImageDetail;
+
+  /// Unknown step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Processing step: {step}...'**
+  String servicesChatAgentUnknownStep(String step);
+
+  /// Unknown step detail
+  ///
+  /// In en, this message translates to:
+  /// **'Processing information for step: {step}'**
+  String servicesChatAgentUnknownDetail(String step);
+
+  /// Agent restart progress
+  ///
+  /// In en, this message translates to:
+  /// **'Restarting with enhanced strategy (attempt {attempt}/3)...'**
+  String servicesChatAgentRestart(int attempt);
+
+  /// Failed step progress
+  ///
+  /// In en, this message translates to:
+  /// **'Step \"{step}\" encountered an issue, attempting recovery...'**
+  String servicesChatAgentFailedStep(String step);
+
+  /// Failed chat message: the provider rejected the API key (401/403)
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key was rejected. Check it in the API key settings.'**
+  String get componentsChatMessageBubbleErrorAuth;
+
+  /// Failed chat message: rate limit or quota reached (429)
+  ///
+  /// In en, this message translates to:
+  /// **'Your AI provider\'s rate limit or quota was reached. Wait a moment or check your plan and credit, then try again.'**
+  String get componentsChatMessageBubbleErrorRateLimit;
+
+  /// Failed chat message: network error or timeout
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the AI provider or the request timed out. Check your internet connection and try again.'**
+  String get componentsChatMessageBubbleErrorNetwork;
+
+  /// Failed chat message: provider server error (5xx)
+  ///
+  /// In en, this message translates to:
+  /// **'The AI provider is currently unavailable. Please try again in a moment.'**
+  String get componentsChatMessageBubbleErrorServer;
+
+  /// Failed chat message: the stored API key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key couldn\'t be read on this device. Enter it again in the API key settings.'**
+  String get componentsChatMessageBubbleErrorKeyUnreadable;
+
+  /// Failed chat message: unknown cause
+  ///
+  /// In en, this message translates to:
+  /// **'The message couldn\'t be sent. Please try again.'**
+  String get componentsChatMessageBubbleErrorUnknown;
+
+  /// Button on a failed message that opens the API key settings
+  ///
+  /// In en, this message translates to:
+  /// **'API key settings'**
+  String get componentsChatMessageBubbleOpenApiKeySettings;
+
+  /// Note under an AI answer when profile, dish or meal data failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Some of your data couldn\'t be loaded; the answer may be less personal.'**
+  String get componentsChatMessageBubbleNoteContextIncomplete;
+
+  /// Note under an AI answer when the attached image could not be processed
+  ///
+  /// In en, this message translates to:
+  /// **'The image couldn\'t be analyzed.'**
+  String get componentsChatMessageBubbleNoteImageNotAnalyzed;
+
+  /// Snackbar when saved chat messages could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Some of your chat history couldn\'t be loaded.'**
+  String get screensChatHistoryLoadFailed;
+
+  /// Snackbar when chat messages could not be saved
+  ///
+  /// In en, this message translates to:
+  /// **'Your chat history couldn\'t be saved on this device.'**
+  String get screensChatHistorySaveFailed;
+
+  /// Snackbar when agent mode settings could not be read or written
+  ///
+  /// In en, this message translates to:
+  /// **'Chat settings couldn\'t be loaded or saved. Defaults are used for now.'**
+  String get screensChatSettingsFailed;
+
+  /// Snackbar when chat profiles could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Chat profiles couldn\'t be loaded. Defaults are shown; your saved profiles were not changed.'**
+  String get screensChatProfilesLoadFailed;
+
+  /// Snackbar when a chat profile change could not be saved
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile changes couldn\'t be saved.'**
+  String get screensChatProfileSaveFailed;
+
+  /// Chat screen title when the stored API key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Your API key couldn\'t be read'**
+  String get screensChatApiKeyReadFailedTitle;
+
+  /// Chat screen explanation when the stored API key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'The key stored on this device couldn\'t be accessed. Reload to try again, or enter it again in the API key settings.'**
+  String get screensChatApiKeyReadFailedMessage;
+
+  /// Banner when health or calorie history failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Some health or calorie data couldn\'t be loaded, so the charts may be incomplete.'**
+  String get screensSettingsStatisticsPartialLoadFailed;
+
+  /// Snackbar when today's health data failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s health data couldn\'t be loaded.'**
+  String get screensSettingsHealthSettingsLoadDataFailed;
+
+  /// Snackbar when Health Connect settings could not be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect settings couldn\'t be opened.'**
+  String get screensSettingsHealthSettingsOpenSettingsFailed;
+
+  /// Calendar message when the user profile failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile couldn\'t be loaded, so daily targets aren\'t shown.'**
+  String get screensCalendarProfileLoadFailed;
 }
 
 class _AppLocalizationsDelegate
