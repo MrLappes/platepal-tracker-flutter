@@ -3070,5 +3070,7 @@
   "screensDishCreateImportIncomplete": "Ergänze oder entferne vor dem Speichern die rot markierten Zutaten.",
   "screensPlatePalImportTitle": "Aus PlatePal importieren",
   "screensPlatePalImportInvalid": "Dieser PlatePal-Link ist ungültig oder unvollständig. Teile das Gericht erneut aus PlatePal.",
-  "screensPlatePalImportUnsupported": "Dieses Gericht wurde von einer neueren PlatePal-Version geteilt. Aktualisiere PlatePal Tracker, um es zu importieren."
+  "screensPlatePalImportUnsupported": "Dieses Gericht wurde von einer neueren PlatePal-Version geteilt. Aktualisiere PlatePal Tracker, um es zu importieren.",
+  "screensMenuPlatePalPromo": "PlatePal – Mahlzeiten mit anderen teilen",
+  "screensMenuPlatePalPromoSubtitle": "Hol dir die PlatePal-App bei Google Play"
 }

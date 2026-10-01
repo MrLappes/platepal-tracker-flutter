@@ -3346,5 +3346,9 @@
   "screensPlatePalImportInvalid": "This PlatePal link is invalid or incomplete. Share the dish again from PlatePal.",
   "@screensPlatePalImportInvalid": {"description": "Error for a PlatePal import link that failed validation"},
   "screensPlatePalImportUnsupported": "This dish was shared by a newer version of PlatePal. Update PlatePal Tracker to import it.",
-  "@screensPlatePalImportUnsupported": {"description": "Error for a PlatePal import link with an unknown format version"}
+  "@screensPlatePalImportUnsupported": {"description": "Error for a PlatePal import link with an unknown format version"},
+  "screensMenuPlatePalPromo": "PlatePal – share meals with others",
+  "@screensMenuPlatePalPromo": {"description": "Menu entry promoting the PlatePal sister app"},
+  "screensMenuPlatePalPromoSubtitle": "Get the PlatePal app on Google Play",
+  "@screensMenuPlatePalPromoSubtitle": {"description": "Subtitle of the PlatePal menu entry, which opens its Play Store listing"}
 }

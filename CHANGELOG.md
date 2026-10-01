@@ -14,6 +14,7 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 - The chat assistant can propose diary entries ("Log 1.5 servings of Pasta as Lunch today – 640 kcal") for saved dishes or as a quick add. Nothing is logged until you tap Confirm; Edit opens the prefilled log sheet and Dismiss discards the proposal. Confirmed entries sync to Health Connect like manual ones.
 - Automatic backup (Menu → Backup): daily or weekly full ZIP backups with photos, written when you open the app and one is due, to a folder you choose or the app's storage. The newest 5 automatic backups are kept; the screen shows the last backup and has "Back up now". A failed automatic backup is reported the next time you open the app.
 - Import a dish shared from the PlatePal app (`platepaltracker://import-dish` links): the link is validated and opens a new, unsaved dish form with the name, description, servings and ingredient names filled in, and a banner to check the ingredients and amounts. Invalid links show an error.
+- Menu entry "PlatePal – share meals with others" that opens the PlatePal app on Google Play.
 
 ### Changed
 

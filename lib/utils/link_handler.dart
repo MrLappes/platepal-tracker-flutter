@@ -192,6 +192,14 @@ class LinkHandler {
     await openUrl(context, 'https://plate-pal.de');
   }
 
+  /// Play Store listing of PlatePal, the sister app for sharing meals.
+  static const String platePalPlayStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.lappalis.plate_pal';
+
+  static Future<void> openPlatePalPlayStore(BuildContext context) async {
+    await openUrl(context, platePalPlayStoreUrl);
+  }
+
   /// Test method to verify URL launching capabilities
   static Future<void> testUrlLaunching(BuildContext context) async {
     final l10n = AppLocalizations.of(context);

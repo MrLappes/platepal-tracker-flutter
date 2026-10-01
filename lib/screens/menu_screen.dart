@@ -9,6 +9,7 @@ import '../providers/locale_provider.dart';
 import '../services/diagnostic_log_service.dart';
 import '../services/health_service.dart';
 import '../utils/feedback_mail.dart';
+import '../utils/link_handler.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key, this.diagnostics});
@@ -216,6 +217,14 @@ class MenuScreen extends StatelessWidget {
                     AppLocalizations.of(context).screensMenuViewContributors,
                 icon: Icons.people,
                 onTap: () => context.push('/settings/contributions'),
+              ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensMenuPlatePalPromo,
+                subtitle:
+                    AppLocalizations.of(context).screensMenuPlatePalPromoSubtitle,
+                icon: Icons.groups_outlined,
+                onTap: () => LinkHandler.openPlatePalPlayStore(context),
               ),
             ],
           ),

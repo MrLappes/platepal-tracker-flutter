@@ -3879,4 +3879,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensPlatePalImportUnsupported =>
       'Este plato se compartió desde una versión más reciente de PlatePal. Actualiza PlatePal Tracker para importarlo.';
+
+  @override
+  String get screensMenuPlatePalPromo => 'PlatePal: comparte comidas con otros';
+
+  @override
+  String get screensMenuPlatePalPromoSubtitle =>
+      'Consigue la app PlatePal en Google Play';
 }
