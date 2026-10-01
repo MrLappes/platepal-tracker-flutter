@@ -428,6 +428,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       );
       final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
       final dailyCalories = calorieTargetForGoal(tdee, _selectedFitnessGoal);
+      if (!dailyCalories.isFinite || dailyCalories <= 0) {
+        _showErrorSnackBar(
+          AppLocalizations.of(
+            context,
+          ).screensSettingsProfileSettingsInvalidCalorieTarget,
+        );
+        return;
+      }
       const defaultEmail = "user@platepal.app";
 
       // Get current user ID from session service
@@ -1124,27 +1132,34 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     if (_originalProfile == null) return const SizedBox.shrink();
 
     final locale = Localizations.localeOf(context).toString();
-    // Calculate current values for display
+    // Partially typed or invalid values fall back to the saved profile.
     final isMetric = _selectedUnitSystem == 'metric';
     final height =
-        _metricMeasurement(
-          _heightController,
-          _displayedHeight,
-          _preciseHeight,
-          isMetric,
-          2.54,
-        ) ??
+        (_validateHeight(_heightController.text) == null
+            ? _metricMeasurement(
+              _heightController,
+              _displayedHeight,
+              _preciseHeight,
+              isMetric,
+              2.54,
+            )
+            : null) ??
         _originalProfile!.height;
     final weight =
-        _metricMeasurement(
-          _weightController,
-          _displayedWeight,
-          _preciseWeight,
-          isMetric,
-          1 / 2.2046,
-        ) ??
+        (_validateWeight(_weightController.text) == null
+            ? _metricMeasurement(
+              _weightController,
+              _displayedWeight,
+              _preciseWeight,
+              isMetric,
+              1 / 2.2046,
+            )
+            : null) ??
         _originalProfile!.weight;
-    final age = int.tryParse(_ageController.text) ?? _originalProfile!.age;
+    final age =
+        _validateAge(_ageController.text) == null
+            ? int.parse(_ageController.text.trim())
+            : _originalProfile!.age;
 
     final bmi = weight / ((height / 100) * (height / 100));
     final bmr = mifflinStJeorBmr(

@@ -83,7 +83,9 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
 
             // Calculate fiber per 1000 calories with validation
             final calculatedFiber =
-                userProfile.goals.targetFiber / (_dailyCalories / 1000);
+                _dailyCalories > 0
+                    ? userProfile.goals.targetFiber / (_dailyCalories / 1000)
+                    : 14.0;
             _fiberPer1000Cal = calculatedFiber.clamp(5.0, 35.0);
           }
         } else {

@@ -3442,4 +3442,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String componentsLowCalorieWarningMessage(String calories, String threshold) {
     return 'Ein tägliches Kalorienziel von $calories kcal liegt unter $threshold kcal. Möglicherweise stimmt etwas nicht: Bitte prüfe deine Profilangaben wie Gewicht, Größe, Alter und Aktivitätslevel. Eine sehr niedrige Kalorienzufuhr sollte nur unter ärztlicher Aufsicht erfolgen.';
   }
+
+  @override
+  String get screensSettingsProfileSettingsInvalidCalorieTarget =>
+      'Aus diesen Angaben lässt sich kein Kalorienziel berechnen. Bitte prüfe dein Gewicht, deine Größe und dein Alter.';
 }

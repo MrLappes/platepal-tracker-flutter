@@ -2899,5 +2899,7 @@
       "calories": {"type": "String"},
       "threshold": {"type": "String"}
     }
-  }
+  },
+  "screensSettingsProfileSettingsInvalidCalorieTarget": "Con estos datos no se puede calcular un objetivo calórico. Revisa tu peso, altura y edad.",
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Error cuando los datos del perfil dan un objetivo calórico de 0 kcal o menos, por lo que el perfil no se guarda"}
 }

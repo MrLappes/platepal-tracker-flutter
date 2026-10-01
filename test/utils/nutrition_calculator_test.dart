@@ -103,12 +103,19 @@ void main() {
   group('isLowCalorieTarget', () {
     test('flags targets below the 1200 kcal warning threshold', () {
       expect(lowCalorieWarningThreshold, 1200);
-      expect(isLowCalorieTarget(1199.9), isTrue);
+      expect(isLowCalorieTarget(1199.4), isTrue);
       expect(isLowCalorieTarget(800), isTrue);
       expect(isLowCalorieTarget(0), isTrue);
       expect(isLowCalorieTarget(1200), isFalse);
       expect(isLowCalorieTarget(2500), isFalse);
       expect(isLowCalorieTarget(double.nan), isFalse);
+      expect(isLowCalorieTarget(double.infinity), isFalse);
+    });
+
+    test('uses the whole-kcal value that is displayed', () {
+      expect(isLowCalorieTarget(1199.6), isFalse);
+      expect(isLowCalorieTarget(1199.5), isFalse);
+      expect(isLowCalorieTarget(1199.49), isTrue);
     });
   });
 

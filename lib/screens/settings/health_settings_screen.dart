@@ -379,7 +379,8 @@ class _HealthSettingsScreenState extends State<HealthSettingsScreen> {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   // Failed analyses report 0 kcal, which is not a real target.
-                  if (analysis.needsAdjustment || analysis.currentTarget > 0)
+                  if (analysis.status != CalorieTargetStatus.profileNotFound &&
+                      analysis.status != CalorieTargetStatus.error)
                     LowCalorieTargetWarning(
                       calories:
                           analysis.needsAdjustment

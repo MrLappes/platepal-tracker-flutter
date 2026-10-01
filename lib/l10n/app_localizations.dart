@@ -5567,6 +5567,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A daily calorie target of {calories} kcal is below {threshold} kcal. Something may be wrong: please check your profile values such as weight, height, age and activity level. Very low calorie intakes should only be followed under medical supervision.'**
   String componentsLowCalorieWarningMessage(String calories, String threshold);
+
+  /// Error when the profile values give a calorie target of 0 kcal or less, so the profile is not saved
+  ///
+  /// In en, this message translates to:
+  /// **'No calorie target can be calculated from these values. Please check your weight, height and age.'**
+  String get screensSettingsProfileSettingsInvalidCalorieTarget;
 }
 
 class _AppLocalizationsDelegate

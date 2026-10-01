@@ -2929,5 +2929,7 @@
       "calories": {"type": "String"},
       "threshold": {"type": "String"}
     }
-  }
+  },
+  "screensSettingsProfileSettingsInvalidCalorieTarget": "Aus diesen Angaben lässt sich kein Kalorienziel berechnen. Bitte prüfe dein Gewicht, deine Größe und dein Alter.",
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Fehler, wenn die Profilangaben ein Kalorienziel von 0 kcal oder weniger ergeben und das Profil daher nicht gespeichert wird"}
 }

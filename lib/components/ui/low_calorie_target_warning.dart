@@ -29,7 +29,6 @@ class LowCalorieTargetWarning extends StatelessWidget {
       padding: padding,
       child: Semantics(
         container: true,
-        liveRegion: true,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
