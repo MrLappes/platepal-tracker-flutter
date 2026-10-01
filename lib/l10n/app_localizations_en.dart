@@ -1390,7 +1390,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.';
+      'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us. If you turn on automatic backup, the app also writes full ZIP backups to a folder you choose (or to app storage) when one is due and keeps the newest five.';
 
   @override
   String get screensPrivacyBackupTitle => 'Android backup';
@@ -3706,4 +3706,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get componentsChatMealLogProposalInvalid =>
       'The assistant\'s entry couldn\'t be read. Try asking again.';
+
+  @override
+  String get screensBackupTitle => 'Backup';
+
+  @override
+  String get screensMenuBackupSubtitle => 'Automatic backups with photos';
+
+  @override
+  String get screensBackupAutomatic => 'Automatic backup';
+
+  @override
+  String get screensBackupAutomaticSubtitle =>
+      'Saves a full backup with photos when you open the app and one is due';
+
+  @override
+  String get screensBackupDaily => 'Daily';
+
+  @override
+  String get screensBackupWeekly => 'Weekly';
+
+  @override
+  String get screensBackupFolder => 'Backup folder';
+
+  @override
+  String get screensBackupFolderDefault =>
+      'App storage (deleted when the app is uninstalled)';
+
+  @override
+  String get screensBackupChooseFolder => 'Choose';
+
+  @override
+  String get screensBackupUseDefaultFolder => 'Use app storage';
+
+  @override
+  String get screensBackupFolderPickFailed =>
+      'Couldn\'t open the folder picker.';
+
+  @override
+  String screensBackupKeepNote(int count) {
+    return 'The newest $count automatic backups are kept; older ones are deleted.';
+  }
+
+  @override
+  String get screensBackupNever => 'No backup yet';
+
+  @override
+  String screensBackupLast(String date) {
+    return 'Last backup: $date';
+  }
+
+  @override
+  String screensBackupLastFailed(String date) {
+    return 'Last attempt failed: $date';
+  }
+
+  @override
+  String get screensBackupNow => 'Back up now';
+
+  @override
+  String get screensBackupDone => 'Backup saved';
+
+  @override
+  String get screensBackupFailed =>
+      'Backup failed. Check the folder and free space.';
+
+  @override
+  String get screensBackupFailureNotice => 'The last automatic backup failed.';
+
+  @override
+  String get screensBackupOpenSettings => 'Settings';
 }

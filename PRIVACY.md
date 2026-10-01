@@ -28,7 +28,7 @@ The Contributors screen loads avatar images from GitHub's avatars.githubusercont
 
 ## Export and import
 
-Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.
+Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us. If you turn on automatic backup, the app also writes full ZIP backups to a folder you choose (or to app storage) when one is due and keeps the newest five.
 
 ## Diagnostic log and feedback
 

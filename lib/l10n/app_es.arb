@@ -1517,7 +1517,7 @@
   "@screensPrivacyExportTitle": {
     "description": "Título de la sección de exportación e importación"
   },
-  "screensPrivacyExportBody": "Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.",
+  "screensPrivacyExportBody": "Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes.",
   "@screensPrivacyExportBody": {
     "description": "Exportación, importación y copias previas"
   },
@@ -3014,5 +3014,25 @@
   "componentsChatMealLogProposalLogged": "Registrado",
   "componentsChatMealLogProposalDismissed": "Descartado",
   "componentsChatMealLogProposalDishMissing": "Este plato ya no existe.",
-  "componentsChatMealLogProposalInvalid": "No se pudo leer la entrada del asistente. Vuelve a preguntar."
+  "componentsChatMealLogProposalInvalid": "No se pudo leer la entrada del asistente. Vuelve a preguntar.",
+  "screensBackupTitle": "Copia de seguridad",
+  "screensMenuBackupSubtitle": "Copias automáticas con fotos",
+  "screensBackupAutomatic": "Copia de seguridad automática",
+  "screensBackupAutomaticSubtitle": "Guarda una copia completa con fotos al abrir la app cuando toca",
+  "screensBackupDaily": "Diaria",
+  "screensBackupWeekly": "Semanal",
+  "screensBackupFolder": "Carpeta de copias",
+  "screensBackupFolderDefault": "Almacenamiento de la app (se borra al desinstalarla)",
+  "screensBackupChooseFolder": "Elegir",
+  "screensBackupUseDefaultFolder": "Usar almacenamiento de la app",
+  "screensBackupFolderPickFailed": "No se pudo abrir el selector de carpetas.",
+  "screensBackupKeepNote": "Se conservan las {count} copias automáticas más recientes; las anteriores se eliminan.",
+  "screensBackupNever": "Aún no hay copias",
+  "screensBackupLast": "Última copia: {date}",
+  "screensBackupLastFailed": "Último intento fallido: {date}",
+  "screensBackupNow": "Hacer copia ahora",
+  "screensBackupDone": "Copia guardada",
+  "screensBackupFailed": "La copia falló. Revisa la carpeta y el espacio libre.",
+  "screensBackupFailureNotice": "La última copia automática falló.",
+  "screensBackupOpenSettings": "Ajustes"
 }

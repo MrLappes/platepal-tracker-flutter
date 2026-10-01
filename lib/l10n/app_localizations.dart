@@ -2494,7 +2494,7 @@ abstract class AppLocalizations {
   /// Export, import, and pre-import backups
   ///
   /// In en, this message translates to:
-  /// **'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.'**
+  /// **'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us. If you turn on automatic backup, the app also writes full ZIP backups to a folder you choose (or to app storage) when one is due and keeps the newest five.'**
   String get screensPrivacyExportBody;
 
   /// Android operating system backup section heading
@@ -6094,6 +6094,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The assistant\'s entry couldn\'t be read. Try asking again.'**
   String get componentsChatMealLogProposalInvalid;
+
+  /// Title of the backup settings screen and its menu entry
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get screensBackupTitle;
+
+  /// Subtitle of the backup menu entry
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups with photos'**
+  String get screensMenuBackupSubtitle;
+
+  /// Switch that turns on automatic backups
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup'**
+  String get screensBackupAutomatic;
+
+  /// Explains when automatic backups run
+  ///
+  /// In en, this message translates to:
+  /// **'Saves a full backup with photos when you open the app and one is due'**
+  String get screensBackupAutomaticSubtitle;
+
+  /// Automatic backup frequency
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get screensBackupDaily;
+
+  /// Automatic backup frequency
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get screensBackupWeekly;
+
+  /// Title of the backup folder setting
+  ///
+  /// In en, this message translates to:
+  /// **'Backup folder'**
+  String get screensBackupFolder;
+
+  /// Backup folder when the user has not chosen one
+  ///
+  /// In en, this message translates to:
+  /// **'App storage (deleted when the app is uninstalled)'**
+  String get screensBackupFolderDefault;
+
+  /// Button that opens the folder picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get screensBackupChooseFolder;
+
+  /// Button that resets the backup folder to the default
+  ///
+  /// In en, this message translates to:
+  /// **'Use app storage'**
+  String get screensBackupUseDefaultFolder;
+
+  /// Shown when the folder picker fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the folder picker.'**
+  String get screensBackupFolderPickFailed;
+
+  /// Explains backup rotation
+  ///
+  /// In en, this message translates to:
+  /// **'The newest {count} automatic backups are kept; older ones are deleted.'**
+  String screensBackupKeepNote(int count);
+
+  /// Shown before the first backup
+  ///
+  /// In en, this message translates to:
+  /// **'No backup yet'**
+  String get screensBackupNever;
+
+  /// Date and time of the last successful backup
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}'**
+  String screensBackupLast(String date);
+
+  /// Date and time of the last failed backup
+  ///
+  /// In en, this message translates to:
+  /// **'Last attempt failed: {date}'**
+  String screensBackupLastFailed(String date);
+
+  /// Button that writes a backup immediately
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get screensBackupNow;
+
+  /// Shown after a manual backup
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get screensBackupDone;
+
+  /// Shown when a manual backup failed
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed. Check the folder and free space.'**
+  String get screensBackupFailed;
+
+  /// Snackbar on app start after a failed automatic backup
+  ///
+  /// In en, this message translates to:
+  /// **'The last automatic backup failed.'**
+  String get screensBackupFailureNotice;
+
+  /// Snackbar action that opens the backup settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get screensBackupOpenSettings;
 }
 
 class _AppLocalizationsDelegate

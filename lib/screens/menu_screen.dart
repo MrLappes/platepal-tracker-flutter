@@ -126,6 +126,14 @@ class MenuScreen extends StatelessWidget {
                 icon: Icons.file_upload,
                 onTap: () => context.push('/settings/import-data'),
               ),
+              _buildSettingsTile(
+                context,
+                title: AppLocalizations.of(context).screensBackupTitle,
+                subtitle:
+                    AppLocalizations.of(context).screensMenuBackupSubtitle,
+                icon: Icons.backup_outlined,
+                onTap: () => context.push('/settings/backup'),
+              ),
             ],
           ),
           _buildSettingsSection(
