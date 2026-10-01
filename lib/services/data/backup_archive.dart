@@ -7,6 +7,9 @@ import 'package:path/path.dart' as p;
 const String backupArchiveDataFile = 'platepal_data.json';
 const String backupArchiveImageDir = 'images';
 
+/// Folder in the app documents directory that holds dish photos.
+const String dishImagesDirName = 'dish_images';
+
 /// Limits applied to entries of an imported archive.
 const int maxBackupImageBytes = 20 * 1024 * 1024;
 const int maxBackupDataBytes = 50 * 1024 * 1024;
@@ -35,6 +38,27 @@ class BackupArchiveContents {
 Iterable<Map<dynamic, dynamic>> _dishes(Map<String, dynamic> data) {
   final dishes = data['dishes'];
   return dishes is List ? dishes.whereType<Map>() : const [];
+}
+
+/// Whether [path] is an image file inside [dishImagesDir]. Pass canonical
+/// paths when the files exist, so symlinks cannot point elsewhere.
+bool isDishImageInDirectory(String path, String dishImagesDir) =>
+    p.isAbsolute(path) &&
+    p.isWithin(p.normalize(dishImagesDir), p.normalize(path)) &&
+    _imageExtensions.contains(p.extension(path).toLowerCase());
+
+/// The `imageUrl` an imported dish may keep: http(s) URLs and photos in the
+/// app's own [dishImagesDir]. Any other path could name a private app file
+/// that later full backups would bundle.
+String? sanitizeImportedImageUrl(String? url, String dishImagesDir) {
+  if (url == null || url.isEmpty) return null;
+  final uri = Uri.tryParse(url);
+  if (uri != null &&
+      (uri.scheme == 'http' || uri.scheme == 'https') &&
+      uri.host.isNotEmpty) {
+    return url;
+  }
+  return isDishImageInDirectory(url, dishImagesDir) ? url : null;
 }
 
 /// Absolute on-device image paths referenced by dishes in [data].
@@ -104,15 +128,24 @@ List<int> encodeBackupArchive(
 
 /// Reads a full backup. Throws [FormatException] if [archive] is not one.
 /// Unexpected entries, unsafe names and oversized images are ignored.
-BackupArchiveContents readBackupArchive(Archive archive) {
+/// Zip headers can lie about sizes, so the decompressed data is checked too.
+BackupArchiveContents readBackupArchive(
+  Archive archive, {
+  int maxDataBytes = maxBackupDataBytes,
+  int maxImageBytes = maxBackupImageBytes,
+}) {
   final dataFile = archive.find(backupArchiveDataFile);
   if (dataFile == null || !dataFile.isFile) {
     throw const FormatException('Backup data file missing');
   }
-  if (dataFile.size > maxBackupDataBytes) {
+  if (dataFile.size > maxDataBytes) {
     throw const FormatException('Backup data file too large');
   }
-  final decoded = json.decode(utf8.decode(dataFile.content));
+  final content = dataFile.content;
+  if (content.length > maxDataBytes) {
+    throw const FormatException('Backup data file too large');
+  }
+  final decoded = json.decode(utf8.decode(content));
   if (decoded is! Map<String, dynamic>) {
     throw const FormatException('Backup data must be a JSON object');
   }
@@ -122,8 +155,18 @@ BackupArchiveContents readBackupArchive(Archive archive) {
       for (final file in archive.files)
         if (file.isFile &&
             _archiveImageName.hasMatch(file.name) &&
-            file.size <= maxBackupImageBytes)
+            file.size <= maxImageBytes)
           file.name: file,
     },
   );
+}
+
+/// Decompressed bytes of an archived image, or null when they exceed
+/// [maxBytes] whatever the zip header claims.
+List<int>? readBackupImage(
+  ArchiveFile file, {
+  int maxBytes = maxBackupImageBytes,
+}) {
+  final bytes = file.readBytes();
+  return bytes == null || bytes.length > maxBytes ? null : bytes;
 }
