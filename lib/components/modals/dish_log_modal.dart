@@ -6,30 +6,89 @@ import '../../models/meal_type.dart';
 import '../../services/storage/dish_service.dart';
 import '../../services/health_service.dart';
 import '../../utils/number_parsing.dart';
+import '../../utils/unit_conversion.dart';
 
 /// Combines a local calendar date with a selected meal time.
 DateTime combineMealDateAndTime(DateTime date, TimeOfDay time) {
   return DateTime(date.year, date.month, date.day, time.hour, time.minute);
 }
 
+/// Allowed portion range, in servings of the dish.
+const double minServings = 0.01;
+const double maxServings = 20;
+const double servingStep = 0.25;
+
+/// Next servings value on the [servingStep] grid in [direction] (+1/-1),
+/// kept within [servingStep]..[maxServings].
+double stepServings(double servings, int direction) {
+  final steps = (servings / servingStep * 1e6).round() / 1e6;
+  final next =
+      direction > 0
+          ? (steps.floor() + 1) * servingStep
+          : (steps.ceil() - 1) * servingStep;
+  return next.clamp(servingStep, maxServings).toDouble();
+}
+
+/// The dish a diary entry was logged from, rebuilt from its snapshot so it
+/// can be edited even when the dish was changed or deleted. [current] only
+/// contributes ingredients (for the weight input).
+Dish dishForLog(DishLog log, {Dish? current, required String fallbackName}) {
+  double perServing(double value) =>
+      log.servingSize > 0 ? value / log.servingSize : value;
+  return Dish(
+    id: log.dishId,
+    name: log.dishName ?? current?.name ?? fallbackName,
+    ingredients: current?.ingredients ?? const [],
+    nutrition: NutritionInfo(
+      calories: perServing(log.calories),
+      protein: perServing(log.protein),
+      carbs: perServing(log.carbs),
+      fat: perServing(log.fat),
+      fiber: perServing(log.fiber),
+    ),
+    createdAt: log.loggedAt,
+    updatedAt: log.loggedAt,
+  );
+}
+
 class DishLogModal extends StatefulWidget {
   final Dish dish;
   final DateTime? initialDate;
+  final String? initialMealType;
 
-  const DishLogModal({super.key, required this.dish, this.initialDate});
+  /// When set, the sheet edits this diary entry instead of logging anew.
+  final DishLog? existingLog;
+  final DishService? dishService;
+
+  const DishLogModal({
+    super.key,
+    required this.dish,
+    this.initialDate,
+    this.initialMealType,
+    this.existingLog,
+    this.dishService,
+  });
 
   @override
   State<DishLogModal> createState() => _DishLogModalState();
 }
 
 class _DishLogModalState extends State<DishLogModal> {
-  final DishService _dishService = DishService();
+  late final DishService _dishService = widget.dishService ?? DishService();
   final HealthService _healthService = HealthService();
   final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _servingsController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  late final ({double amount, String unit})? _dishWeight = totalDishWeight(
+    widget.dish.ingredients.map((i) => (amount: i.amount, unit: i.unit)),
+  );
 
   late DateTime _selectedDate;
   late String _selectedMealType;
   double _portionSize = 1.0;
+  bool _byWeight = false;
+  String? _portionError;
+  bool _controllersReady = false;
   bool _isLoading = false;
 
   final List<Map<String, dynamic>> _mealTypes = [
@@ -42,6 +101,14 @@ class _DishLogModalState extends State<DishLogModal> {
   @override
   void initState() {
     super.initState();
+    final log = widget.existingLog;
+    if (log != null) {
+      _selectedDate = log.loggedAt;
+      _selectedMealType = MealType.fromString(log.mealType).toJsonValue();
+      _portionSize = log.servingSize;
+      _notesController.text = log.notes ?? '';
+      return;
+    }
     final now = DateTime.now();
     _selectedDate =
         widget.initialDate == null
@@ -50,21 +117,110 @@ class _DishLogModalState extends State<DishLogModal> {
               widget.initialDate!,
               TimeOfDay.fromDateTime(now),
             );
-    _selectedMealType = defaultMealTypeForTime(_selectedDate).toJsonValue();
+    _selectedMealType =
+        widget.initialMealType != null
+            ? MealType.fromString(widget.initialMealType!).toJsonValue()
+            : defaultMealTypeForTime(_selectedDate).toJsonValue();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_controllersReady) return;
+    _controllersReady = true;
+    _syncPortionFields();
   }
 
   @override
   void dispose() {
     _notesController.dispose();
+    _servingsController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
+  String get _locale => Localizations.localeOf(context).toString();
+
+  /// Writes [_portionSize] into the servings and weight fields.
+  void _syncPortionFields({bool servings = true, bool weight = true}) {
+    if (servings) {
+      _servingsController.text = formatAmount(_portionSize, _locale);
+    }
+    final dishWeight = _dishWeight;
+    if (weight && dishWeight != null) {
+      _weightController.text = formatAmount(
+        (_portionSize * dishWeight.amount).roundToDouble(),
+        _locale,
+      );
+    }
+  }
+
+  void _stepPortion(int direction) {
+    setState(() {
+      _portionSize = stepServings(_portionSize, direction);
+      _portionError = null;
+      _syncPortionFields();
+    });
+  }
+
+  void _onServingsChanged(String text) {
+    final value = parseLocalizedDouble(text);
+    setState(() {
+      if (value == null || value < minServings || value > maxServings) {
+        _portionError = AppLocalizations.of(
+          context,
+        ).componentsModalsDishLogModalAmountRange(
+          formatAmount(minServings, _locale),
+          formatAmount(maxServings, _locale),
+        );
+        return;
+      }
+      _portionError = null;
+      _portionSize = value;
+      _syncPortionFields(servings: false);
+    });
+  }
+
+  void _onWeightChanged(String text) {
+    final dishWeight = _dishWeight!;
+    final value = parseLocalizedDouble(text);
+    final servings = value == null ? null : value / dishWeight.amount;
+    setState(() {
+      if (servings == null ||
+          servings < minServings ||
+          servings > maxServings) {
+        _portionError = AppLocalizations.of(
+          context,
+        ).componentsModalsDishLogModalAmountRange(
+          '${formatAmount((minServings * dishWeight.amount).ceilToDouble(), _locale)} ${dishWeight.unit}',
+          '${formatAmount((maxServings * dishWeight.amount).floorToDouble(), _locale)} ${dishWeight.unit}',
+        );
+        return;
+      }
+      _portionError = null;
+      _portionSize = servings;
+      _syncPortionFields(weight: false);
+    });
+  }
+
+  void _setByWeight(bool byWeight) {
+    setState(() {
+      _byWeight = byWeight;
+      _portionError = null;
+      _syncPortionFields();
+    });
+  }
+
   Future<void> _selectDate() async {
+    final now = DateTime.now();
+    final defaultFirst = now.subtract(const Duration(days: 365));
+    final defaultLast = now.add(const Duration(days: 30));
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
+      firstDate:
+          _selectedDate.isBefore(defaultFirst) ? _selectedDate : defaultFirst,
+      lastDate: _selectedDate.isAfter(defaultLast) ? _selectedDate : defaultLast,
     );
     if (!mounted) return;
     if (picked != null) {
@@ -91,20 +247,33 @@ class _DishLogModalState extends State<DishLogModal> {
   }
 
   Future<void> _saveDishLog() async {
+    if (_portionError != null) return;
     setState(() {
       _isLoading = true;
     });
 
+    final existingLog = widget.existingLog;
     try {
-      await _dishService.logDish(
-        dishId: widget.dish.id,
-        loggedAt: _selectedDate,
-        mealType: _selectedMealType,
-        servingSize: _portionSize,
-        notes: _notesController.text,
-      );
+      if (existingLog != null) {
+        await _dishService.updateDishLog(
+          existingLog,
+          servingSize: _portionSize,
+          loggedAt: _selectedDate,
+          mealType: _selectedMealType,
+          notes: _notesController.text,
+        );
+      } else {
+        await _dishService.logDish(
+          dishId: widget.dish.id,
+          loggedAt: _selectedDate,
+          mealType: _selectedMealType,
+          servingSize: _portionSize,
+          notes: _notesController.text,
+        );
+      }
 
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -112,12 +281,12 @@ class _DishLogModalState extends State<DishLogModal> {
             children: [
               Expanded(
                 child: Text(
-                  AppLocalizations.of(
-                    context,
-                  ).componentsModalsDishLogModalDishLoggedSuccessfully,
+                  existingLog != null
+                      ? l10n.componentsModalsDishLogModalEntryUpdated
+                      : l10n.componentsModalsDishLogModalDishLoggedSuccessfully,
                 ),
               ),
-              if (_healthService.isConnected)
+              if (existingLog == null && _healthService.isConnected)
                 const Padding(
                   padding: EdgeInsets.only(left: 8),
                   child: Icon(Icons.sync, color: Colors.white, size: 16),
@@ -129,12 +298,13 @@ class _DishLogModalState extends State<DishLogModal> {
       );
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            ).componentsModalsDishLogModalErrorLoggingDish,
+            existingLog != null
+                ? l10n.componentsModalsDishLogModalUpdateFailed
+                : l10n.componentsModalsDishLogModalErrorLoggingDish,
           ),
           backgroundColor: Colors.red,
         ),
@@ -215,8 +385,11 @@ class _DishLogModalState extends State<DishLogModal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            localizations
-                                .componentsModalsDishLogModalLogDishTitle,
+                            widget.existingLog != null
+                                ? localizations
+                                    .componentsModalsDishLogModalEditTitle
+                                : localizations
+                                    .componentsModalsDishLogModalLogDishTitle,
                             style: theme.textTheme.headlineSmall?.copyWith(
                               color: theme.colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
@@ -459,41 +632,7 @@ class _DishLogModalState extends State<DishLogModal> {
                           localizations.componentsModalsDishLogModalPortionSize,
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Slider(
-                                value: _portionSize,
-                                min: 0.01, // 1% minimum portion size
-                                max: 3.0, // 300% maximum
-                                divisions: 299, // 299 divisions for 1% steps
-                                label: '${(_portionSize * 100).round()}%',
-                                onChanged: (value) {
-                                  setState(() {
-                                    _portionSize = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${(_portionSize * 100).round()}%',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        _buildPortionInput(theme, localizations, locale),
 
                         const SizedBox(height: 20),
 
@@ -574,6 +713,18 @@ class _DishLogModalState extends State<DishLogModal> {
                           textInputAction: TextInputAction.done,
                         ),
 
+                        if (widget.existingLog != null &&
+                            _healthService.isConnected) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            localizations
+                                .componentsModalsDishLogModalHealthEditWarning,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+
                         // Add some bottom padding for better scroll experience
                         const SizedBox(height: 40),
                       ],
@@ -609,7 +760,10 @@ class _DishLogModalState extends State<DishLogModal> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _saveDishLog,
+                        onPressed:
+                            _isLoading || _portionError != null
+                                ? null
+                                : _saveDishLog,
                         child:
                             _isLoading
                                 ? SizedBox(
@@ -635,6 +789,98 @@ class _DishLogModalState extends State<DishLogModal> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPortionInput(
+    ThemeData theme,
+    AppLocalizations localizations,
+    String locale,
+  ) {
+    final dishWeight = _dishWeight;
+    final byWeight = _byWeight && dishWeight != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (dishWeight != null) ...[
+          SegmentedButton<bool>(
+            segments: [
+              ButtonSegment(
+                value: false,
+                label: Text(localizations.componentsModalsDishLogModalServings),
+              ),
+              ButtonSegment(
+                value: true,
+                label: Text(localizations.componentsModalsDishLogModalWeight),
+              ),
+            ],
+            selected: {byWeight},
+            showSelectedIcon: false,
+            onSelectionChanged: (selection) => _setByWeight(selection.first),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (byWeight)
+          TextField(
+            key: const ValueKey('dish-log-weight'),
+            controller: _weightController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [decimalInputFormatter],
+            decoration: InputDecoration(
+              labelText: localizations.componentsModalsDishLogModalAmountInUnit(
+                dishWeight.unit,
+              ),
+              suffixText: dishWeight.unit,
+              helperText: localizations
+                  .componentsModalsDishLogModalServingWeight(
+                    formatAmount(dishWeight.amount.roundToDouble(), locale),
+                    dishWeight.unit,
+                  ),
+              errorText: _portionError,
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: _onWeightChanged,
+          )
+        else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              IconButton.outlined(
+                tooltip: localizations.componentsModalsDishLogModalFewerServings,
+                onPressed:
+                    _portionSize > servingStep ? () => _stepPortion(-1) : null,
+                icon: const Icon(Icons.remove),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('dish-log-servings'),
+                  controller: _servingsController,
+                  textAlign: TextAlign.center,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [decimalInputFormatter],
+                  decoration: InputDecoration(
+                    labelText:
+                        localizations.componentsModalsDishLogModalServings,
+                    errorText: _portionError,
+                    errorMaxLines: 2,
+                    border: const OutlineInputBorder(),
+                  ),
+                  onChanged: _onServingsChanged,
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.outlined(
+                tooltip: localizations.componentsModalsDishLogModalMoreServings,
+                onPressed:
+                    _portionSize < maxServings ? () => _stepPortion(1) : null,
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+      ],
     );
   }
 
