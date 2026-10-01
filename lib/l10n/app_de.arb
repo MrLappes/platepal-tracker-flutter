@@ -1517,7 +1517,7 @@
   "@screensPrivacyExportTitle": {
     "description": "Überschrift zum Datenexport und -import"
   },
-  "screensPrivacyExportBody": "Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch. Wenn du die automatische Sicherung einschaltest, schreibt die App bei Fälligkeit zusätzlich vollständige ZIP-Sicherungen in einen von dir gewählten Ordner (oder in den App-Speicher) und behält die neuesten fünf.",
+  "screensPrivacyExportBody": "Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch. Wenn du die automatische Sicherung einschaltest, schreibt die App bei Fälligkeit zusätzlich vollständige ZIP-Sicherungen in einen von dir gewählten Ordner (oder in den App-Speicher) und behält die neuesten fünf. Links aus der PlatePal-App füllen nur ein neues Gerichtsformular aus; gespeichert wird erst, wenn du speicherst.",
   "@screensPrivacyExportBody": {
     "description": "Export, Import und Sicherung vor dem Import"
   },
@@ -3064,5 +3064,11 @@
   "screensBackupDone": "Sicherung gespeichert",
   "screensBackupFailed": "Sicherung fehlgeschlagen. Prüfe den Ordner und den freien Speicher.",
   "screensBackupFailureNotice": "Die letzte automatische Sicherung ist fehlgeschlagen.",
-  "screensBackupOpenSettings": "Einstellungen"
+  "screensBackupOpenSettings": "Einstellungen",
+  "screensDishCreateImportedBanner": "Aus PlatePal importiert – prüfe die Zutaten und Mengen",
+  "screensDishCreateIngredientNeedsDetails": "Menge und Nährwerte ergänzen",
+  "screensDishCreateImportIncomplete": "Ergänze oder entferne vor dem Speichern die rot markierten Zutaten.",
+  "screensPlatePalImportTitle": "Aus PlatePal importieren",
+  "screensPlatePalImportInvalid": "Dieser PlatePal-Link ist ungültig oder unvollständig. Teile das Gericht erneut aus PlatePal.",
+  "screensPlatePalImportUnsupported": "Dieses Gericht wurde von einer neueren PlatePal-Version geteilt. Aktualisiere PlatePal Tracker, um es zu importieren."
 }

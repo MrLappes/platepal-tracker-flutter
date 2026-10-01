@@ -1517,7 +1517,7 @@
   "@screensPrivacyExportTitle": {
     "description": "Título de la sección de exportación e importación"
   },
-  "screensPrivacyExportBody": "Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes.",
+  "screensPrivacyExportBody": "Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes. Los enlaces de la app PlatePal solo rellenan un formulario de plato nuevo; no se guarda nada hasta que tú lo guardes.",
   "@screensPrivacyExportBody": {
     "description": "Exportación, importación y copias previas"
   },
@@ -3034,5 +3034,11 @@
   "screensBackupDone": "Copia guardada",
   "screensBackupFailed": "La copia falló. Revisa la carpeta y el espacio libre.",
   "screensBackupFailureNotice": "La última copia automática falló.",
-  "screensBackupOpenSettings": "Ajustes"
+  "screensBackupOpenSettings": "Ajustes",
+  "screensDishCreateImportedBanner": "Importado de PlatePal: revisa los ingredientes y las cantidades",
+  "screensDishCreateIngredientNeedsDetails": "Añade cantidad y valores nutricionales",
+  "screensDishCreateImportIncomplete": "Completa o elimina los ingredientes marcados en rojo antes de guardar.",
+  "screensPlatePalImportTitle": "Importar de PlatePal",
+  "screensPlatePalImportInvalid": "Este enlace de PlatePal no es válido o está incompleto. Vuelve a compartir el plato desde PlatePal.",
+  "screensPlatePalImportUnsupported": "Este plato se compartió desde una versión más reciente de PlatePal. Actualiza PlatePal Tracker para importarlo."
 }

@@ -25,6 +25,8 @@ import 'screens/settings/health_settings_screen.dart';
 import 'screens/settings/privacy_policy_screen.dart';
 import 'screens/settings/backup_settings_screen.dart';
 import 'components/ui/auto_backup_runner.dart';
+import 'screens/platepal_import_screen.dart';
+import 'services/data/platepal_dish_import.dart';
 import 'providers/meal_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -120,10 +122,22 @@ class PlatePalApp extends StatelessWidget {
 }
 
 final GoRouter _router = GoRouter(
+  // platepaltracker://import-dish?d=... arrives as a location with that
+  // scheme and host; send it to the import route on top of home.
+  redirect: (context, state) => platePalImportRedirect(state.uri),
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => const MainNavigationScreen(),
+      routes: [
+        GoRoute(
+          path: platePalImportRoute.substring(1),
+          builder:
+              (context, state) => PlatePalImportScreen(
+                payload: state.uri.queryParameters['d'],
+              ),
+        ),
+      ],
     ),
     GoRoute(path: '/meals', builder: (context, state) => const MealsScreen()),
     GoRoute(

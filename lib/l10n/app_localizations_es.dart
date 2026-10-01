@@ -1420,7 +1420,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes.';
+      'Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes. Los enlaces de la app PlatePal solo rellenan un formulario de plato nuevo; no se guarda nada hasta que tú lo guardes.';
 
   @override
   String get screensPrivacyBackupTitle => 'Copia de seguridad de Android';
@@ -3856,4 +3856,27 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensBackupOpenSettings => 'Ajustes';
+
+  @override
+  String get screensDishCreateImportedBanner =>
+      'Importado de PlatePal: revisa los ingredientes y las cantidades';
+
+  @override
+  String get screensDishCreateIngredientNeedsDetails =>
+      'Añade cantidad y valores nutricionales';
+
+  @override
+  String get screensDishCreateImportIncomplete =>
+      'Completa o elimina los ingredientes marcados en rojo antes de guardar.';
+
+  @override
+  String get screensPlatePalImportTitle => 'Importar de PlatePal';
+
+  @override
+  String get screensPlatePalImportInvalid =>
+      'Este enlace de PlatePal no es válido o está incompleto. Vuelve a compartir el plato desde PlatePal.';
+
+  @override
+  String get screensPlatePalImportUnsupported =>
+      'Este plato se compartió desde una versión más reciente de PlatePal. Actualiza PlatePal Tracker para importarlo.';
 }
