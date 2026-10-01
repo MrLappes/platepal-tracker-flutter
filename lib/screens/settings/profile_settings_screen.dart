@@ -1215,6 +1215,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 48,
+        ),
         border: const OutlineInputBorder(),
       ),
       items: items,
