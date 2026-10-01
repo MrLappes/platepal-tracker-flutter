@@ -932,11 +932,6 @@
   "@componentsScannerBarcodeScannerTorchOn": {"description": "Turn on the scanner flashlight"},
   "componentsScannerBarcodeScannerTorchOff": "Apagar la linterna",
   "@componentsScannerBarcodeScannerTorchOff": {"description": "Turn off the scanner flashlight"},
-  "componentsScannerProductSearchErrorSearchingProduct": "Error al buscar el producto: {error}",
-  "@componentsScannerProductSearchErrorSearchingProduct": {
-    "description": "Error al buscar el producto",
-    "placeholders": {"error": {"type": "String"}}
-  },
   "componentsScannerProductSearchLoadMore": "Cargar más",
   "@componentsScannerProductSearchLoadMore": {
     "description": "Cargar más"
@@ -1466,7 +1461,7 @@
   "@screensPrivacyTitle": {
     "description": "Título de la política de privacidad en la aplicación"
   },
-  "screensPrivacyEffectiveDate": "Fecha de entrada en vigor: 2026-09-30",
+  "screensPrivacyEffectiveDate": "Fecha de entrada en vigor: 2026-10-01",
   "@screensPrivacyEffectiveDate": {
     "description": "Fecha de entrada en vigor de la política de privacidad"
   },
@@ -1522,7 +1517,7 @@
   "@screensPrivacyExportTitle": {
     "description": "Título de la sección de exportación e importación"
   },
-  "screensPrivacyExportBody": "Los archivos de exportación (JSON o CSV) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.",
+  "screensPrivacyExportBody": "Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.",
   "@screensPrivacyExportBody": {
     "description": "Exportación, importación y copias previas"
   },
@@ -1562,7 +1557,7 @@
   "@screensPrivacyContactTitle": {
     "description": "Título de la sección de contacto sobre privacidad"
   },
-  "screensPrivacyContactBody": "Si tienes preguntas sobre privacidad, abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.",
+  "screensPrivacyContactBody": "Si tienes preguntas sobre privacidad, escribe a mike.busam@plate-pal.de o abre una incidencia en github.com/MrLappes/platepal-tracker-flutter/issues. No podemos acceder a los datos almacenados únicamente en tu dispositivo; usa los controles de la aplicación y del sistema descritos arriba para eliminarlos.",
   "@screensPrivacyContactBody": {
     "description": "Cómo contactar con el proyecto sobre privacidad"
   },
@@ -2028,7 +2023,7 @@
   "@screensSettingsImportDataRemoveFile": {"description": "Información al quitar el archivo"},
   "screensSettingsImportDataChangeFile": "Cambiar archivo",
   "@screensSettingsImportDataChangeFile": {"description": "Reemplazar archivo seleccionado"},
-  "screensSettingsImportDataSupportedFormats": "Formatos admitidos: JSON, CSV",
+  "screensSettingsImportDataSupportedFormats": "Formatos admitidos: JSON, CSV, ZIP (copia completa)",
   "@screensSettingsImportDataSupportedFormats": {"description": "Formatos aceptados"},
   "screensSettingsImportDataAllDataDescription": "Importar todos los datos del archivo",
   "@screensSettingsImportDataAllDataDescription": {"description": "Descripción de importar todo"},
@@ -2116,7 +2111,7 @@
   "@screensSettingsImportDataFileTooLarge": {"description": "Tamaño máximo de importación", "placeholders": {"maxSize": {"type": "int"}}},
   "screensSettingsImportDataInvalidJson": "El archivo no contiene JSON válido. Revísalo e inténtalo de nuevo.",
   "@screensSettingsImportDataInvalidJson": {"description": "Archivo JSON no válido"},
-  "screensSettingsImportDataUnsupportedFormat": "Formato de archivo no admitido. Selecciona un archivo JSON o CSV.",
+  "screensSettingsImportDataUnsupportedFormat": "Formato de archivo no admitido. Selecciona un archivo JSON, CSV o ZIP.",
   "@screensSettingsImportDataUnsupportedFormat": {"description": "Formato no admitido para importar"},
   "screensSettingsImportDataInvalidData": "El archivo contiene datos no válidos. Revisa los detalles e inténtalo de nuevo.",
   "@screensSettingsImportDataInvalidData": {"description": "La validación impidió la importación"},
@@ -2903,5 +2898,69 @@
     }
   },
   "screensSettingsProfileSettingsInvalidCalorieTarget": "Con estos datos no se puede calcular un objetivo calórico. Revisa tu peso, altura y edad.",
-  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Error cuando los datos del perfil dan un objetivo calórico de 0 kcal o menos, por lo que el perfil no se guarda"}
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Error cuando los datos del perfil dan un objetivo calórico de 0 kcal o menos, por lo que el perfil no se guarda"},
+  "screensMenuSupport": "Ayuda y comentarios",
+  "@screensMenuSupport": {"description": "Menu section for feedback and problem reports"},
+  "screensMenuSendFeedback": "Enviar comentarios",
+  "@screensMenuSendFeedback": {"description": "Menu entry that opens an email to the developer"},
+  "screensMenuSendFeedbackSubtitle": "Escribe un correo al desarrollador",
+  "@screensMenuSendFeedbackSubtitle": {"description": "Subtitle of the send feedback entry"},
+  "screensMenuReportProblem": "Informar de un problema",
+  "@screensMenuReportProblem": {"description": "Menu entry that shares the diagnostic log"},
+  "screensMenuReportProblemSubtitle": "Comparte el registro de diagnóstico con la app que elijas",
+  "@screensMenuReportProblemSubtitle": {"description": "Subtitle of the report a problem entry"},
+  "screensMenuClearDiagnosticLog": "Borrar registro de diagnóstico",
+  "@screensMenuClearDiagnosticLog": {"description": "Menu entry that deletes the local error log"},
+  "screensMenuClearDiagnosticLogSubtitle": "Elimina los registros de errores guardados en este dispositivo",
+  "@screensMenuClearDiagnosticLogSubtitle": {"description": "Subtitle of the clear diagnostic log entry"},
+  "screensMenuDiagnosticsNote": "No se envía nada automáticamente: los errores se guardan en un breve registro local sin datos personales y solo salen de tu dispositivo si los compartes.",
+  "@screensMenuDiagnosticsNote": {"description": "One-sentence note that diagnostics are local and only shared by the user"},
+  "screensMenuFeedbackSubject": "Comentarios sobre PlatePal Tracker (v{version})",
+  "@screensMenuFeedbackSubject": {"description": "Subject of the feedback email", "placeholders": {"version": {"type": "String"}}},
+  "screensMenuNoEmailApp": "No se encontró ninguna app de correo. Puedes escribir a {email}.",
+  "@screensMenuNoEmailApp": {"description": "Shown when no email app can open the feedback email", "placeholders": {"email": {"type": "String"}}},
+  "screensMenuReportProblemSubject": "Informe de problema de PlatePal Tracker (v{version})",
+  "@screensMenuReportProblemSubject": {"description": "Subject when sharing the diagnostic log", "placeholders": {"version": {"type": "String"}}},
+  "screensMenuReportProblemShareText": "Registro de diagnóstico de PlatePal Tracker. Contacto del desarrollador: {email}",
+  "@screensMenuReportProblemShareText": {"description": "Text sent along with the shared diagnostic log", "placeholders": {"email": {"type": "String"}}},
+  "screensMenuDiagnosticLogEmpty": "Aún no se ha registrado ningún problema. El registro de diagnóstico está vacío.",
+  "@screensMenuDiagnosticLogEmpty": {"description": "Shown when there is no diagnostic log to share"},
+  "screensMenuDiagnosticLogShareFailed": "No se pudo compartir el registro de diagnóstico. Inténtalo de nuevo.",
+  "@screensMenuDiagnosticLogShareFailed": {"description": "Sharing the diagnostic log failed"},
+  "screensMenuDiagnosticLogCleared": "Registro de diagnóstico borrado.",
+  "@screensMenuDiagnosticLogCleared": {"description": "Confirmation after clearing the diagnostic log"},
+  "screensMenuDiagnosticLogClearFailed": "No se pudo borrar el registro de diagnóstico. Inténtalo de nuevo.",
+  "@screensMenuDiagnosticLogClearFailed": {"description": "Clearing the diagnostic log failed"},
+  "screensPrivacyDiagnosticsTitle": "Registro de diagnóstico y comentarios",
+  "@screensPrivacyDiagnosticsTitle": {"description": "Privacy policy section title"},
+  "screensPrivacyDiagnosticsBody": "Si la app sufre un error inesperado, guarda en tu dispositivo un breve registro técnico: la hora, la versión de la app, el tipo de error, un mensaje de error abreviado y la ubicación en el código. Se elimina el texto que pueda contener datos personales, como valores entre comillas, direcciones de correo, claves y medidas, y solo se conservan las últimas 20 entradas. El registro nunca se envía automáticamente. Solo sale de tu dispositivo si eliges «Informar de un problema» y lo compartes con la app que prefieras; «Borrar registro de diagnóstico» en el menú lo elimina. «Enviar comentarios» abre tu app de correo y no se envía nada hasta que tú mismo envíes el correo.",
+  "@screensPrivacyDiagnosticsBody": {"description": "Privacy policy section about the local diagnostic log and feedback"},
+  "screensSettingsImportDataInvalidArchive": "Este archivo ZIP no es una copia de seguridad de PlatePal Tracker.",
+  "@screensSettingsImportDataInvalidArchive": {"description": "Import error for an unreadable backup archive"},
+  "screensSettingsExportDataExportAsZip": "Copia completa (.zip)",
+  "@screensSettingsExportDataExportAsZip": {"description": "Export option that bundles data and dish photos"},
+  "screensSettingsExportDataZipDescription": "Datos y fotos de los platos en un solo archivo, para pasar a otro dispositivo",
+  "@screensSettingsExportDataZipDescription": {"description": "Full backup format description"},
+  "screensSettingsStatisticsNotEnoughMetrics": "Registra tus medidas corporales al menos {count} veces para ver este gráfico.",
+  "@screensSettingsStatisticsNotEnoughMetrics": {"description": "Shown in a body metric chart with too few records", "placeholders": {"count": {"type": "int"}}},
+  "componentsScannerBarcodeScannerNotFoundMessage": "El código {barcode} aún no está en Open Food Facts. Busca por nombre o introduce el alimento tú mismo.",
+  "@componentsScannerBarcodeScannerNotFoundMessage": {"description": "Explains options after an unknown barcode", "placeholders": {"barcode": {"type": "String"}}},
+  "componentsScannerBarcodeScannerSearchByName": "Buscar por nombre",
+  "@componentsScannerBarcodeScannerSearchByName": {"description": "Open product search after an unknown barcode"},
+  "componentsScannerBarcodeScannerEnterManually": "Introducir manualmente",
+  "@componentsScannerBarcodeScannerEnterManually": {"description": "Open manual entry after an unknown barcode"},
+  "componentsScannerBarcodeScannerScanAgain": "Escanear de nuevo",
+  "@componentsScannerBarcodeScannerScanAgain": {"description": "Return to the scanner after an unknown barcode"},
+  "componentsDishesDishFormIngredientFormModalBarcode": "Código de barras: {barcode}",
+  "@componentsDishesDishFormIngredientFormModalBarcode": {"description": "Barcode attached to the ingredient", "placeholders": {"barcode": {"type": "String"}}},
+  "screensMealsScanBarcode": "Escanear código de barras",
+  "@screensMealsScanBarcode": {"description": "Empty meals action that starts a dish from a barcode"},
+  "screensMealsSearchFood": "Buscar alimento",
+  "@screensMealsSearchFood": {"description": "Empty meals action that starts a dish from product search"},
+  "componentsScannerProductSearchErrorOffline": "Estás sin conexión. Revisa tu conexión e inténtalo de nuevo.",
+  "@componentsScannerProductSearchErrorOffline": {"description": "Product search failed without a connection"},
+  "componentsScannerProductSearchErrorTimeout": "Open Food Facts tardó demasiado en responder. Inténtalo de nuevo.",
+  "@componentsScannerProductSearchErrorTimeout": {"description": "Product search timed out"},
+  "componentsScannerProductSearchErrorServer": "Open Food Facts está saturado o no disponible. Espera un momento e inténtalo de nuevo.",
+  "@componentsScannerProductSearchErrorServer": {"description": "Product search hit a rate limit or server error"}
 }

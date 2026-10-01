@@ -86,7 +86,11 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
 
   Widget _buildExportPreviewCard() {
     final selectedCount = _selectedDataTypes.length;
-    final formatName = _selectedFormat == ExportFormat.json ? 'JSON' : 'CSV';
+    final formatName = switch (_selectedFormat) {
+      ExportFormat.json => 'JSON',
+      ExportFormat.csv => 'CSV',
+      ExportFormat.zip => 'ZIP',
+    };
 
     return Card(
       elevation: 2,
@@ -368,6 +372,23 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                     secondary: const Icon(
                       Icons.table_chart,
                       color: Colors.green,
+                    ),
+                  ),
+                  RadioListTile<ExportFormat>(
+                    title: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataExportAsZip,
+                    ),
+                    subtitle: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).screensSettingsExportDataZipDescription,
+                    ),
+                    value: ExportFormat.zip,
+                    secondary: const Icon(
+                      Icons.folder_zip_outlined,
+                      color: Colors.deepPurple,
                     ),
                   ),
                 ],

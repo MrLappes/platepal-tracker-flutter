@@ -1,15 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 import '../storage/dish_service.dart';
 import '../storage/database_service.dart';
 import '../storage/user_profile_service.dart';
 import '../../models/dish.dart';
 import '../../models/user_profile.dart';
+import 'backup_archive.dart';
 
 enum DataType {
   userProfiles,
@@ -21,7 +25,8 @@ enum DataType {
   allData,
 }
 
-enum ExportFormat { json, csv }
+/// `zip` is a full backup: the JSON export plus the dish photos it uses.
+enum ExportFormat { json, csv, zip }
 
 enum DuplicateHandling { skip, overwrite, merge }
 
@@ -30,6 +35,9 @@ Object? _decodeJson(String source) => json.decode(source);
 String _encodeJson(Object? data) => json.encode(data);
 String _encodeJsonPretty(Object? data) =>
     const JsonEncoder.withIndent('  ').convert(data);
+List<int> _encodeArchive(
+  (Map<String, dynamic>, Map<String, List<int>>) input,
+) => encodeBackupArchive(input.$1, input.$2);
 
 /// Thrown when some sections of an "all data" export could not be read.
 class _SectionExportException implements Exception {
@@ -57,6 +65,14 @@ class ImportExportService {
 
   /// Import files above this size are rejected before reading.
   static const int maxImportBytes = 50 * 1024 * 1024;
+
+  /// Full backups carry photos, so they may be larger.
+  static const int maxArchiveImportBytes = 500 * 1024 * 1024;
+
+  static bool _isArchive(String path) => path.toLowerCase().endsWith('.zip');
+
+  static int maxImportBytesFor(String path) =>
+      _isArchive(path) ? maxArchiveImportBytes : maxImportBytes;
 
   static const int _yieldInterval = 1000;
 
@@ -135,6 +151,18 @@ class ImportExportService {
 
       if (format == ExportFormat.json) {
         await file.writeAsString(await compute(_encodeJsonPretty, exportData));
+      } else if (format == ExportFormat.zip) {
+        final images = <String, List<int>>{};
+        for (final path in localDishImagePaths(exportData)) {
+          final image = File(path);
+          if (await image.exists() &&
+              await image.length() <= maxBackupImageBytes) {
+            images[path] = await image.readAsBytes();
+          }
+        }
+        await file.writeAsBytes(
+          await compute(_encodeArchive, (exportData, images)),
+        );
       } else {
         final csvData = _convertToCSV(exportData);
         await file.writeAsString(csvData);
@@ -183,55 +211,72 @@ class ImportExportService {
           throw Exception('File not found');
         }
         final size = await file.length();
-        if (size > maxImportBytes) {
+        final maxBytes = maxImportBytesFor(filePath);
+        if (size > maxBytes) {
           errorCode = ImportExportErrorCode.importFileTooLarge;
           throw Exception(
             'File is too large (${size ~/ (1024 * 1024)} MB, '
-            'max ${maxImportBytes ~/ (1024 * 1024)} MB)',
+            'max ${maxBytes ~/ (1024 * 1024)} MB)',
           );
         }
 
-        final content = await file.readAsString();
-        detailedResults.setFileInfo(
-          FileInfo(
-            fileName: file.path.split('/').last,
-            fileSize: content.length,
-            totalLines: content.split('\n').length,
-          ),
-        );
-
-        if (filePath.endsWith('.json')) {
-          final Object? decoded;
+        if (_isArchive(filePath)) {
+          detailedResults.setFileInfo(
+            FileInfo(
+              fileName: p.basename(file.path),
+              fileSize: size,
+              totalLines: 0,
+            ),
+          );
           try {
-            decoded = await compute(_decodeJson, content);
-          } catch (e) {
-            errorCode = ImportExportErrorCode.importInvalidJson;
-            detailedResults.parsingErrors.add(
-              ParsingError(
-                line: _findJsonErrorLine(content, e.toString()),
-                column: 0,
-                error: 'JSON parsing failed: ${e.toString()}',
-                context: _getContextLines(
-                  content,
-                  _findJsonErrorLine(content, e.toString()),
-                ),
-              ),
-            );
-            throw Exception('JSON parsing failed: $e');
+            importData = await _extractBackupArchive(file);
+          } on FormatException catch (e) {
+            errorCode = ImportExportErrorCode.importInvalidArchive;
+            throw Exception('Invalid backup archive: ${e.message}');
           }
-          if (decoded is! Map<String, dynamic>) {
-            errorCode = ImportExportErrorCode.importInvalidJson;
-            throw Exception('The file must contain a JSON object');
-          }
-          importData = decoded;
-        } else if (filePath.endsWith('.csv')) {
-          final csvResult = _convertFromCSVWithErrors(content);
-          importData = csvResult.data;
-          detailedResults.parsingErrors.addAll(csvResult.errors);
-          detailedResults.omittedErrors += csvResult.omittedErrors;
         } else {
-          errorCode = ImportExportErrorCode.importUnsupportedFormat;
-          throw Exception('Unsupported file format');
+          final content = await file.readAsString();
+          detailedResults.setFileInfo(
+            FileInfo(
+              fileName: file.path.split('/').last,
+              fileSize: content.length,
+              totalLines: content.split('\n').length,
+            ),
+          );
+
+          if (filePath.endsWith('.json')) {
+            final Object? decoded;
+            try {
+              decoded = await compute(_decodeJson, content);
+            } catch (e) {
+              errorCode = ImportExportErrorCode.importInvalidJson;
+              detailedResults.parsingErrors.add(
+                ParsingError(
+                  line: _findJsonErrorLine(content, e.toString()),
+                  column: 0,
+                  error: 'JSON parsing failed: ${e.toString()}',
+                  context: _getContextLines(
+                    content,
+                    _findJsonErrorLine(content, e.toString()),
+                  ),
+                ),
+              );
+              throw Exception('JSON parsing failed: $e');
+            }
+            if (decoded is! Map<String, dynamic>) {
+              errorCode = ImportExportErrorCode.importInvalidJson;
+              throw Exception('The file must contain a JSON object');
+            }
+            importData = decoded;
+          } else if (filePath.endsWith('.csv')) {
+            final csvResult = _convertFromCSVWithErrors(content);
+            importData = csvResult.data;
+            detailedResults.parsingErrors.addAll(csvResult.errors);
+            detailedResults.omittedErrors += csvResult.omittedErrors;
+          } else {
+            errorCode = ImportExportErrorCode.importUnsupportedFormat;
+            throw Exception('Unsupported file format');
+          }
         }
       }
 
@@ -319,11 +364,48 @@ class ImportExportService {
         success: false,
         message: 'Import failed: $e',
         errorCode: errorCode ?? ImportExportErrorCode.importFailed,
+        filePath:
+            errorCode == ImportExportErrorCode.importFileTooLarge
+                ? filePath
+                : null,
         itemsProcessed: 0,
         duplicatesFound: 0,
         errors: [e.toString()],
         detailedResults: ImportDetailedResults(),
       );
+    }
+  }
+
+  /// Reads a full backup and copies its dish photos into app storage,
+  /// pointing the imported dishes at the copies.
+  Future<Map<String, dynamic>> _extractBackupArchive(File file) async {
+    final input = InputFileStream(file.path);
+    try {
+      final contents = readBackupArchive(ZipDecoder().decodeStream(input));
+      final wanted = archivedDishImagePaths(contents.data);
+      final restored = <String, String>{};
+      if (wanted.isNotEmpty) {
+        final directory = Directory(
+          p.join((await getApplicationDocumentsDirectory()).path, 'dish_images'),
+        );
+        await directory.create(recursive: true);
+        for (final name in wanted) {
+          final bytes = contents.images[name]?.readBytes();
+          if (bytes == null || bytes.length > maxBackupImageBytes) continue;
+          final destination = p.join(
+            directory.path,
+            '${const Uuid().v4()}${p.extension(name)}',
+          );
+          await File(destination).writeAsBytes(bytes);
+          restored[name] = destination;
+        }
+      }
+      return rewriteDishImagePaths(
+        contents.data,
+        (url) => wanted.contains(url) ? restored[url] : url,
+      );
+    } finally {
+      await input.close();
     }
   }
 
@@ -2540,6 +2622,7 @@ enum ImportExportErrorCode {
   importFileMissing,
   importFileTooLarge,
   importInvalidJson,
+  importInvalidArchive,
   importUnsupportedFormat,
   importInvalidData,
   importFailed,

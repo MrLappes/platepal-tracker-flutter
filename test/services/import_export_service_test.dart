@@ -960,4 +960,86 @@ void main() {
       expect(await _ledger(), isEmpty);
     });
   });
+
+  group('full backup zip', () {
+    Future<String> exportWithPhoto() async {
+      final photo = File('${tempDir.path}/dish_images/photo.jpg');
+      await photo.create(recursive: true);
+      await photo.writeAsBytes([1, 2, 3, 4]);
+      await dishService.saveDish(
+        _dish('pic', 'Pancakes', 300).copyWith(imageUrl: photo.path),
+      );
+      final result = await service.exportData(
+        dataTypes: [DataType.dishes],
+        format: ExportFormat.zip,
+      );
+      expect(result.success, isTrue);
+      expect(result.filePath, endsWith('.zip'));
+      return result.filePath!;
+    }
+
+    test('restores dish photos and points dishes at the copies', () async {
+      final zipPath = await exportWithPhoto();
+      await dishService.deleteDish('pic');
+      await File('${tempDir.path}/dish_images/photo.jpg').delete();
+
+      final result = await service.importData(
+        filePath: zipPath,
+        dataTypes: [DataType.dishes],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+
+      expect(result.success, isTrue);
+      final dish = await dishService.getDishById('pic');
+      expect(dish, isNotNull);
+      final imageUrl = dish!.imageUrl!;
+      expect(imageUrl, startsWith('${tempDir.path}/dish_images/'));
+      expect(imageUrl, endsWith('.jpg'));
+      expect(await File(imageUrl).readAsBytes(), [1, 2, 3, 4]);
+      expect((await dishService.getDishById('oats'))!.imageUrl, isNull);
+    });
+
+    test('import can be undone with the pre-import backup', () async {
+      final zipPath = await exportWithPhoto();
+      await dishService.deleteDish('pic');
+
+      expect(await service.createBackupBeforeImport(), isTrue);
+      await service.importData(
+        filePath: zipPath,
+        dataTypes: [DataType.dishes],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+      expect(await dishService.getDishById('pic'), isNotNull);
+
+      final restored = await service.restoreFromLastBackup();
+      expect(restored.success, isTrue);
+      expect(await dishService.getDishById('pic'), isNull);
+      expect(await dishService.getDishById('oats'), isNotNull);
+    });
+
+    test('a zip that is not a backup fails with its own code', () async {
+      final bogus = File('${tempDir.path}/bogus.zip');
+      await bogus.writeAsString('not a zip');
+
+      final result = await service.importData(
+        filePath: bogus.path,
+        dataTypes: [DataType.dishes],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+
+      expect(result.success, isFalse);
+      expect(result.errorCode, ImportExportErrorCode.importInvalidArchive);
+    });
+
+    test('zip files get the larger size limit', () {
+      expect(
+        ImportExportService.maxImportBytesFor('backup.ZIP'),
+        ImportExportService.maxArchiveImportBytes,
+      );
+      expect(
+        ImportExportService.maxImportBytesFor('backup.json'),
+        ImportExportService.maxImportBytes,
+      );
+    });
+  });
 }

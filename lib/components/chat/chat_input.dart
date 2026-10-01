@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
+import '../../models/dish.dart' show Ingredient;
 import '../../models/user_ingredient.dart';
 import '../../models/product.dart';
 import '../scanner/barcode_scanner_screen.dart';
@@ -633,6 +634,7 @@ class _ChatInputState extends State<ChatInput>
               onProductFound: (product) {
                 _addProductAsIngredient(product);
               },
+              onManualEntry: _addManualIngredient,
             ),
       ),
     );
@@ -664,37 +666,56 @@ class _ChatInputState extends State<ChatInput>
     IngredientFormModal.show(
       context,
       ingredient: defaultIngredient,
-      onSave: (ingredient) {
-        // Convert Ingredient to UserIngredient
-        final userIngredient = UserIngredient(
-          id: ingredient.id,
-          name: ingredient.name,
-          quantity: ingredient.amount,
-          unit: ingredient.unit,
-          barcode: product.barcode,
-          scannedAt: DateTime.now(),
-          metadata: {
-            'productName': product.name,
-            'brand': product.brand,
-            'nutrition': ingredient.nutrition?.toJson(),
-          },
-        );
-
-        setState(() {
-          _selectedIngredients.add(userIngredient);
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              ).componentsChatChatInputIngredientAdded,
-            ),
-            backgroundColor: Colors.green,
+      onSave:
+          (ingredient) => _addUserIngredient(
+            ingredient,
+            barcode: product.barcode,
+            productName: product.name,
+            brand: product.brand,
           ),
-        );
+    );
+  }
+
+  void _addManualIngredient(String barcode) {
+    if (!mounted) return;
+    IngredientFormModal.show(
+      context,
+      initialBarcode: barcode,
+      onSave: (ingredient) => _addUserIngredient(ingredient, barcode: barcode),
+    );
+  }
+
+  void _addUserIngredient(
+    Ingredient ingredient, {
+    String? barcode,
+    String? productName,
+    String? brand,
+  }) {
+    final userIngredient = UserIngredient(
+      id: ingredient.id,
+      name: ingredient.name,
+      quantity: ingredient.amount,
+      unit: ingredient.unit,
+      barcode: barcode,
+      scannedAt: DateTime.now(),
+      metadata: {
+        'productName': productName,
+        'brand': brand,
+        'nutrition': ingredient.nutrition?.toJson(),
       },
+    );
+
+    setState(() {
+      _selectedIngredients.add(userIngredient);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context).componentsChatChatInputIngredientAdded,
+        ),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 

@@ -299,12 +299,31 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverFillRemaining(
+              hasScrollBody: false,
               child: EmptyStateWidget(
                 icon: Icons.restaurant,
                 title: localizations.screensMealsNoDishesCreated,
                 subtitle: localizations.screensMealsCreateFirstDish,
                 onAction: _createNewDish,
                 actionLabel: localizations.screensDishCreateCreateDish,
+                secondaryActions: [
+                  OutlinedButton.icon(
+                    onPressed:
+                        () => _createNewDish(
+                          entry: DishCreateEntry.scanBarcode,
+                        ),
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: Text(localizations.screensMealsScanBarcode),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed:
+                        () => _createNewDish(
+                          entry: DishCreateEntry.searchProduct,
+                        ),
+                    icon: const Icon(Icons.search),
+                    label: Text(localizations.screensMealsSearchFood),
+                  ),
+                ],
               ),
             ),
           ],
@@ -579,12 +598,13 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
     );
   }
 
-  void _createNewDish() {
+  void _createNewDish({DishCreateEntry? entry}) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder:
             (context) => DishCreateScreenAdvanced(
               heroTag: "dish_create_fab_meals_new",
+              entry: entry,
               onDishCreated: (dish) {
                 debugPrint(
                   '🍽️ MealsScreen: onDishCreated callback triggered for: ${dish.name}',

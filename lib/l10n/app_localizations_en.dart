@@ -832,11 +832,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get componentsScannerBarcodeScannerTorchOff => 'Turn flashlight off';
 
   @override
-  String componentsScannerProductSearchErrorSearchingProduct(String error) {
-    return 'Error searching for product: $error';
-  }
-
-  @override
   String get componentsScannerProductSearchLoadMore => 'Loard more';
 
   @override
@@ -1346,7 +1341,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screensPrivacyTitle => 'Privacy policy';
 
   @override
-  String get screensPrivacyEffectiveDate => 'Effective date: 2026-09-30';
+  String get screensPrivacyEffectiveDate => 'Effective date: 2026-10-01';
 
   @override
   String get screensPrivacyOverviewTitle => 'At a glance';
@@ -1395,7 +1390,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Export files (JSON or CSV) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.';
+      'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us.';
 
   @override
   String get screensPrivacyBackupTitle => 'Android backup';
@@ -1430,7 +1425,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensPrivacyContactBody =>
-      'For privacy questions, open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.';
+      'For privacy questions, email mike.busam@plate-pal.de or open a GitHub issue at github.com/MrLappes/platepal-tracker-flutter/issues. We cannot access data kept only on your device; use the app and platform controls above to delete it.';
 
   @override
   String get screensPrivacyMenuSubtitle =>
@@ -1966,7 +1961,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataSupportedFormats =>
-      'Supported formats: JSON, CSV';
+      'Supported formats: JSON, CSV, ZIP (full backup)';
 
   @override
   String get screensSettingsImportDataAllDataDescription =>
@@ -2167,7 +2162,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screensSettingsImportDataUnsupportedFormat =>
-      'Unsupported file format. Select a JSON or CSV file.';
+      'Unsupported file format. Select a JSON, CSV or ZIP file.';
 
   @override
   String get screensSettingsImportDataInvalidData =>
@@ -3377,4 +3372,127 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get screensSettingsProfileSettingsInvalidCalorieTarget =>
       'No calorie target can be calculated from these values. Please check your weight, height and age.';
+
+  @override
+  String get screensMenuSupport => 'Help & feedback';
+
+  @override
+  String get screensMenuSendFeedback => 'Send feedback';
+
+  @override
+  String get screensMenuSendFeedbackSubtitle =>
+      'Write an email to the developer';
+
+  @override
+  String get screensMenuReportProblem => 'Report a problem';
+
+  @override
+  String get screensMenuReportProblemSubtitle =>
+      'Share the diagnostic log with an app you choose';
+
+  @override
+  String get screensMenuClearDiagnosticLog => 'Clear diagnostic log';
+
+  @override
+  String get screensMenuClearDiagnosticLogSubtitle =>
+      'Delete the error records stored on this device';
+
+  @override
+  String get screensMenuDiagnosticsNote =>
+      'Nothing is sent automatically: errors are kept in a short local log without personal data and only leave your device when you share them.';
+
+  @override
+  String screensMenuFeedbackSubject(String version) {
+    return 'PlatePal Tracker feedback (v$version)';
+  }
+
+  @override
+  String screensMenuNoEmailApp(String email) {
+    return 'No email app found. You can write to $email.';
+  }
+
+  @override
+  String screensMenuReportProblemSubject(String version) {
+    return 'PlatePal Tracker problem report (v$version)';
+  }
+
+  @override
+  String screensMenuReportProblemShareText(String email) {
+    return 'PlatePal Tracker diagnostic log. Developer contact: $email';
+  }
+
+  @override
+  String get screensMenuDiagnosticLogEmpty =>
+      'No problems recorded yet. The diagnostic log is empty.';
+
+  @override
+  String get screensMenuDiagnosticLogShareFailed =>
+      'The diagnostic log couldn\'t be shared. Try again.';
+
+  @override
+  String get screensMenuDiagnosticLogCleared => 'Diagnostic log cleared.';
+
+  @override
+  String get screensMenuDiagnosticLogClearFailed =>
+      'The diagnostic log couldn\'t be cleared. Try again.';
+
+  @override
+  String get screensPrivacyDiagnosticsTitle => 'Diagnostic log and feedback';
+
+  @override
+  String get screensPrivacyDiagnosticsBody =>
+      'If the app hits an unexpected error, it saves a short technical record on your device: time, app version, error type, a shortened error message and the code location. Text that may contain personal data, such as quoted values, email addresses, keys and measurements, is removed, and only the last 20 entries are kept. The log is never sent automatically. It leaves your device only if you choose Report a problem and share it with an app you pick; Clear diagnostic log in the menu deletes it. Send feedback opens your email app, and nothing is sent until you send the email yourself.';
+
+  @override
+  String get screensSettingsImportDataInvalidArchive =>
+      'This ZIP file is not a PlatePal Tracker backup.';
+
+  @override
+  String get screensSettingsExportDataExportAsZip => 'Full backup (.zip)';
+
+  @override
+  String get screensSettingsExportDataZipDescription =>
+      'Data plus dish photos in one file, for moving to a new device';
+
+  @override
+  String screensSettingsStatisticsNotEnoughMetrics(int count) {
+    return 'Record your body measurements at least $count times to see this chart.';
+  }
+
+  @override
+  String componentsScannerBarcodeScannerNotFoundMessage(String barcode) {
+    return 'Barcode $barcode isn\'t in Open Food Facts yet. Search by name or enter the food yourself.';
+  }
+
+  @override
+  String get componentsScannerBarcodeScannerSearchByName => 'Search by name';
+
+  @override
+  String get componentsScannerBarcodeScannerEnterManually => 'Enter manually';
+
+  @override
+  String get componentsScannerBarcodeScannerScanAgain => 'Scan again';
+
+  @override
+  String componentsDishesDishFormIngredientFormModalBarcode(String barcode) {
+    return 'Barcode: $barcode';
+  }
+
+  @override
+  String get screensMealsScanBarcode => 'Scan barcode';
+
+  @override
+  String get screensMealsSearchFood => 'Search food';
+
+  @override
+  String get componentsScannerProductSearchErrorOffline =>
+      'You\'re offline. Check your connection and try again.';
+
+  @override
+  String get componentsScannerProductSearchErrorTimeout =>
+      'Open Food Facts took too long to respond. Try again.';
+
+  @override
+  String get componentsScannerProductSearchErrorServer =>
+      'Open Food Facts is busy or unavailable. Wait a moment and try again.';
 }

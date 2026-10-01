@@ -102,6 +102,35 @@ void main() {
     expect(service.loadCount, greaterThan(previousLoads));
   });
 
+  testWidgets('first-run empty state offers scan and search too', (
+    tester,
+  ) async {
+    for (final (locale, labels) in [
+      (const Locale('en'), ['Create Dish', 'Scan barcode', 'Search food']),
+      (
+        const Locale('de'),
+        ['Barcode scannen', 'Lebensmittel suchen'],
+      ),
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: UniqueKey(),
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MealsScreen(dishService: _StubDishService([])),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      for (final label in labels) {
+        expect(find.text(label), findsWidgets);
+      }
+      expect(find.byIcon(Icons.qr_code_scanner), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('short dish list stays refreshable and labels are localized', (
     tester,
   ) async {
