@@ -677,7 +677,7 @@ class ImportExportService {
       }
       dishName ??= dish?.name;
       if (snapshot == null) {
-        final n = dish!.nutrition;
+        final n = dish!.nutritionPerServing;
         final s = log.servingSize;
         snapshot = (
           calories: n.calories * s,
