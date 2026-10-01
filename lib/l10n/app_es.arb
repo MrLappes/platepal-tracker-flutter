@@ -2998,5 +2998,9 @@
   "screensCalendarAddToMeal": "Añadir a {mealType}",
   "screensCalendarEntriesCopied": "{count, plural, =1{1 entrada copiada} other{{count} entradas copiadas}}",
   "screensCalendarNothingToCopy": "El día anterior no tiene entradas de {mealType}",
-  "screensCalendarCopyFailed": "No se pudo copiar. Inténtalo de nuevo."
+  "screensCalendarCopyFailed": "No se pudo copiar. Inténtalo de nuevo.",
+  "screensDishCreateRecipeMakes": "Esta receta rinde",
+  "screensDishCreateServingsSuffix": "raciones",
+  "screensDishCreateServingsHelper": "Los valores nutricionales de abajo son para toda la receta",
+  "screensDishCreatePerServingSummary": "Por ración (1 de {servings}): {calories} kcal · {protein} g proteína · {carbs} g carbohidratos · {fat} g grasa"
 }

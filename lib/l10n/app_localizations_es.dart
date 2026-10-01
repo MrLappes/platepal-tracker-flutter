@@ -3710,4 +3710,25 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensCalendarCopyFailed =>
       'No se pudo copiar. Inténtalo de nuevo.';
+
+  @override
+  String get screensDishCreateRecipeMakes => 'Esta receta rinde';
+
+  @override
+  String get screensDishCreateServingsSuffix => 'raciones';
+
+  @override
+  String get screensDishCreateServingsHelper =>
+      'Los valores nutricionales de abajo son para toda la receta';
+
+  @override
+  String screensDishCreatePerServingSummary(
+    String servings,
+    String calories,
+    String protein,
+    String carbs,
+    String fat,
+  ) {
+    return 'Por ración (1 de $servings): $calories kcal · $protein g proteína · $carbs g carbohidratos · $fat g grasa';
+  }
 }

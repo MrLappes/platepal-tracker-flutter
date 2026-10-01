@@ -346,6 +346,44 @@ void main() {
     expect(health.writes, ['Office cake']);
   });
 
+  test('recipe yield round-trips through JSON, CSV and zip exports', () async {
+    await dishService.saveDish(_dish('stew', 'Stew', 2000).copyWith(servings: 4));
+
+    for (final format in ExportFormat.values) {
+      final result = await service.exportData(
+        dataTypes: [DataType.dishes],
+        format: format,
+      );
+      expect(result.success, isTrue, reason: result.message);
+      await dishService.deleteDish('stew');
+
+      final reimport = await service.importData(
+        filePath: result.filePath!,
+        dataTypes: [DataType.dishes],
+        duplicateHandling: DuplicateHandling.skip,
+      );
+      expect(reimport.errors, isEmpty, reason: format.name);
+      final stew = await dishService.getDishById('stew');
+      expect(stew!.servings, 4, reason: format.name);
+      expect(stew.nutrition.calories, 2000, reason: format.name);
+      expect((await dishService.getDishById('oats'))!.servings, 1);
+      File(result.filePath!).deleteSync();
+    }
+  });
+
+  test('a dish file without servings imports with a yield of 1', () async {
+    final result = await service.importData(
+      filePath: '',
+      jsonData: {
+        'dishes': [_dish('bread', 'Bread', 250).toJson()..remove('servings')],
+      },
+      dataTypes: [DataType.dishes],
+      duplicateHandling: DuplicateHandling.skip,
+    );
+    expect(result.errors, isEmpty);
+    expect((await dishService.getDishById('bread'))!.servings, 1);
+  });
+
   test('a failed write rolls back the whole meal-log import', () async {
     final db = await DatabaseService.instance.database;
     await db.execute('''

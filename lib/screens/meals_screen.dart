@@ -579,23 +579,23 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
                 children: [
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.calories.round()}',
+                    '${dish.nutritionPerServing.calories.round()}',
                     localizations
                         .componentsDishesDishFormIngredientFormModalKcal,
                   ),
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.protein.round()}g',
+                    '${dish.nutritionPerServing.protein.round()}g',
                     localizations.componentsCalendarMacroSummaryCompactProtein,
                   ),
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.carbs.round()}g',
+                    '${dish.nutritionPerServing.carbs.round()}g',
                     localizations.componentsCalendarMacroSummaryCompactCarbs,
                   ),
                   _buildTelemetryItem(
                     theme,
-                    '${dish.nutrition.fat.round()}g',
+                    '${dish.nutritionPerServing.fat.round()}g',
                     localizations.componentsCalendarMacroSummaryCompactFat,
                   ),
                 ],

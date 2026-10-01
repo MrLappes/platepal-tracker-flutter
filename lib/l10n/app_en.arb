@@ -3262,5 +3262,13 @@
   "screensCalendarNothingToCopy": "The previous day has no {mealType} entries",
   "@screensCalendarNothingToCopy": {"description": "Shown when copying a meal from the previous day finds nothing", "placeholders": {"mealType": {"type": "String", "example": "Lunch"}}},
   "screensCalendarCopyFailed": "Couldn't copy. Try again.",
-  "@screensCalendarCopyFailed": {"description": "Shown when copying diary entries failed"}
+  "@screensCalendarCopyFailed": {"description": "Shown when copying diary entries failed"},
+  "screensDishCreateRecipeMakes": "This recipe makes",
+  "@screensDishCreateRecipeMakes": {"description": "Label of the recipe yield field in the dish form"},
+  "screensDishCreateServingsSuffix": "servings",
+  "@screensDishCreateServingsSuffix": {"description": "Unit shown after the recipe yield number"},
+  "screensDishCreateServingsHelper": "The nutrition values below are for the whole recipe",
+  "@screensDishCreateServingsHelper": {"description": "Helper text of the recipe yield field"},
+  "screensDishCreatePerServingSummary": "Per serving (1 of {servings}): {calories} kcal · {protein} g protein · {carbs} g carbs · {fat} g fat",
+  "@screensDishCreatePerServingSummary": {"description": "Nutrition of one serving shown under the recipe totals", "placeholders": {"servings": {"type": "String", "example": "4"}, "calories": {"type": "String", "example": "450"}, "protein": {"type": "String", "example": "20.5"}, "carbs": {"type": "String", "example": "40.0"}, "fat": {"type": "String", "example": "12.3"}}}
 }
