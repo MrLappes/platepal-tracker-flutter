@@ -44,3 +44,11 @@ To save a screenshot manually after navigating to the desired screen:
 ```bash
 "$HOME/Android/Sdk/platform-tools/adb" exec-out screencap -p > platepal-demo.png
 ```
+
+To capture the full Play Store set (demo status bar, seeded data, six screens)
+on a 1080x1920 emulator, and to re-render the store icon and feature graphic:
+
+```bash
+bash tool/screenshots/capture_store_screenshots.sh en
+python3 tool/screenshots/store_graphics.py
+```
