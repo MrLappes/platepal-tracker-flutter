@@ -146,6 +146,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   void _adjustTargetWeightForGoal(String newGoal) {
+    final locale = Localizations.localeOf(context).toString();
     final currentWeight = parseLocalizedDouble(_weightController.text);
     if (currentWeight == null) return;
 
@@ -206,7 +207,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       newTargetWeight = newTargetWeight * 2.2046;
     }
 
-    _targetWeightController.text = _formatMeasurement(newTargetWeight);
+    _targetWeightController.text = _formatMeasurement(newTargetWeight, locale);
   }
 
   // Health service initialization
@@ -295,6 +296,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   void _populateFields(UserProfile profile) {
+    final locale = Localizations.localeOf(context).toString();
     _preciseHeight = profile.height;
     _preciseWeight = profile.weight;
     _preciseTargetWeight =
@@ -306,27 +308,36 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
     // Convert height/weight based on unit system
     if (profile.preferredUnit == 'metric') {
-      _heightController.text = _formatMeasurement(profile.height);
-      _weightController.text = _formatMeasurement(profile.weight);
+      _heightController.text = _formatMeasurement(profile.height, locale);
+      _weightController.text = _formatMeasurement(profile.weight, locale);
       // For maintain_weight goal, set target weight to current weight
       if (profile.goals.goal == 'maintain_weight') {
-        _targetWeightController.text = _formatMeasurement(profile.weight);
+        _targetWeightController.text = _formatMeasurement(
+          profile.weight,
+          locale,
+        );
       } else {
         _targetWeightController.text = _formatMeasurement(
           profile.goals.targetWeight,
+          locale,
         );
       }
     } else {
-      _heightController.text = _formatMeasurement(profile.height / 2.54);
-      _weightController.text = _formatMeasurement(profile.weight * 2.2046);
+      _heightController.text = _formatMeasurement(profile.height / 2.54, locale);
+      _weightController.text = _formatMeasurement(
+        profile.weight * 2.2046,
+        locale,
+      );
       // For maintain_weight goal, set target weight to current weight
       if (profile.goals.goal == 'maintain_weight') {
         _targetWeightController.text = _formatMeasurement(
           profile.weight * 2.2046,
+          locale,
         );
       } else {
         _targetWeightController.text = _formatMeasurement(
           profile.goals.targetWeight * 2.2046,
+          locale,
         );
       }
     }
@@ -354,8 +365,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     });
   }
 
-  String _formatMeasurement(double value) =>
-      value.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '');
+  String _formatMeasurement(double value, String locale) =>
+      formatDecimal(value, locale).replaceFirst(RegExp(r'[.,]0$'), '');
 
   double? _metricMeasurement(
     TextEditingController controller,
@@ -1103,6 +1114,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   Widget _buildCurrentStatsCard(AppLocalizations l10n) {
     if (_originalProfile == null) return const SizedBox.shrink();
 
+    final locale = Localizations.localeOf(context).toString();
     // Calculate current values for display
     final isMetric = _selectedUnitSystem == 'metric';
     final height =
@@ -1148,7 +1160,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 Expanded(
                   child: _buildStatColumn(
                     l10n.screensSettingsProfileSettingsBmi,
-                    bmi.toStringAsFixed(1),
+                    formatDecimal(bmi, locale),
                     _getBMICategory(bmi, l10n),
                   ),
                 ),
@@ -1292,6 +1304,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   void _convertUnitsForDisplay() {
     if (_originalProfile == null) return;
 
+    final locale = Localizations.localeOf(context).toString();
     final wasMetric = _selectedUnitSystem == 'imperial';
     final height = _metricMeasurement(
       _heightController,
@@ -1320,6 +1333,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       _preciseHeight = height;
       _heightController.text = _formatMeasurement(
         wasMetric ? height / 2.54 : height,
+        locale,
       );
       _displayedHeight = _heightController.text;
     }
@@ -1327,6 +1341,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       _preciseWeight = weight;
       _weightController.text = _formatMeasurement(
         wasMetric ? weight * 2.2046 : weight,
+        locale,
       );
       _displayedWeight = _weightController.text;
     }
@@ -1334,6 +1349,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       _preciseTargetWeight = targetWeight;
       _targetWeightController.text = _formatMeasurement(
         wasMetric ? targetWeight * 2.2046 : targetWeight,
+        locale,
       );
       _displayedTargetWeight = _targetWeightController.text;
     }

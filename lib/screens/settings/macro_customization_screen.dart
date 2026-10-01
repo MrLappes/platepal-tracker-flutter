@@ -3,6 +3,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user_profile.dart';
+import '../../utils/number_parsing.dart';
 import '../../utils/service_extensions.dart';
 import '../../services/user_session_service.dart';
 
@@ -429,6 +430,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -463,7 +465,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
         body:
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _buildContent(l10n, theme, colorScheme),
+                : _buildContent(l10n, theme, colorScheme, locale),
         bottomNavigationBar:
             _hasUnsavedChanges
                 ? Container(
@@ -521,6 +523,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     AppLocalizations l10n,
     ThemeData theme,
     ColorScheme colorScheme,
+    String locale,
   ) {
     final macros = _calculateMacroTargets();
 
@@ -557,7 +560,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                   const SizedBox(height: 8),
                   Text(
                     l10n.screensSettingsMacroCustomizationDailyCalories(
-                      _dailyCalories.toStringAsFixed(0),
+                      formatDecimal(_dailyCalories, locale, fractionDigits: 0),
                     ),
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: colorScheme.onPrimaryContainer,
@@ -576,7 +579,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             l10n.screensSettingsMacroCustomizationMacroRatios,
             theme,
           ),
-          _buildMacroSliderCard(l10n, theme, colorScheme, macros),
+          _buildMacroSliderCard(l10n, theme, colorScheme, macros, locale),
 
           const SizedBox(height: 24),
 
@@ -585,7 +588,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             l10n.screensSettingsMacroCustomizationFiberTarget,
             theme,
           ),
-          _buildFiberCard(l10n, theme, colorScheme, macros),
+          _buildFiberCard(l10n, theme, colorScheme, macros, locale),
 
           const SizedBox(height: 24),
 
@@ -594,7 +597,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             l10n.screensSettingsMacroCustomizationTargetPreview,
             theme,
           ),
-          _buildPreviewCard(l10n, theme, colorScheme, macros),
+          _buildPreviewCard(l10n, theme, colorScheme, macros, locale),
 
           const SizedBox(height: 24), // Preset buttons
           _buildSectionHeader(
@@ -627,6 +630,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
     Map<String, double> macros,
+    String locale,
   ) {
     final macroColors = MacroColors.of(context);
     return Card(
@@ -642,6 +646,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               onChanged: (value) => _adjustRatios('protein', value),
               grams: macros['protein']!,
               theme: theme,
+              locale: locale,
               isPinned: _proteinPinned,
               onPinToggle: () => _togglePin('protein'),
             ),
@@ -656,6 +661,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               onChanged: (value) => _adjustRatios('carbs', value),
               grams: macros['carbs']!,
               theme: theme,
+              locale: locale,
               isPinned: _carbsPinned,
               onPinToggle: () => _togglePin('carbs'),
             ),
@@ -670,6 +676,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
               onChanged: (value) => _adjustRatios('fat', value),
               grams: macros['fat']!,
               theme: theme,
+              locale: locale,
               isPinned: _fatPinned,
               onPinToggle: () => _togglePin('fat'),
             ),
@@ -708,8 +715,11 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                   Flexible(
                     child: Text(
                       l10n.screensSettingsMacroCustomizationTotalRatio(
-                        (_proteinRatio + _carbsRatio + _fatRatio)
-                            .toStringAsFixed(1),
+                        formatDecimal(
+                          _proteinRatio + _carbsRatio + _fatRatio,
+                          locale,
+                          fractionDigits: 1,
+                        ),
                       ),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
@@ -732,6 +742,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     required ValueChanged<double> onChanged,
     required double grams,
     required ThemeData theme,
+    required String locale,
     required bool isPinned,
     required VoidCallback onPinToggle,
   }) {
@@ -761,7 +772,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     ),
                   ),
                   Text(
-                    '${value.toStringAsFixed(1)}% (${grams.toStringAsFixed(0)}g)',
+                    '${formatDecimal(value, locale, fractionDigits: 1)}% (${formatDecimal(grams, locale, fractionDigits: 0)}g)',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
                       color: color,
@@ -817,7 +828,8 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             divisions: 40,
             label: label,
             semanticFormatterCallback:
-                (newValue) => '${newValue.toStringAsFixed(1)}%',
+                (newValue) =>
+                    '${formatDecimal(newValue, locale, fractionDigits: 1)}%',
             onChanged: isSliderDisabled ? null : onChanged,
           ),
         ),
@@ -843,6 +855,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
     Map<String, double> macros,
+    String locale,
   ) {
     final macroColors = MacroColors.of(context);
     return Card(
@@ -865,7 +878,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 ),
                 Text(
                   l10n.screensSettingsMacroCustomizationFiberTotal(
-                    macros['fiber']!.toStringAsFixed(1),
+                    formatDecimal(macros['fiber']!, locale, fractionDigits: 1),
                   ),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w500,
@@ -877,7 +890,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
             const SizedBox(height: 8),
             Text(
               l10n.screensSettingsMacroCustomizationFiberPer1000Calories(
-                _fiberPer1000Cal.toStringAsFixed(1),
+                formatDecimal(_fiberPer1000Cal, locale, fractionDigits: 1),
               ),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -900,7 +913,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                 semanticFormatterCallback:
                     (newValue) => l10n
                         .screensSettingsMacroCustomizationFiberPer1000Calories(
-                          newValue.toStringAsFixed(1),
+                          formatDecimal(newValue, locale, fractionDigits: 1),
                         ),
                 onChanged: (value) {
                   setState(() {
@@ -929,6 +942,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     ThemeData theme,
     ColorScheme colorScheme,
     Map<String, double> macros,
+    String locale,
   ) {
     final macroColors = MacroColors.of(context);
     return Card(
@@ -954,6 +968,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     'g',
                     macroColors.protein,
                     theme,
+                    locale,
                   ),
                 ),
                 Expanded(
@@ -963,6 +978,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     'g',
                     macroColors.carbs,
                     theme,
+                    locale,
                   ),
                 ),
               ],
@@ -977,6 +993,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     'g',
                     macroColors.fat,
                     theme,
+                    locale,
                   ),
                 ),
                 Expanded(
@@ -986,6 +1003,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
                     'g',
                     macroColors.fiber,
                     theme,
+                    locale,
                   ),
                 ),
               ],
@@ -1002,6 +1020,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
     String unit,
     Color color,
     ThemeData theme,
+    String locale,
   ) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1022,7 +1041,7 @@ class _MacroCustomizationScreenState extends State<MacroCustomizationScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${value.toStringAsFixed(0)}$unit',
+            '${formatDecimal(value, locale, fractionDigits: 0)}$unit',
             style: theme.textTheme.titleLarge?.copyWith(
               color: color,
               fontWeight: FontWeight.bold,

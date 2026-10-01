@@ -12,6 +12,7 @@ import '../../models/dish.dart';
 import '../../models/user_ingredient.dart';
 import '../../services/storage/dish_service.dart';
 import '../../services/chat/openai_service.dart' show ChatErrorKind;
+import '../../utils/number_parsing.dart';
 import '../modals/dish_log_modal.dart';
 import 'agent_steps_modal.dart';
 import 'dish_suggestion_card.dart';
@@ -710,6 +711,7 @@ class MessageBubble extends StatelessWidget {
     ProcessedDish dish,
   ) async {
     final localizations = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     return await showDialog<ProcessedDish?>(
       context: context,
       builder:
@@ -724,16 +726,16 @@ class MessageBubble extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryCalories}: ${dish.totalNutrition.calories.toStringAsFixed(0)}',
+                  '${localizations.componentsCalendarMacroSummaryCalories}: ${formatDecimal(dish.totalNutrition.calories, locale, fractionDigits: 0)}',
                 ),
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryProtein}: ${dish.totalNutrition.protein.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryProtein}: ${formatDecimal(dish.totalNutrition.protein, locale)}g',
                 ),
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryCarbs}: ${dish.totalNutrition.carbs.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryCarbs}: ${formatDecimal(dish.totalNutrition.carbs, locale)}g',
                 ),
                 Text(
-                  '${localizations.componentsCalendarMacroSummaryFat}: ${dish.totalNutrition.fat.toStringAsFixed(1)}g',
+                  '${localizations.componentsCalendarMacroSummaryFat}: ${formatDecimal(dish.totalNutrition.fat, locale)}g',
                 ),
                 if (dish.ingredients.isNotEmpty) ...[
                   const SizedBox(height: 12),
@@ -901,6 +903,7 @@ class MessageBubble extends StatelessWidget {
     }
 
     final localizations = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -940,6 +943,24 @@ class MessageBubble extends StatelessWidget {
                   final ingredient = UserIngredient.fromJson(
                     ingredientData as Map<String, dynamic>,
                   );
+                  final quantityText = ingredient.quantity.toString();
+                  final exponentIndex = quantityText.indexOf('e');
+                  final decimalIndex = quantityText.indexOf('.');
+                  final fractionDigits =
+                      decimalIndex == -1
+                          ? 0
+                          : (exponentIndex == -1
+                                  ? quantityText.length
+                                  : exponentIndex) -
+                              decimalIndex -
+                              1;
+                  final exponent =
+                      exponentIndex == -1
+                          ? 0
+                          : int.parse(
+                            quantityText.substring(exponentIndex + 1),
+                          );
+                  final digits = fractionDigits - exponent;
                   return Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -953,7 +974,7 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '${ingredient.name} (${ingredient.quantity}${ingredient.unit})',
+                      '${ingredient.name} (${formatDecimal(ingredient.quantity, locale, fractionDigits: digits > 0 ? digits : 1)}${ingredient.unit})',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w500,

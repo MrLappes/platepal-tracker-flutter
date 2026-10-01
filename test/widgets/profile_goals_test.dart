@@ -256,7 +256,7 @@ void main() {
     );
 
     final fiber = tester.getSemantics(find.bySemanticsLabel('Ballaststoffe'));
-    expect(fiber.value, contains('15.0 g pro 1000 Kalorien'));
+    expect(fiber.value, contains('15,0 g pro 1000 Kalorien'));
     semantics.dispose();
   });
 

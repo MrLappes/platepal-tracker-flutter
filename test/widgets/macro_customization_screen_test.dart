@@ -93,4 +93,33 @@ void main() {
     );
     semantics.dispose();
   });
+
+  testWidgets('German macro ratios use commas in text and slider semantics', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final storage = StorageServiceProvider()..userProfileService = _Profiles();
+    await tester.pumpWidget(
+      ChangeNotifierProvider<StorageServiceProvider>.value(
+        value: storage,
+        child: MaterialApp(
+          locale: const Locale('de'),
+          theme: AppThemes.dark.materialTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const MacroCustomizationScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gesamt: 100,0 %'), findsOneWidget);
+    expect(find.textContaining('40,0%'), findsOneWidget);
+    expect(
+      tester
+          .widget<Slider>(find.byType(Slider).first)
+          .semanticFormatterCallback!(26.1),
+      '26,1%',
+    );
+  });
 }

@@ -10,6 +10,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Profiles extends UserProfileService {
+  _Profiles({this.weight = 70});
+
+  final double weight;
+
   @override
   Future<UserProfile?> getUserProfile(String userId) async => UserProfile(
     id: userId,
@@ -18,7 +22,7 @@ class _Profiles extends UserProfileService {
     age: 30,
     gender: 'other',
     height: 170,
-    weight: 70,
+    weight: weight,
     activityLevel: 'moderately_active',
     goals: const FitnessGoals(
       goal: 'maintain_weight',
@@ -42,14 +46,19 @@ class _Profiles extends UserProfileService {
 }
 
 void main() {
-  Future<void> pumpProfile(WidgetTester tester, String language) async {
+  Future<void> pumpProfile(
+    WidgetTester tester,
+    String language, {
+    double weight = 70,
+  }) async {
     tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues({});
 
-    final storage = StorageServiceProvider()..userProfileService = _Profiles();
+    final storage = StorageServiceProvider()
+      ..userProfileService = _Profiles(weight: weight);
     await tester.pumpWidget(
       ChangeNotifierProvider<StorageServiceProvider>.value(
         value: storage,
@@ -117,6 +126,27 @@ void main() {
       'Opcional',
     ),
   };
+
+  for (final (language, weightLabel, expectedWeight, expectedBmi) in [
+    ('de', 'Gewicht (kg)', '70,5', '24,4'),
+    ('en', 'Weight (kg)', '70.5', '24.4'),
+  ]) {
+    testWidgets('$language profile decimals follow the selected locale', (
+      tester,
+    ) async {
+      await pumpProfile(tester, language, weight: 70.5);
+
+      final weightField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField && widget.decoration?.labelText == weightLabel,
+      );
+      expect(
+        tester.widget<TextField>(weightField).controller!.text,
+        expectedWeight,
+      );
+      expect(find.text(expectedBmi), findsOneWidget);
+    });
+  }
 
   for (final entry in labels.entries) {
     testWidgets(
