@@ -79,11 +79,75 @@ void main() {
     expect(dish.name, 'Old soup');
     expect(dish.nutrition.calories, 150);
     expect(dish.nutrition.fiber, 2);
-    expect(dish.ingredients, current.ingredients);
+    // The soup now has 100 kcal per serving, not 150: no weight input.
+    expect(dish.ingredients, isEmpty);
+    expect(servingWeight(dish), isNull);
+
+    final unchanged = log.copyWith(calories: 201);
     expect(
-      dishForLog(log.copyWith(), fallbackName: 'x').ingredients,
+      dishForLog(unchanged, current: current, fallbackName: 'x').ingredients,
+      current.ingredients,
+    );
+    expect(
+      dishForLog(
+        log.copyWith(calories: 204),
+        current: current,
+        fallbackName: 'x',
+      ).ingredients,
       isEmpty,
     );
+    expect(
+      dishForLog(unchanged.copyWith(), fallbackName: 'x').ingredients,
+      isEmpty,
+    );
+  });
+
+  testWidgets('editing an entry of a changed dish hides the weight input', (
+    tester,
+  ) async {
+    final log = DishLog(
+      id: 'l',
+      dishId: 'soup',
+      dishName: 'Soup',
+      loggedAt: DateTime(2026, 9, 20, 12),
+      mealType: 'lunch',
+      servingSize: 1,
+      calories: 150,
+      protein: 5,
+      carbs: 10,
+      fat: 3,
+      fiber: 0,
+    );
+    final current = _soup(
+      ingredients: const [
+        Ingredient(id: 'i', name: 'Water', amount: 300, unit: 'ml'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      _app(
+        DishLogModal(
+          dish: dishForLog(log, current: current, fallbackName: 'x'),
+          existingLog: log,
+        ),
+      ),
+    );
+    expect(find.text('Weight'), findsNothing);
+
+    await tester.pumpWidget(
+      _app(
+        DishLogModal(
+          key: const ValueKey('same'),
+          dish: dishForLog(
+            log.copyWith(calories: 100),
+            current: current,
+            fallbackName: 'x',
+          ),
+          existingLog: log.copyWith(calories: 100),
+        ),
+      ),
+    );
+    expect(find.text('Weight'), findsOneWidget);
   });
 
   testWidgets('servings stepper moves in quarters and updates nutrition', (

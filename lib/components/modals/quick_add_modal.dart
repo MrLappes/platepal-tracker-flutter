@@ -3,6 +3,7 @@ import 'package:platepal_tracker/l10n/app_localizations.dart';
 
 import '../../models/dish.dart';
 import '../../models/meal_type.dart';
+import '../../services/chat/meal_log_proposal.dart';
 import '../../services/storage/dish_service.dart';
 import '../../utils/number_parsing.dart';
 import 'dish_log_modal.dart';
@@ -94,7 +95,11 @@ class _QuickAddModalState extends State<QuickAddModal> {
     super.dispose();
   }
 
-  String? _validateNumber(String? text, {bool required = false}) {
+  String? _validateNumber(
+    String? text, {
+    bool required = false,
+    required double max,
+  }) {
     final l10n = AppLocalizations.of(context);
     if (text == null || text.trim().isEmpty) {
       return required ? l10n.componentsModalsQuickAddCaloriesRequired : null;
@@ -102,6 +107,11 @@ class _QuickAddModalState extends State<QuickAddModal> {
     final value = parseLocalizedDouble(text);
     if (value == null || value < 0) {
       return l10n.componentsModalsQuickAddInvalidNumber;
+    }
+    if (value > max) {
+      return l10n.componentsModalsQuickAddTooLarge(
+        formatAmount(max, Localizations.localeOf(context).toString()),
+      );
     }
     return null;
   }
@@ -177,6 +187,7 @@ class _QuickAddModalState extends State<QuickAddModal> {
     String label, {
     bool required = false,
     bool autofocus = false,
+    double max = MealLogProposal.maxGrams,
   }) {
     return TextFormField(
       controller: controller,
@@ -188,7 +199,8 @@ class _QuickAddModalState extends State<QuickAddModal> {
         labelText: label,
         border: const OutlineInputBorder(),
       ),
-      validator: (text) => _validateNumber(text, required: required),
+      validator:
+          (text) => _validateNumber(text, required: required, max: max),
     );
   }
 
@@ -237,6 +249,7 @@ class _QuickAddModalState extends State<QuickAddModal> {
                     l10n.componentsModalsQuickAddCalories,
                     required: true,
                     autofocus: true,
+                    max: MealLogProposal.maxCalories,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(

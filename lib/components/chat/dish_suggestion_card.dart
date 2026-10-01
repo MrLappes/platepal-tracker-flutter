@@ -306,9 +306,14 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
   Future<void> _openDishCreationScreen() async {
     setState(() => _loading = true);
     try {
+      // A stored dish is edited as stored: the card shows one serving only.
+      final stored = await _dishService.getDishById(widget.dish.id);
+      if (!mounted) return;
       // Navigate to dish creation screen with pre-filled data
       final result = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(builder: (context) => _buildDishCreationScreen()),
+        MaterialPageRoute(
+          builder: (context) => _buildDishCreationScreen(stored),
+        ),
       );
       if (result == true) {
         // Dish was created/updated successfully
@@ -348,13 +353,13 @@ class _DishSuggestionCardState extends State<DishSuggestionCard>
         );
       }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  Widget _buildDishCreationScreen() {
+  Widget _buildDishCreationScreen(Dish? stored) {
     // Convert ProcessedDish to Dish for the creation screen
-    final dishData = Dish(
+    final dishData = stored ?? Dish(
       id: widget.dish.id,
       name: widget.dish.name,
       description: widget.dish.description,

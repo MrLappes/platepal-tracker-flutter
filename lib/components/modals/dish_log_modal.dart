@@ -1,3 +1,5 @@
+import 'dart:math' show max;
+
 import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:platepal_tracker/themes/app_theme.dart';
@@ -41,15 +43,24 @@ double stepServings(double servings, int direction) {
 
 /// The dish a diary entry was logged from, rebuilt from its snapshot so it
 /// can be edited even when the dish was changed or deleted. [current] only
-/// contributes ingredients and yield (for the weight input).
+/// contributes ingredients and yield (for the weight input), and only while
+/// its per-serving calories still match the snapshot (within 1 %); otherwise
+/// grams would no longer correspond to the logged nutrition.
 Dish dishForLog(DishLog log, {Dish? current, required String fallbackName}) {
-  final servings = current?.servings ?? 1;
+  final loggedPerServing =
+      log.servingSize > 0 ? log.calories / log.servingSize : log.calories;
+  final currentPerServing = current?.nutritionPerServing.calories;
+  final unchanged =
+      currentPerServing != null &&
+      (currentPerServing - loggedPerServing).abs() <=
+          0.01 * max(currentPerServing.abs(), loggedPerServing.abs());
+  final servings = unchanged ? current!.servings : 1.0;
   double recipeTotal(double value) =>
       (log.servingSize > 0 ? value / log.servingSize : value) * servings;
   return Dish(
     id: log.dishId,
     name: log.dishName ?? current?.name ?? fallbackName,
-    ingredients: current?.ingredients ?? const [],
+    ingredients: unchanged ? current!.ingredients : const [],
     nutrition: NutritionInfo(
       calories: recipeTotal(log.calories),
       protein: recipeTotal(log.protein),
