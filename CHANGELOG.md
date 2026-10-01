@@ -4,6 +4,8 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-10-01
+
 ### Added
 
 - Log meals directly from a selected day in the calendar diary.
@@ -24,6 +26,7 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 - Avoid duplicate AI replies and fix logging dishes suggested by chat.
 - Make imports and restores safer with confirmation, pre-import backups, clearer results, and support for legacy profiles.
 - Correct calories burned calculations for Health Connect and Apple Health.
+- Show decimal numbers with the separator of the app language (for example 24,0 in German and Spanish).
 
 ### Security
 
