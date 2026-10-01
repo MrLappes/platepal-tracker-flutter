@@ -2494,7 +2494,7 @@ abstract class AppLocalizations {
   /// Export, import, and pre-import backups
   ///
   /// In en, this message translates to:
-  /// **'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us. If you turn on automatic backup, the app also writes full ZIP backups to a folder you choose (or to app storage) when one is due and keeps the newest five.'**
+  /// **'Export files (JSON, CSV, or a ZIP full backup that also contains your dish photos) are created locally when you choose to export; you can share them using your device. Import reads a file you choose and creates a local pre-import backup first, unless you explicitly continue when backup creation fails. Nothing is uploaded to us. If you turn on automatic backup, the app also writes full ZIP backups to a folder you choose (or to app storage) when one is due and keeps the newest five. Links from the PlatePal app only fill in a new dish form; nothing is saved until you save it.'**
   String get screensPrivacyExportBody;
 
   /// Android operating system backup section heading
@@ -6214,6 +6214,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get screensBackupOpenSettings;
+
+  /// Banner on the dish form opened from a PlatePal link
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from PlatePal – check the ingredients and amounts'**
+  String get screensDishCreateImportedBanner;
+
+  /// Shown on an imported ingredient that has no amount or nutrition yet
+  ///
+  /// In en, this message translates to:
+  /// **'Add amount and nutrition'**
+  String get screensDishCreateIngredientNeedsDetails;
+
+  /// Shown when saving an imported dish with incomplete ingredients
+  ///
+  /// In en, this message translates to:
+  /// **'Complete or remove the ingredients marked in red before saving.'**
+  String get screensDishCreateImportIncomplete;
+
+  /// Title of the screen shown for an invalid PlatePal link
+  ///
+  /// In en, this message translates to:
+  /// **'Import from PlatePal'**
+  String get screensPlatePalImportTitle;
+
+  /// Error for a PlatePal import link that failed validation
+  ///
+  /// In en, this message translates to:
+  /// **'This PlatePal link is invalid or incomplete. Share the dish again from PlatePal.'**
+  String get screensPlatePalImportInvalid;
+
+  /// Error for a PlatePal import link with an unknown format version
+  ///
+  /// In en, this message translates to:
+  /// **'This dish was shared by a newer version of PlatePal. Update PlatePal Tracker to import it.'**
+  String get screensPlatePalImportUnsupported;
 }
 
 class _AppLocalizationsDelegate

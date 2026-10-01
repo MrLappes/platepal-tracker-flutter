@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../models/dish.dart';
 import '../models/product.dart';
 import '../services/storage/dish_service.dart';
+import '../services/data/platepal_dish_import.dart';
 import '../themes/app_theme.dart';
 import '../utils/number_parsing.dart';
 import '../utils/unit_conversion.dart';
@@ -79,6 +80,9 @@ class DishCreateScreenAdvanced extends StatefulWidget {
   /// Opens the scanner or product search right away.
   final DishCreateEntry? entry;
 
+  /// A dish shared from PlatePal; prefills a new, unsaved dish.
+  final PlatePalDishDraft? importedDraft;
+
   const DishCreateScreenAdvanced({
     super.key,
     this.dish,
@@ -87,6 +91,7 @@ class DishCreateScreenAdvanced extends StatefulWidget {
     this.heroTag,
     this.dishService,
     this.entry,
+    this.importedDraft,
   });
 
   @override
@@ -115,6 +120,9 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   String? _servingsError;
   String _selectedCategory = 'breakfast';
   List<Ingredient> _ingredients = [];
+
+  /// Imported ingredients that still need an amount and nutrition.
+  final Set<String> _incompleteIngredientIds = {};
   File? _selectedImage;
   bool _removeExistingImage = false;
   bool _justRecalculated = false;
@@ -186,8 +194,25 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
   }
 
   void _loadDishData(String locale) {
-    _servings = widget.dish?.servings ?? 1;
+    final draft = widget.importedDraft;
+    _servings = widget.dish?.servings ?? draft?.servings?.toDouble() ?? 1;
     _servingsController.text = formatAmount(_servings, locale);
+    if (widget.dish == null && draft != null) {
+      _nameController.text = draft.name;
+      _descriptionController.text = draft.description ?? '';
+      _ingredients = [
+        for (final name in draft.ingredients)
+          Ingredient(
+            id: const Uuid().v4(),
+            name: name,
+            amount: 0,
+            unit: 'g',
+          ),
+      ];
+      _incompleteIngredientIds.addAll(_ingredients.map((i) => i.id));
+      // Never saved without the user: leaving asks to discard.
+      _isDirty = true;
+    }
     if (widget.dish != null) {
       final dish = widget.dish!;
       _nameController.text = dish.name;
@@ -306,6 +331,12 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
     }
     if (_servingsError != null) {
       _showErrorSnackBar(_servingsError!);
+      return;
+    }
+    if (_ingredients.any((i) => _incompleteIngredientIds.contains(i.id))) {
+      _showErrorSnackBar(
+        AppLocalizations.of(context).screensDishCreateImportIncomplete,
+      );
       return;
     }
 
@@ -694,6 +725,7 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
       ingredient: _ingredients[index],
       onSave: (ingredient) {
         setState(() {
+          _incompleteIngredientIds.remove(_ingredients[index].id);
           _ingredients[index] = ingredient;
           _isDirty = true;
           _recalculateNutrition();
@@ -745,6 +777,31 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildImportBanner() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      key: const ValueKey('platepal-import-banner'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.download_done, color: colorScheme.onSecondaryContainer),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).screensDishCreateImportedBanner,
+              style: TextStyle(color: colorScheme.onSecondaryContainer),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1359,13 +1416,24 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      '${formatDecimal(ingredient.amount, locale)} ${ingredient.unit}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                    if (_incompleteIngredientIds.contains(ingredient.id))
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).screensDishCreateIngredientNeedsDetails,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    else
+                      Text(
+                        '${formatDecimal(ingredient.amount, locale)} ${ingredient.unit}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -1553,6 +1621,10 @@ class _DishCreateScreenAdvancedState extends State<DishCreateScreenAdvanced>
           ),
           child: Column(
             children: [
+              if (widget.importedDraft != null) ...[
+                _buildImportBanner(),
+                const SizedBox(height: 16),
+              ],
               _buildImageSelector(),
               const SizedBox(height: 16),
               _buildQuickActions(),

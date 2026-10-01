@@ -111,7 +111,12 @@ class _IngredientFormModalState extends State<IngredientFormModal> {
     final ingredient = widget.ingredient;
     if (ingredient == null) return;
     final locale = Localizations.localeOf(context).toString();
-    _quantityController.text = _formatEditableNumber(ingredient.amount, locale);
+    if (ingredient.amount > 0) {
+      _quantityController.text = _formatEditableNumber(
+        ingredient.amount,
+        locale,
+      );
+    }
     final nutrition = ingredient.nutrition;
     if (nutrition == null) return;
     _caloriesController.text = _formatEditableNumber(

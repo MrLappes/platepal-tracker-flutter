@@ -1423,7 +1423,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch. Wenn du die automatische Sicherung einschaltest, schreibt die App bei Fälligkeit zusätzlich vollständige ZIP-Sicherungen in einen von dir gewählten Ordner (oder in den App-Speicher) und behält die neuesten fünf.';
+      'Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch. Wenn du die automatische Sicherung einschaltest, schreibt die App bei Fälligkeit zusätzlich vollständige ZIP-Sicherungen in einen von dir gewählten Ordner (oder in den App-Speicher) und behält die neuesten fünf. Links aus der PlatePal-App füllen nur ein neues Gerichtsformular aus; gespeichert wird erst, wenn du speicherst.';
 
   @override
   String get screensPrivacyBackupTitle => 'Android-Sicherung';
@@ -3852,4 +3852,27 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensBackupOpenSettings => 'Einstellungen';
+
+  @override
+  String get screensDishCreateImportedBanner =>
+      'Aus PlatePal importiert – prüfe die Zutaten und Mengen';
+
+  @override
+  String get screensDishCreateIngredientNeedsDetails =>
+      'Menge und Nährwerte ergänzen';
+
+  @override
+  String get screensDishCreateImportIncomplete =>
+      'Ergänze oder entferne vor dem Speichern die rot markierten Zutaten.';
+
+  @override
+  String get screensPlatePalImportTitle => 'Aus PlatePal importieren';
+
+  @override
+  String get screensPlatePalImportInvalid =>
+      'Dieser PlatePal-Link ist ungültig oder unvollständig. Teile das Gericht erneut aus PlatePal.';
+
+  @override
+  String get screensPlatePalImportUnsupported =>
+      'Dieses Gericht wurde von einer neueren PlatePal-Version geteilt. Aktualisiere PlatePal Tracker, um es zu importieren.';
 }
