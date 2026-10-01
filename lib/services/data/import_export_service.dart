@@ -58,8 +58,7 @@ class ImportExportService {
   /// Import files above this size are rejected before reading.
   static const int maxImportBytes = 50 * 1024 * 1024;
 
-  /// Sections with more rows are rejected as a whole.
-  static const int maxItemsPerSection = 100000;
+  static const int _yieldInterval = 1000;
 
   static const int _backupsToKeep = 5;
   static final RegExp _backupName = RegExp(r'^platepal_backup_(\d+)\.json$');
@@ -229,6 +228,7 @@ class ImportExportService {
           final csvResult = _convertFromCSVWithErrors(content);
           importData = csvResult.data;
           detailedResults.parsingErrors.addAll(csvResult.errors);
+          detailedResults.omittedErrors += csvResult.omittedErrors;
         } else {
           errorCode = ImportExportErrorCode.importUnsupportedFormat;
           throw Exception('Unsupported file format');
@@ -396,19 +396,22 @@ class ImportExportService {
     if (raw == null) debugPrint('⚠️ No mealLogs found in import data');
 
     final errors = <String>[];
+    int errorCount = 0;
     int processed = 0;
     int duplicates = 0;
     int skipped = 0;
 
     final groups = <String, List<(int, _ImportedLog)>>{};
     for (int i = 0; i < entries.length; i++) {
+      await _yieldPeriodically(i);
       try {
         final log = _parseImportedLog(entries[i]);
         groups.putIfAbsent(log.key, () => []).add((i, log));
       } on FormatException catch (e) {
         skipped++;
         final value = entries[i].toString();
-        detailedResults.validationErrors.add(
+        detailedResults.addValidationError(
+          typeName,
           ValidationError(
             field: typeName,
             error: e.message,
@@ -421,6 +424,7 @@ class ImportExportService {
 
     final existing = await _existingLogCounts();
     final toInsert = <(int, String, _ImportedLog, String?, _Nutrients)>[];
+    var visited = 0;
     for (final entry in groups.entries) {
       final group = entry.value;
       // A logical log appears at most once per source, so the busiest
@@ -437,6 +441,7 @@ class ImportExportService {
       ];
 
       for (int n = 0; n < candidates.length; n++) {
+        await _yieldPeriodically(visited++);
         final (index, log) = candidates[n];
         final identifier = '${log.dishId} @ ${log.loggedAt.toIso8601String()}';
         if (n >= toWrite) {
@@ -455,9 +460,8 @@ class ImportExportService {
           final (dishName, snapshot) = await _resolveImportedLog(log);
           toInsert.add((index, identifier, log, dishName, snapshot));
         } catch (e) {
-          final errorMsg = 'Error processing meal log item at index $index: $e';
-          errors.add(errorMsg);
-          detailedResults.processingErrors.add(
+          errorCount++;
+          detailedResults.addProcessingError(
             ProcessingError(
               type: typeName,
               index: index,
@@ -465,6 +469,9 @@ class ImportExportService {
               item: identifier,
             ),
           );
+          if (errors.length < ImportDetailedResults.maxErrorsPerSection) {
+            errors.add('Error processing meal log item at index $index: $e');
+          }
           debugPrint('❌ $typeName item $index failed: ${_logError(e)}');
         }
       }
@@ -506,8 +513,9 @@ class ImportExportService {
       } catch (e) {
         final errorMsg =
             'No meal logs imported, writing ${toInsert.length} failed: $e';
+        errorCount++;
         errors.add(errorMsg);
-        detailedResults.processingErrors.add(
+        detailedResults.addProcessingError(
           ProcessingError(
             type: typeName,
             index: toInsert.first.$1,
@@ -526,16 +534,23 @@ class ImportExportService {
       processed: processed,
       duplicates: duplicates,
       skipped: skipped,
-      errors: errors.length,
+      errors: errorCount,
     );
 
     return ImportExportResult(
-      success: errors.isEmpty,
+      success: errorCount == 0,
       message: 'Processed $processed meal logs',
       itemsProcessed: processed,
       duplicatesFound: duplicates,
       errors: errors,
     );
+  }
+
+  /// Lets the UI isolate draw a frame during long import loops.
+  static Future<void> _yieldPeriodically(int i) async {
+    if (i % _yieldInterval == _yieldInterval - 1) {
+      await Future<void>.delayed(Duration.zero);
+    }
   }
 
   static String _logKey(
@@ -551,7 +566,9 @@ class ImportExportService {
   Future<Map<String, int>> _existingLogCounts() async {
     final rows = await _getAllDishLogs();
     final counts = <String, int>{};
+    var n = 0;
     for (final row in rows) {
+      await _yieldPeriodically(n++);
       final loggedAt = DateTime.tryParse(row['logged_at'] as String? ?? '');
       if (loggedAt == null) continue;
       final key = _logKey(
@@ -844,11 +861,6 @@ class ImportExportService {
               : null;
       if (items == null) {
         errors.add('$name must be a list');
-      } else if (items.length > maxItemsPerSection) {
-        errors.add(
-          '$name contains too many items (${items.length}, '
-          'max $maxItemsPerSection)',
-        );
       }
     }
     if (!hasData) errors.add('No importable data found');
@@ -953,79 +965,104 @@ class ImportExportService {
       int processed = 0;
       int duplicates = 0;
       int skipped = 0;
+      int errorCount = 0;
       final errors = <String>[];
+      final processedItems = <ProcessedItem>[];
 
-      for (int index = 0; index < items.length; index++) {
-        var item = items[index];
-        try {
-          final itemValidation = _validateItem(type, item, index);
-          if (itemValidation.isNotEmpty) {
-            detailedResults.validationErrors.addAll(itemValidation);
-            skipped++;
-            continue;
-          }
-
-          // Reuse the local ID of a same-named dish, or overwrite would add
-          // a second dish under a new ID.
-          if (type == DataType.dishes && item['id'] == null) {
-            final localId = await _localDishIdByName(item['name']);
-            if (localId != null) item = <String, dynamic>{...item, 'id': localId};
-          }
-
-          final exists = await _checkIfExists(type, item);
-
-          if (exists) {
-            final duplicate = DuplicateItem(
-              type: type.name,
-              index: index,
-              identifier: _getItemIdentifier(type, item),
-              action: duplicateHandling.name,
-            );
-            detailedResults.duplicates.add(duplicate);
-
-            if (duplicateHandling == DuplicateHandling.skip) {
-              duplicates++;
+      Future<void> processItems(DatabaseExecutor? executor) async {
+        for (int index = 0; index < items.length; index++) {
+          await _yieldPeriodically(index);
+          var item = items[index];
+          try {
+            final itemValidation = _validateItem(type, item, index);
+            if (itemValidation.isNotEmpty) {
+              for (final error in itemValidation) {
+                detailedResults.addValidationError(type.name, error);
+              }
+              skipped++;
               continue;
             }
+
+            // Reuse the local ID of a same-named dish, or overwrite would add
+            // a second dish under a new ID.
+            if (type == DataType.dishes && item['id'] == null) {
+              final localId = await _localDishIdByName(item['name']);
+              if (localId != null) {
+                item = <String, dynamic>{...item, 'id': localId};
+              }
+            }
+
+            final exists = await _checkIfExists(type, item, executor);
+
+            if (exists) {
+              final duplicate = DuplicateItem(
+                type: type.name,
+                index: index,
+                identifier: _getItemIdentifier(type, item),
+                action: duplicateHandling.name,
+              );
+              detailedResults.duplicates.add(duplicate);
+
+              if (duplicateHandling == DuplicateHandling.skip) {
+                duplicates++;
+                continue;
+              }
+            }
+
+            await _saveItem(type, item, duplicateHandling, executor);
+            processed++;
+
+            processedItems.add(
+              ProcessedItem(
+                type: type.name,
+                index: index,
+                identifier: _getItemIdentifier(type, item),
+                action: exists ? 'updated' : 'created',
+              ),
+            );
+          } catch (e) {
+            // Only a row's own constraint violation is a row error; anything
+            // else (disk full, I/O) must fail and roll back the transaction.
+            if (executor != null && _isFatalDatabaseError(e)) rethrow;
+            errorCount++;
+            detailedResults.addProcessingError(
+              ProcessingError(
+                type: type.name,
+                index: index,
+                error: e.toString(),
+                item: item.toString(),
+              ),
+            );
+            if (errors.length < ImportDetailedResults.maxErrorsPerSection) {
+              errors.add(
+                'Error processing ${type.name} item at index $index: $e',
+              );
+            }
+            skipped++;
           }
-
-          await _saveItem(type, item, duplicateHandling);
-          processed++;
-
-          detailedResults.processedItems.add(
-            ProcessedItem(
-              type: type.name,
-              index: index,
-              identifier: _getItemIdentifier(type, item),
-              action: exists ? 'updated' : 'created',
-            ),
-          );
-        } catch (e) {
-          final error =
-              'Error processing ${type.name} item at index $index: $e';
-          errors.add(error);
-          detailedResults.processingErrors.add(
-            ProcessingError(
-              type: type.name,
-              index: index,
-              error: e.toString(),
-              item: item.toString(),
-            ),
-          );
-          skipped++;
         }
       }
+
+      // Ingredient rows are plain statements: commit the section once
+      // instead of once per row. Dishes already save in one transaction each.
+      if (type == DataType.ingredients) {
+        final db = await DatabaseService.instance.database;
+        await db.transaction(processItems);
+      } else {
+        await processItems(null);
+      }
+      detailedResults.processedItems.addAll(processedItems);
 
       detailedResults.summary[type.name] = TypeSummary(
         total: items.length,
         processed: processed,
         duplicates: duplicates,
         skipped: skipped,
-        errors: errors.length,
-      ); // ${type.name} processing complete: $processed processed, ${errors.length} errors
+        errors: errorCount,
+      );
 
       return ImportExportResult(
-        success: errors.isEmpty,
+        success: errorCount == 0,
         message: 'Processed $processed ${type.name} items',
         itemsProcessed: processed,
         duplicatesFound: duplicates,
@@ -1336,6 +1373,10 @@ class ImportExportService {
           ? 'DatabaseException(${e.getResultCode()})'
           : e.runtimeType.toString();
 
+  static bool _isFatalDatabaseError(Object e) =>
+      e is DatabaseException &&
+      !(e.isUniqueConstraintError() || e.isNotNullConstraintError());
+
   double? _safeParseDouble(dynamic value) {
     if (value == null) return null;
 
@@ -1486,6 +1527,45 @@ class ImportExportService {
           );
         }
         break;
+      case DataType.ingredients:
+        for (final field in const ['id', 'name']) {
+          final value = map[field];
+          if (value is! String || value.trim().isEmpty) {
+            errors.add(
+              ValidationError(
+                field: field,
+                error: 'Ingredient $field is required',
+                value: value?.toString() ?? '',
+                itemIndex: index,
+              ),
+            );
+          }
+        }
+        final nutrition = map['nutrition'];
+        if (nutrition is Map<String, dynamic>) {
+          for (final nutrient in const ['calories', 'protein', 'carbs', 'fat']) {
+            if (nutrition[nutrient] is! num) {
+              errors.add(
+                ValidationError(
+                  field: 'nutrition.$nutrient',
+                  error: '$nutrient must be a number',
+                  value: nutrition[nutrient]?.toString() ?? '',
+                  itemIndex: index,
+                ),
+              );
+            }
+          }
+        } else if (nutrition != null) {
+          errors.add(
+            ValidationError(
+              field: 'nutrition',
+              error: 'Nutrition must be an object',
+              value: nutrition.toString(),
+              itemIndex: index,
+            ),
+          );
+        }
+        break;
       default:
         break;
     }
@@ -1493,7 +1573,11 @@ class ImportExportService {
     return errors;
   }
 
-  Future<bool> _checkIfExists(DataType type, dynamic item) async {
+  Future<bool> _checkIfExists(
+    DataType type,
+    dynamic item, [
+    DatabaseExecutor? executor,
+  ]) async {
     if (item is! Map<String, dynamic>) return false;
 
     switch (type) {
@@ -1523,7 +1607,7 @@ class ImportExportService {
       case DataType.ingredients:
         final id = item['id'] as String?;
         if (id != null) {
-          final db = await DatabaseService.instance.database;
+          final db = executor ?? await DatabaseService.instance.database;
           final results = await db.query(
             'ingredients',
             where: 'id = ?',
@@ -1576,8 +1660,9 @@ class ImportExportService {
   Future<void> _saveItem(
     DataType type,
     dynamic item,
-    DuplicateHandling duplicateHandling,
-  ) async {
+    DuplicateHandling duplicateHandling, [
+    DatabaseExecutor? executor,
+  ]) async {
     switch (type) {
       case DataType.dishes:
         await _saveDishItem(item as Map<String, dynamic>, duplicateHandling);
@@ -1597,6 +1682,7 @@ class ImportExportService {
         await _saveIngredientItem(
           item as Map<String, dynamic>,
           duplicateHandling,
+          executor,
         );
         break;
       case DataType.supplements:
@@ -1695,27 +1781,18 @@ class ImportExportService {
     }
   }
 
-  /// Save an ingredient item to the database
+  /// Save an ingredient item to the database. Existing rows are already
+  /// skipped by the caller for [DuplicateHandling.skip].
   Future<void> _saveIngredientItem(
     Map<String, dynamic> ingredientData,
-    DuplicateHandling duplicateHandling,
-  ) async {
+    DuplicateHandling duplicateHandling, [
+    DatabaseExecutor? executor,
+  ]) async {
     try {
-      final db = await DatabaseService.instance.database;
+      final db = executor ?? await DatabaseService.instance.database;
       final id = ingredientData['id'] as String;
       final name = ingredientData['name'] as String;
       final barcode = ingredientData['barcode'] as String?;
-
-      // Check if ingredient exists
-      final existing = await db.query(
-        'ingredients',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-
-      if (existing.isNotEmpty && duplicateHandling == DuplicateHandling.skip) {
-        return;
-      }
 
       // Save/update ingredient
       await db.insert(
@@ -1850,6 +1927,14 @@ class ImportExportService {
     final lines = csvContent.split('\n');
     final data = <String, List<dynamic>>{};
     final errors = <ParsingError>[];
+    var omittedErrors = 0;
+    void addError(ParsingError error) {
+      if (errors.length < ImportDetailedResults.maxErrorsPerSection) {
+        errors.add(error);
+      } else {
+        omittedErrors++;
+      }
+    }
 
     for (int i = 1; i < lines.length; i++) {
       final line = lines[i].trim();
@@ -1858,7 +1943,7 @@ class ImportExportService {
       try {
         final commaIndex = line.indexOf(',');
         if (commaIndex == -1) {
-          errors.add(
+          addError(
             ParsingError(
               line: i + 1,
               column: 0,
@@ -1880,7 +1965,7 @@ class ImportExportService {
 
         data.putIfAbsent(type, () => []).add(item);
       } catch (e) {
-        errors.add(
+        addError(
           ParsingError(
             line: i + 1,
             column: 0,
@@ -1891,7 +1976,11 @@ class ImportExportService {
       }
     }
 
-    return CSVParseResult(data: data, errors: errors);
+    return CSVParseResult(
+      data: data,
+      errors: errors,
+      omittedErrors: omittedErrors,
+    );
   }
 
   String _generateId() {
@@ -2505,6 +2594,13 @@ class ImportDetailedResults {
   final List<ProcessedItem> processedItems;
   final Map<String, TypeSummary> summary;
 
+  /// Detailed errors kept per section; further ones are only counted.
+  static const int maxErrorsPerSection = 50;
+
+  /// Errors counted but left out of the detailed lists.
+  int omittedErrors;
+  final Map<String, int> _errorCounts = {};
+
   ImportDetailedResults({
     FileInfo? fileInfo,
     List<ParsingError>? parsingErrors,
@@ -2513,6 +2609,7 @@ class ImportDetailedResults {
     List<DuplicateItem>? duplicates,
     List<ProcessedItem>? processedItems,
     Map<String, TypeSummary>? summary,
+    this.omittedErrors = 0,
   }) : _fileInfo = fileInfo,
        parsingErrors = parsingErrors ?? [],
        validationErrors = validationErrors ?? [],
@@ -2525,6 +2622,25 @@ class ImportDetailedResults {
 
   void setFileInfo(FileInfo info) {
     _fileInfo = info;
+  }
+
+  bool _keepError(String section) {
+    final count = _errorCounts.update(
+      section,
+      (n) => n + 1,
+      ifAbsent: () => 1,
+    );
+    if (count <= maxErrorsPerSection) return true;
+    omittedErrors++;
+    return false;
+  }
+
+  void addValidationError(String section, ValidationError error) {
+    if (_keepError(section)) validationErrors.add(error);
+  }
+
+  void addProcessingError(ProcessingError error) {
+    if (_keepError(error.type)) processingErrors.add(error);
   }
 }
 
@@ -2629,8 +2745,13 @@ class TypeSummary {
 class CSVParseResult {
   final Map<String, List<dynamic>> data;
   final List<ParsingError> errors;
+  final int omittedErrors;
 
-  const CSVParseResult({required this.data, required this.errors});
+  const CSVParseResult({
+    required this.data,
+    required this.errors,
+    this.omittedErrors = 0,
+  });
 }
 
 class DataValidationResult {

@@ -4,6 +4,20 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-10-01
+
+### Changed
+
+- Calorie targets are no longer raised to 1200 kcal; targets below 1200 kcal show a warning to check your profile values and to seek medical supervision instead.
+- Imports no longer limit how many items a section may contain; large imports write ingredients in one transaction and keep the screen responsive.
+- Import results list at most 50 detailed errors per section and say how many more there are.
+
+### Fixed
+
+- Enable the HealthKit entitlement on iOS so Apple Health sync can be authorized; iOS 14 is now the minimum, and devices without HealthKit can still install the app.
+- A profile that would produce a calorie target of 0 kcal or less is no longer saved, so custom macro splits are not lost.
+- An ingredient with missing or non-numeric nutrition is skipped instead of being imported without it, and a database failure such as a full disk fails the ingredients section instead of reporting rolled-back rows as imported.
+
 ## [1.14.0] - 2026-10-01
 
 ### Added

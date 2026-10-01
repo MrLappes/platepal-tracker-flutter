@@ -10,23 +10,38 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Profiles extends UserProfileService {
-  _Profiles({this.weight = 70});
+  _Profiles({
+    this.weight = 70,
+    this.height = 170,
+    this.age = 30,
+    this.gender = 'other',
+    this.activityLevel = 'moderately_active',
+    this.goal = 'maintain_weight',
+    this.targetWeight = 70,
+  });
 
   final double weight;
+  final double height;
+  final int age;
+  final String gender;
+  final String activityLevel;
+  final String goal;
+  final double targetWeight;
+  final saved = <UserProfile>[];
 
   @override
   Future<UserProfile?> getUserProfile(String userId) async => UserProfile(
     id: userId,
     name: 'Tester',
     email: 'user@platepal.app',
-    age: 30,
-    gender: 'other',
-    height: 170,
+    age: age,
+    gender: gender,
+    height: height,
     weight: weight,
-    activityLevel: 'moderately_active',
-    goals: const FitnessGoals(
-      goal: 'maintain_weight',
-      targetWeight: 70,
+    activityLevel: activityLevel,
+    goals: FitnessGoals(
+      goal: goal,
+      targetWeight: targetWeight,
       targetCalories: 2000,
       targetProtein: 140,
       targetCarbs: 275,
@@ -36,6 +51,15 @@ class _Profiles extends UserProfileService {
     createdAt: DateTime(2026),
     updatedAt: DateTime(2026),
   );
+
+  @override
+  Future<UserProfile> saveUserProfile(
+    UserProfile userProfile, {
+    double? bodyFat,
+  }) async {
+    saved.add(userProfile);
+    return userProfile;
+  }
 
   @override
   Future<List<Map<String, dynamic>>> getUserMetricsHistory(
@@ -261,4 +285,126 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  group('calorie target', () {
+    const warningTitle = 'Very low calorie target';
+    const invalidTargetMessage = 'check your weight, height and age';
+
+    Finder field(String label) => find.byWidgetPredicate(
+      (widget) => widget is TextField && widget.decoration?.labelText == label,
+    );
+
+    Finder warning() => find.text(warningTitle, skipOffstage: false);
+
+    Future<void> enter(WidgetTester tester, String label, String text) async {
+      await tester.ensureVisible(field(label));
+      await tester.enterText(field(label), text);
+      await tester.pumpAndSettle();
+    }
+
+    // Pushed on top of a home route so the screen can pop after saving.
+    Future<void> pumpPushed(WidgetTester tester, _Profiles profiles) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({});
+
+      final navigatorKey = GlobalKey<NavigatorState>();
+      final storage = StorageServiceProvider()..userProfileService = profiles;
+      await tester.pumpWidget(
+        ChangeNotifierProvider<StorageServiceProvider>.value(
+          value: storage,
+          child: MaterialApp(
+            navigatorKey: navigatorKey,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(body: Text('home')),
+          ),
+        ),
+      );
+      navigatorKey.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const ProfileSettingsScreen()),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+
+    // Female, 45 kg, 150 cm, sedentary: 1291.8 kcal at 30, 1111.8 kcal at 60.
+    _Profiles lowProfile({int age = 30}) => _Profiles(
+      weight: 45,
+      height: 150,
+      age: age,
+      gender: 'female',
+      activityLevel: 'sedentary',
+      targetWeight: 45,
+    );
+
+    testWidgets('warns only while the entered values give < 1200 kcal', (
+      tester,
+    ) async {
+      await pumpPushed(tester, lowProfile());
+      expect(warning(), findsNothing);
+
+      await enter(tester, 'Age', '60');
+      expect(warning(), findsOneWidget);
+
+      await enter(tester, 'Age', '30');
+      expect(warning(), findsNothing);
+    });
+
+    testWidgets('ignores partially typed values in the live stats', (
+      tester,
+    ) async {
+      await pumpPushed(tester, _Profiles());
+      expect(find.text('24.2', skipOffstage: false), findsOneWidget);
+
+      await enter(tester, 'Height (cm)', '1');
+      await enter(tester, 'Weight (kg)', '7');
+      await enter(tester, 'Age', '1');
+      expect(find.text('24.2', skipOffstage: false), findsOneWidget);
+      expect(warning(), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('saves a positive target below 1200 kcal unchanged', (
+      tester,
+    ) async {
+      final profiles = lowProfile(age: 60);
+      await pumpPushed(tester, profiles);
+      expect(warning(), findsOneWidget);
+
+      await enter(tester, 'Name', 'Tester 2');
+      await tester.tap(find.byIcon(Icons.save));
+      await tester.pumpAndSettle();
+
+      final goals = profiles.saved.single.goals;
+      expect(goals.targetCalories, closeTo(1111.8, 1e-9));
+      expect(goals.targetProtein, greaterThan(0));
+      expect(find.text('home'), findsOneWidget);
+    });
+
+    testWidgets('does not save a 0 kcal target and explains why', (
+      tester,
+    ) async {
+      final profiles = _Profiles(
+        weight: 30,
+        height: 100,
+        age: 120,
+        gender: 'female',
+        activityLevel: 'sedentary',
+        goal: 'lose_weight',
+        targetWeight: 30,
+      );
+      await pumpPushed(tester, profiles);
+
+      await enter(tester, 'Name', 'Tester 2');
+      await tester.tap(find.byIcon(Icons.save));
+      await tester.pumpAndSettle();
+
+      expect(profiles.saved, isEmpty);
+      expect(find.textContaining(invalidTargetMessage), findsOneWidget);
+      expect(find.byType(ProfileSettingsScreen), findsOneWidget);
+    });
+  });
 }

@@ -547,20 +547,212 @@ void main() {
           duplicateHandling: DuplicateHandling.overwrite,
         );
 
-    test('too many items fails without writing anything', () async {
+    test('a section with more than 100000 items is not rejected', () async {
       final result = await importAll({
         'dishes': [rice()],
-        'mealLogs': List.generate(
-          ImportExportService.maxItemsPerSection + 1,
-          (i) => _dishLogEntry('$i', 'oats', 'lunch', '2026-09-20T12:00:00.000'),
-        ),
+        'mealLogs': List.filled(100001, const <String, dynamic>{}),
+      });
+
+      expect(result.errorCode, isNot(ImportExportErrorCode.importInvalidData));
+      expect(await dishService.getDishById('rice'), isNotNull);
+      expect(result.detailedResults!.summary['mealLogs']!.total, 100001);
+      expect(result.detailedResults!.validationErrors, hasLength(50));
+      expect(result.detailedResults!.omittedErrors, 100001 - 50);
+    });
+
+    Future<ImportExportResult> importIngredients(
+      List<Map<String, dynamic>> ingredients, {
+      DuplicateHandling duplicateHandling = DuplicateHandling.overwrite,
+    }) => service.importData(
+      filePath: '',
+      jsonData: {'ingredients': ingredients},
+      dataTypes: [DataType.ingredients],
+      duplicateHandling: duplicateHandling,
+    );
+
+    Future<int> countRows(String table) async {
+      final db = await DatabaseService.instance.database;
+      final rows = await db.rawQuery('SELECT COUNT(*) AS n FROM $table');
+      return rows.single['n'] as int;
+    }
+
+    Map<String, dynamic> nutrition(num calories) => {
+      'calories': calories,
+      'protein': 1,
+      'carbs': 2,
+      'fat': 3,
+    };
+
+    test('a large ingredients section with half stored skips the rest', () async {
+      const count = 1002;
+      final db = await DatabaseService.instance.database;
+      final batch = db.batch();
+      for (var i = 0; i < count; i += 2) {
+        batch.insert('ingredients', {'id': 'ing$i', 'name': 'Stored $i'});
+        batch.insert('ingredient_nutrition', {
+          'ingredient_id': 'ing$i',
+          ...nutrition(0),
+        });
+      }
+      await batch.commit(noResult: true);
+
+      final result = await importIngredients([
+        for (var i = 0; i < count; i++)
+          {'id': 'ing$i', 'name': 'Ingredient $i', 'nutrition': nutrition(i)},
+      ], duplicateHandling: DuplicateHandling.skip);
+
+      expect(result.success, isTrue, reason: result.message);
+      expect(result.itemsProcessed, count ~/ 2);
+      expect(result.duplicatesFound, count ~/ 2);
+      final summary = result.detailedResults!.summary['ingredients']!;
+      expect(
+        (summary.total, summary.processed, summary.duplicates, summary.skipped),
+        (count, count ~/ 2, count ~/ 2, 0),
+      );
+      expect(await countRows('ingredients'), count);
+      expect(await countRows('ingredient_nutrition'), count);
+      final stored = await db.query(
+        'ingredients',
+        where: 'id IN (?, ?)',
+        whereArgs: ['ing0', 'ing1'],
+        orderBy: 'id',
+      );
+      expect(stored.map((r) => r['name']), ['Stored 0', 'Ingredient 1']);
+    });
+
+    test('an ingredient with invalid nutrition is skipped before writing', () async {
+      final result = await importIngredients([
+        {
+          'id': 'text',
+          'name': 'Text',
+          'nutrition': {...nutrition(1), 'calories': 'lots'},
+        },
+        {
+          'id': 'missing',
+          'name': 'Missing',
+          'nutrition': nutrition(1)..remove('fat'),
+        },
+        {'id': 'list', 'name': 'List', 'nutrition': [1, 2]},
+        {'id': '', 'name': 'Empty id'},
+        {'id': 'ok', 'name': 'Ok', 'nutrition': nutrition(5)},
+      ]);
+
+      final db = await DatabaseService.instance.database;
+      final rows = await db.query('ingredients');
+      expect(rows.map((r) => r['id']), ['ok']);
+      expect(await countRows('ingredient_nutrition'), 1);
+      expect(result.itemsProcessed, 1);
+      expect(result.itemsSkipped, 4);
+      expect(
+        result.detailedResults!.validationErrors.map((e) => e.field),
+        ['nutrition.calories', 'nutrition.fat', 'nutrition', 'id'],
+      );
+    });
+
+    test('a fatal database error rolls back the whole ingredients section', () async {
+      final db = await DatabaseService.instance.database;
+      await db.execute('DROP TABLE ingredient_nutrition');
+
+      final result = await importIngredients([
+        {'id': 'i1', 'name': 'Salt', 'nutrition': nutrition(0)},
+        {'id': 'i2', 'name': 'Flour'},
+      ]);
+
+      expect(await countRows('ingredients'), 0);
+      expect(result.success, isFalse);
+      expect(result.itemsProcessed, 0);
+      expect(result.errors, hasLength(1));
+      expect(result.failedSections, ['ingredients']);
+    });
+
+    test('detailed errors are capped per section with a total count', () async {
+      final result = await importAll({
+        'ingredients': [
+          for (var i = 0; i < 120; i++) {'id': 'x$i'},
+        ],
+        'mealLogs': List.filled(60, const <String, dynamic>{}),
+      });
+
+      final details = result.detailedResults!;
+      expect(details.validationErrors, hasLength(100));
+      expect(
+        details.validationErrors.where((e) => e.field == 'name'),
+        hasLength(ImportDetailedResults.maxErrorsPerSection),
+      );
+      expect(details.omittedErrors, 70 + 10);
+      expect(result.itemsSkipped, 180);
+    });
+
+    test('processing errors and messages are capped per section', () async {
+      final result = await importAll({
+        'mealLogs': [
+          for (var i = 0; i < 55; i++)
+            {
+              'id': '$i',
+              'dishId': 'unknown',
+              'servingSize': 1,
+              'mealType': 'lunch',
+              'loggedAt': DateTime(2026, 9, 20, 12, i).toIso8601String(),
+              'source': 'meal_logs',
+            },
+        ],
+      });
+
+      final details = result.detailedResults!;
+      expect(details.processingErrors, hasLength(50));
+      expect(result.errors, hasLength(50));
+      expect(details.summary['mealLogs']!.errors, 55);
+      expect(details.omittedErrors, 5);
+    });
+
+    test('a write error is reported after the detail cap is reached', () async {
+      final result = await importAll({
+        'mealLogs': [
+          ...List.filled(60, const <String, dynamic>{}),
+          {
+            'dishId': 'unknown',
+            'servingSize': 1,
+            'mealType': 'lunch',
+            'loggedAt': '2026-09-20T12:00:00.000',
+            'source': 'meal_logs',
+          },
+        ],
       });
 
       expect(result.success, isFalse);
-      expect(result.errors.join(), contains('too many items'));
-      expect(result.errorCode, ImportExportErrorCode.importInvalidData);
-      expect(await dishService.getDishById('rice'), isNull);
-      expect(await _ledger(), isEmpty);
+      expect(result.errors, hasLength(1));
+      expect(result.failedSections, ['mealLogs']);
+      expect(result.detailedResults!.omittedErrors, 11);
+    });
+
+    test('an ingredients section writes valid rows and reports bad ones', () async {
+      final result = await service.importData(
+        filePath: '',
+        jsonData: {
+          'ingredients': [
+            {
+              'id': 'i1',
+              'name': 'Salt',
+              'nutrition': {'calories': 0, 'protein': 0, 'carbs': 0, 'fat': 0},
+            },
+            {'id': 'i2', 'name': 'Flour'},
+            {'name': 'No id'},
+          ],
+        },
+        dataTypes: [DataType.ingredients],
+        duplicateHandling: DuplicateHandling.overwrite,
+      );
+
+      final db = await DatabaseService.instance.database;
+      final rows = await db.query('ingredients', orderBy: 'id');
+      expect(rows.map((r) => r['id']), ['i1', 'i2']);
+      expect(result.itemsProcessed, 2);
+      expect(result.itemsSkipped, 1);
+      expect(
+        result.detailedResults!.validationErrors.map((e) => e.field),
+        ['id'],
+      );
+      expect(result.detailedResults!.processedItems, hasLength(2));
     });
 
     test('a section of the wrong type fails without writing', () async {

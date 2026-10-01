@@ -1,0 +1,3 @@
+- Los objetivos de calorías por debajo de 1200 kcal ya no se elevan automáticamente; en su lugar verás un aviso para revisar tu perfil.
+- Las importaciones ya no tienen límite de elementos y siguen siendo fluidas con copias de seguridad muy grandes.
+- Importación de ingredientes más segura: las entradas incompletas se omiten y los errores se informan con claridad.

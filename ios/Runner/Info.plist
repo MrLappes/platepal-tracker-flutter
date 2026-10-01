@@ -50,11 +50,6 @@
 		<string>PlatePal Tracker reads your active and resting energy burned to compare the calories you burn with the calories you eat and to suggest calorie targets.</string>
 		<key>NSHealthUpdateUsageDescription</key>
 		<string>PlatePal Tracker saves the nutrition (calories, protein, carbohydrates, fat, fiber, sugar and sodium) of meals you log to Apple Health.</string>
-		<!-- Required for HealthKit -->
-		<key>UIRequiredDeviceCapabilities</key>
-		<array>
-			<string>healthkit</string>
-		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

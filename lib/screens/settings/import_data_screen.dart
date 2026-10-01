@@ -1056,6 +1056,15 @@ class ImportResultsCard extends StatelessWidget {
                     Text(localizations.screensSettingsImportDataTechnicalDetails),
                     for (final reason in reasons)
                       ListTile(dense: true, title: Text(reason)),
+                    if ((details?.omittedErrors ?? 0) > 0)
+                      ListTile(
+                        dense: true,
+                        title: Text(
+                          localizations.screensSettingsImportDataMoreReasons(
+                            details!.omittedErrors,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
             ] else if (!result.success)

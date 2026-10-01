@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:platepal_tracker/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
+import '../../components/ui/low_calorie_target_warning.dart';
 import '../../models/user_profile.dart';
 import '../../utils/number_parsing.dart';
 import '../../utils/nutrition_calculator.dart';
@@ -427,6 +428,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       );
       final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
       final dailyCalories = calorieTargetForGoal(tdee, _selectedFitnessGoal);
+      if (!dailyCalories.isFinite || dailyCalories <= 0) {
+        _showErrorSnackBar(
+          AppLocalizations.of(
+            context,
+          ).screensSettingsProfileSettingsInvalidCalorieTarget,
+        );
+        return;
+      }
       const defaultEmail = "user@platepal.app";
 
       // Get current user ID from session service
@@ -769,7 +778,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             // Current Stats Section (Read-only)
             if (_originalProfile != null) ...[
               _buildSectionHeader(l10n.screensMenuCurrentStats),
-              _buildCurrentStatsCard(l10n),
+              // Rebuild on every keystroke so the stats and warning stay live.
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  _ageController,
+                  _heightController,
+                  _weightController,
+                ]),
+                builder: (context, _) => _buildCurrentStatsCard(l10n),
+              ),
               const SizedBox(height: 24),
             ],
 
@@ -1115,27 +1132,34 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     if (_originalProfile == null) return const SizedBox.shrink();
 
     final locale = Localizations.localeOf(context).toString();
-    // Calculate current values for display
+    // Partially typed or invalid values fall back to the saved profile.
     final isMetric = _selectedUnitSystem == 'metric';
     final height =
-        _metricMeasurement(
-          _heightController,
-          _displayedHeight,
-          _preciseHeight,
-          isMetric,
-          2.54,
-        ) ??
+        (_validateHeight(_heightController.text) == null
+            ? _metricMeasurement(
+              _heightController,
+              _displayedHeight,
+              _preciseHeight,
+              isMetric,
+              2.54,
+            )
+            : null) ??
         _originalProfile!.height;
     final weight =
-        _metricMeasurement(
-          _weightController,
-          _displayedWeight,
-          _preciseWeight,
-          isMetric,
-          1 / 2.2046,
-        ) ??
+        (_validateWeight(_weightController.text) == null
+            ? _metricMeasurement(
+              _weightController,
+              _displayedWeight,
+              _preciseWeight,
+              isMetric,
+              1 / 2.2046,
+            )
+            : null) ??
         _originalProfile!.weight;
-    final age = int.tryParse(_ageController.text) ?? _originalProfile!.age;
+    final age =
+        _validateAge(_ageController.text) == null
+            ? int.parse(_ageController.text.trim())
+            : _originalProfile!.age;
 
     final bmi = weight / ((height / 100) * (height / 100));
     final bmr = mifflinStJeorBmr(
@@ -1145,6 +1169,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       gender: _selectedGender,
     );
     final tdee = totalDailyEnergyExpenditure(bmr, _selectedActivityLevel);
+    final calorieTarget = calorieTargetForGoal(tdee, _selectedFitnessGoal);
 
     return Card(
       color: Theme.of(
@@ -1179,6 +1204,10 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   ),
                 ),
               ],
+            ),
+            LowCalorieTargetWarning(
+              calories: calorieTarget,
+              padding: const EdgeInsets.only(top: 16),
             ),
           ],
         ),
