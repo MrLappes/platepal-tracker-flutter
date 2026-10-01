@@ -3315,8 +3315,8 @@
   "@screensBackupChooseFolder": {"description": "Button that opens the folder picker"},
   "screensBackupUseDefaultFolder": "Use app storage",
   "@screensBackupUseDefaultFolder": {"description": "Button that resets the backup folder to the default"},
-  "screensBackupFolderPickFailed": "Couldn't open the folder picker.",
-  "@screensBackupFolderPickFailed": {"description": "Shown when the folder picker fails"},
+  "screensBackupFolderPickFailed": "Couldn't use that folder. Choose another one.",
+  "@screensBackupFolderPickFailed": {"description": "Shown when the folder picker fails or the chosen folder is not writable"},
   "screensBackupKeepNote": "The newest {count} automatic backups are kept; older ones are deleted.",
   "@screensBackupKeepNote": {"description": "Explains backup rotation", "placeholders": {"count": {"type": "int", "example": "5"}}},
   "screensBackupNever": "No backup yet",
@@ -3350,5 +3350,9 @@
   "screensMenuPlatePalPromo": "PlatePal – share meals with others",
   "@screensMenuPlatePalPromo": {"description": "Menu entry promoting the PlatePal sister app"},
   "screensMenuPlatePalPromoSubtitle": "Get the PlatePal app on Google Play",
-  "@screensMenuPlatePalPromoSubtitle": {"description": "Subtitle of the PlatePal menu entry, which opens its Play Store listing"}
+  "@screensMenuPlatePalPromoSubtitle": {"description": "Subtitle of the PlatePal menu entry, which opens its Play Store listing"},
+  "screensCalendarKcalUnit": "kcal",
+  "@screensCalendarKcalUnit": {"description": "Calorie unit shown after calorie totals in the diary"},
+  "componentsModalsQuickAddTooLarge": "Enter at most {max}",
+  "@componentsModalsQuickAddTooLarge": {"description": "Validation error when a quick add value is above the limit", "placeholders": {"max": {"type": "String", "example": "10,000"}}}
 }

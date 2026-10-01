@@ -6,10 +6,18 @@ import 'package:platepal_tracker/services/data/auto_backup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeAutoBackupService extends AutoBackupService {
-  _FakeAutoBackupService({required this.succeed});
+  _FakeAutoBackupService({required this.succeed, this.writable = true});
 
   final bool succeed;
+  final bool writable;
   int runs = 0;
+  final List<String> probed = [];
+
+  @override
+  Future<bool> canWriteTo(String directory) async {
+    probed.add(directory);
+    return writable;
+  }
 
   @override
   Future<AutoBackupResult> backUpNow({bool reportFailure = false}) async {
@@ -69,6 +77,25 @@ void main() {
     await tester.tap(find.text('Use app storage'));
     await tester.pumpAndSettle();
     expect((await service.loadSettings()).directory, isNull);
+  });
+
+  testWidgets('an unwritable folder is not saved', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'auto_backup_directory': '/storage/Old',
+    });
+    final service = _FakeAutoBackupService(succeed: true, writable: false);
+    await _pump(tester, service, pick: () async => '/storage/ReadOnly');
+
+    await tester.tap(find.text('Choose'));
+    await tester.pumpAndSettle();
+
+    expect(service.probed, ['/storage/ReadOnly']);
+    expect(
+      find.text("Couldn't use that folder. Choose another one."),
+      findsOneWidget,
+    );
+    expect((await service.loadSettings()).directory, '/storage/Old');
+    expect(find.text('/storage/Old'), findsOneWidget);
   });
 
   testWidgets('Back up now shows the result and the last backup', (

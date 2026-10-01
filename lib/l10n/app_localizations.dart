@@ -6155,10 +6155,10 @@ abstract class AppLocalizations {
   /// **'Use app storage'**
   String get screensBackupUseDefaultFolder;
 
-  /// Shown when the folder picker fails
+  /// Shown when the folder picker fails or the chosen folder is not writable
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t open the folder picker.'**
+  /// **'Couldn\'t use that folder. Choose another one.'**
   String get screensBackupFolderPickFailed;
 
   /// Explains backup rotation
@@ -6262,6 +6262,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get the PlatePal app on Google Play'**
   String get screensMenuPlatePalPromoSubtitle;
+
+  /// Calorie unit shown after calorie totals in the diary
+  ///
+  /// In en, this message translates to:
+  /// **'kcal'**
+  String get screensCalendarKcalUnit;
+
+  /// Validation error when a quick add value is above the limit
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at most {max}'**
+  String componentsModalsQuickAddTooLarge(String max);
 }
 
 class _AppLocalizationsDelegate
