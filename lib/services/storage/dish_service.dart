@@ -528,6 +528,7 @@ class DishService {
       fiber: fiber,
       notes: notes,
     );
+    // Like dish_logs, quick adds have no sugar/sodium to send to Health.
     _writeLogToHealth(
       name: name,
       mealType: mealType,
@@ -635,6 +636,7 @@ class DishService {
       }
     });
     for (final (log, loggedAt) in copies) {
+      // dish_logs has no sugar/sodium columns, so copies reach Health without them.
       _writeLogToHealth(
         name: log.dishName ?? '',
         mealType: log.mealType,
