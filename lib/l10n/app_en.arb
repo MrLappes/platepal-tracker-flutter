@@ -3122,5 +3122,17 @@
   "screensSettingsHealthSettingsOpenSettingsFailed": "Health Connect settings couldn't be opened.",
   "@screensSettingsHealthSettingsOpenSettingsFailed": {"description": "Snackbar when Health Connect settings could not be opened"},
   "screensCalendarProfileLoadFailed": "Your profile couldn't be loaded, so daily targets aren't shown.",
-  "@screensCalendarProfileLoadFailed": {"description": "Calendar message when the user profile failed to load"}
+  "@screensCalendarProfileLoadFailed": {"description": "Calendar message when the user profile failed to load"},
+  "componentsLowCalorieWarningTitle": "Very low calorie target",
+  "@componentsLowCalorieWarningTitle": {"description": "Title of the warning shown when a daily calorie target is below 1200 kcal"},
+  "componentsLowCalorieWarningMessage": "A daily calorie target of {calories} kcal is below {threshold} kcal. Something may be wrong: please check your profile values such as weight, height, age and activity level. Very low calorie intakes should only be followed under medical supervision.",
+  "@componentsLowCalorieWarningMessage": {
+    "description": "Warning shown when a daily calorie target is below the low-calorie threshold",
+    "placeholders": {
+      "calories": {"type": "String"},
+      "threshold": {"type": "String"}
+    }
+  },
+  "screensSettingsProfileSettingsInvalidCalorieTarget": "No calorie target can be calculated from these values. Please check your weight, height and age.",
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Error when the profile values give a calorie target of 0 kcal or less, so the profile is not saved"}
 }

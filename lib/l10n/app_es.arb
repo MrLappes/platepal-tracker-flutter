@@ -2889,5 +2889,17 @@
   "screensSettingsHealthSettingsOpenSettingsFailed": "No se pudieron abrir los ajustes de Health Connect.",
   "@screensSettingsHealthSettingsOpenSettingsFailed": {"description": "Aviso cuando no se pudieron abrir los ajustes de Health Connect"},
   "screensCalendarProfileLoadFailed": "No se pudo cargar tu perfil, por eso no se muestran los objetivos diarios.",
-  "@screensCalendarProfileLoadFailed": {"description": "Mensaje del calendario cuando no se pudo cargar el perfil"}
+  "@screensCalendarProfileLoadFailed": {"description": "Mensaje del calendario cuando no se pudo cargar el perfil"},
+  "componentsLowCalorieWarningTitle": "Objetivo calórico muy bajo",
+  "@componentsLowCalorieWarningTitle": {"description": "Título del aviso cuando un objetivo calórico diario es inferior a 1200 kcal"},
+  "componentsLowCalorieWarningMessage": "Un objetivo calórico diario de {calories} kcal está por debajo de {threshold} kcal. Puede que algo no esté bien: revisa los datos de tu perfil, como peso, altura, edad y nivel de actividad. Una ingesta calórica muy baja solo debe seguirse bajo supervisión médica.",
+  "@componentsLowCalorieWarningMessage": {
+    "description": "Aviso cuando un objetivo calórico diario está por debajo del umbral de calorías bajas",
+    "placeholders": {
+      "calories": {"type": "String"},
+      "threshold": {"type": "String"}
+    }
+  },
+  "screensSettingsProfileSettingsInvalidCalorieTarget": "Con estos datos no se puede calcular un objetivo calórico. Revisa tu peso, altura y edad.",
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Error cuando los datos del perfil dan un objetivo calórico de 0 kcal o menos, por lo que el perfil no se guarda"}
 }

@@ -2919,5 +2919,17 @@
   "screensSettingsHealthSettingsOpenSettingsFailed": "Die Health-Connect-Einstellungen konnten nicht geöffnet werden.",
   "@screensSettingsHealthSettingsOpenSettingsFailed": {"description": "Hinweis, wenn die Health-Connect-Einstellungen nicht geöffnet werden konnten"},
   "screensCalendarProfileLoadFailed": "Dein Profil konnte nicht geladen werden, daher werden keine Tagesziele angezeigt.",
-  "@screensCalendarProfileLoadFailed": {"description": "Kalendermeldung, wenn das Profil nicht geladen werden konnte"}
+  "@screensCalendarProfileLoadFailed": {"description": "Kalendermeldung, wenn das Profil nicht geladen werden konnte"},
+  "componentsLowCalorieWarningTitle": "Sehr niedriges Kalorienziel",
+  "@componentsLowCalorieWarningTitle": {"description": "Titel der Warnung bei einem täglichen Kalorienziel unter 1200 kcal"},
+  "componentsLowCalorieWarningMessage": "Ein tägliches Kalorienziel von {calories} kcal liegt unter {threshold} kcal. Möglicherweise stimmt etwas nicht: Bitte prüfe deine Profilangaben wie Gewicht, Größe, Alter und Aktivitätslevel. Eine sehr niedrige Kalorienzufuhr sollte nur unter ärztlicher Aufsicht erfolgen.",
+  "@componentsLowCalorieWarningMessage": {
+    "description": "Warnung bei einem täglichen Kalorienziel unter der Schwelle für niedrige Kalorienzufuhr",
+    "placeholders": {
+      "calories": {"type": "String"},
+      "threshold": {"type": "String"}
+    }
+  },
+  "screensSettingsProfileSettingsInvalidCalorieTarget": "Aus diesen Angaben lässt sich kein Kalorienziel berechnen. Bitte prüfe dein Gewicht, deine Größe und dein Alter.",
+  "@screensSettingsProfileSettingsInvalidCalorieTarget": {"description": "Fehler, wenn die Profilangaben ein Kalorienziel von 0 kcal oder weniger ergeben und das Profil daher nicht gespeichert wird"}
 }

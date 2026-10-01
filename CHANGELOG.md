@@ -4,6 +4,10 @@ Notable changes to PlatePal Tracker are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Changed
+
+- Calorie targets are no longer raised to 1200 kcal; targets below 1200 kcal show a warning to check your profile values and to seek medical supervision instead.
+
 ### Fixed
 
 - Enable the HealthKit entitlement on iOS so Apple Health sync can be authorized; iOS 14 is now the minimum, and devices without HealthKit can still install the app.
