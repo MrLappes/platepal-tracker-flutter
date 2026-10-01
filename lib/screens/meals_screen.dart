@@ -382,7 +382,8 @@ class _MealsScreenState extends State<MealsScreen> with WidgetsBindingObserver {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(16),
+          // Room below the last card for the two stacked FABs.
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 140),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final dish = filteredDishes[index];

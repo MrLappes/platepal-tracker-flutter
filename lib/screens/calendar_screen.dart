@@ -828,7 +828,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                     if (logs.isNotEmpty)
                       TextSpan(
-                        text: '  ${calories.round()} KCAL',
+                        text:
+                            '  ${calories.round()} '
+                            '${l10n.screensCalendarKcalUnit.toUpperCase()}',
                         style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                   ],
@@ -927,7 +929,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ),
                         ),
                         Text(
-                          '${log.calories.round()} KCAL',
+                          '${log.calories.round()} '
+                          '${l10n.screensCalendarKcalUnit.toUpperCase()}',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.9),
                           ),
