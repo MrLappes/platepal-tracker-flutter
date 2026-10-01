@@ -3511,6 +3511,12 @@ abstract class AppLocalizations {
   /// **'Show reasons'**
   String get screensSettingsImportDataShowReasons;
 
+  /// Count of import errors left out of the reasons list
+  ///
+  /// In en, this message translates to:
+  /// **'…and {count} more'**
+  String screensSettingsImportDataMoreReasons(int count);
+
   /// Section that could not be imported
   ///
   /// In en, this message translates to:
