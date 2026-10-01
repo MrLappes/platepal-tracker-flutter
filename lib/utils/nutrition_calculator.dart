@@ -1,7 +1,14 @@
 import '../models/user_profile.dart';
 
-/// Floor for suggested calorie targets; diets below ~1200 kcal need medical supervision.
-const double minimumCalorieTarget = 1200;
+/// Targets below this (kcal/day) get a warning; such diets need medical supervision.
+const double lowCalorieWarningThreshold = 1200;
+
+/// Whether [kcal] is a target low enough to warn about.
+bool isLowCalorieTarget(double kcal) => kcal < lowCalorieWarningThreshold;
+
+/// [kcal] as a usable target: non-finite or negative input becomes 0.
+double nonNegativeCalorieTarget(double kcal) =>
+    kcal.isFinite && kcal > 0 ? kcal : 0;
 
 /// Basal metabolic rate (kcal/day) via Mifflin-St Jeor.
 ///
@@ -44,7 +51,7 @@ double activityMultiplier(String activityLevel) {
 double totalDailyEnergyExpenditure(double bmr, String activityLevel) =>
     bmr * activityMultiplier(activityLevel);
 
-/// Daily calorie target for [goal], never below [minimumCalorieTarget].
+/// Daily calorie target for [goal]; never negative or non-finite.
 double calorieTargetForGoal(double tdee, String goal) {
   final double target;
   switch (goal) {
@@ -60,7 +67,7 @@ double calorieTargetForGoal(double tdee, String goal) {
     default:
       target = tdee;
   }
-  return target < minimumCalorieTarget ? minimumCalorieTarget : target;
+  return nonNegativeCalorieTarget(target);
 }
 
 /// Gram targets for protein, carbs, fat and fiber.

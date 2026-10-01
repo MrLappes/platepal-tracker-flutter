@@ -3435,4 +3435,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get screensCalendarProfileLoadFailed =>
       'No se pudo cargar tu perfil, por eso no se muestran los objetivos diarios.';
+
+  @override
+  String get componentsLowCalorieWarningTitle => 'Objetivo calórico muy bajo';
+
+  @override
+  String componentsLowCalorieWarningMessage(String calories, String threshold) {
+    return 'Un objetivo calórico diario de $calories kcal está por debajo de $threshold kcal. Puede que algo no esté bien: revisa los datos de tu perfil, como peso, altura, edad y nivel de actividad. Una ingesta calórica muy baja solo debe seguirse bajo supervisión médica.';
+  }
 }

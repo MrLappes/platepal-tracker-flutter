@@ -93,15 +93,32 @@ void main() {
       expect(goals.targetProtein, closeTo(2000 * 600 / 1940 / 4, 1e-9));
     });
 
-    test('clamps the new target to the 1200 kcal floor', () async {
+    test('saves targets below 1200 kcal unchanged', () async {
       await UserProfileService().saveUserProfile(_profile(_goals()));
 
-      expect(await service.updateCalorieTargets(400), isTrue);
+      expect(await service.updateCalorieTargets(1000), isTrue);
 
       final goals =
           (await UserProfileService().getUserProfile('default'))!.goals;
-      expect(goals.targetCalories, 1200);
-      expect(goals.targetProtein, closeTo(90, 1e-9));
+      expect(goals.targetCalories, 1000);
+      expect(goals.targetProtein, closeTo(75, 1e-9));
+    });
+
+    test('rejects non-positive and non-finite targets', () async {
+      await UserProfileService().saveUserProfile(_profile(_goals()));
+
+      for (final invalid in [0.0, -300.0, double.nan, double.infinity]) {
+        expect(
+          await service.updateCalorieTargets(invalid),
+          isFalse,
+          reason: '$invalid',
+        );
+      }
+
+      final goals =
+          (await UserProfileService().getUserProfile('default'))!.goals;
+      expect(goals.targetCalories, 2000);
+      expect(goals.targetProtein, 150);
     });
   });
 
@@ -165,7 +182,7 @@ void main() {
       await cacheDays({1: const DailyEnergyBurned(total: 1000)});
       final decrease = await service.analyzeCalorieTargets(days: 1);
       expect(decrease.status, CalorieTargetStatus.decreaseIntake);
-      expect(decrease.suggestedTarget, 1200);
+      expect(decrease.suggestedTarget, closeTo(1100, 1e-9));
 
       await cacheDays({1: const DailyEnergyBurned(total: 2500)});
       final aligned = await service.analyzeCalorieTargets(days: 1);
