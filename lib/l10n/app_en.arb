@@ -2110,6 +2110,8 @@
   "@screensSettingsImportDataImportedSkipped": {"description": "Partial import totals", "placeholders": {"imported": {"type": "int"}, "skipped": {"type": "int"}}},
   "screensSettingsImportDataShowReasons": "Show reasons",
   "@screensSettingsImportDataShowReasons": {"description": "Expand skipped item reasons"},
+  "screensSettingsImportDataMoreReasons": "…and {count} more",
+  "@screensSettingsImportDataMoreReasons": {"description": "Count of import errors left out of the reasons list", "placeholders": {"count": {"type": "int"}}},
   "screensSettingsImportDataFailedSection": "Failed section: {section}",
   "@screensSettingsImportDataFailedSection": {"description": "Section that could not be imported", "placeholders": {"section": {"type": "String"}}},
   "screensSettingsImportDataConfirmTitle": "Confirm import",

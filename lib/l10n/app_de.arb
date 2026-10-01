@@ -2060,6 +2060,8 @@
   "@screensSettingsImportDataImportedSkipped": {"description": "Anzahlen des teilweisen Imports", "placeholders": {"imported": {"type": "int"}, "skipped": {"type": "int"}}},
   "screensSettingsImportDataShowReasons": "Gründe anzeigen",
   "@screensSettingsImportDataShowReasons": {"description": "Gründe für übersprungene Einträge ausklappen"},
+  "screensSettingsImportDataMoreReasons": "…und {count} weitere",
+  "@screensSettingsImportDataMoreReasons": {"description": "Nicht aufgelistete Importfehler", "placeholders": {"count": {"type": "int"}}},
   "screensSettingsImportDataFailedSection": "Fehlgeschlagener Bereich: {section}",
   "@screensSettingsImportDataFailedSection": {"description": "Nicht importierter Bereich", "placeholders": {"section": {"type": "String"}}},
   "screensSettingsImportDataConfirmTitle": "Import bestätigen",
