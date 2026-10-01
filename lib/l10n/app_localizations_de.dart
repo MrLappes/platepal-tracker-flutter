@@ -1423,7 +1423,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch.';
+      'Exportdateien (JSON, CSV oder ein vollständiges ZIP-Backup, das auch deine Gerichtsfotos enthält) werden lokal erstellt, wenn du einen Export auswählst; du kannst sie über dein Gerät teilen. Beim Import liest die App eine von dir ausgewählte Datei und erstellt zuvor eine lokale Sicherung, es sei denn, du entscheidest dich bei fehlgeschlagener Sicherung ausdrücklich für das Fortfahren. Wir laden diese Daten auf keinen eigenen Server hoch. Wenn du die automatische Sicherung einschaltest, schreibt die App bei Fälligkeit zusätzlich vollständige ZIP-Sicherungen in einen von dir gewählten Ordner (oder in den App-Speicher) und behält die neuesten fünf.';
 
   @override
   String get screensPrivacyBackupTitle => 'Android-Sicherung';
@@ -3781,4 +3781,75 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get componentsChatMealLogProposalInvalid =>
       'Der Eintrag des Assistenten konnte nicht gelesen werden. Frag bitte noch einmal.';
+
+  @override
+  String get screensBackupTitle => 'Sicherung';
+
+  @override
+  String get screensMenuBackupSubtitle => 'Automatische Sicherungen mit Fotos';
+
+  @override
+  String get screensBackupAutomatic => 'Automatische Sicherung';
+
+  @override
+  String get screensBackupAutomaticSubtitle =>
+      'Speichert beim Öffnen der App eine vollständige Sicherung mit Fotos, wenn eine fällig ist';
+
+  @override
+  String get screensBackupDaily => 'Täglich';
+
+  @override
+  String get screensBackupWeekly => 'Wöchentlich';
+
+  @override
+  String get screensBackupFolder => 'Sicherungsordner';
+
+  @override
+  String get screensBackupFolderDefault =>
+      'App-Speicher (wird beim Deinstallieren gelöscht)';
+
+  @override
+  String get screensBackupChooseFolder => 'Auswählen';
+
+  @override
+  String get screensBackupUseDefaultFolder => 'App-Speicher verwenden';
+
+  @override
+  String get screensBackupFolderPickFailed =>
+      'Die Ordnerauswahl konnte nicht geöffnet werden.';
+
+  @override
+  String screensBackupKeepNote(int count) {
+    return 'Die neuesten $count automatischen Sicherungen werden behalten, ältere werden gelöscht.';
+  }
+
+  @override
+  String get screensBackupNever => 'Noch keine Sicherung';
+
+  @override
+  String screensBackupLast(String date) {
+    return 'Letzte Sicherung: $date';
+  }
+
+  @override
+  String screensBackupLastFailed(String date) {
+    return 'Letzter Versuch fehlgeschlagen: $date';
+  }
+
+  @override
+  String get screensBackupNow => 'Jetzt sichern';
+
+  @override
+  String get screensBackupDone => 'Sicherung gespeichert';
+
+  @override
+  String get screensBackupFailed =>
+      'Sicherung fehlgeschlagen. Prüfe den Ordner und den freien Speicher.';
+
+  @override
+  String get screensBackupFailureNotice =>
+      'Die letzte automatische Sicherung ist fehlgeschlagen.';
+
+  @override
+  String get screensBackupOpenSettings => 'Einstellungen';
 }

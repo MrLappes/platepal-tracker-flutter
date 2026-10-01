@@ -23,6 +23,8 @@ import 'screens/settings/import_data_screen.dart';
 import 'screens/settings/chat_agent_settings_screen.dart';
 import 'screens/settings/health_settings_screen.dart';
 import 'screens/settings/privacy_policy_screen.dart';
+import 'screens/settings/backup_settings_screen.dart';
+import 'components/ui/auto_backup_runner.dart';
 import 'providers/meal_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -95,6 +97,11 @@ class PlatePalApp extends StatelessWidget {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: _router,
+          builder:
+              (context, child) => AutoBackupRunner(
+                onOpenSettings: () => _router.push('/settings/backup'),
+                child: child ?? const SizedBox.shrink(),
+              ),
         );
       },
     );
@@ -176,6 +183,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/settings/health',
       builder: (context, state) => const HealthSettingsScreen(),
+    ),
+    GoRoute(
+      path: '/settings/backup',
+      builder: (context, state) => const BackupSettingsScreen(),
     ),
   ],
 );

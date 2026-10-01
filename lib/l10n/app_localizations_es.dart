@@ -1420,7 +1420,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get screensPrivacyExportBody =>
-      'Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio.';
+      'Los archivos de exportación (JSON, CSV o una copia completa en ZIP que también incluye las fotos de tus platos) se crean localmente cuando decides exportar y puedes compartirlos desde tu dispositivo. La importación lee el archivo que eliges y antes crea una copia de seguridad local, salvo que decidas continuar expresamente si falla esa copia. No subimos estos datos a ningún servidor propio. Si activas la copia automática, la app también guarda copias completas en ZIP en una carpeta que elijas (o en el almacenamiento de la app) cuando toca y conserva las cinco más recientes.';
 
   @override
   String get screensPrivacyBackupTitle => 'Copia de seguridad de Android';
@@ -3786,4 +3786,74 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get componentsChatMealLogProposalInvalid =>
       'No se pudo leer la entrada del asistente. Vuelve a preguntar.';
+
+  @override
+  String get screensBackupTitle => 'Copia de seguridad';
+
+  @override
+  String get screensMenuBackupSubtitle => 'Copias automáticas con fotos';
+
+  @override
+  String get screensBackupAutomatic => 'Copia de seguridad automática';
+
+  @override
+  String get screensBackupAutomaticSubtitle =>
+      'Guarda una copia completa con fotos al abrir la app cuando toca';
+
+  @override
+  String get screensBackupDaily => 'Diaria';
+
+  @override
+  String get screensBackupWeekly => 'Semanal';
+
+  @override
+  String get screensBackupFolder => 'Carpeta de copias';
+
+  @override
+  String get screensBackupFolderDefault =>
+      'Almacenamiento de la app (se borra al desinstalarla)';
+
+  @override
+  String get screensBackupChooseFolder => 'Elegir';
+
+  @override
+  String get screensBackupUseDefaultFolder => 'Usar almacenamiento de la app';
+
+  @override
+  String get screensBackupFolderPickFailed =>
+      'No se pudo abrir el selector de carpetas.';
+
+  @override
+  String screensBackupKeepNote(int count) {
+    return 'Se conservan las $count copias automáticas más recientes; las anteriores se eliminan.';
+  }
+
+  @override
+  String get screensBackupNever => 'Aún no hay copias';
+
+  @override
+  String screensBackupLast(String date) {
+    return 'Última copia: $date';
+  }
+
+  @override
+  String screensBackupLastFailed(String date) {
+    return 'Último intento fallido: $date';
+  }
+
+  @override
+  String get screensBackupNow => 'Hacer copia ahora';
+
+  @override
+  String get screensBackupDone => 'Copia guardada';
+
+  @override
+  String get screensBackupFailed =>
+      'La copia falló. Revisa la carpeta y el espacio libre.';
+
+  @override
+  String get screensBackupFailureNotice => 'La última copia automática falló.';
+
+  @override
+  String get screensBackupOpenSettings => 'Ajustes';
 }
