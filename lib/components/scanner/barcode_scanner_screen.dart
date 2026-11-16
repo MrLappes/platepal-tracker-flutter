@@ -287,7 +287,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
-            errorBuilder: (context, error, child) {
+            errorBuilder: (context, error) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
