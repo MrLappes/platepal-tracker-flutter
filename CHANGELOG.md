@@ -2,6 +2,12 @@
 
 Notable changes to PlatePal Tracker are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.16.1] - 2026-11-16
+
+### Changed
+
+- Version bump for a new internal Play upload attempt. No app changes since 1.16.0.
+
 ## [1.16.0] - 2026-10-01
 
 ### Added
