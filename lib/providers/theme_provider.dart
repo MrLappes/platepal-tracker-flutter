@@ -138,11 +138,15 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // Update system UI overlay style based on current theme
   void _updateSystemBrightness() {
+    // Edge-to-edge: both bars are transparent and the app draws behind them.
+    // Icon brightness still follows the theme so status/nav icons stay legible.
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: _isDark ? Brightness.light : Brightness.dark,
-        systemNavigationBarColor: _currentTheme.colors.background,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
         systemNavigationBarIconBrightness:
             _isDark ? Brightness.light : Brightness.dark,
       ),
