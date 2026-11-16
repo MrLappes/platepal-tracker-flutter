@@ -36,6 +36,7 @@ class _FakeHealth implements Health {
   @override
   Future<List<HealthDataPoint>> getHealthDataFromTypes({
     required List<HealthDataType> types,
+    Map<HealthDataType, HealthDataUnit>? preferredUnits,
     required DateTime startTime,
     required DateTime endTime,
     List<RecordingMethod> recordingMethodsToFilter = const [],
