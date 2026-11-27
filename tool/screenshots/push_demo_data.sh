@@ -2,7 +2,7 @@
 set -euo pipefail
 
 package=com.platepal.platepaltracker
-adb_bin="${ADB:-$HOME/Android/Sdk/platform-tools/adb}"
+adb_bin="${ADB:-$(command -v adb || echo "$HOME/Android/Sdk/platform-tools/adb")}"
 database_file="${DEMO_DB_OUT:-/tmp/platepal_demo/platepal.db}"
 preferences_file=/tmp/platepal_demo/FlutterSharedPreferences.xml
 locale="${1:-${DEMO_LOCALE:-en}}"
