@@ -36,7 +36,16 @@ def back(wait=1.5):
     time.sleep(wait)
 
 
+def dismiss_anr():
+    """The launcher can ANR under emulator load; its dialog must not be shot."""
+    windows = adb("shell", "dumpsys", "window", "windows")
+    if "Not Responding" in windows:
+        print("dismissing ANR dialog")
+        tap(540, 1343, 2.0, "Wait")
+
+
 def shot(name):
+    dismiss_anr()
     data = adb("exec-out", "screencap", "-p", binary=True)
     (OUT / f"{name}.png").write_bytes(data)
     print("shot", name, len(data))

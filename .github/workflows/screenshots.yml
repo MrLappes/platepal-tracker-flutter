@@ -59,6 +59,7 @@ jobs:
             adb shell settings put global transition_animation_scale 0
             adb shell settings put global animator_duration_scale 0
             adb install -r build/app/outputs/flutter-apk/app-debug.apk
+            adb shell am force-stop com.google.android.apps.nexuslauncher || true
             ADB="$(command -v adb)" bash tool/screenshots/push_demo_data.sh ${{ inputs.locale }}
             sleep 30
             python3 tool/screenshots/capture_2400.py shots
