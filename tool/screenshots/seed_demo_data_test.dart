@@ -31,7 +31,7 @@ void main() {
       databaseFile.path,
     );
     addTearDown(database.close);
-    expect(await database.getVersion(), 4);
+    expect(await database.getVersion(), 5);
 
     Future<int> count(String table) async {
       final rows = await database.rawQuery(
