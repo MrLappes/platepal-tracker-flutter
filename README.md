@@ -17,7 +17,17 @@ Meal logging and your data work locally. Product lookup, AI chat, and health int
 
 ## Screenshots
 
-Store screenshots will be added to `fastlane/metadata/android/en-US/images/phoneScreenshots/`. See the [store image requirements](fastlane/metadata/android/en-US/images/README.md); no screenshots are included yet.
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1_meals.png" width="170" alt="Meals">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_calendar.png" width="170" alt="Calendar">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3_log_meal.png" width="170" alt="Log meal">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4_statistics.png" width="170" alt="Statistics">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5_macros.png" width="170" alt="Macros">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6_profile.png" width="170" alt="Profile">
+</p>
+
+The release workflow uploads these files to the Google Play listing on every
+version tag. See the [store image requirements](fastlane/metadata/android/en-US/images/README.md).
 
 ## Getting Started
 

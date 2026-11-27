@@ -145,3 +145,19 @@ jobs:
             build/app/outputs/bundle/release/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Play store screenshots
+        if: ${{ !cancelled() }}
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          [ -n "$PLAY_SERVICE_ACCOUNT_JSON" ] || { echo "::error::PLAY_SERVICE_ACCOUNT_JSON is missing"; exit 1; }
+          python3 -m pip install --quiet --disable-pip-version-check \
+            'google-api-python-client>=2.100,<3' 'google-auth>=2.23,<3'
+          umask 077
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/play-service-account.json"
+          trap 'rm -f "$RUNNER_TEMP/play-service-account.json"' EXIT
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/play-service-account.json" \
+            python3 tool/play_screenshots.py \
+              --package com.platepal.platepaltracker \
+              --fastlane fastlane/metadata/android
