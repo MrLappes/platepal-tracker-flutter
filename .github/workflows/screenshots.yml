@@ -37,7 +37,10 @@ jobs:
       - run: flutter build apk --debug
 
       - name: KVM availability
-        run: ls -l /dev/kvm || echo "NO KVM"
+        run: |
+          ls -l /dev/kvm || echo "NO KVM"
+          sudo chmod 666 /dev/kvm || true
+          ls -l /dev/kvm || true
 
       - name: Boot emulator and capture
         uses: ReactiveCircus/android-emulator-runner@v2
