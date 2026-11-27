@@ -15,7 +15,7 @@ from pathlib import Path
 
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "shots")
 OUT.mkdir(parents=True, exist_ok=True)
-NAV_Y = 2260
+NAV_Y = 2292
 
 
 def adb(*args, binary=False):
@@ -55,7 +55,9 @@ def main():
     demo("network", "-e", "wifi", "show", "-e", "level", "4", "-e", "fully", "true")
     demo("network", "-e", "mobile", "hide")
     demo("notifications", "-e", "visible", "false")
-    time.sleep(2)
+    # A debug build cold-starts slowly on the emulator; wait for the first
+    # frame and the seeded database before the first capture.
+    time.sleep(12)
 
     # 1 - meals (home)
     shot("1_meals")
