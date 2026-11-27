@@ -36,7 +36,24 @@ def back(wait=1.5):
     time.sleep(wait)
 
 
+def dismiss_anr():
+    """A slow emulator sometimes puts a launcher ANR over the app."""
+    adb("shell", "uiautomator", "dump", "/sdcard/ui.xml")
+    xml = adb("shell", "cat", "/sdcard/ui.xml")
+    if "responding" not in xml:
+        return
+    print("ANR dialog found, dismissing")
+    import re
+    for node in re.finditer(r'text="Wait"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml):
+        x = (int(node.group(1)) + int(node.group(3))) // 2
+        y = (int(node.group(2)) + int(node.group(4))) // 2
+        tap(x, y, 2.0, "Wait")
+        return
+    adb("shell", "input", "keyevent", "4")
+
+
 def shot(name):
+    dismiss_anr()
     data = adb("exec-out", "screencap", "-p", binary=True)
     (OUT / f"{name}.png").write_bytes(data)
     print("shot", name, len(data))
