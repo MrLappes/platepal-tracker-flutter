@@ -53,7 +53,7 @@ jobs:
     with:
       locales: '["en-US","de-DE","es-ES"]'
     permissions:
-      contents: read
+      contents: write
 
   release:
     needs: [test, screenshots]

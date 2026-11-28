@@ -24,7 +24,7 @@ on:
     branches: [ci/screenshots]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   capture:
@@ -113,8 +113,6 @@ jobs:
     needs: capture
     if: github.event_name == 'push' && github.ref == 'refs/heads/ci/screenshots'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
