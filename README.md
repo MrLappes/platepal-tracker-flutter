@@ -24,10 +24,15 @@ Meal logging and your data work locally. Product lookup, AI chat, and health int
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4_statistics.png" width="170" alt="Statistics">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5_macros.png" width="170" alt="Macros">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6_profile.png" width="170" alt="Profile">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7_open_source.png" width="170" alt="Open source, free forever, bring your own key">
 </p>
 
-The release workflow uploads these files to the Google Play listing on every
-version tag. See the [store image requirements](fastlane/metadata/android/en-US/images/README.md).
+The release workflow captures these screens on a 1080x2400 emulator, renders the
+phone mockups, uploads them to the Google Play listing, and attaches the raw
+captures. `.github/workflows/screenshots.yml` can also be started manually; a
+push to `ci/screenshots` refreshes the committed images. The layout and copy
+live in `tool/screenshots/spec.json`. See the
+[store image requirements](fastlane/metadata/android/en-US/images/README.md).
 
 ## Getting Started
 

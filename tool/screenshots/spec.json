@@ -1,0 +1,380 @@
+{
+  "name": "tracker",
+  "source": "tool/screenshots/raw/{locale}",
+  "eyebrow": "PLATEPAL TRACKER",
+  "theme": {
+    "bg": [
+      [
+        0.0,
+        "#0B0A0C"
+      ],
+      [
+        0.5,
+        "#120D12"
+      ],
+      [
+        1.0,
+        "#1B0F18"
+      ]
+    ],
+    "ink": "#F7F2F6",
+    "accent": "#FF9FE5",
+    "muted": "#A38C9E",
+    "glow": "#FF3FC6",
+    "glow_top": "#B0269A",
+    "frame": [
+      "#6E6E78",
+      "#232328"
+    ],
+    "shadow": 0.55,
+    "vignette": 0.35,
+    "phone_glow": true,
+    "dots": "#FF9FE5",
+    "dot_alpha": 5
+  },
+  "phone": {
+    "roll": -6.0,
+    "yaw": 0.0,
+    "pitch": 0.0,
+    "distance": 2.6
+  },
+  "type": {
+    "headline": 106
+  },
+  "layout": {
+    "text_top": 96,
+    "headline_bottom": 402,
+    "text_anchor": 1818
+  },
+  "locales": {
+    "en-US": {
+      "screens": [
+        {
+          "src": "1_meals.png",
+          "headline": "Track your\n[calories!]",
+          "sub": "Log meals in seconds.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -9.0,
+            "yaw": -12.0,
+            "pitch": 4.0
+          }
+        },
+        {
+          "src": "2_calendar.png",
+          "headline": "See your\n[week.]",
+          "sub": "Meals, planned and logged.",
+          "layout": {
+            "placement": "top",
+            "align": "left"
+          },
+          "phone": {
+            "roll": 5.0,
+            "yaw": 12.0,
+            "pitch": 2.0,
+            "dx": 26
+          }
+        },
+        {
+          "src": "3_log_meal.png",
+          "headline": "Log it\n[in seconds.]",
+          "sub": "Search, scan, done.",
+          "layout": {
+            "placement": "bottom",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -6.0,
+            "yaw": 10.0,
+            "pitch": 5.0
+          }
+        },
+        {
+          "src": "4_statistics.png",
+          "headline": "Watch the\n[trend.]",
+          "sub": "Weight and intake over time.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": 8.0,
+            "yaw": -15.0,
+            "pitch": -3.0
+          }
+        },
+        {
+          "src": "5_macros.png",
+          "headline": "Macros,\n[handled.]",
+          "sub": "Protein, carbs, fat - tracked.",
+          "layout": {
+            "placement": "bottom",
+            "align": "left"
+          },
+          "phone": {
+            "roll": -7.0,
+            "yaw": -9.0,
+            "pitch": 3.0,
+            "dx": 26
+          }
+        },
+        {
+          "src": "6_profile.png",
+          "headline": "Built around\n[you.]",
+          "sub": "Goals that fit your day.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -3.0,
+            "yaw": 0.0,
+            "pitch": 0.0
+          }
+        },
+        {
+          "statement": true,
+          "out": "7_open_source.png",
+          "headline": "Open source.\n[Free forever.]",
+          "sub": "No account. No ads. No tracking.",
+          "bullets": [
+            "GPL-2.0 licensed",
+            "Your data stays on device",
+            "Bring your own AI key"
+          ],
+          "layout": {
+            "text_top": 236
+          }
+        }
+      ]
+    },
+    "de-DE": {
+      "screens": [
+        {
+          "src": "1_meals.png",
+          "headline": "Zähl deine\n[Kalorien!]",
+          "sub": "Mahlzeiten in Sekunden erfassen.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -9.0,
+            "yaw": -12.0,
+            "pitch": 4.0
+          }
+        },
+        {
+          "src": "2_calendar.png",
+          "headline": "Deine Woche\n[im Blick.]",
+          "sub": "Geplant und gegessen.",
+          "layout": {
+            "placement": "top",
+            "align": "left"
+          },
+          "phone": {
+            "roll": 5.0,
+            "yaw": 12.0,
+            "pitch": 2.0,
+            "dx": 26
+          }
+        },
+        {
+          "src": "3_log_meal.png",
+          "headline": "Eintrag in\n[Sekunden.]",
+          "sub": "Suchen, scannen, fertig.",
+          "layout": {
+            "placement": "bottom",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -6.0,
+            "yaw": 10.0,
+            "pitch": 5.0
+          }
+        },
+        {
+          "src": "4_statistics.png",
+          "headline": "Sieh den\n[Trend.]",
+          "sub": "Gewicht und Kalorien im Verlauf.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": 8.0,
+            "yaw": -15.0,
+            "pitch": -3.0
+          }
+        },
+        {
+          "src": "5_macros.png",
+          "headline": "Makros\n[im Griff.]",
+          "sub": "Protein, Kohlenhydrate, Fett.",
+          "layout": {
+            "placement": "bottom",
+            "align": "left"
+          },
+          "phone": {
+            "roll": -7.0,
+            "yaw": -9.0,
+            "pitch": 3.0,
+            "dx": 26
+          }
+        },
+        {
+          "src": "6_profile.png",
+          "headline": "Gebaut für\n[dich.]",
+          "sub": "Ziele, die zu deinem Tag passen.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -3.0,
+            "yaw": 0.0,
+            "pitch": 0.0
+          }
+        },
+        {
+          "statement": true,
+          "out": "7_open_source.png",
+          "headline": "Open Source.\n[Für immer kostenlos.]",
+          "sub": "Kein Konto. Keine Werbung. Kein Tracking.",
+          "bullets": [
+            "GPL-2.0-Lizenz",
+            "Daten bleiben auf dem Gerät",
+            "Eigener KI-Schlüssel"
+          ],
+          "layout": {
+            "text_top": 236
+          }
+        }
+      ]
+    },
+    "es-ES": {
+      "screens": [
+        {
+          "src": "1_meals.png",
+          "headline": "Cuenta tus\n[calorías!]",
+          "sub": "Registra comidas en segundos.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -9.0,
+            "yaw": -12.0,
+            "pitch": 4.0
+          }
+        },
+        {
+          "src": "2_calendar.png",
+          "headline": "Tu semana\n[a la vista.]",
+          "sub": "Planificada y registrada.",
+          "layout": {
+            "placement": "top",
+            "align": "left"
+          },
+          "phone": {
+            "roll": 5.0,
+            "yaw": 12.0,
+            "pitch": 2.0,
+            "dx": 26
+          }
+        },
+        {
+          "src": "3_log_meal.png",
+          "headline": "Registra en\n[segundos.]",
+          "sub": "Busca, escanea, listo.",
+          "layout": {
+            "placement": "bottom",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -6.0,
+            "yaw": 10.0,
+            "pitch": 5.0
+          }
+        },
+        {
+          "src": "4_statistics.png",
+          "headline": "Mira la\n[tendencia.]",
+          "sub": "Peso y calorías en el tiempo.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": 8.0,
+            "yaw": -15.0,
+            "pitch": -3.0
+          }
+        },
+        {
+          "src": "5_macros.png",
+          "headline": "Macros\n[bajo control.]",
+          "sub": "Proteína, carbos y grasa.",
+          "layout": {
+            "placement": "bottom",
+            "align": "left"
+          },
+          "phone": {
+            "roll": -7.0,
+            "yaw": -9.0,
+            "pitch": 3.0,
+            "dx": 26
+          }
+        },
+        {
+          "src": "6_profile.png",
+          "headline": "Hecho para\n[ti.]",
+          "sub": "Objetivos a tu medida.",
+          "layout": {
+            "placement": "top",
+            "align": "center"
+          },
+          "phone": {
+            "roll": -3.0,
+            "yaw": 0.0,
+            "pitch": 0.0
+          }
+        },
+        {
+          "statement": true,
+          "out": "7_open_source.png",
+          "headline": "Código abierto.\n[Gratis para siempre.]",
+          "sub": "Sin cuenta. Sin anuncios. Sin seguimiento.",
+          "bullets": [
+            "Licencia GPL-2.0",
+            "Tus datos, en tu dispositivo",
+            "Tu propia clave de IA"
+          ],
+          "layout": {
+            "text_top": 236
+          }
+        }
+      ]
+    }
+  },
+  "dest": "fastlane/metadata/android/{locale}/images/phoneScreenshots",
+  "presets": {
+    "top": {
+      "phone": {
+        "top": 512,
+        "width": 740
+      }
+    },
+    "bottom": {
+      "phone": {
+        "top": 62,
+        "width": 735
+      }
+    }
+  },
+  "icon": "assets/icons/icon.png",
+  "footer": "github.com/MrLappes/platepal-tracker-flutter"
+}

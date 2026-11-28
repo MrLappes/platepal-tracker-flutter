@@ -1,24 +1,40 @@
 name: Store screenshots (2400)
 
-# Captures the Play screenshots on a Pixel-7-sized emulator (1080x2400) and
-# uploads them as an artifact. Manual only; nothing is published to Play.
+# Captures the Play screenshots on a Pixel-7-sized emulator (1080x2400),
+# renders the phone mockups, and keeps the raw captures as artifacts.
+#
+# Manual runs are for review. A push to ci/screenshots refreshes the committed
+# store images in that branch, and the release workflow calls this workflow so
+# every tag ships screenshots from the current build.
 
 on:
   workflow_dispatch:
     inputs:
-      locale:
-        description: UI locale
-        type: choice
-        options: [en, de, es]
-        default: en
+      locales:
+        description: JSON array of Play locales
+        type: string
+        default: '["en-US","de-DE","es-ES"]'
+  workflow_call:
+    inputs:
+      locales:
+        description: JSON array of Play locales
+        type: string
+        default: '["en-US","de-DE","es-ES"]'
+  push:
+    branches: [ci/screenshots]
 
 permissions:
   contents: read
 
 jobs:
   capture:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip ci]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: ${{ fromJSON(inputs.locales || '["en-US","de-DE","es-ES"]') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,7 +50,9 @@ jobs:
           cache: true
 
       - run: flutter pub get
-      - run: flutter build apk --debug
+
+      - name: Build demo APK
+        run: flutter build apk --debug
 
       - name: KVM availability
         run: |
@@ -60,14 +78,67 @@ jobs:
             adb shell settings put global animator_duration_scale 0
             adb install -r build/app/outputs/flutter-apk/app-debug.apk
             adb shell am force-stop com.google.android.apps.nexuslauncher || true
-            ADB="$(command -v adb)" bash tool/screenshots/push_demo_data.sh ${{ inputs.locale }}
+            loc="${{ matrix.locale }}"
+            ui="${loc%%-*}"
+            ADB="$(command -v adb)" bash tool/screenshots/push_demo_data.sh "$ui"
             sleep 30
-            python3 tool/screenshots/capture_2400.py shots
+            python3 tool/screenshots/capture_2400.py "shots/$loc"
 
-      - name: Upload screenshots
+      - name: Render store mockups
+        run: |
+          python3 -m pip install --quiet --disable-pip-version-check \
+            'Pillow>=10,<12'
+          python3 tool/screenshots/render_store.py render \
+            tool/screenshots/spec.json \
+            --locale ${{ matrix.locale }} \
+            --source-root shots/${{ matrix.locale }} \
+            --out rendered
+
+      - name: Upload rendered screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-screens-${{ matrix.locale }}
+          path: rendered/${{ matrix.locale }}/*.png
+          if-no-files-found: error
+
+      - name: Upload raw captures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: shots-${{ inputs.locale }}
-          path: shots/
+          name: store-raw-${{ matrix.locale }}
+          path: shots/${{ matrix.locale }}/*.png
           if-no-files-found: warn
+
+  commit:
+    needs: capture
+    if: github.event_name == 'push' && github.ref == 'refs/heads/ci/screenshots'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: store-screens-*
+          path: screen-artifacts
+
+      - name: Copy renders into the repository
+        run: |
+          for d in screen-artifacts/store-screens-*/; do
+            loc="${d#screen-artifacts/store-screens-}"; loc="${loc%/}"
+            mkdir -p "fastlane/metadata/android/$loc/images/phoneScreenshots"
+            cp "$d"*.png "fastlane/metadata/android/$loc/images/phoneScreenshots/"
+          done
+
+      - name: Commit refreshed screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fastlane/metadata/android
+          if git diff --cached --quiet; then
+            echo "No screenshot changes."
+            exit 0
+          fi
+          git commit -m "chore(store): refresh screenshots [skip ci]"
+          git push
